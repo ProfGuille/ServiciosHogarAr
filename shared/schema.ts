@@ -123,12 +123,29 @@ export const payments = pgTable("payments", {
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   platformFee: decimal("platform_fee", { precision: 10, scale: 2 }).notNull(),
   providerAmount: decimal("provider_amount", { precision: 10, scale: 2 }).notNull(),
-  stripePaymentIntentId: varchar("stripe_payment_intent_id", { length: 255 }).notNull(),
+  // Payment method
+  paymentMethod: varchar("payment_method", { 
+    enum: ["bank_transfer", "cash", "stripe", "mercadopago"] 
+  }).notNull(),
+  // Bank transfer fields
+  bankAccountNumber: varchar("bank_account_number"),
+  bankName: varchar("bank_name"),
+  accountHolderName: varchar("account_holder_name"),
+  transferReference: varchar("transfer_reference"),
+  // Cash payment fields
+  cashLocation: varchar("cash_location"),
+  cashInstructions: text("cash_instructions"),
+  // Stripe fields (optional)
+  stripePaymentIntentId: varchar("stripe_payment_intent_id", { length: 255 }),
   stripeChargeId: varchar("stripe_charge_id", { length: 255 }),
+  // Mercado Pago fields
+  mercadopagoPaymentId: varchar("mercadopago_payment_id"),
+  mercadopagoPreferenceId: varchar("mercadopago_preference_id"),
   status: varchar("status", { 
     enum: ["pending", "processing", "succeeded", "failed", "canceled", "refunded"] 
   }).default("pending"),
   currency: varchar("currency", { length: 3 }).default("ars"),
+  paymentProof: varchar("payment_proof"), // File path for transfer receipts
   paidAt: timestamp("paid_at"),
   refundedAt: timestamp("refunded_at"),
   createdAt: timestamp("created_at").defaultNow(),

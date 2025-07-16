@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import Stripe from "stripe";
+import { MercadoPagoConfig, Preference, Payment } from "mercadopago";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
@@ -10,6 +11,17 @@ if (!process.env.STRIPE_SECRET_KEY) {
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2025-06-30.basil",
 });
+
+// Initialize Mercado Pago
+let mercadopagoClient: any = null;
+if (process.env.MERCADOPAGO_ACCESS_TOKEN) {
+  mercadopagoClient = new MercadoPagoConfig({
+    accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN,
+    options: {
+      timeout: 5000,
+    }
+  });
+}
 import { 
   insertServiceCategorySchema,
   insertServiceProviderSchema,
@@ -786,6 +798,119 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching payment history:", error);
       res.status(500).json({ message: "Failed to fetch payment history" });
+    }
+  });
+
+  // Mercado Pago preference creation
+  app.post("/api/create-mercadopago-preference", isAuthenticated, async (req: any, res) => {
+    try {
+      if (!mercadopagoClient) {
+        return res.status(400).json({ message: "Mercado Pago not configured. Please contact support." });
+      }
+
+      const { serviceRequestId, amount, title, description } = req.body;
+      
+      if (!serviceRequestId || !amount) {
+        return res.status(400).json({ message: "Service request ID and amount are required" });
+      }
+
+      const numericAmount = parseFloat(amount);
+      if (isNaN(numericAmount) || numericAmount <= 0) {
+        return res.status(400).json({ message: "Invalid amount" });
+      }
+
+      // Platform fee (10%)
+      const platformFee = numericAmount * 0.10;
+      const providerAmount = numericAmount - platformFee;
+
+      const preference = new Preference(mercadopagoClient);
+
+      const preferenceData = {
+        items: [
+          {
+            id: `service-${serviceRequestId}`,
+            title: title || "Servicio de hogar",
+            description: description || "Pago por servicio profesional",
+            quantity: 1,
+            currency_id: "ARS",
+            unit_price: numericAmount
+          }
+        ],
+        payer: {
+          email: req.user.claims.email || "customer@servicioshogar.com.ar"
+        },
+        back_urls: {
+          success: `${req.protocol}://${req.hostname}/payment-success/${serviceRequestId}`,
+          failure: `${req.protocol}://${req.hostname}/payment-failure/${serviceRequestId}`,
+          pending: `${req.protocol}://${req.hostname}/payment-pending/${serviceRequestId}`
+        },
+        auto_return: "approved",
+        external_reference: serviceRequestId.toString(),
+        metadata: {
+          serviceRequestId: serviceRequestId.toString(),
+          platformFee: platformFee.toString(),
+          providerAmount: providerAmount.toString(),
+          customerId: req.user.claims.sub,
+        },
+        notification_url: `${req.protocol}://${req.hostname}/api/mercadopago-webhook`
+      };
+
+      const response = await preference.create({ body: preferenceData });
+
+      res.json({
+        preferenceId: response.id,
+        initPoint: response.init_point,
+        sandboxInitPoint: response.sandbox_init_point,
+        platformFee: platformFee,
+        providerAmount: providerAmount,
+      });
+    } catch (error: any) {
+      console.error("Error creating Mercado Pago preference:", error);
+      res.status(500).json({ message: "Error creating Mercado Pago preference: " + error.message });
+    }
+  });
+
+  // Mercado Pago webhook
+  app.post("/api/mercadopago-webhook", async (req, res) => {
+    try {
+      const { id, topic } = req.body;
+      
+      if (topic === 'payment') {
+        if (!mercadopagoClient) {
+          return res.status(400).send('Mercado Pago not configured');
+        }
+
+        const payment = new Payment(mercadopagoClient);
+        const paymentInfo = await payment.get({ id });
+
+        // Update payment in database
+        if (paymentInfo.external_reference) {
+          const serviceRequestId = parseInt(paymentInfo.external_reference);
+          
+          let status = 'pending';
+          if (paymentInfo.status === 'approved') status = 'succeeded';
+          else if (paymentInfo.status === 'rejected') status = 'failed';
+          else if (paymentInfo.status === 'cancelled') status = 'cancelled';
+
+          // Find existing payment record
+          const existingPayment = await storage.getPaymentByServiceRequest(serviceRequestId);
+          
+          if (existingPayment && existingPayment.paymentMethod === 'mercadopago') {
+            console.log(`Updating Mercado Pago payment ${existingPayment.id} status to ${status}`);
+            
+            if (status === 'succeeded') {
+              await storage.updateServiceRequest(serviceRequestId, {
+                paymentStatus: 'paid'
+              });
+            }
+          }
+        }
+      }
+      
+      res.status(200).send('OK');
+    } catch (error) {
+      console.error('Mercado Pago webhook error:', error);
+      res.status(500).send('Error');
     }
   });
 

@@ -14,6 +14,8 @@ import ProviderDashboard from "@/pages/provider-dashboard";
 import AdminDashboard from "@/pages/admin-dashboard";
 import MyRequests from "@/pages/my-requests";
 import Payment from "@/pages/payment";
+import PaymentMethods from "@/pages/payment-methods";
+import PaymentSuccess from "@/pages/payment-success";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -30,6 +32,8 @@ function Router() {
           <Route path="/profesional/:id" component={ProviderProfile} />
           <Route path="/mis-solicitudes" component={MyRequests} />
           <Route path="/payment/:requestId" component={Payment} />
+          <Route path="/payment-methods/:requestId" component={PaymentMethods} />
+          <Route path="/payment-success/:requestId" component={PaymentSuccess} />
           <Route path="/dashboard-profesional" component={ProviderDashboard} />
           <Route path="/admin" component={AdminDashboard} />
         </>

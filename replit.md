@@ -49,6 +49,21 @@ Preferred communication style: Simple, everyday language.
 - **Analytics**: Platform growth metrics and financial performance tracking
 - **Real-time Data**: Live statistics and recent activity monitoring
 
+### Payment System (Completed)
+- **Mercado Pago Integration**: Full integration with Argentina's most popular payment method
+  - Support for credit/debit cards, bank transfers, and cash payment locations
+  - Secure redirect flow with webhook handling for payment confirmation
+  - Automatic payment status updates and service request synchronization
+- **Bank Transfer Option**: Free alternative allowing direct bank transfers to platform account
+  - Clear bank account details provided to customers
+  - Transfer reference tracking for payment verification
+- **Cash Payment Option**: Free option for direct payment to service providers
+  - Coordination instructions for in-person cash payments
+  - Location tracking for payment logistics
+- **Platform Fee System**: 10% commission automatically calculated on all payments
+- **Payment History**: Complete payment tracking for customers, providers, and admin
+- **Payment Status Management**: Real-time status updates across all payment methods
+
 ### Database Schema
 - **Users**: Profile information, user types, timestamps
 - **Service Categories**: Hierarchical service classification
