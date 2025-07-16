@@ -2,221 +2,242 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { 
-  Menu, 
-  X, 
+  Home, 
+  Search, 
   User, 
   Settings, 
   LogOut, 
-  Home,
-  Search,
+  Menu, 
+  X,
+  Shield,
   Briefcase,
-  MessageSquare,
-  Shield
+  FileText
 } from "lucide-react";
 
 export function Navbar() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [location] = useLocation();
   const { user, isAuthenticated, isLoading } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const navigation = [
-    { name: "Inicio", href: "/", current: location === "/" },
-    { name: "Buscar Servicios", href: "/services", current: location === "/services" },
-    { name: "Cómo Funciona", href: "/como-funciona", current: false },
-    { name: "Para Profesionales", href: "/para-profesionales", current: false },
+  const isActive = (path: string) => location === path;
+
+  const navigationLinks = [
+    { href: "/", label: "Inicio", icon: Home },
+    { href: "/servicios", label: "Servicios", icon: Search },
   ];
 
-  const userNavigation = [
-    { name: "Mi Perfil", href: "/perfil", icon: User },
-    { name: "Mis Solicitudes", href: "/my-requests", icon: Briefcase },
-    { name: "Mensajes", href: "/mensajes", icon: MessageSquare },
-    { name: "Configuración", href: "/configuracion", icon: Settings },
+  const authenticatedLinks = [
+    { href: "/mis-solicitudes", label: "Mis Solicitudes", icon: FileText },
+    { href: "/dashboard-proveedor", label: "Dashboard", icon: Briefcase },
   ];
 
-  const providerNavigation = [
-    { name: "Dashboard", href: "/dashboard-profesional", icon: Home },
-    { name: "Mi Perfil", href: "/perfil-profesional", icon: User },
-    { name: "Solicitudes", href: "/solicitudes", icon: Briefcase },
-    { name: "Mensajes", href: "/mensajes", icon: MessageSquare },
+  const adminLinks = [
+    { href: "/admin", label: "Admin", icon: Shield },
   ];
 
-  const adminNavigation = [
-    { name: "Panel Admin", href: "/admin", icon: Shield },
-    { name: "Usuarios", href: "/admin/usuarios", icon: User },
-    { name: "Profesionales", href: "/admin/profesionales", icon: Briefcase },
-  ];
+  const UserMenu = () => {
+    if (!isAuthenticated || !user) return null;
 
-  const handleLogout = () => {
-    window.location.href = "/api/logout";
-  };
+    const initials = user.firstName && user.lastName 
+      ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
+      : user.email?.[0]?.toUpperCase() || "U";
 
-  const getUserNavigation = () => {
-    if (user?.userType === "admin") return adminNavigation;
-    if (user?.userType === "provider") return providerNavigation;
-    return userNavigation;
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+            <Avatar className="h-8 w-8">
+              <AvatarImage src={user.profileImageUrl} alt={user.firstName || "Usuario"} />
+              <AvatarFallback>{initials}</AvatarFallback>
+            </Avatar>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-56" align="end" forceMount>
+          <div className="flex items-center justify-start gap-2 p-2">
+            <div className="flex flex-col space-y-1 leading-none">
+              <p className="font-medium">{user.firstName} {user.lastName}</p>
+              <p className="w-[200px] truncate text-sm text-muted-foreground">
+                {user.email}
+              </p>
+            </div>
+          </div>
+          <DropdownMenuItem asChild>
+            <Link href="/perfil">
+              <User className="mr-2 h-4 w-4" />
+              Perfil
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/configuracion">
+              <Settings className="mr-2 h-4 w-4" />
+              Configuración
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => window.location.href = "/api/logout"}>
+            <LogOut className="mr-2 h-4 w-4" />
+            Cerrar sesión
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
   };
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <div className="flex items-center">
-            <Link href="/" className="flex items-center">
-              <div className="flex-shrink-0">
-                <h1 className="text-2xl font-bold text-primary">ServiciosHogar</h1>
-                <span className="text-xs text-slate-500">.com.ar</span>
+            <Link href="/" className="flex items-center space-x-2">
+              <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
+                <Home className="h-5 w-5 text-primary-foreground" />
               </div>
+              <span className="font-bold text-xl">ServiciosHogar</span>
+              <Badge variant="secondary" className="hidden sm:inline-flex">
+                Argentina
+              </Badge>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-8">
-              {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`px-3 py-2 text-sm font-medium transition-colors ${
-                    item.current
-                      ? "text-primary border-b-2 border-primary"
-                      : "text-slate-600 hover:text-primary"
-                  }`}
-                >
-                  {item.name}
+            <div className="ml-10 flex items-baseline space-x-4">
+              {navigationLinks.map((link) => (
+                <Link key={link.href} href={link.href}>
+                  <Button 
+                    variant={isActive(link.href) ? "default" : "ghost"}
+                    className="flex items-center space-x-2"
+                  >
+                    <link.icon className="h-4 w-4" />
+                    <span>{link.label}</span>
+                  </Button>
+                </Link>
+              ))}
+              
+              {isAuthenticated && authenticatedLinks.map((link) => (
+                <Link key={link.href} href={link.href}>
+                  <Button 
+                    variant={isActive(link.href) ? "default" : "ghost"}
+                    className="flex items-center space-x-2"
+                  >
+                    <link.icon className="h-4 w-4" />
+                    <span>{link.label}</span>
+                  </Button>
+                </Link>
+              ))}
+
+              {/* Admin link - solo para admins */}
+              {isAuthenticated && user?.email?.includes('@admin') && adminLinks.map((link) => (
+                <Link key={link.href} href={link.href}>
+                  <Button 
+                    variant={isActive(link.href) ? "default" : "ghost"}
+                    className="flex items-center space-x-2"
+                  >
+                    <link.icon className="h-4 w-4" />
+                    <span>{link.label}</span>
+                  </Button>
                 </Link>
               ))}
             </div>
           </div>
 
-          {/* User Menu */}
-          <div className="flex items-center space-x-4">
-            {isLoading ? (
-              <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
-            ) : isAuthenticated && user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={user.profileImageUrl || undefined} alt={user.firstName || 'Usuario'} />
-                      <AvatarFallback>
-                        {user.firstName?.charAt(0) || user.email?.charAt(0) || 'U'}
-                      </AvatarFallback>
-                    </Avatar>
+          {/* User Menu & Auth Buttons */}
+          <div className="hidden md:block">
+            <div className="ml-4 flex items-center md:ml-6">
+              {isLoading ? (
+                <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
+              ) : isAuthenticated ? (
+                <UserMenu />
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <Button variant="ghost" onClick={() => window.location.href = "/api/login"}>
+                    Iniciar sesión
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <div className="flex items-center justify-start gap-2 p-2">
-                    <div className="flex flex-col space-y-1 leading-none">
-                      <p className="font-medium">{user.firstName || 'Usuario'}</p>
-                      <p className="w-[200px] truncate text-sm text-muted-foreground">
-                        {user.email}
-                      </p>
-                      <div className="flex gap-1">
-                        <Badge variant="outline" className="text-xs">
-                          {user.userType === 'admin' ? 'Administrador' : 
-                           user.userType === 'provider' ? 'Profesional' : 'Cliente'}
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-                  <DropdownMenuSeparator />
-                  {getUserNavigation().map((item) => (
-                    <DropdownMenuItem key={item.name} asChild>
-                      <Link href={item.href} className="flex items-center gap-2">
-                        <item.icon className="h-4 w-4" />
-                        {item.name}
-                      </Link>
-                    </DropdownMenuItem>
-                  ))}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout}>
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Cerrar Sesión
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <>
-                <Button variant="ghost" onClick={() => window.location.href = "/api/login"}>
-                  Iniciar Sesión
-                </Button>
-                <Button onClick={() => window.location.href = "/api/login"}>
-                  Registrarse
-                </Button>
-              </>
-            )}
+                  <Button onClick={() => window.location.href = "/api/login"}>
+                    Registrarse
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
 
-            {/* Mobile menu button */}
-            <button
-              className="md:hidden p-2 rounded-md text-slate-600 hover:text-primary"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          {/* Mobile menu button */}
+          <div className="md:hidden">
+            <Button
+              variant="ghost"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="inline-flex items-center justify-center p-2"
             >
-              {isMobileMenuOpen ? (
+              {mobileMenuOpen ? (
                 <X className="h-6 w-6" />
               ) : (
                 <Menu className="h-6 w-6" />
               )}
-            </button>
+            </Button>
           </div>
         </div>
 
-        {/* Mobile Navigation */}
-        {isMobileMenuOpen && (
+        {/* Mobile menu */}
+        {mobileMenuOpen && (
           <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t border-slate-200">
-              {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`block px-3 py-2 text-base font-medium transition-colors ${
-                    item.current
-                      ? "text-primary bg-primary/10"
-                      : "text-slate-600 hover:text-primary hover:bg-slate-50"
-                  }`}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {item.name}
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t">
+              {navigationLinks.map((link) => (
+                <Link key={link.href} href={link.href}>
+                  <Button 
+                    variant={isActive(link.href) ? "default" : "ghost"}
+                    className="w-full justify-start"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <link.icon className="h-4 w-4 mr-2" />
+                    {link.label}
+                  </Button>
                 </Link>
               ))}
-              {isAuthenticated && user && (
-                <>
-                  <div className="border-t border-slate-200 pt-3">
-                    {getUserNavigation().map((item) => (
-                      <Link
-                        key={item.name}
-                        href={item.href}
-                        className="flex items-center gap-2 px-3 py-2 text-base font-medium text-slate-600 hover:text-primary hover:bg-slate-50"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        <item.icon className="h-4 w-4" />
-                        {item.name}
-                      </Link>
-                    ))}
-                    <button
-                      onClick={handleLogout}
-                      className="flex items-center gap-2 w-full px-3 py-2 text-base font-medium text-slate-600 hover:text-primary hover:bg-slate-50"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      Cerrar Sesión
-                    </button>
-                  </div>
-                </>
+              
+              {isAuthenticated && authenticatedLinks.map((link) => (
+                <Link key={link.href} href={link.href}>
+                  <Button 
+                    variant={isActive(link.href) ? "default" : "ghost"}
+                    className="w-full justify-start"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <link.icon className="h-4 w-4 mr-2" />
+                    {link.label}
+                  </Button>
+                </Link>
+              ))}
+
+              {/* Auth buttons for mobile */}
+              {!isAuthenticated && (
+                <div className="pt-4 border-t space-y-2">
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start"
+                    onClick={() => window.location.href = "/api/login"}
+                  >
+                    Iniciar sesión
+                  </Button>
+                  <Button 
+                    className="w-full justify-start"
+                    onClick={() => window.location.href = "/api/login"}
+                  >
+                    Registrarse
+                  </Button>
+                </div>
               )}
             </div>
           </div>
         )}
-      </nav>
-    </header>
+      </div>
+    </nav>
   );
 }

@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { isUnauthorizedError } from "@/lib/authUtils";
 import { insertServiceRequestSchema } from "@shared/schema";
 import type { ServiceProvider } from "@shared/schema";
 
@@ -28,7 +30,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Clock, MapPin, Phone, Mail } from "lucide-react";
+import { CalendarIcon, Clock, MapPin, Phone, Mail, CheckCircle, AlertCircle, DollarSign } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -59,8 +61,16 @@ interface BookingFormProps {
 
 export function BookingForm({ provider, isOpen, onClose }: BookingFormProps) {
   const { toast } = useToast();
+  const { isAuthenticated, isLoading } = useAuth();
   const queryClient = useQueryClient();
   const [step, setStep] = useState(1);
+  const [selectedService, setSelectedService] = useState(null);
+
+  // Load provider services
+  const { data: providerServices, isLoading: servicesLoading } = useQuery({
+    queryKey: [`/api/providers/${provider.id}/services`],
+    enabled: isOpen,
+  });
 
   const form = useForm<BookingFormData>({
     resolver: zodResolver(bookingFormSchema),
@@ -103,6 +113,17 @@ export function BookingForm({ provider, isOpen, onClose }: BookingFormProps) {
       setStep(1);
     },
     onError: (error: Error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Autorización requerida",
+          description: "Debes iniciar sesión para solicitar servicios.",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 2000);
+        return;
+      }
       toast({
         title: "Error",
         description: error.message || "No se pudo enviar la solicitud",

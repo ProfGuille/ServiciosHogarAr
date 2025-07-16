@@ -214,13 +214,25 @@ export class DatabaseStorage implements IStorage {
 
   // Provider services
   async getProviderServices(providerId: number): Promise<ProviderService[]> {
-    return await db
-      .select()
+    const services = await db
+      .select({
+        id: providerServices.id,
+        providerId: providerServices.providerId,
+        categoryId: providerServices.categoryId,
+        customServiceName: providerServices.customServiceName,
+        description: providerServices.description,
+        basePrice: providerServices.basePrice,
+        isActive: providerServices.isActive,
+        createdAt: providerServices.createdAt,
+        categoryName: serviceCategories.name,
+      })
       .from(providerServices)
+      .leftJoin(serviceCategories, eq(providerServices.categoryId, serviceCategories.id))
       .where(and(
         eq(providerServices.providerId, providerId),
         eq(providerServices.isActive, true)
       ));
+    return services;
   }
 
   async createProviderService(service: InsertProviderService): Promise<ProviderService> {
