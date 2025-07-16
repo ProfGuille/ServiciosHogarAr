@@ -37,7 +37,7 @@ export function Navbar() {
 
   const authenticatedLinks = [
     { href: "/mis-solicitudes", label: "Mis Solicitudes", icon: FileText },
-    { href: "/dashboard-proveedor", label: "Dashboard", icon: Briefcase },
+    { href: "/dashboard-profesional", label: "Dashboard", icon: Briefcase },
   ];
 
   const adminLinks = [
@@ -73,13 +73,19 @@ export function Navbar() {
           <DropdownMenuItem asChild>
             <Link href="/perfil">
               <User className="mr-2 h-4 w-4" />
-              Perfil
+              Mi Perfil
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/configuracion">
+            <Link href="/mis-solicitudes">
+              <FileText className="mr-2 h-4 w-4" />
+              Mis Solicitudes
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/dashboard-profesional">
               <Settings className="mr-2 h-4 w-4" />
-              Configuración
+              Dashboard Profesional
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => window.location.href = "/api/logout"}>

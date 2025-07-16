@@ -27,29 +27,29 @@ export function Footer() {
       title: "Para Profesionales",
       links: [
         { label: "Registrarse como Proveedor", href: "/api/login" },
-        { label: "Dashboard", href: "/dashboard-proveedor" },
-        { label: "Verificación", href: "/verificacion" },
-        { label: "Políticas", href: "/politicas-proveedores" },
+        { label: "Dashboard", href: "/dashboard-profesional" },
+        { label: "Verificación", href: "/dashboard-profesional" },
+        { label: "Políticas", href: "/dashboard-profesional" },
       ]
     },
     {
       title: "Empresa",
       links: [
-        { label: "Nosotros", href: "/nosotros" },
-        { label: "Cómo Funciona", href: "/como-funciona" },
-        { label: "Blog", href: "/blog" },
-        { label: "Carreras", href: "/carreras" },
-        { label: "Prensa", href: "/prensa" },
+        { label: "Nosotros", href: "/" },
+        { label: "Cómo Funciona", href: "/" },
+        { label: "Blog", href: "/" },
+        { label: "Carreras", href: "/" },
+        { label: "Prensa", href: "/" },
       ]
     },
     {
       title: "Soporte",
       links: [
-        { label: "Centro de Ayuda", href: "/ayuda" },
-        { label: "Contacto", href: "/contacto" },
-        { label: "Términos de Servicio", href: "/terminos" },
-        { label: "Privacidad", href: "/privacidad" },
-        { label: "Seguridad", href: "/seguridad" },
+        { label: "Centro de Ayuda", href: "/" },
+        { label: "Contacto", href: "/" },
+        { label: "Términos de Servicio", href: "/" },
+        { label: "Privacidad", href: "/" },
+        { label: "Seguridad", href: "/" },
       ]
     }
   ];

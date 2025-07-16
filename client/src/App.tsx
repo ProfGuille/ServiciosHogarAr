@@ -17,6 +17,7 @@ import Payment from "@/pages/payment";
 import PaymentMethods from "@/pages/payment-methods";
 import PaymentSuccess from "@/pages/payment-success";
 import TestPayments from "@/pages/test-payments";
+import Profile from "@/pages/profile";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -38,6 +39,7 @@ function Router() {
           <Route path="/test-payments" component={TestPayments} />
           <Route path="/dashboard-profesional" component={ProviderDashboard} />
           <Route path="/admin" component={AdminDashboard} />
+          <Route path="/perfil" component={Profile} />
         </>
       )}
       <Route component={NotFound} />
