@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
@@ -18,6 +18,10 @@ export default function Services() {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [sortBy, setSortBy] = useState("rating");
   const [showFilters, setShowFilters] = useState(false);
+
+  useEffect(() => {
+    document.title = "Servicios - ServiciosHogar.com.ar";
+  }, []);
 
   const { data: categories, isLoading: categoriesLoading } = useQuery({
     queryKey: ["/api/categories"],

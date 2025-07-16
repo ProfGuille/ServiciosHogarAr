@@ -24,19 +24,22 @@ function Router() {
 
   return (
     <Switch>
+      {/* Public routes available to all users */}
+      <Route path="/servicios" component={Services} />
+      <Route path="/servicios/:id" component={ServiceDetail} />
+      <Route path="/profesional/:id" component={ProviderProfile} />
+      <Route path="/test-payments" component={TestPayments} />
+      
+      {/* Authentication-dependent routes */}
       {isLoading || !isAuthenticated ? (
         <Route path="/" component={Landing} />
       ) : (
         <>
           <Route path="/" component={Home} />
-          <Route path="/servicios" component={Services} />
-          <Route path="/servicios/:id" component={ServiceDetail} />
-          <Route path="/profesional/:id" component={ProviderProfile} />
           <Route path="/mis-solicitudes" component={MyRequests} />
           <Route path="/payment/:requestId" component={Payment} />
           <Route path="/payment-methods/:requestId" component={PaymentMethods} />
           <Route path="/payment-success/:requestId" component={PaymentSuccess} />
-          <Route path="/test-payments" component={TestPayments} />
           <Route path="/dashboard-profesional" component={ProviderDashboard} />
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/perfil" component={Profile} />
