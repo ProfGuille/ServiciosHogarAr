@@ -12,6 +12,7 @@ import ServiceDetail from "@/pages/service-detail";
 import ProviderProfile from "@/pages/provider-profile";
 import ProviderDashboard from "@/pages/provider-dashboard";
 import AdminDashboard from "@/pages/admin-dashboard";
+import MyRequests from "@/pages/my-requests";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -26,6 +27,7 @@ function Router() {
           <Route path="/servicios" component={Services} />
           <Route path="/servicios/:id" component={ServiceDetail} />
           <Route path="/profesional/:id" component={ProviderProfile} />
+          <Route path="/mis-solicitudes" component={MyRequests} />
           <Route path="/dashboard-profesional" component={ProviderDashboard} />
           <Route path="/admin" component={AdminDashboard} />
         </>
