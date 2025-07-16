@@ -85,7 +85,44 @@ export default function Services() {
 
         {/* Search */}
         <div className="mb-8">
-          <ServiceSearch />
+          <Card className="shadow-lg">
+            <CardContent className="p-6">
+              <div className="grid md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700">
+                    ¿Qué servicio necesitas?
+                  </label>
+                  <Input
+                    type="text"
+                    placeholder="Ej: Plomería, Electricidad..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700">
+                    ¿Dónde?
+                  </label>
+                  <Select value={selectedCity} onValueChange={setSelectedCity}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona tu ciudad" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Todas las ciudades</SelectItem>
+                      {argentineCities.map((city) => (
+                        <SelectItem key={city} value={city}>{city}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-end">
+                  <Button className="w-full">
+                    Buscar servicios
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="grid lg:grid-cols-4 gap-8">
