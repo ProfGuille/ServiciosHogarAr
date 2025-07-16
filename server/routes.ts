@@ -468,6 +468,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin Routes
+  app.get('/api/admin/stats', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (user?.userType !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const stats = await storage.getPlatformStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching platform stats:", error);
+      res.status(500).json({ message: "Failed to fetch platform stats" });
+    }
+  });
+
+  app.get('/api/admin/users', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (user?.userType !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      // Get all users (this would need to be implemented in storage)
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  app.get('/api/admin/providers', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (user?.userType !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const providers = await storage.getServiceProviders({ limit: 100, offset: 0 });
+      res.json(providers);
+    } catch (error) {
+      console.error("Error fetching providers for admin:", error);
+      res.status(500).json({ message: "Failed to fetch providers" });
+    }
+  });
+
+  app.get('/api/admin/requests', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (user?.userType !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const requests = await storage.getServiceRequests({ limit: 100, offset: 0 });
+      res.json(requests);
+    } catch (error) {
+      console.error("Error fetching requests for admin:", error);
+      res.status(500).json({ message: "Failed to fetch requests" });
+    }
+  });
+
+  app.put('/api/admin/providers/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (user?.userType !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const id = parseInt(req.params.id);
+      const { isVerified, isActive } = req.body;
+
+      const updatedProvider = await storage.updateServiceProvider(id, {
+        isVerified,
+        isActive,
+      });
+
+      res.json(updatedProvider);
+    } catch (error) {
+      console.error("Error updating provider:", error);
+      res.status(500).json({ message: "Failed to update provider" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
