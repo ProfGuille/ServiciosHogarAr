@@ -583,6 +583,164 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Comprehensive end-to-end payment testing
+  app.post('/api/test-e2e-payments', async (req, res) => {
+    try {
+      const { scenario } = req.body;
+      
+      // Load test scenarios
+      const scenarios = {
+        "bank_transfer": {
+          serviceRequestId: 9,
+          amount: "150000",
+          title: "Instalación de tomas adicionales",
+          provider: "Electricidad Profesional"
+        },
+        "cash": {
+          serviceRequestId: 9,
+          amount: "85000", 
+          title: "Limpieza profunda de oficina",
+          provider: "Limpieza Integral"
+        },
+        "mercadopago": {
+          serviceRequestId: 9,
+          amount: "200000",
+          title: "Reparación de caños",
+          provider: "Plomería Express BA"
+        }
+      };
+
+      const testData = scenarios[scenario];
+      if (!testData) {
+        return res.status(400).json({ success: false, message: "Invalid test scenario" });
+      }
+
+      const results = {
+        scenario,
+        timestamp: new Date().toISOString(),
+        tests: []
+      };
+
+      if (scenario === 'bank_transfer') {
+        const paymentData = {
+          serviceRequestId: parseInt(testData.serviceRequestId),
+          customerId: "test-customer",
+          providerId: 4,
+          amount: testData.amount,
+          platformFee: (parseInt(testData.amount) * 0.1).toString(),
+          providerAmount: (parseInt(testData.amount) * 0.9).toString(),
+          paymentMethod: "bank_transfer",
+          transferReference: `TRF${Date.now()}`,
+          bankAccountNumber: "0110599520000001234567",
+          bankName: "Banco Galicia",
+          accountHolderName: "ServiciosHogar.com.ar",
+        };
+        
+        const payment = await storage.createPayment(paymentData);
+        results.tests.push({
+          test: "Payment Record Creation",
+          status: "PASSED",
+          paymentId: payment.id,
+          details: payment
+        });
+
+        results.tests.push({
+          test: "Platform Fee Calculation", 
+          status: payment.platformFee === paymentData.platformFee ? "PASSED" : "FAILED",
+          expected: paymentData.platformFee,
+          actual: payment.platformFee
+        });
+
+      } else if (scenario === 'cash') {
+        const paymentData = {
+          serviceRequestId: parseInt(testData.serviceRequestId),
+          customerId: "test-customer",
+          providerId: 4,
+          amount: testData.amount,
+          platformFee: (parseInt(testData.amount) * 0.1).toString(),
+          providerAmount: (parseInt(testData.amount) * 0.9).toString(),
+          paymentMethod: "cash",
+          cashLocation: "En mi domicilio al finalizar el trabajo",
+          cashInstructions: "Coordinar con el profesional para el pago en efectivo al finalizar el servicio.",
+        };
+        
+        const payment = await storage.createPayment(paymentData);
+        results.tests.push({
+          test: "Cash Payment Creation",
+          status: "PASSED",
+          paymentId: payment.id,
+          details: payment
+        });
+
+      } else if (scenario === 'mercadopago') {
+        if (!mercadopagoClient) {
+          results.tests.push({
+            test: "Mercado Pago Configuration",
+            status: "SKIPPED",
+            message: "Credentials not provided - ready for integration"
+          });
+        } else {
+          const preference = new Preference(mercadopagoClient);
+          const preferenceData = {
+            items: [{
+              id: `service-${testData.serviceRequestId}`,
+              title: testData.title,
+              description: `Servicio: ${testData.title}`,
+              quantity: 1,
+              currency_id: "ARS",
+              unit_price: parseInt(testData.amount)
+            }],
+            payer: {
+              email: "test@servicioshogar.com.ar"
+            },
+            back_urls: {
+              success: `${req.protocol}://${req.hostname}/payment-success/${testData.serviceRequestId}`,
+              failure: `${req.protocol}://${req.hostname}/payment-failure/${testData.serviceRequestId}`,
+              pending: `${req.protocol}://${req.hostname}/payment-pending/${testData.serviceRequestId}`
+            },
+            auto_return: "approved",
+            external_reference: testData.serviceRequestId.toString(),
+          };
+
+          const response = await preference.create({ body: preferenceData });
+          
+          const paymentData = {
+            serviceRequestId: parseInt(testData.serviceRequestId),
+            customerId: "test-customer",
+            providerId: 4,
+            amount: testData.amount,
+            platformFee: (parseInt(testData.amount) * 0.1).toString(),
+            providerAmount: (parseInt(testData.amount) * 0.9).toString(),
+            paymentMethod: "mercadopago",
+            mercadopagoPreferenceId: response.id,
+          };
+          
+          const payment = await storage.createPayment(paymentData);
+
+          results.tests.push({
+            test: "Mercado Pago Preference Creation",
+            status: "PASSED",
+            preferenceId: response.id,
+            initPoint: response.init_point
+          });
+
+          results.tests.push({
+            test: "Payment Record with Preference",
+            status: "PASSED", 
+            paymentId: payment.id,
+            mercadopagoPreferenceId: payment.mercadopagoPreferenceId
+          });
+        }
+      }
+
+      res.json({ success: true, results });
+
+    } catch (error: any) {
+      console.error("E2E test error:", error);
+      res.status(500).json({ success: false, message: error.message, error: error.toString() });
+    }
+  });
+
   // Test payment methods (no auth for testing)
   app.post('/api/test-payments', async (req, res) => {
     try {

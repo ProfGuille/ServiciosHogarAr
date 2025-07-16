@@ -1,0 +1,56 @@
+{
+  "testScenarios": [
+    {
+      "id": "bank_transfer_test",
+      "name": "Transferencia Bancaria",
+      "description": "Prueba completa de pago por transferencia bancaria",
+      "serviceRequest": {
+        "title": "Instalación de tomas adicionales",
+        "amount": 150000,
+        "provider": "Electricidad Profesional"
+      },
+      "paymentMethod": "bank_transfer",
+      "expectedResults": {
+        "paymentRecord": true,
+        "platformFee": 15000,
+        "providerAmount": 135000,
+        "bankDetails": true
+      }
+    },
+    {
+      "id": "cash_payment_test", 
+      "name": "Pago en Efectivo",
+      "description": "Prueba completa de pago en efectivo",
+      "serviceRequest": {
+        "title": "Limpieza profunda de oficina",
+        "amount": 85000,
+        "provider": "Limpieza Integral"
+      },
+      "paymentMethod": "cash",
+      "expectedResults": {
+        "paymentRecord": true,
+        "platformFee": 8500,
+        "providerAmount": 76500,
+        "cashInstructions": true
+      }
+    },
+    {
+      "id": "mercadopago_test",
+      "name": "Mercado Pago",
+      "description": "Prueba completa de pago con Mercado Pago",
+      "serviceRequest": {
+        "title": "Reparación de caños",
+        "amount": 200000,
+        "provider": "Plomería Express BA"
+      },
+      "paymentMethod": "mercadopago",
+      "expectedResults": {
+        "paymentRecord": true,
+        "platformFee": 20000,
+        "providerAmount": 180000,
+        "preferenceId": true,
+        "redirectUrl": true
+      }
+    }
+  ]
+}

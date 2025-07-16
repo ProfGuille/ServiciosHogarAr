@@ -16,6 +16,7 @@ import MyRequests from "@/pages/my-requests";
 import Payment from "@/pages/payment";
 import PaymentMethods from "@/pages/payment-methods";
 import PaymentSuccess from "@/pages/payment-success";
+import TestPayments from "@/pages/test-payments";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -34,6 +35,7 @@ function Router() {
           <Route path="/payment/:requestId" component={Payment} />
           <Route path="/payment-methods/:requestId" component={PaymentMethods} />
           <Route path="/payment-success/:requestId" component={PaymentSuccess} />
+          <Route path="/test-payments" component={TestPayments} />
           <Route path="/dashboard-profesional" component={ProviderDashboard} />
           <Route path="/admin" component={AdminDashboard} />
         </>
