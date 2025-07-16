@@ -571,6 +571,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test endpoint for payment scenario
+  app.post('/api/admin/create-payment-test', async (req, res) => {
+    try {
+      // First check if we have any requests at all
+      const allRequests = await storage.getServiceRequests({});
+      console.log(`Found ${allRequests.length} total requests`);
+      
+      // Look for quoted requests first
+      let testRequest = allRequests.find(r => r.quotedPrice && r.status === 'quoted');
+      
+      if (!testRequest) {
+        // If no quoted requests, create one
+        console.log("No quoted requests found, creating one...");
+        
+        // Get a pending request to convert
+        const pendingRequest = allRequests.find(r => r.status === 'pending');
+        if (pendingRequest) {
+          testRequest = await storage.updateServiceRequest(pendingRequest.id, {
+            status: 'quoted',
+            quotedPrice: '150000', // 150,000 ARS
+            providerResponse: 'Precio cotizado para el servicio solicitado. Incluye materiales y mano de obra.',
+            quotedAt: new Date(),
+          });
+          console.log(`Updated request ${pendingRequest.id} to quoted status`);
+        }
+      }
+      
+      if (testRequest) {
+        // Now update to accepted status for payment
+        const acceptedRequest = await storage.updateServiceRequest(testRequest.id, {
+          status: 'accepted',
+          paymentStatus: 'pending',
+          acceptedAt: new Date(),
+        });
+        
+        res.json({ 
+          message: "Payment test scenario created successfully", 
+          requestId: testRequest.id,
+          amount: testRequest.quotedPrice,
+          paymentUrl: `/payment/${testRequest.id}`,
+          details: acceptedRequest
+        });
+      } else {
+        // Create a test request with quote if none exist
+        if (allRequests.length === 0) {
+          console.log("Creating test service request...");
+          const testRequestData = {
+            customerId: "test-customer-123",
+            serviceType: "Plomería",
+            title: "Reparación de tubería de baño",
+            description: "Necesito reparar una tubería que gotea en el baño principal. Es urgente.",
+            address: "Av. Corrientes 1234",
+            city: "Buenos Aires",
+            contactPhone: "+54 9 11 1234-5678",
+            preferredDateTime: new Date(),
+            estimatedBudget: "100000",
+            urgencyLevel: "high" as const,
+            status: "quoted" as const,
+            quotedPrice: "150000",
+            providerResponse: "Precio cotizado para reparación de tubería. Incluye materiales y mano de obra.",
+            quotedAt: new Date(),
+            providerId: 1,
+          };
+          
+          const newRequest = await storage.createServiceRequest(testRequestData);
+          
+          // Now update to accepted for payment testing
+          const acceptedRequest = await storage.updateServiceRequest(newRequest.id, {
+            status: 'accepted',
+            paymentStatus: 'pending',
+            acceptedAt: new Date(),
+          });
+          
+          res.json({ 
+            message: "Created new test request and prepared for payment", 
+            requestId: newRequest.id,
+            amount: newRequest.quotedPrice,
+            paymentUrl: `/payment/${newRequest.id}`,
+            details: acceptedRequest
+          });
+        } else {
+          res.json({ 
+            message: "No requests available - please create test data first",
+            totalRequests: allRequests.length
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error creating payment test:", error);
+      res.status(500).json({ message: "Failed to create payment test scenario" });
+    }
+  });
+
   // Payment Routes
   app.post('/api/payments/create-payment-intent', isAuthenticated, async (req: any, res) => {
     try {
