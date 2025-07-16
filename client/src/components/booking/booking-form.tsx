@@ -1,417 +1,443 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
-import { isUnauthorizedError } from "@/lib/authUtils";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
-import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { insertServiceRequestSchema } from "@shared/schema";
+import type { ServiceProvider } from "@shared/schema";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { 
-  X, 
-  Calendar, 
-  MapPin, 
-  DollarSign, 
-  AlertTriangle,
-  CheckCircle,
-  Star
-} from "lucide-react";
-import { insertServiceRequestSchema, type ServiceProvider } from "@shared/schema";
-import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon, Clock, MapPin, Phone, Mail } from "lucide-react";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
 
-const bookingFormSchema = insertServiceRequestSchema.extend({
-  categoryId: z.number().min(1, "Selecciona una categoría"),
-  preferredDate: z.string().min(1, "Selecciona una fecha"),
-  estimatedBudget: z.string().optional(),
-}).omit({ customerId: true, providerId: true });
+const bookingFormSchema = z.object({
+  providerId: z.number(),
+  categoryId: z.number(),
+  title: z.string().min(1, "Describe el servicio que necesitas"),
+  description: z.string().min(10, "Proporciona más detalles sobre el servicio"),
+  address: z.string().min(5, "Ingresa la dirección completa"),
+  city: z.string().min(1, "Ingresa la ciudad"),
+  province: z.string().min(1, "Ingresa la provincia"),
+  estimatedBudget: z.number().min(1, "Ingresa un presupuesto estimado"),
+  isUrgent: z.boolean().default(false),
+  customerNotes: z.string().optional(),
+  preferredDate: z.date({
+    required_error: "Selecciona una fecha preferida",
+  }),
+  preferredTime: z.string().min(1, "Selecciona una hora preferida"),
+});
 
 type BookingFormData = z.infer<typeof bookingFormSchema>;
 
 interface BookingFormProps {
   provider: ServiceProvider;
+  isOpen: boolean;
   onClose: () => void;
 }
 
-export function BookingForm({ provider, onClose }: BookingFormProps) {
-  const [step, setStep] = useState(1);
-  const { user } = useAuth();
+export function BookingForm({ provider, isOpen, onClose }: BookingFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
-  const { data: categories } = useQuery({
-    queryKey: ["/api/categories"],
-  });
+  const [step, setStep] = useState(1);
 
   const form = useForm<BookingFormData>({
     resolver: zodResolver(bookingFormSchema),
     defaultValues: {
+      providerId: provider.id,
+      categoryId: 1, // Default to Plomería
       title: "",
       description: "",
       address: "",
-      city: provider.city || "",
-      province: provider.province || "",
-      categoryId: undefined,
-      preferredDate: "",
-      estimatedBudget: "",
+      city: "Buenos Aires",
+      province: "CABA",
+      estimatedBudget: 0,
       isUrgent: false,
       customerNotes: "",
     },
   });
 
-  const createRequestMutation = useMutation({
+  const bookingMutation = useMutation({
     mutationFn: async (data: BookingFormData) => {
-      const requestData = {
-        ...data,
-        providerId: provider.id,
-        estimatedBudget: data.estimatedBudget ? parseFloat(data.estimatedBudget) : null,
-        preferredDate: new Date(data.preferredDate).toISOString(),
-      };
+      const { preferredDate, preferredTime, ...requestData } = data;
       
-      const response = await apiRequest("POST", "/api/requests", requestData);
-      return response.json();
+      // Combine date and time into a single datetime
+      const [hours, minutes] = preferredTime.split(':');
+      const preferredDateTime = new Date(preferredDate);
+      preferredDateTime.setHours(parseInt(hours), parseInt(minutes));
+
+      return await apiRequest("POST", "/api/requests", {
+        ...requestData,
+        preferredDate: preferredDateTime.toISOString(),
+      });
     },
     onSuccess: () => {
       toast({
         title: "Solicitud enviada",
-        description: "Tu solicitud ha sido enviada al profesional. Te contactaremos pronto.",
+        description: "Tu solicitud ha sido enviada al profesional. Te contactará pronto.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/requests"] });
       onClose();
+      form.reset();
+      setStep(1);
     },
     onError: (error: Error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "No autorizado",
-          description: "Iniciando sesión...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-      
       toast({
         title: "Error",
-        description: "No pudimos enviar tu solicitud. Intenta nuevamente.",
+        description: error.message || "No se pudo enviar la solicitud",
         variant: "destructive",
       });
     },
   });
 
   const onSubmit = (data: BookingFormData) => {
-    if (step === 1) {
-      setStep(2);
-    } else {
-      createRequestMutation.mutate(data);
-    }
+    bookingMutation.mutate(data);
   };
 
-  const minDate = new Date();
-  minDate.setDate(minDate.getDate() + 1);
-  const formattedMinDate = minDate.toISOString().split('T')[0];
+  const nextStep = () => {
+    if (step < 3) setStep(step + 1);
+  };
+
+  const prevStep = () => {
+    if (step > 1) setStep(step - 1);
+  };
+
+  const timeSlots = [
+    "08:00", "09:00", "10:00", "11:00", "12:00", "13:00",
+    "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"
+  ];
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="flex items-center gap-2">
-          <Calendar className="h-5 w-5" />
-          {step === 1 ? "Detalles del servicio" : "Confirmar solicitud"}
-        </CardTitle>
-        <Button variant="ghost" size="sm" onClick={onClose}>
-          <X className="h-4 w-4" />
-        </Button>
-      </CardHeader>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Solicitar servicio</DialogTitle>
+          <DialogDescription>
+            Completa los detalles para solicitar el servicio de {provider.businessName}
+          </DialogDescription>
+        </DialogHeader>
 
-      <CardContent className="space-y-6">
-        {/* Provider Info */}
-        <div className="bg-slate-50 rounded-lg p-4">
-          <div className="flex items-center gap-3">
-            <Avatar className="w-12 h-12">
-              <AvatarImage 
-                src={provider.profileImageUrl || undefined} 
-                alt={provider.businessName || 'Profesional'} 
-              />
-              <AvatarFallback>
-                {provider.businessName?.charAt(0) || 'P'}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <h3 className="font-semibold text-slate-900">{provider.businessName}</h3>
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1">
-                  <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                  <span className="text-sm">{provider.rating}</span>
-                </div>
-                {provider.isVerified && (
-                  <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    Verificado
-                  </Badge>
-                )}
+        <div className="mb-6">
+          <div className="flex items-center space-x-2">
+            {[1, 2, 3].map((num) => (
+              <div
+                key={num}
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                  step >= num
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-200 text-gray-600"
+                }`}
+              >
+                {num}
               </div>
-            </div>
+            ))}
+          </div>
+          <div className="flex justify-between text-xs text-gray-500 mt-2">
+            <span>Detalles del servicio</span>
+            <span>Fecha y hora</span>
+            <span>Contacto</span>
           </div>
         </div>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {step === 1 ? (
-            <>
-              {/* Step 1: Service Details */}
-              <div className="grid gap-4">
-                <div>
-                  <Label htmlFor="categoryId">Categoría del servicio *</Label>
-                  <Select
-                    value={form.watch("categoryId")?.toString()}
-                    onValueChange={(value) => form.setValue("categoryId", parseInt(value))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecciona una categoría" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories?.map((category) => (
-                        <SelectItem key={category.id} value={category.id.toString()}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {form.formState.errors.categoryId && (
-                    <p className="text-sm text-destructive mt-1">
-                      {form.formState.errors.categoryId.message}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <Label htmlFor="title">Título de la solicitud *</Label>
-                  <Input
-                    id="title"
-                    placeholder="Ej: Reparación de tubería en el baño"
-                    {...form.register("title")}
-                  />
-                  {form.formState.errors.title && (
-                    <p className="text-sm text-destructive mt-1">
-                      {form.formState.errors.title.message}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <Label htmlFor="description">Descripción detallada *</Label>
-                  <Textarea
-                    id="description"
-                    placeholder="Describe el problema o servicio que necesitas en detalle..."
-                    rows={4}
-                    {...form.register("description")}
-                  />
-                  {form.formState.errors.description && (
-                    <p className="text-sm text-destructive mt-1">
-                      {form.formState.errors.description.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="preferredDate">Fecha preferida *</Label>
-                    <Input
-                      id="preferredDate"
-                      type="date"
-                      min={formattedMinDate}
-                      {...form.register("preferredDate")}
-                    />
-                    {form.formState.errors.preferredDate && (
-                      <p className="text-sm text-destructive mt-1">
-                        {form.formState.errors.preferredDate.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <Label htmlFor="estimatedBudget">Presupuesto estimado (ARS)</Label>
-                    <div className="relative">
-                      <DollarSign className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                      <Input
-                        id="estimatedBudget"
-                        type="number"
-                        placeholder="5000"
-                        className="pl-10"
-                        {...form.register("estimatedBudget")}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="address">Dirección *</Label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                    <Input
-                      id="address"
-                      placeholder="Dirección completa donde se realizará el servicio"
-                      className="pl-10"
-                      {...form.register("address")}
-                    />
-                  </div>
-                  {form.formState.errors.address && (
-                    <p className="text-sm text-destructive mt-1">
-                      {form.formState.errors.address.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="city">Ciudad *</Label>
-                    <Input
-                      id="city"
-                      {...form.register("city")}
-                    />
-                    {form.formState.errors.city && (
-                      <p className="text-sm text-destructive mt-1">
-                        {form.formState.errors.city.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <Label htmlFor="province">Provincia *</Label>
-                    <Input
-                      id="province"
-                      {...form.register("province")}
-                    />
-                    {form.formState.errors.province && (
-                      <p className="text-sm text-destructive mt-1">
-                        {form.formState.errors.province.message}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="customerNotes">Notas adicionales</Label>
-                  <Textarea
-                    id="customerNotes"
-                    placeholder="Información adicional que el profesional debe saber..."
-                    rows={3}
-                    {...form.register("customerNotes")}
-                  />
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="isUrgent"
-                    checked={form.watch("isUrgent")}
-                    onCheckedChange={(checked) => form.setValue("isUrgent", !!checked)}
-                  />
-                  <Label htmlFor="isUrgent" className="flex items-center gap-2">
-                    <AlertTriangle className="h-4 w-4 text-orange-500" />
-                    Es urgente (el profesional será notificado inmediatamente)
-                  </Label>
-                </div>
-              </div>
-            </>
-          ) : (
-            <>
-              {/* Step 2: Confirmation */}
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {step === 1 && (
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-slate-900">Resumen de tu solicitud</h3>
-                
-                <div className="bg-slate-50 rounded-lg p-4 space-y-3">
-                  <div>
-                    <span className="text-sm font-medium text-slate-700">Servicio:</span>
-                    <p className="text-slate-900">{form.watch("title")}</p>
-                  </div>
-                  
-                  <div>
-                    <span className="text-sm font-medium text-slate-700">Descripción:</span>
-                    <p className="text-slate-900">{form.watch("description")}</p>
-                  </div>
-                  
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <span className="text-sm font-medium text-slate-700">Fecha preferida:</span>
-                      <p className="text-slate-900">
-                        {form.watch("preferredDate") && new Date(form.watch("preferredDate")).toLocaleDateString('es-AR')}
-                      </p>
-                    </div>
-                    
-                    {form.watch("estimatedBudget") && (
-                      <div>
-                        <span className="text-sm font-medium text-slate-700">Presupuesto:</span>
-                        <p className="text-slate-900">
-                          ${Number(form.watch("estimatedBudget")).toLocaleString('es-AR')} ARS
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div>
-                    <span className="text-sm font-medium text-slate-700">Ubicación:</span>
-                    <p className="text-slate-900">
-                      {form.watch("address")}, {form.watch("city")}, {form.watch("province")}
-                    </p>
-                  </div>
-                  
-                  {form.watch("isUrgent") && (
-                    <div className="flex items-center gap-2 text-orange-600">
-                      <AlertTriangle className="h-4 w-4" />
-                      <span className="text-sm font-medium">Marcado como urgente</span>
-                    </div>
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tipo de servicio</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="ej: Reparación de cañería, Instalación eléctrica..."
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Descripción detallada</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Describe el problema o servicio que necesitas..."
+                          className="min-h-[100px]"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="isUrgent"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                        <FormControl>
+                          <input 
+                            type="checkbox" 
+                            checked={field.value}
+                            onChange={(e) => field.onChange(e.target.checked)}
+                            className="mt-1"
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel>
+                            Es urgente
+                          </FormLabel>
+                          <p className="text-xs text-muted-foreground">
+                            Marca si necesitas el servicio con urgencia
+                          </p>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="estimatedBudget"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Presupuesto estimado (ARS)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="5000"
+                            {...field}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
 
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <h4 className="font-semibold text-blue-900 mb-2">¿Qué sucede después?</h4>
-                  <ul className="text-sm text-blue-800 space-y-1">
-                    <li>• El profesional recibirá tu solicitud inmediatamente</li>
-                    <li>• Te enviará un presupuesto personalizado</li>
-                    <li>• Podrás revisar y aceptar la propuesta</li>
-                    <li>• El pago se procesa de forma segura</li>
-                  </ul>
+                <div className="space-y-4">
+                  <h4 className="font-medium flex items-center gap-2">
+                    <MapPin className="w-4 h-4" />
+                    Dirección del servicio
+                  </h4>
+                  
+                  <FormField
+                    control={form.control}
+                    name="address"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Dirección completa</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Av. Corrientes 1234, Piso 5, Depto A" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="city"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Ciudad</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="customerNotes"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Notas adicionales</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Información adicional" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
               </div>
-            </>
-          )}
-
-          <div className="flex gap-3 pt-4 border-t border-slate-200">
-            {step === 2 && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setStep(1)}
-                className="flex-1"
-              >
-                Volver
-              </Button>
             )}
-            
-            <Button 
-              type="submit" 
-              className="flex-1"
-              disabled={createRequestMutation.isPending}
-            >
-              {createRequestMutation.isPending ? (
-                <div className="flex items-center gap-2">
-                  <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
-                  Enviando...
+
+            {step === 2 && (
+              <div className="space-y-4">
+                <h4 className="font-medium flex items-center gap-2">
+                  <CalendarIcon className="w-4 h-4" />
+                  Fecha y hora preferida
+                </h4>
+
+                <FormField
+                  control={form.control}
+                  name="preferredDate"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Fecha preferida</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              className={`w-full pl-3 text-left font-normal ${
+                                !field.value && "text-muted-foreground"
+                              }`}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP", { locale: es })
+                              ) : (
+                                <span>Selecciona una fecha</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) =>
+                              date < new Date() || date < new Date("1900-01-01")
+                            }
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="preferredTime"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Hora preferida</FormLabel>
+                      <FormControl>
+                        <div className="grid grid-cols-3 gap-2">
+                          {timeSlots.map((time) => (
+                            <Button
+                              key={time}
+                              type="button"
+                              variant={field.value === time ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => field.onChange(time)}
+                              className="text-xs"
+                            >
+                              <Clock className="w-3 h-3 mr-1" />
+                              {time}
+                            </Button>
+                          ))}
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
+
+            {step === 3 && (
+              <div className="space-y-4">
+                <h4 className="font-medium flex items-center gap-2">
+                  <Phone className="w-4 h-4" />
+                  Información de contacto
+                </h4>
+
+                <FormField
+                  control={form.control}
+                  name="customerNotes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Información de contacto y detalles</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Incluye tu teléfono, email y cualquier detalle adicional..."
+                          className="min-h-[80px]"
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h5 className="font-medium text-blue-900 mb-2">Resumen de la solicitud</h5>
+                  <div className="text-sm text-blue-800 space-y-1">
+                    <p><strong>Profesional:</strong> {provider.businessName}</p>
+                    <p><strong>Servicio:</strong> {form.watch("title")}</p>
+                    <p><strong>Fecha:</strong> {form.watch("preferredDate") && format(form.watch("preferredDate"), "PPP", { locale: es })}</p>
+                    <p><strong>Hora:</strong> {form.watch("preferredTime")}</p>
+                    <p><strong>Presupuesto:</strong> ARS {form.watch("estimatedBudget")}</p>
+                  </div>
                 </div>
-              ) : (
-                step === 1 ? "Continuar" : "Enviar solicitud"
+              </div>
+            )}
+
+            <div className="flex justify-between pt-4">
+              {step > 1 && (
+                <Button type="button" variant="outline" onClick={prevStep}>
+                  Anterior
+                </Button>
               )}
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+              
+              {step < 3 ? (
+                <Button type="button" onClick={nextStep} className="ml-auto">
+                  Siguiente
+                </Button>
+              ) : (
+                <Button
+                  type="submit"
+                  disabled={bookingMutation.isPending}
+                  className="ml-auto"
+                >
+                  {bookingMutation.isPending ? "Enviando..." : "Enviar solicitud"}
+                </Button>
+              )}
+            </div>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
   );
 }

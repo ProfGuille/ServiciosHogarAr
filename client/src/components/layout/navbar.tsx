@@ -31,14 +31,14 @@ export function Navbar() {
 
   const navigation = [
     { name: "Inicio", href: "/", current: location === "/" },
-    { name: "Buscar Servicios", href: "/servicios", current: location === "/servicios" },
+    { name: "Buscar Servicios", href: "/services", current: location === "/services" },
     { name: "Cómo Funciona", href: "/como-funciona", current: false },
     { name: "Para Profesionales", href: "/para-profesionales", current: false },
   ];
 
   const userNavigation = [
     { name: "Mi Perfil", href: "/perfil", icon: User },
-    { name: "Mis Solicitudes", href: "/mis-solicitudes", icon: Briefcase },
+    { name: "Mis Solicitudes", href: "/my-requests", icon: Briefcase },
     { name: "Mensajes", href: "/mensajes", icon: MessageSquare },
     { name: "Configuración", href: "/configuracion", icon: Settings },
   ];
