@@ -14,8 +14,8 @@ import { Filter, SlidersHorizontal, Star, MapPin } from "lucide-react";
 
 export default function Services() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCity, setSelectedCity] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCity, setSelectedCity] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("rating");
   const [showFilters, setShowFilters] = useState(false);
 
@@ -31,8 +31,8 @@ export default function Services() {
     queryKey: ["/api/providers", selectedCity, selectedCategory],
     queryFn: () => {
       const params = new URLSearchParams();
-      if (selectedCity) params.set('city', selectedCity);
-      if (selectedCategory) params.set('categoryId', selectedCategory);
+      if (selectedCity && selectedCity !== 'all' && selectedCity !== 'all2') params.set('city', selectedCity);
+      if (selectedCategory && selectedCategory !== 'all') params.set('categoryId', selectedCategory);
       params.set('limit', '20');
       return fetch(`/api/providers?${params.toString()}`).then(res => res.json());
     },
@@ -108,7 +108,7 @@ export default function Services() {
                       <SelectValue placeholder="Selecciona tu ciudad" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Todas las ciudades</SelectItem>
+                      <SelectItem value="all">Todas las ciudades</SelectItem>
                       {argentineCities.map((city) => (
                         <SelectItem key={city} value={city}>{city}</SelectItem>
                       ))}
@@ -162,7 +162,7 @@ export default function Services() {
                       <SelectValue placeholder="Todas las categorías" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Todas las categorías</SelectItem>
+                      <SelectItem value="all">Todas las categorías</SelectItem>
                       {categories?.map((category) => (
                         <SelectItem key={category.id} value={category.id.toString()}>
                           {category.name}
@@ -180,7 +180,7 @@ export default function Services() {
                       <SelectValue placeholder="Todas las ciudades" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Todas las ciudades</SelectItem>
+                      <SelectItem value="all2">Todas las ciudades</SelectItem>
                       {argentineCities.map((city) => (
                         <SelectItem key={city} value={city}>
                           {city}
@@ -207,7 +207,7 @@ export default function Services() {
                 </div>
 
                 {/* Active Filters */}
-                {(selectedCategory || selectedCity || searchQuery) && (
+                {(selectedCategory && selectedCategory !== 'all') || (selectedCity && selectedCity !== 'all' && selectedCity !== 'all2') || searchQuery ? (
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Filtros activos</label>
                     <div className="space-y-2">
@@ -222,22 +222,22 @@ export default function Services() {
                           </button>
                         </Badge>
                       )}
-                      {selectedCategory && (
+                      {selectedCategory && selectedCategory !== 'all' && (
                         <Badge variant="secondary" className="mr-2">
                           {categories?.find(c => c.id.toString() === selectedCategory)?.name}
                           <button
-                            onClick={() => setSelectedCategory("")}
+                            onClick={() => setSelectedCategory("all")}
                             className="ml-2 hover:text-destructive"
                           >
                             ×
                           </button>
                         </Badge>
                       )}
-                      {selectedCity && (
+                      {selectedCity && selectedCity !== 'all' && selectedCity !== 'all2' && (
                         <Badge variant="secondary" className="mr-2">
                           {selectedCity}
                           <button
-                            onClick={() => setSelectedCity("")}
+                            onClick={() => setSelectedCity("all")}
                             className="ml-2 hover:text-destructive"
                           >
                             ×
@@ -246,7 +246,7 @@ export default function Services() {
                       )}
                     </div>
                   </div>
-                )}
+                ) : null}
               </CardContent>
             </Card>
           </div>
@@ -263,13 +263,13 @@ export default function Services() {
                     `${sortedProviders?.length || 0} profesionales encontrados`
                   )}
                 </h2>
-                {(selectedCity || selectedCategory) && (
+                {(selectedCity && selectedCity !== 'all' && selectedCity !== 'all2') || (selectedCategory && selectedCategory !== 'all') ? (
                   <p className="text-sm text-slate-600 mt-1">
-                    {selectedCity && `en ${selectedCity}`}
-                    {selectedCity && selectedCategory && " • "}
-                    {selectedCategory && `categoría: ${categories?.find(c => c.id.toString() === selectedCategory)?.name}`}
+                    {selectedCity && selectedCity !== 'all' && selectedCity !== 'all2' && `en ${selectedCity}`}
+                    {selectedCity && selectedCity !== 'all' && selectedCity !== 'all2' && selectedCategory && selectedCategory !== 'all' && " • "}
+                    {selectedCategory && selectedCategory !== 'all' && `categoría: ${categories?.find(c => c.id.toString() === selectedCategory)?.name}`}
                   </p>
-                )}
+                ) : null}
               </div>
             </div>
 
@@ -359,8 +359,8 @@ export default function Services() {
                     variant="outline"
                     onClick={() => {
                       setSearchQuery("");
-                      setSelectedCity("");
-                      setSelectedCategory("");
+                      setSelectedCity("all");
+                      setSelectedCategory("all");
                     }}
                   >
                     Limpiar filtros
