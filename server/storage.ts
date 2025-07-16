@@ -54,6 +54,8 @@ export interface IStorage {
   // Provider services
   getProviderServices(providerId: number): Promise<ProviderService[]>;
   createProviderService(service: InsertProviderService): Promise<ProviderService>;
+  updateProviderService(id: number, updates: Partial<InsertProviderService>): Promise<ProviderService | undefined>;
+  deleteProviderService(id: number): Promise<void>;
   
   // Service requests
   getServiceRequests(filters?: {
@@ -241,6 +243,21 @@ export class DatabaseStorage implements IStorage {
       .values(service)
       .returning();
     return newService;
+  }
+
+  async updateProviderService(id: number, updates: Partial<InsertProviderService>): Promise<ProviderService | undefined> {
+    const [updatedService] = await db
+      .update(providerServices)
+      .set(updates)
+      .where(eq(providerServices.id, id))
+      .returning();
+    return updatedService;
+  }
+
+  async deleteProviderService(id: number): Promise<void> {
+    await db
+      .delete(providerServices)
+      .where(eq(providerServices.id, id));
   }
 
   // Service requests

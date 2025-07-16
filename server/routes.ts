@@ -242,6 +242,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create provider service (alternative route)
+  app.post('/api/provider-services', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // Check if user owns this provider profile
+      const provider = await storage.getServiceProviderById(req.body.providerId);
+      if (!provider || provider.userId !== userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const serviceData = insertProviderServiceSchema.parse(req.body);
+      const service = await storage.createProviderService(serviceData);
+      res.status(201).json(service);
+    } catch (error) {
+      console.error("Error creating provider service:", error);
+      res.status(500).json({ message: "Failed to create provider service" });
+    }
+  });
+
+  // Update provider service
+  app.put('/api/provider-services/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const serviceId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      // Get the service to check ownership
+      const services = await storage.getProviderServices(req.body.providerId);
+      const service = services.find(s => s.id === serviceId);
+      
+      if (!service) {
+        return res.status(404).json({ message: "Service not found" });
+      }
+
+      // Check if user owns the provider profile
+      const provider = await storage.getServiceProviderById(service.providerId);
+      if (!provider || provider.userId !== userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const updates = insertProviderServiceSchema.partial().parse(req.body);
+      const updatedService = await storage.updateProviderService(serviceId, updates);
+      
+      if (!updatedService) {
+        return res.status(404).json({ message: "Service not found" });
+      }
+      
+      res.json(updatedService);
+    } catch (error) {
+      console.error("Error updating provider service:", error);
+      res.status(500).json({ message: "Failed to update provider service" });
+    }
+  });
+
+  // Delete provider service
+  app.delete('/api/provider-services/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const serviceId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      // Get all provider services to find this one
+      const allProviders = await storage.getServiceProviders({});
+      let targetProvider = null;
+      
+      for (const provider of allProviders) {
+        const services = await storage.getProviderServices(provider.id);
+        const service = services.find(s => s.id === serviceId);
+        if (service) {
+          targetProvider = provider;
+          break;
+        }
+      }
+
+      if (!targetProvider || targetProvider.userId !== userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      await storage.deleteProviderService(serviceId);
+      res.json({ message: "Service deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting provider service:", error);
+      res.status(500).json({ message: "Failed to delete provider service" });
+    }
+  });
+
+  // Get provider payments
+  app.get('/api/providers/:id/payments', isAuthenticated, async (req: any, res) => {
+    try {
+      const providerId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      // Check if user owns this provider profile
+      const provider = await storage.getServiceProviderById(providerId);
+      if (!provider || provider.userId !== userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const payments = await storage.getPaymentsByProvider(providerId);
+      res.json(payments);
+    } catch (error) {
+      console.error("Error fetching provider payments:", error);
+      res.status(500).json({ message: "Failed to fetch provider payments" });
+    }
+  });
+
   // Service Requests
   app.get('/api/requests', isAuthenticated, async (req: any, res) => {
     try {
