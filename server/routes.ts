@@ -583,6 +583,108 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test payment methods (no auth for testing)
+  app.post('/api/test-payments', async (req, res) => {
+    try {
+      const { method, serviceRequestId } = req.body;
+      
+      if (method === 'bank_transfer') {
+        const paymentData = {
+          serviceRequestId: parseInt(serviceRequestId),
+          customerId: "test-customer",
+          providerId: 4,
+          amount: "150000",
+          platformFee: "15000",
+          providerAmount: "135000",
+          paymentMethod: "bank_transfer",
+          transferReference: "TRF123456789",
+          bankAccountNumber: "0110599520000001234567",
+          bankName: "Banco Galicia",
+          accountHolderName: "ServiciosHogar.com.ar",
+        };
+        
+        const payment = await storage.createPayment(paymentData);
+        res.json({ success: true, payment, message: "Bank transfer payment created successfully" });
+        
+      } else if (method === 'cash') {
+        const paymentData = {
+          serviceRequestId: parseInt(serviceRequestId),
+          customerId: "test-customer",
+          providerId: 4,
+          amount: "150000",
+          platformFee: "15000",
+          providerAmount: "135000",
+          paymentMethod: "cash",
+          cashLocation: "En mi domicilio al finalizar el trabajo",
+          cashInstructions: "Coordinar con el profesional para el pago en efectivo al finalizar el servicio.",
+        };
+        
+        const payment = await storage.createPayment(paymentData);
+        res.json({ success: true, payment, message: "Cash payment registered successfully" });
+        
+      } else if (method === 'mercadopago') {
+        if (!mercadopagoClient) {
+          return res.json({ 
+            success: false, 
+            message: "Mercado Pago not configured. Credentials needed.",
+            needsCredentials: true
+          });
+        }
+        
+        const preference = new Preference(mercadopagoClient);
+        const preferenceData = {
+          items: [{
+            id: `service-${serviceRequestId}`,
+            title: "Test - Instalación de tomas adicionales",
+            description: "Test payment for service",
+            quantity: 1,
+            currency_id: "ARS",
+            unit_price: 150000
+          }],
+          payer: {
+            email: "test@servicioshogar.com.ar"
+          },
+          back_urls: {
+            success: `http://localhost:5000/payment-success/${serviceRequestId}`,
+            failure: `http://localhost:5000/payment-failure/${serviceRequestId}`,
+            pending: `http://localhost:5000/payment-pending/${serviceRequestId}`
+          },
+          auto_return: "approved",
+          external_reference: serviceRequestId.toString(),
+        };
+
+        const response = await preference.create({ body: preferenceData });
+        
+        const paymentData = {
+          serviceRequestId: parseInt(serviceRequestId),
+          customerId: "test-customer",
+          providerId: 4,
+          amount: "150000",
+          platformFee: "15000",
+          providerAmount: "135000",
+          paymentMethod: "mercadopago",
+          mercadopagoPreferenceId: response.id,
+        };
+        
+        const payment = await storage.createPayment(paymentData);
+        
+        res.json({ 
+          success: true, 
+          payment, 
+          preferenceId: response.id,
+          initPoint: response.init_point,
+          message: "Mercado Pago preference created successfully" 
+        });
+        
+      } else {
+        res.status(400).json({ success: false, message: "Invalid payment method" });
+      }
+    } catch (error: any) {
+      console.error("Test payment error:", error);
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
   // Test endpoint for payment scenario
   app.post('/api/admin/create-payment-test', async (req, res) => {
     try {
