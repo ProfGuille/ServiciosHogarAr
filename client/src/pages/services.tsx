@@ -2,8 +2,8 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
-import { ServiceSearch } from "@/components/services/service-search";
-import { ServiceCard } from "@/components/services/service-card";
+// import { ServiceSearch } from "@/components/services/service-search";
+// import { ServiceCard } from "@/components/services/service-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -258,7 +258,50 @@ export default function Services() {
             ) : sortedProviders && sortedProviders.length > 0 ? (
               <div className="grid md:grid-cols-2 gap-6">
                 {sortedProviders.map((provider) => (
-                  <ServiceCard key={provider.id} provider={provider} />
+                  <Card key={provider.id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-4 mb-4">
+                      <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center">
+                        <span className="text-2xl font-bold text-slate-600">
+                          {provider.businessName?.[0] || 'P'}
+                        </span>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-slate-900 mb-1">{provider.businessName}</h3>
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="flex items-center">
+                            <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                            <span className="text-sm text-slate-600 ml-1">
+                              {provider.rating} ({provider.totalReviews} reseñas)
+                            </span>
+                          </div>
+                          {provider.isVerified && (
+                            <Badge variant="secondary" className="text-xs">
+                              Verificado
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="flex items-center text-sm text-slate-600 mb-2">
+                          <MapPin className="h-4 w-4 mr-1" />
+                          {provider.city}
+                        </div>
+                        <p className="text-sm text-slate-600 mb-3 line-clamp-2">
+                          {provider.description}
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold text-primary">
+                            ${provider.hourlyRate}/hora
+                          </span>
+                          <Button size="sm" asChild>
+                            <a href={`/profesional/${provider.id}`}>
+                              Ver perfil
+                            </a>
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
                 ))}
               </div>
             ) : (
