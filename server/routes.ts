@@ -694,11 +694,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
               email: "test@servicioshogar.com.ar"
             },
             back_urls: {
-              success: `${req.protocol}://${req.hostname}/payment-success/${testData.serviceRequestId}`,
-              failure: `${req.protocol}://${req.hostname}/payment-failure/${testData.serviceRequestId}`,
-              pending: `${req.protocol}://${req.hostname}/payment-pending/${testData.serviceRequestId}`
+              success: `http://localhost:5000/payment-success/${testData.serviceRequestId}`,
+              failure: `http://localhost:5000/payment-failure/${testData.serviceRequestId}`,
+              pending: `http://localhost:5000/payment-pending/${testData.serviceRequestId}`
             },
-            auto_return: "approved",
             external_reference: testData.serviceRequestId.toString(),
           };
 
@@ -807,7 +806,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             failure: `http://localhost:5000/payment-failure/${serviceRequestId}`,
             pending: `http://localhost:5000/payment-pending/${serviceRequestId}`
           },
-          auto_return: "approved",
+
           external_reference: serviceRequestId.toString(),
         };
 
@@ -1100,11 +1099,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           email: req.user.claims.email || "customer@servicioshogar.com.ar"
         },
         back_urls: {
-          success: `${req.protocol}://${req.hostname}/payment-success/${serviceRequestId}`,
-          failure: `${req.protocol}://${req.hostname}/payment-failure/${serviceRequestId}`,
-          pending: `${req.protocol}://${req.hostname}/payment-pending/${serviceRequestId}`
+          success: `http://localhost:5000/payment-success/${serviceRequestId}`,
+          failure: `http://localhost:5000/payment-failure/${serviceRequestId}`,
+          pending: `http://localhost:5000/payment-pending/${serviceRequestId}`
         },
-        auto_return: "approved",
         external_reference: serviceRequestId.toString(),
         metadata: {
           serviceRequestId: serviceRequestId.toString(),
