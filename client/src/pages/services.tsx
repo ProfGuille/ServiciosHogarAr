@@ -24,11 +24,14 @@ export default function Services() {
   });
 
   const { data: providers, isLoading: providersLoading } = useQuery({
-    queryKey: ["/api/providers", {
-      city: selectedCity,
-      categoryId: selectedCategory ? parseInt(selectedCategory) : undefined,
-      limit: 20,
-    }],
+    queryKey: ["/api/providers", selectedCity, selectedCategory],
+    queryFn: () => {
+      const params = new URLSearchParams();
+      if (selectedCity) params.set('city', selectedCity);
+      if (selectedCategory) params.set('categoryId', selectedCategory);
+      params.set('limit', '20');
+      return fetch(`/api/providers?${params.toString()}`).then(res => res.json());
+    },
   });
 
   const argentineCities = [

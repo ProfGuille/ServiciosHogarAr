@@ -38,7 +38,8 @@ export default function Landing() {
   });
 
   const { data: featuredProviders } = useQuery({
-    queryKey: ["/api/providers", { limit: 4, isVerified: true }],
+    queryKey: ["/api/providers"],
+    queryFn: () => fetch("/api/providers?limit=4&isVerified=true").then(res => res.json()),
   });
 
   const handleSearch = () => {
