@@ -2,6 +2,14 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import Stripe from "stripe";
+
+if (!process.env.STRIPE_SECRET_KEY) {
+  throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
+}
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: "2025-06-30.basil",
+});
 import { 
   insertServiceCategorySchema,
   insertServiceProviderSchema,
@@ -9,6 +17,7 @@ import {
   insertServiceRequestSchema,
   insertReviewSchema,
   insertMessageSchema,
+  insertPaymentSchema,
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -559,6 +568,131 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating provider:", error);
       res.status(500).json({ message: "Failed to update provider" });
+    }
+  });
+
+  // Payment Routes
+  app.post('/api/payments/create-payment-intent', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { serviceRequestId, amount } = req.body;
+
+      // Validate service request and user permissions
+      const serviceRequest = await storage.getServiceRequestById(serviceRequestId);
+      if (!serviceRequest || serviceRequest.customerId !== userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      if (serviceRequest.status !== 'accepted') {
+        return res.status(400).json({ message: "Payment can only be made for accepted services" });
+      }
+
+      // Calculate platform fee (10% of total)
+      const totalAmount = Math.round(parseFloat(amount) * 100); // Convert to cents
+      const platformFee = Math.round(totalAmount * 0.10);
+      const providerAmount = totalAmount - platformFee;
+
+      // Create payment intent
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: totalAmount,
+        currency: 'ars',
+        metadata: {
+          serviceRequestId: serviceRequestId.toString(),
+          customerId: userId,
+          providerId: serviceRequest.providerId?.toString() || '',
+          platformFee: platformFee.toString(),
+          providerAmount: providerAmount.toString(),
+        },
+      });
+
+      // Update service request with payment intent
+      await storage.updateServiceRequest(serviceRequestId, {
+        stripePaymentIntentId: paymentIntent.id,
+        paymentStatus: 'processing',
+      });
+
+      res.json({ 
+        clientSecret: paymentIntent.client_secret,
+        paymentIntentId: paymentIntent.id,
+      });
+    } catch (error: any) {
+      console.error("Error creating payment intent:", error);
+      res.status(500).json({ message: "Error creating payment intent: " + error.message });
+    }
+  });
+
+  app.post('/api/payments/confirm', isAuthenticated, async (req: any, res) => {
+    try {
+      const { paymentIntentId } = req.body;
+      const userId = req.user.claims.sub;
+
+      // Retrieve payment intent from Stripe
+      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+      
+      if (paymentIntent.status === 'succeeded') {
+        const serviceRequestId = parseInt(paymentIntent.metadata.serviceRequestId);
+        const serviceRequest = await storage.getServiceRequestById(serviceRequestId);
+
+        if (!serviceRequest || serviceRequest.customerId !== userId) {
+          return res.status(403).json({ message: "Access denied" });
+        }
+
+        // Create payment record
+        const paymentData = {
+          serviceRequestId,
+          customerId: userId,
+          providerId: serviceRequest.providerId!,
+          amount: (paymentIntent.amount / 100).toString(),
+          platformFee: (parseInt(paymentIntent.metadata.platformFee) / 100).toString(),
+          providerAmount: (parseInt(paymentIntent.metadata.providerAmount) / 100).toString(),
+          stripePaymentIntentId: paymentIntentId,
+          stripeChargeId: paymentIntent.latest_charge?.toString(),
+          status: 'succeeded' as const,
+          currency: 'ars',
+          paidAt: new Date(),
+        };
+
+        await storage.createPayment(paymentData);
+
+        // Update service request status
+        await storage.updateServiceRequest(serviceRequestId, {
+          paymentStatus: 'paid',
+          status: 'in_progress',
+        });
+
+        res.json({ success: true, message: "Payment confirmed successfully" });
+      } else {
+        res.status(400).json({ message: "Payment not succeeded" });
+      }
+    } catch (error: any) {
+      console.error("Error confirming payment:", error);
+      res.status(500).json({ message: "Error confirming payment: " + error.message });
+    }
+  });
+
+  app.get('/api/payments/history', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      let payments;
+      if (user?.userType === 'customer') {
+        payments = await storage.getPaymentsByCustomer(userId);
+      } else if (user?.userType === 'provider') {
+        const provider = await storage.getServiceProviderByUserId(userId);
+        if (provider) {
+          payments = await storage.getPaymentsByProvider(provider.id);
+        }
+      } else if (user?.userType === 'admin') {
+        payments = await storage.getAllPayments();
+      } else {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      res.json(payments || []);
+    } catch (error) {
+      console.error("Error fetching payment history:", error);
+      res.status(500).json({ message: "Failed to fetch payment history" });
     }
   });
 

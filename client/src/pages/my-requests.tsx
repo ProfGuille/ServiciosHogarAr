@@ -297,6 +297,15 @@ export default function MyRequests() {
                               </Button>
                             </>
                           )}
+                          {request.status === "accepted" && request.paymentStatus === 'pending' && (
+                            <Button 
+                              size="sm" 
+                              onClick={() => setLocation(`/payment/${request.id}`)}
+                              className="bg-green-600 hover:bg-green-700"
+                            >
+                              Pagar servicio
+                            </Button>
+                          )}
                           {request.status === "completed" && (
                             <Button variant="outline" size="sm">
                               Dejar reseña

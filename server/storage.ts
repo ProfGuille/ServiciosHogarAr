@@ -6,6 +6,7 @@ import {
   serviceRequests,
   reviews,
   messages,
+  payments,
   type User,
   type UpsertUser,
   type ServiceCategory,
@@ -20,6 +21,8 @@ import {
   type InsertReview,
   type Message,
   type InsertMessage,
+  type Payment,
+  type InsertPayment,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, asc, like, and, or, sql, count } from "drizzle-orm";
@@ -87,6 +90,13 @@ export interface IStorage {
     totalRequests: number;
     totalCompletedJobs: number;
   }>;
+
+  // Payments
+  createPayment(payment: InsertPayment): Promise<Payment>;
+  getPaymentsByCustomer(customerId: string): Promise<Payment[]>;
+  getPaymentsByProvider(providerId: number): Promise<Payment[]>;
+  getAllPayments(): Promise<Payment[]>;
+  getPaymentByServiceRequest(serviceRequestId: number): Promise<Payment | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -406,6 +416,46 @@ export class DatabaseStorage implements IStorage {
       totalRequests: requestStats.totalRequests,
       totalCompletedJobs: requestStats.totalCompletedJobs,
     };
+  }
+
+  // Payment operations
+  async createPayment(paymentData: InsertPayment): Promise<Payment> {
+    const [payment] = await db
+      .insert(payments)
+      .values(paymentData)
+      .returning();
+    return payment;
+  }
+
+  async getPaymentsByCustomer(customerId: string): Promise<Payment[]> {
+    return await db
+      .select()
+      .from(payments)
+      .where(eq(payments.customerId, customerId))
+      .orderBy(desc(payments.createdAt));
+  }
+
+  async getPaymentsByProvider(providerId: number): Promise<Payment[]> {
+    return await db
+      .select()
+      .from(payments)
+      .where(eq(payments.providerId, providerId))
+      .orderBy(desc(payments.createdAt));
+  }
+
+  async getAllPayments(): Promise<Payment[]> {
+    return await db
+      .select()
+      .from(payments)
+      .orderBy(desc(payments.createdAt));
+  }
+
+  async getPaymentByServiceRequest(serviceRequestId: number): Promise<Payment | undefined> {
+    const [payment] = await db
+      .select()
+      .from(payments)
+      .where(eq(payments.serviceRequestId, serviceRequestId));
+    return payment;
   }
 }
 

@@ -106,6 +106,31 @@ export const serviceRequests = pgTable("service_requests", {
   isUrgent: boolean("is_urgent").default(false),
   customerNotes: text("customer_notes"),
   providerNotes: text("provider_notes"),
+  paymentStatus: varchar("payment_status", { 
+    enum: ["pending", "processing", "paid", "failed", "refunded"] 
+  }).default("pending"),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id", { length: 255 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Payment transactions
+export const payments = pgTable("payments", {
+  id: serial("id").primaryKey(),
+  serviceRequestId: integer("service_request_id").notNull().references(() => serviceRequests.id),
+  customerId: varchar("customer_id").notNull().references(() => users.id),
+  providerId: integer("provider_id").notNull().references(() => serviceProviders.id),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  platformFee: decimal("platform_fee", { precision: 10, scale: 2 }).notNull(),
+  providerAmount: decimal("provider_amount", { precision: 10, scale: 2 }).notNull(),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id", { length: 255 }).notNull(),
+  stripeChargeId: varchar("stripe_charge_id", { length: 255 }),
+  status: varchar("status", { 
+    enum: ["pending", "processing", "succeeded", "failed", "canceled", "refunded"] 
+  }).default("pending"),
+  currency: varchar("currency", { length: 3 }).default("ars"),
+  paidAt: timestamp("paid_at"),
+  refundedAt: timestamp("refunded_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -186,6 +211,22 @@ export const serviceRequestsRelations = relations(serviceRequests, ({ one, many 
   }),
   messages: many(messages),
   reviews: many(reviews),
+  payments: many(payments),
+}));
+
+export const paymentsRelations = relations(payments, ({ one }) => ({
+  serviceRequest: one(serviceRequests, {
+    fields: [payments.serviceRequestId],
+    references: [serviceRequests.id],
+  }),
+  customer: one(users, {
+    fields: [payments.customerId],
+    references: [users.id],
+  }),
+  provider: one(serviceProviders, {
+    fields: [payments.providerId],
+    references: [serviceProviders.id],
+  }),
 }));
 
 export const reviewsRelations = relations(reviews, ({ one }) => ({
@@ -245,3 +286,8 @@ export type Review = typeof reviews.$inferSelect;
 export const insertMessageSchema = createInsertSchema(messages);
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
 export type Message = typeof messages.$inferSelect;
+
+export const insertPaymentSchema = createInsertSchema(payments);
+export type InsertPayment = z.infer<typeof insertPaymentSchema>;
+export type Payment = typeof payments.$inferSelect;
+
