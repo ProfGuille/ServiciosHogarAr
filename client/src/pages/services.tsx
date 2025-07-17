@@ -21,32 +21,35 @@ export default function Services() {
   const [showFilters, setShowFilters] = useState(false);
   const searchParams = new URLSearchParams(useSearch());
 
+  const { data: categories, isLoading: categoriesLoading } = useQuery({
+    queryKey: ["/api/categories"],
+  });
+
   useEffect(() => {
-    document.title = "Servicios - ServiciosHogar.com.ar";
-    
     // Check for category filter from URL
     const categoryParam = searchParams.get('categoria');
-    if (categoryParam && categories) {
+    const searchParam = searchParams.get('buscar');
+    
+    if (categoryParam && categories && categories.length > 0) {
       // Find category by name (case insensitive)
       const category = categories.find(cat => 
+        cat.name.toLowerCase() === categoryParam.toLowerCase() ||
         cat.name.toLowerCase().includes(categoryParam.toLowerCase())
       );
       if (category) {
         setSelectedCategory(category.id.toString());
         setShowFilters(true);
+        document.title = `${category.name} - ServiciosHogar.com.ar`;
       }
+    } else {
+      document.title = "Servicios - ServiciosHogar.com.ar";
     }
     
     // Check for search query from URL
-    const searchParam = searchParams.get('buscar');
     if (searchParam) {
       setSearchQuery(searchParam);
     }
-  }, [categories]);
-
-  const { data: categories, isLoading: categoriesLoading } = useQuery({
-    queryKey: ["/api/categories"],
-  });
+  }, [categories, searchParams.toString()]);
 
   const { data: providers, isLoading: providersLoading } = useQuery({
     queryKey: ["/api/providers", selectedCity, selectedCategory],
@@ -98,9 +101,17 @@ export default function Services() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Buscar servicios</h1>
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">
+            {selectedCategory !== "all" && categories ? 
+              `Profesionales de ${categories.find(c => c.id.toString() === selectedCategory)?.name || 'Servicios'}` : 
+              "Buscar servicios"
+            }
+          </h1>
           <p className="text-lg text-slate-600">
-            Encuentra profesionales verificados para tu hogar
+            {selectedCategory !== "all" ? 
+              `Encuentra los mejores profesionales de ${categories?.find(c => c.id.toString() === selectedCategory)?.name?.toLowerCase() || 'servicios'} verificados` :
+              "Encuentra profesionales verificados para tu hogar"
+            }
           </p>
         </div>
 
@@ -226,6 +237,22 @@ export default function Services() {
                     </SelectContent>
                   </Select>
                 </div>
+
+                {/* Reset Filters Button */}
+                {(selectedCategory !== 'all' || selectedCity !== 'all' || searchQuery) && (
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => {
+                      setSelectedCategory('all');
+                      setSelectedCity('all');
+                      setSearchQuery('');
+                      window.history.pushState({}, '', '/servicios');
+                    }}
+                  >
+                    Limpiar filtros
+                  </Button>
+                )}
 
                 {/* Active Filters */}
                 {(selectedCategory && selectedCategory !== 'all') || (selectedCity && selectedCity !== 'all' && selectedCity !== 'all2') || searchQuery ? (

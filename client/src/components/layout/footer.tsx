@@ -17,11 +17,11 @@ export function Footer() {
     {
       title: "Servicios Populares",
       links: [
-        { label: "Plomero", href: "/servicios?categoria=plomeria" },
-        { label: "Electricista", href: "/servicios?categoria=electricidad" },
-        { label: "Pintor", href: "/servicios?categoria=pintura" },
+        { label: "Plomería", href: "/servicios/plomeria" },
+        { label: "Electricidad", href: "/servicios?categoria=electricidad" },
+        { label: "Pintura", href: "/servicios?categoria=pintura" },
         { label: "Limpieza", href: "/servicios?categoria=limpieza" },
-        { label: "Carpintero", href: "/servicios?categoria=carpinteria" },
+        { label: "Carpintería", href: "/servicios?categoria=carpintería" },
         { label: "Ver todos los servicios", href: "/servicios" },
       ]
     },
