@@ -84,11 +84,11 @@ export default function Contacto() {
               Contactanos
             </h1>
             <p className="text-xl text-slate-600 max-w-3xl mx-auto">
-              ¿Tienes preguntas? Estamos aquí para ayudarte. Contáctanos por cualquiera de estos medios.
+              ¿Tienes preguntas o necesitas ayuda? Completa el formulario y nos pondremos en contacto contigo lo antes posible.
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-12">
+          <div className="max-w-2xl mx-auto">
             {/* Contact Form */}
             <Card>
               <CardHeader>
@@ -166,70 +166,6 @@ export default function Contacto() {
                 </form>
               </CardContent>
             </Card>
-
-            {/* Contact Info */}
-            <div className="space-y-6">
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4 mb-4">
-                    <Phone className="h-6 w-6 text-primary" />
-                    <div>
-                      <h3 className="font-semibold">Teléfono</h3>
-                      <p className="text-slate-600">+54 11 5555-0123</p>
-                    </div>
-                  </div>
-                  <p className="text-sm text-slate-500">
-                    Disponible de lunes a viernes de 9:00 a 18:00 hs
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4 mb-4">
-                    <Mail className="h-6 w-6 text-primary" />
-                    <div>
-                      <h3 className="font-semibold">Email</h3>
-                      <p className="text-slate-600">contacto@servicioshogar.com.ar</p>
-                    </div>
-                  </div>
-                  <p className="text-sm text-slate-500">
-                    Respuesta en menos de 24 horas
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4 mb-4">
-                    <MapPin className="h-6 w-6 text-primary" />
-                    <div>
-                      <h3 className="font-semibold">Oficina</h3>
-                      <p className="text-slate-600">Av. Corrientes 1234, CABA</p>
-                    </div>
-                  </div>
-                  <p className="text-sm text-slate-500">
-                    Buenos Aires, Argentina
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4 mb-4">
-                    <Clock className="h-6 w-6 text-primary" />
-                    <div>
-                      <h3 className="font-semibold">Horarios de atención</h3>
-                      <div className="text-slate-600">
-                        <p>Lunes a Viernes: 9:00 - 18:00</p>
-                        <p>Sábados: 9:00 - 13:00</p>
-                        <p>Domingos: Cerrado</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
           </div>
 
           {/* FAQ Section */}
