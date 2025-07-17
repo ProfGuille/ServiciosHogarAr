@@ -18,6 +18,14 @@ import PaymentMethods from "@/pages/payment-methods";
 import PaymentSuccess from "@/pages/payment-success";
 import TestPayments from "@/pages/test-payments";
 import Profile from "@/pages/profile";
+import About from "@/pages/about";
+import ComoFunciona from "@/pages/como-funciona";
+import Contacto from "@/pages/contacto";
+import Terminos from "@/pages/terminos";
+import Privacidad from "@/pages/privacidad";
+import Seguridad from "@/pages/seguridad";
+import Blog from "@/pages/blog";
+import CentroAyuda from "@/pages/centro-ayuda";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -29,6 +37,14 @@ function Router() {
       <Route path="/servicios/:id" component={ServiceDetail} />
       <Route path="/profesional/:id" component={ProviderProfile} />
       <Route path="/test-payments" component={TestPayments} />
+      <Route path="/about" component={About} />
+      <Route path="/como-funciona" component={ComoFunciona} />
+      <Route path="/contacto" component={Contacto} />
+      <Route path="/terminos" component={Terminos} />
+      <Route path="/privacidad" component={Privacidad} />
+      <Route path="/seguridad" component={Seguridad} />
+      <Route path="/blog" component={Blog} />
+      <Route path="/centro-ayuda" component={CentroAyuda} />
       
       {/* Authentication-dependent routes */}
       {isLoading || !isAuthenticated ? (

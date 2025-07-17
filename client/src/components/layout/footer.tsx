@@ -35,21 +35,21 @@ export function Footer() {
     {
       title: "Empresa",
       links: [
-        { label: "Nosotros", href: "/" },
-        { label: "Cómo Funciona", href: "/" },
-        { label: "Blog", href: "/" },
-        { label: "Carreras", href: "/" },
-        { label: "Prensa", href: "/" },
+        { label: "Nosotros", href: "/about" },
+        { label: "Cómo Funciona", href: "/como-funciona" },
+        { label: "Blog", href: "/blog" },
+        { label: "Carreras", href: "/blog" },
+        { label: "Prensa", href: "/blog" },
       ]
     },
     {
       title: "Soporte",
       links: [
-        { label: "Centro de Ayuda", href: "/" },
-        { label: "Contacto", href: "/" },
-        { label: "Términos de Servicio", href: "/" },
-        { label: "Privacidad", href: "/" },
-        { label: "Seguridad", href: "/" },
+        { label: "Centro de Ayuda", href: "/centro-ayuda" },
+        { label: "Contacto", href: "/contacto" },
+        { label: "Términos de Servicio", href: "/terminos" },
+        { label: "Privacidad", href: "/privacidad" },
+        { label: "Seguridad", href: "/seguridad" },
       ]
     }
   ];
