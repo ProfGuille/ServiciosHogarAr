@@ -329,12 +329,14 @@ export default function Landing() {
             >
               Registrarme como Profesional
             </Button>
-            <Button 
-              variant="outline" 
-              className="w-full sm:w-auto border-white text-white hover:bg-white hover:text-secondary"
-            >
-              Ver Planes y Precios
-            </Button>
+            <Link href="/precios">
+              <Button 
+                variant="outline" 
+                className="w-full sm:w-auto border-white text-white bg-white/10 hover:bg-white hover:text-secondary"
+              >
+                Ver Planes y Precios
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
