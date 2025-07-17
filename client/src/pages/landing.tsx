@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
+import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -43,7 +44,12 @@ export default function Landing() {
   });
 
   const handleSearch = () => {
-    console.log("Búsqueda iniciada:", { searchQuery, location });
+    // Redirect to services page with search query
+    let url = '/servicios';
+    if (searchQuery) {
+      url += `?buscar=${encodeURIComponent(searchQuery)}`;
+    }
+    window.location.href = url;
   };
 
   const handleProviderSignup = () => {
@@ -132,16 +138,19 @@ export default function Landing() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
             {categories?.map((category) => {
               const IconComponent = serviceIcons[category.name.toLowerCase() as keyof typeof serviceIcons] || Wrench;
+              const categoryPath = category.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
               return (
-                <Card key={category.id} className="text-center shadow-sm hover:shadow-md transition-shadow cursor-pointer group">
-                  <CardContent className="p-6">
-                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
-                      <IconComponent className="h-8 w-8 text-primary group-hover:text-white" />
-                    </div>
-                    <h3 className="font-semibold text-slate-900 mb-2">{category.name}</h3>
-                    <p className="text-sm text-slate-500">150+ profesionales</p>
-                  </CardContent>
-                </Card>
+                <Link key={category.id} href={`/servicios/${categoryPath}`}>
+                  <Card className="text-center shadow-sm hover:shadow-md transition-shadow cursor-pointer group h-full">
+                    <CardContent className="p-6">
+                      <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
+                        <IconComponent className="h-8 w-8 text-primary group-hover:text-white" />
+                      </div>
+                      <h3 className="font-semibold text-slate-900 mb-2">{category.name}</h3>
+                      <p className="text-sm text-slate-500">150+ profesionales</p>
+                    </CardContent>
+                  </Card>
+                </Link>
               );
             })}
           </div>
@@ -194,8 +203,9 @@ export default function Landing() {
           
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {featuredProviders?.map((provider) => (
-              <Card key={provider.id} className="shadow-sm hover:shadow-md transition-shadow">
-                <CardContent className="p-6 text-center">
+              <Link key={provider.id} href={`/profesional/${provider.id}`}>
+                <Card className="shadow-sm hover:shadow-md transition-shadow cursor-pointer h-full">
+                  <CardContent className="p-6 text-center">
                   <img 
                     src={provider.profileImageUrl || "https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300"} 
                     alt={`${provider.businessName} - Profesional`} 
@@ -223,8 +233,9 @@ export default function Landing() {
                       <span>Asegurado</span>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
         </div>
