@@ -9,6 +9,7 @@ import { Calendar, ExternalLink, Download, Users, TrendingUp, Award } from "luci
 export default function Prensa() {
   useEffect(() => {
     document.title = "Prensa - ServiciosHogar.com.ar";
+    window.scrollTo(0, 0);
   }, []);
 
   const pressReleases = [

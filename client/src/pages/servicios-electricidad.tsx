@@ -12,6 +12,7 @@ import { Star, MapPin, Zap, CheckCircle, ArrowLeft } from "lucide-react";
 export default function ServiciosElectricidad() {
   useEffect(() => {
     document.title = "Electricistas - ServiciosHogar.com.ar";
+    window.scrollTo(0, 0);
   }, []);
 
   // Get electricity category ID

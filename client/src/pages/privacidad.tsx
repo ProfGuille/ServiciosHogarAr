@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export default function Privacidad() {
   useEffect(() => {
     document.title = "Política de Privacidad - ServiciosHogar.com.ar";
+    window.scrollTo(0, 0);
   }, []);
 
   return (

@@ -7,6 +7,7 @@ import { Shield, Lock, UserCheck, CreditCard, Eye, AlertTriangle } from "lucide-
 export default function Seguridad() {
   useEffect(() => {
     document.title = "Seguridad - ServiciosHogar.com.ar";
+    window.scrollTo(0, 0);
   }, []);
 
   const securityFeatures = [

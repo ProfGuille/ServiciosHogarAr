@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { Link } from "wouter";
@@ -33,6 +33,10 @@ const serviceIcons = {
 export default function Landing() {
   const [searchQuery, setSearchQuery] = useState("");
   const [location, setLocation] = useState("");
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const { data: categories } = useQuery({
     queryKey: ["/api/categories"],

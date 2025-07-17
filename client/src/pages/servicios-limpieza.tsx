@@ -12,6 +12,7 @@ import { Star, MapPin, Sparkles, CheckCircle, ArrowLeft } from "lucide-react";
 export default function ServiciosLimpieza() {
   useEffect(() => {
     document.title = "Servicios de Limpieza - ServiciosHogar.com.ar";
+    window.scrollTo(0, 0);
   }, []);
 
   // Get cleaning category ID

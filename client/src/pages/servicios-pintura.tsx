@@ -12,6 +12,7 @@ import { Star, MapPin, Paintbrush, CheckCircle, ArrowLeft } from "lucide-react";
 export default function ServiciosPintura() {
   useEffect(() => {
     document.title = "Pintores - ServiciosHogar.com.ar";
+    window.scrollTo(0, 0);
   }, []);
 
   // Get painting category ID

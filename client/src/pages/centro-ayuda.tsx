@@ -8,6 +8,7 @@ import { Search, ChevronDown, ChevronRight } from "lucide-react";
 export default function CentroAyuda() {
   useEffect(() => {
     document.title = "Centro de Ayuda - ServiciosHogar.com.ar";
+    window.scrollTo(0, 0);
   }, []);
 
   const [searchQuery, setSearchQuery] = useState("");

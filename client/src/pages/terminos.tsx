@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export default function Terminos() {
   useEffect(() => {
     document.title = "Términos de Servicio - ServiciosHogar.com.ar";
+    window.scrollTo(0, 0);
   }, []);
 
   return (

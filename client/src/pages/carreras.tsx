@@ -9,6 +9,7 @@ import { MapPin, Clock, Users, Briefcase, Heart, Star } from "lucide-react";
 export default function Carreras() {
   useEffect(() => {
     document.title = "Carreras - ServiciosHogar.com.ar";
+    window.scrollTo(0, 0);
   }, []);
 
   const jobs = [

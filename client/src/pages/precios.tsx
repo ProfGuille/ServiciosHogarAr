@@ -10,6 +10,7 @@ import { DollarSign, TrendingUp, Users, Star } from "lucide-react";
 export default function Precios() {
   useEffect(() => {
     document.title = "Guía de Precios - ServiciosHogar.com.ar";
+    window.scrollTo(0, 0);
   }, []);
 
   const { data: categories, isLoading: categoriesLoading } = useQuery({

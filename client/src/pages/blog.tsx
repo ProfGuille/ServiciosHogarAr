@@ -8,6 +8,7 @@ import { Calendar, User, Clock } from "lucide-react";
 export default function Blog() {
   useEffect(() => {
     document.title = "Blog - ServiciosHogar.com.ar";
+    window.scrollTo(0, 0);
   }, []);
 
   const posts = [

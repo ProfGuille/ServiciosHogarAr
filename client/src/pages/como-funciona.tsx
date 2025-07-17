@@ -8,6 +8,7 @@ import { Search, UserCheck, Calendar, CreditCard, Star, ArrowRight } from "lucid
 export default function ComoFunciona() {
   useEffect(() => {
     document.title = "Cómo Funciona - ServiciosHogar.com.ar";
+    window.scrollTo(0, 0);
   }, []);
 
   const steps = [

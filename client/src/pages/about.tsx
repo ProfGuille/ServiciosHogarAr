@@ -8,6 +8,7 @@ import { Users, Shield, MapPin, Clock, Award, Heart } from "lucide-react";
 export default function About() {
   useEffect(() => {
     document.title = "Acerca de - ServiciosHogar.com.ar";
+    window.scrollTo(0, 0);
   }, []);
 
   return (

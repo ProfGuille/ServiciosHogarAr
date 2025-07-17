@@ -12,6 +12,7 @@ import { Star, MapPin, Hammer, CheckCircle, ArrowLeft } from "lucide-react";
 export default function ServiciosCarpinteria() {
   useEffect(() => {
     document.title = "Carpinteros - ServiciosHogar.com.ar";
+    window.scrollTo(0, 0);
   }, []);
 
   // Get carpentry category ID
