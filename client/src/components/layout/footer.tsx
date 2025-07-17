@@ -97,10 +97,8 @@ export function Footer() {
               <ul className="space-y-2">
                 {section.links.map((link, linkIndex) => (
                   <li key={linkIndex}>
-                    <Link href={link.href}>
-                      <span className="text-slate-300 hover:text-white text-sm transition-colors cursor-pointer">
-                        {link.label}
-                      </span>
+                    <Link href={link.href} className="text-slate-300 hover:text-white text-sm transition-colors cursor-pointer">
+                      {link.label}
                     </Link>
                   </li>
                 ))}
@@ -154,22 +152,16 @@ export function Footer() {
               © {currentYear} ServiciosHogar.com.ar. Todos los derechos reservados.
             </div>
             <div className="flex items-center space-x-4 text-sm">
-              <Link href="/terminos">
-                <span className="text-slate-300 hover:text-white cursor-pointer transition-colors">
-                  Términos
-                </span>
+              <Link href="/terminos" className="text-slate-300 hover:text-white cursor-pointer transition-colors">
+                Términos
               </Link>
               <span className="text-slate-500">•</span>
-              <Link href="/privacidad">
-                <span className="text-slate-300 hover:text-white cursor-pointer transition-colors">
-                  Privacidad
-                </span>
+              <Link href="/privacidad" className="text-slate-300 hover:text-white cursor-pointer transition-colors">
+                Privacidad
               </Link>
               <span className="text-slate-500">•</span>
-              <Link href="/seguridad">
-                <span className="text-slate-300 hover:text-white cursor-pointer transition-colors">
-                  Seguridad
-                </span>
+              <Link href="/seguridad" className="text-slate-300 hover:text-white cursor-pointer transition-colors">
+                Seguridad
               </Link>
             </div>
           </div>
