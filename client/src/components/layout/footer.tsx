@@ -69,7 +69,7 @@ export function Footer() {
                 className="inline-flex items-center justify-center space-x-2 bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:scale-105 shadow-lg"
               >
                 <Mail className="h-5 w-5" />
-                <span>Contactar por Email</span>
+                <span>Contactanos</span>
               </Link>
               <Link 
                 href="/servicios"

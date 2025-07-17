@@ -26,6 +26,9 @@ export default function Services() {
   });
 
   useEffect(() => {
+    // Asegurar que la página se muestre desde arriba
+    window.scrollTo(0, 0);
+    
     // Check for category filter from URL
     const categoryParam = searchParams.get('categoria');
     const searchParam = searchParams.get('buscar');
