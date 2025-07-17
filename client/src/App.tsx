@@ -26,6 +26,8 @@ import Privacidad from "@/pages/privacidad";
 import Seguridad from "@/pages/seguridad";
 import Blog from "@/pages/blog";
 import CentroAyuda from "@/pages/centro-ayuda";
+import Carreras from "@/pages/carreras";
+import Prensa from "@/pages/prensa";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -45,6 +47,8 @@ function Router() {
       <Route path="/seguridad" component={Seguridad} />
       <Route path="/blog" component={Blog} />
       <Route path="/centro-ayuda" component={CentroAyuda} />
+      <Route path="/carreras" component={Carreras} />
+      <Route path="/prensa" component={Prensa} />
       
       {/* Authentication-dependent routes */}
       {isLoading || !isAuthenticated ? (

@@ -16,20 +16,20 @@ export function Footer() {
     {
       title: "Servicios",
       links: [
-        { label: "Plomería", href: "/servicios?category=plomeria" },
-        { label: "Electricidad", href: "/servicios?category=electricidad" },
-        { label: "Limpieza", href: "/servicios?category=limpieza" },
-        { label: "Carpintería", href: "/servicios?category=carpinteria" },
-        { label: "Albañilería", href: "/servicios?category=albanileria" },
+        { label: "Plomería", href: "/servicios" },
+        { label: "Electricidad", href: "/servicios" },
+        { label: "Limpieza", href: "/servicios" },
+        { label: "Carpintería", href: "/servicios" },
+        { label: "Albañilería", href: "/servicios" },
       ]
     },
     {
       title: "Para Profesionales",
       links: [
         { label: "Registrarse como Proveedor", href: "/api/login" },
-        { label: "Dashboard", href: "/dashboard-profesional" },
-        { label: "Verificación", href: "/dashboard-profesional" },
-        { label: "Políticas", href: "/dashboard-profesional" },
+        { label: "Dashboard", href: "/api/login" },
+        { label: "Verificación", href: "/como-funciona" },
+        { label: "Políticas", href: "/terminos" },
       ]
     },
     {
@@ -38,8 +38,8 @@ export function Footer() {
         { label: "Nosotros", href: "/about" },
         { label: "Cómo Funciona", href: "/como-funciona" },
         { label: "Blog", href: "/blog" },
-        { label: "Carreras", href: "/blog" },
-        { label: "Prensa", href: "/blog" },
+        { label: "Carreras", href: "/carreras" },
+        { label: "Prensa", href: "/prensa" },
       ]
     },
     {
