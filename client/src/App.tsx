@@ -89,7 +89,17 @@ function Router() {
 function App() {
   useEffect(() => {
     fetch("/api/test")
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+          return res.json();
+        } else {
+          return res.text();
+        }
+      })
       .then((data) => console.log("Respuesta backend:", data))
       .catch((err) => console.error("Error al conectar con backend:", err));
   }, []);
