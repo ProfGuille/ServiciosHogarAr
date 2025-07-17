@@ -21,6 +21,8 @@ export default function Contacto() {
 
   useEffect(() => {
     document.title = "Contacto - ServiciosHogar.com.ar";
+    // Asegurar que la página se muestre desde arriba
+    window.scrollTo(0, 0);
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -74,8 +76,9 @@ export default function Contacto() {
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
       <Navbar />
       
-      <main className="container mx-auto px-4 py-8 mt-16">
-        <div className="max-w-7xl mx-auto">
+      {/* Contenido principal con ID para debugging */}
+      <div id="main-content" style={{ paddingTop: "80px", minHeight: "100vh" }}>
+        <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-slate-900 mb-4">
               Contactanos
@@ -271,7 +274,7 @@ export default function Contacto() {
             </div>
           </div>
         </div>
-      </main>
+      </div>
 
       <Footer />
     </div>
