@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -50,10 +50,10 @@ export function ReviewForm({ providerId, serviceRequestId, isOpen, onClose }: Re
         serviceRequestId,
       });
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast({
-        title: "Reseña enviada",
-        description: "Tu reseña ha sido publicada exitosamente.",
+        title: data.message ? "Reseña actualizada" : "Reseña enviada",
+        description: data.message || "Tu reseña ha sido publicada exitosamente.",
       });
       queryClient.invalidateQueries({ queryKey: [`/api/providers/${providerId}/reviews`] });
       queryClient.invalidateQueries({ queryKey: [`/api/providers/${providerId}`] });
@@ -102,9 +102,9 @@ export function ReviewForm({ providerId, serviceRequestId, isOpen, onClose }: Re
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Escribir reseña</DialogTitle>
+          <DialogTitle>Calificar servicio</DialogTitle>
           <DialogDescription>
-            Comparte tu experiencia con este profesional para ayudar a otros usuarios.
+            Comparte tu experiencia con este profesional. Si ya has calificado este servicio, tu calificación será actualizada.
           </DialogDescription>
         </DialogHeader>
 

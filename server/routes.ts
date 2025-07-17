@@ -574,17 +574,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/reviews', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      const { serviceRequestId, providerId, rating, comment } = req.body;
       
-      const reviewData = insertReviewSchema.parse({
-        ...req.body,
-        reviewerId: userId,
-      });
+      // Get the service request to find the reviewee
+      const serviceRequest = await storage.getServiceRequestById(serviceRequestId);
+      if (!serviceRequest) {
+        return res.status(404).json({ message: "Service request not found" });
+      }
       
-      const review = await storage.createReview(reviewData);
-      res.status(201).json(review);
+      // Verify the user was involved in this service request
+      if (serviceRequest.customerId !== userId) {
+        return res.status(403).json({ message: "You can only review services you requested" });
+      }
+      
+      // Get provider to get the reviewee ID
+      const provider = await storage.getServiceProviderById(providerId);
+      if (!provider) {
+        return res.status(404).json({ message: "Provider not found" });
+      }
+      
+      // Check if review already exists
+      const existingReview = await storage.getReviewByUserAndRequest(userId, serviceRequestId);
+      
+      if (existingReview) {
+        // Update existing review
+        const updatedReview = await storage.updateReview(existingReview.id, {
+          rating,
+          comment,
+          revieweeId: provider.userId,
+        });
+        res.json({
+          ...updatedReview,
+          message: "Tu reseña ha sido actualizada exitosamente",
+        });
+      } else {
+        // Create new review
+        const reviewData = insertReviewSchema.parse({
+          serviceRequestId,
+          reviewerId: userId,
+          revieweeId: provider.userId,
+          rating,
+          comment,
+        });
+        
+        const review = await storage.createReview(reviewData);
+        res.status(201).json(review);
+      }
     } catch (error) {
-      console.error("Error creating review:", error);
-      res.status(500).json({ message: "Failed to create review" });
+      console.error("Error creating/updating review:", error);
+      res.status(500).json({ message: "Failed to create/update review" });
     }
   });
 

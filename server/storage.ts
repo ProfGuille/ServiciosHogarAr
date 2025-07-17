@@ -82,6 +82,8 @@ export interface IStorage {
   // Reviews
   getReviewsForProvider(providerId: number): Promise<Review[]>;
   createReview(review: InsertReview): Promise<Review>;
+  updateReview(id: number, updates: Partial<InsertReview>): Promise<Review | undefined>;
+  getReviewByUserAndRequest(reviewerId: string, serviceRequestId: number): Promise<Review | undefined>;
   
   // Messages
   getMessagesForServiceRequest(serviceRequestId: number): Promise<Message[]>;
@@ -447,6 +449,26 @@ export class DatabaseStorage implements IStorage {
       .values(review)
       .returning();
     return newReview;
+  }
+
+  async updateReview(id: number, updates: Partial<InsertReview>): Promise<Review | undefined> {
+    const [updatedReview] = await db
+      .update(reviews)
+      .set(updates)
+      .where(eq(reviews.id, id))
+      .returning();
+    return updatedReview;
+  }
+
+  async getReviewByUserAndRequest(reviewerId: string, serviceRequestId: number): Promise<Review | undefined> {
+    const [review] = await db
+      .select()
+      .from(reviews)
+      .where(and(
+        eq(reviews.reviewerId, reviewerId),
+        eq(reviews.serviceRequestId, serviceRequestId)
+      ));
+    return review;
   }
 
   // Messages

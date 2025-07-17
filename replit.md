@@ -93,7 +93,7 @@ Preferred communication style: Simple, everyday language.
 - **Service Providers**: Business profiles, ratings, verification status
 - **Provider Services**: Service offerings with pricing and descriptions
 - **Service Requests**: Booking system with status tracking
-- **Reviews**: Rating and feedback system
+- **Reviews**: Rating and feedback system with duplicate prevention and update capability
 - **Messages**: Communication between users
 - **Sessions**: Authentication session storage
 

@@ -10,6 +10,7 @@ import { Footer } from "@/components/layout/footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   CreditCard, 
   Check, 
@@ -61,10 +62,58 @@ const creditPackages = [
   },
 ];
 
+// Monthly subscription plans
+const subscriptionPlans = [
+  {
+    id: "plan-basic",
+    name: "Plan Básico",
+    monthlyPrice: 4999,
+    credits: 50,
+    features: [
+      "50 créditos mensuales",
+      "Perfil básico",
+      "Soporte por email",
+      "Sin créditos acumulables"
+    ],
+    popular: false,
+  },
+  {
+    id: "plan-professional",
+    name: "Plan Profesional",
+    monthlyPrice: 9999,
+    credits: 120,
+    features: [
+      "120 créditos mensuales",
+      "Perfil destacado",
+      "Soporte prioritario",
+      "Créditos acumulables",
+      "Estadísticas avanzadas"
+    ],
+    popular: true,
+  },
+  {
+    id: "plan-enterprise",
+    name: "Plan Empresa",
+    monthlyPrice: 19999,
+    credits: 300,
+    features: [
+      "300 créditos mensuales",
+      "Perfil premium con logo",
+      "Soporte dedicado 24/7",
+      "Créditos acumulables",
+      "Estadísticas completas",
+      "Múltiples usuarios"
+    ],
+    popular: false,
+  },
+];
+
 export default function BuyCredits() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [purchaseType, setPurchaseType] = useState<'credits' | 'subscription'>('credits');
 
   useEffect(() => {
     document.title = "Comprar Créditos - ServiciosHogar.com.ar";
@@ -222,9 +271,17 @@ export default function BuyCredits() {
             </div>
           </div>
 
-          {/* Credit Packages */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            {creditPackages.map((pack) => (
+          {/* Tabs for Credits vs Subscriptions */}
+          <Tabs value={purchaseType} onValueChange={(value) => setPurchaseType(value as 'credits' | 'subscription')} className="mb-12">
+            <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
+              <TabsTrigger value="credits">Comprar Créditos</TabsTrigger>
+              <TabsTrigger value="subscription">Suscripción Mensual</TabsTrigger>
+            </TabsList>
+            
+            {/* Credit Packages Tab */}
+            <TabsContent value="credits">
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {creditPackages.map((pack) => (
               <Card 
                 key={pack.id}
                 className={`relative cursor-pointer transition-all ${
@@ -283,7 +340,71 @@ export default function BuyCredits() {
                 </CardContent>
               </Card>
             ))}
-          </div>
+              </div>
+            </TabsContent>
+
+            {/* Subscription Plans Tab */}
+            <TabsContent value="subscription">
+              <div className="grid md:grid-cols-3 gap-6">
+                {subscriptionPlans.map((plan) => (
+                  <Card 
+                    key={plan.id}
+                    className={`relative cursor-pointer transition-all ${
+                      selectedPlan === plan.id 
+                        ? 'ring-2 ring-primary shadow-lg' 
+                        : 'hover:shadow-md'
+                    } ${plan.popular ? 'border-primary' : ''}`}
+                    onClick={() => setSelectedPlan(plan.id)}
+                  >
+                    {plan.popular && (
+                      <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                        <Badge className="bg-primary text-white">
+                          Más popular
+                        </Badge>
+                      </div>
+                    )}
+                    
+                    <CardHeader className="text-center pb-4">
+                      <CardTitle className="text-2xl font-bold">
+                        {plan.name}
+                      </CardTitle>
+                      <div className="mt-4">
+                        <div className="text-4xl font-bold text-slate-900">
+                          ${plan.monthlyPrice.toLocaleString('es-AR')}
+                        </div>
+                        <p className="text-sm text-slate-500">por mes</p>
+                      </div>
+                    </CardHeader>
+                    
+                    <CardContent>
+                      <ul className="space-y-3">
+                        {plan.features.map((feature, index) => (
+                          <li key={index} className="flex items-start gap-2">
+                            <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                            <span className="text-sm text-slate-600">{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      
+                      <Button 
+                        className="w-full mt-6"
+                        variant={selectedPlan === plan.id ? "default" : "outline"}
+                      >
+                        {selectedPlan === plan.id ? (
+                          <>
+                            <Check className="h-4 w-4 mr-2" />
+                            Seleccionado
+                          </>
+                        ) : (
+                          "Seleccionar"
+                        )}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+          </Tabs>
 
           {/* Purchase Button */}
           <div className="text-center">
@@ -291,17 +412,28 @@ export default function BuyCredits() {
               size="lg"
               className="px-8"
               onClick={() => {
-                if (selectedPackage) {
+                if (purchaseType === 'credits' && selectedPackage) {
                   purchaseCreditsMutation.mutate(selectedPackage);
+                } else if (purchaseType === 'subscription' && selectedPlan) {
+                  // TODO: Implement subscription purchase
+                  toast({
+                    title: "Próximamente",
+                    description: "Las suscripciones estarán disponibles pronto.",
+                  });
                 } else {
                   toast({
-                    title: "Selecciona un paquete",
-                    description: "Debes elegir un paquete de créditos antes de continuar.",
+                    title: "Selecciona una opción",
+                    description: purchaseType === 'credits' 
+                      ? "Debes elegir un paquete de créditos antes de continuar."
+                      : "Debes elegir un plan de suscripción antes de continuar.",
                     variant: "destructive",
                   });
                 }
               }}
-              disabled={!selectedPackage || purchaseCreditsMutation.isPending}
+              disabled={
+                (purchaseType === 'credits' && (!selectedPackage || purchaseCreditsMutation.isPending)) ||
+                (purchaseType === 'subscription' && !selectedPlan)
+              }
             >
               {purchaseCreditsMutation.isPending ? (
                 "Procesando..."
