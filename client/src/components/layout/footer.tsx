@@ -6,7 +6,8 @@ import {
   Mail, 
   Phone, 
   MapPin,
-  Heart
+  Heart,
+  Home
 } from "lucide-react";
 
 export function Footer() {
@@ -14,42 +15,31 @@ export function Footer() {
 
   const footerSections = [
     {
-      title: "Servicios",
+      title: "Servicios Populares",
       links: [
-        { label: "Plomería", href: "/servicios" },
-        { label: "Electricidad", href: "/servicios" },
+        { label: "Plomero", href: "/servicios" },
+        { label: "Electricista", href: "/servicios" },
+        { label: "Pintor", href: "/servicios" },
         { label: "Limpieza", href: "/servicios" },
-        { label: "Carpintería", href: "/servicios" },
-        { label: "Albañilería", href: "/servicios" },
+        { label: "Carpintero", href: "/servicios" },
+        { label: "Ver todos los servicios", href: "/servicios" },
       ]
     },
     {
       title: "Para Profesionales",
       links: [
-        { label: "Registrarse como Proveedor", href: "/api/login" },
-        { label: "Dashboard", href: "/api/login" },
-        { label: "Verificación", href: "/como-funciona" },
-        { label: "Políticas", href: "/terminos" },
+        { label: "Registrarse como Profesional", href: "/api/login" },
+        { label: "Cómo funciona", href: "/como-funciona" },
+        { label: "Guía de precios", href: "/como-funciona" },
       ]
     },
     {
-      title: "Empresa",
+      title: "Ayuda",
       links: [
-        { label: "Nosotros", href: "/about" },
-        { label: "Cómo Funciona", href: "/como-funciona" },
-        { label: "Blog", href: "/blog" },
-        { label: "Carreras", href: "/carreras" },
-        { label: "Prensa", href: "/prensa" },
-      ]
-    },
-    {
-      title: "Soporte",
-      links: [
-        { label: "Centro de Ayuda", href: "/centro-ayuda" },
+        { label: "Cómo funciona", href: "/como-funciona" },
+        { label: "Preguntas frecuentes", href: "/como-funciona" },
         { label: "Contacto", href: "/contacto" },
-        { label: "Términos de Servicio", href: "/terminos" },
-        { label: "Privacidad", href: "/privacidad" },
-        { label: "Seguridad", href: "/seguridad" },
+        { label: "WhatsApp", href: "https://wa.me/5491132452445" },
       ]
     }
   ];
@@ -61,45 +51,56 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           
           {/* Brand Section */}
-          <div className="lg:col-span-1">
-            <div className="flex items-center space-x-2 mb-4">
-              <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
-                <Heart className="h-5 w-5 text-primary-foreground" />
+          <div className="lg:col-span-2">
+            <div className="flex items-center space-x-2 mb-6">
+              <div className="h-10 w-10 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-lg">
+                <Home className="h-6 w-6 text-white" />
               </div>
-              <span className="font-bold text-xl">ServiciosHogar</span>
+              <span className="font-bold text-2xl bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">ServiciosHogar</span>
             </div>
-            <p className="text-slate-300 text-sm mb-4">
-              La plataforma líder en Argentina para conectar profesionales del hogar 
-              con clientes que necesitan servicios de calidad.
+            <p className="text-slate-300 text-base mb-6 max-w-md">
+              Conectamos hogares argentinos con profesionales verificados para cualquier servicio que necesites.
             </p>
             
-            {/* Contact Info */}
-            <div className="space-y-2 text-sm text-slate-300">
-              <div className="flex items-center space-x-2">
-                <Phone className="h-4 w-4" />
-                <span>+54 11 5555-0123</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Mail className="h-4 w-4" />
-                <span>contacto@servicioshogar.com.ar</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <MapPin className="h-4 w-4" />
-                <span>Buenos Aires, Argentina</span>
-              </div>
+            {/* Quick Contact */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <a 
+                href="https://wa.me/5491132452445" 
+                className="inline-flex items-center justify-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:scale-105 shadow-lg"
+              >
+                <Phone className="h-5 w-5" />
+                <span>Consultar por WhatsApp</span>
+              </a>
+              <Link 
+                href="/servicios"
+                className="inline-flex items-center justify-center space-x-2 border border-slate-600 hover:border-slate-500 text-slate-300 hover:text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:scale-105"
+              >
+                <span>Ver Servicios</span>
+              </Link>
             </div>
           </div>
 
           {/* Footer Links */}
           {footerSections.map((section, index) => (
             <div key={index} className="lg:col-span-1">
-              <h3 className="font-semibold text-white mb-4">{section.title}</h3>
-              <ul className="space-y-2">
+              <h3 className="font-semibold text-white mb-4 border-b border-slate-700 pb-2">{section.title}</h3>
+              <ul className="space-y-3">
                 {section.links.map((link, linkIndex) => (
                   <li key={linkIndex}>
-                    <Link href={link.href} className="text-slate-300 hover:text-white text-sm transition-colors cursor-pointer">
-                      {link.label}
-                    </Link>
+                    {link.href.startsWith('http') ? (
+                      <a 
+                        href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-slate-300 hover:text-primary text-sm transition-colors cursor-pointer hover:translate-x-1 transform duration-200 inline-block"
+                      >
+                        {link.label}
+                      </a>
+                    ) : (
+                      <Link href={link.href} className="text-slate-300 hover:text-primary text-sm transition-colors cursor-pointer hover:translate-x-1 transform duration-200 inline-block">
+                        {link.label}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -107,62 +108,63 @@ export function Footer() {
           ))}
         </div>
 
-        {/* Social Media & Payment Methods */}
+        {/* Trust Indicators */}
         <div className="mt-12 pt-8 border-t border-slate-700">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            
-            {/* Social Media */}
-            <div className="flex items-center space-x-4">
-              <span className="text-slate-300 text-sm">Síguenos:</span>
-              <div className="flex space-x-3">
-                <a href="#" className="text-slate-300 hover:text-white transition-colors">
-                  <Facebook className="h-5 w-5" />
-                </a>
-                <a href="#" className="text-slate-300 hover:text-white transition-colors">
-                  <Instagram className="h-5 w-5" />
-                </a>
-                <a href="#" className="text-slate-300 hover:text-white transition-colors">
-                  <Twitter className="h-5 w-5" />
-                </a>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+            <div className="flex flex-col items-center">
+              <div className="w-12 h-12 bg-green-600/20 rounded-full flex items-center justify-center mb-3">
+                <Heart className="h-6 w-6 text-green-400" />
               </div>
+              <h4 className="font-semibold text-white mb-1">Profesionales Verificados</h4>
+              <p className="text-slate-400 text-sm">Todos nuestros profesionales pasan por un riguroso proceso de verificación</p>
             </div>
-
-            {/* Payment Methods */}
-            <div className="flex items-center space-x-4">
-              <span className="text-slate-300 text-sm">Métodos de pago:</span>
-              <div className="flex items-center space-x-2">
-                <div className="bg-white rounded px-2 py-1 text-xs font-semibold text-slate-900">
-                  Mercado Pago
-                </div>
-                <div className="bg-white rounded px-2 py-1 text-xs font-semibold text-slate-900">
-                  Transferencia
-                </div>
-                <div className="bg-white rounded px-2 py-1 text-xs font-semibold text-slate-900">
-                  Efectivo
-                </div>
+            <div className="flex flex-col items-center">
+              <div className="w-12 h-12 bg-blue-600/20 rounded-full flex items-center justify-center mb-3">
+                <Phone className="h-6 w-6 text-blue-400" />
               </div>
+              <h4 className="font-semibold text-white mb-1">Soporte 24/7</h4>
+              <p className="text-slate-400 text-sm">Estamos aquí para ayudarte en cada paso del proceso</p>
+            </div>
+            <div className="flex flex-col items-center">
+              <div className="w-12 h-12 bg-purple-600/20 rounded-full flex items-center justify-center mb-3">
+                <MapPin className="h-6 w-6 text-purple-400" />
+              </div>
+              <h4 className="font-semibold text-white mb-1">Cobertura Nacional</h4>
+              <p className="text-slate-400 text-sm">Servicios disponibles en las principales ciudades de Argentina</p>
             </div>
           </div>
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-8 pt-8 border-t border-slate-700">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <div className="text-slate-300 text-sm">
-              © {currentYear} ServiciosHogar.com.ar. Todos los derechos reservados.
+        <div className="mt-8 pt-6 border-t border-slate-800">
+          <div className="flex flex-col lg:flex-row justify-between items-center space-y-4 lg:space-y-0">
+            <div className="flex flex-col lg:flex-row items-center space-y-2 lg:space-y-0 lg:space-x-6">
+              <div className="text-slate-400 text-sm">
+                © {currentYear} ServiciosHogar.com.ar
+              </div>
+              <div className="flex items-center space-x-1 text-xs">
+                <span className="bg-green-500 w-2 h-2 rounded-full animate-pulse"></span>
+                <span className="text-slate-400">Plataforma en funcionamiento</span>
+              </div>
             </div>
-            <div className="flex items-center space-x-4 text-sm">
-              <Link href="/terminos" className="text-slate-300 hover:text-white cursor-pointer transition-colors">
+            
+            <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
+              <Link href="/terminos" className="text-slate-400 hover:text-primary transition-colors">
                 Términos
               </Link>
-              <span className="text-slate-500">•</span>
-              <Link href="/privacidad" className="text-slate-300 hover:text-white cursor-pointer transition-colors">
+              <Link href="/privacidad" className="text-slate-400 hover:text-primary transition-colors">
                 Privacidad
               </Link>
-              <span className="text-slate-500">•</span>
-              <Link href="/seguridad" className="text-slate-300 hover:text-white cursor-pointer transition-colors">
-                Seguridad
+              <Link href="/contacto" className="text-slate-400 hover:text-primary transition-colors">
+                Contacto
               </Link>
+              <div className="flex items-center space-x-2 text-slate-400">
+                <span>Pagos seguros:</span>
+                <div className="flex space-x-1">
+                  <div className="bg-gradient-to-r from-blue-500 to-yellow-500 text-white px-2 py-1 rounded text-xs font-medium">MP</div>
+                  <div className="bg-slate-700 text-slate-300 px-2 py-1 rounded text-xs">Banco</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
