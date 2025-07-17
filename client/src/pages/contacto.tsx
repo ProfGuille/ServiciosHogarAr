@@ -76,11 +76,12 @@ export default function Contacto() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+    <div className="min-h-screen bg-white">
       <Navbar />
       
-      <main className="relative pt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      {/* Main content - simplified structure */}
+      <div className="pt-24 pb-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-slate-900 mb-4">
             Contactanos
@@ -275,8 +276,7 @@ export default function Contacto() {
             </Card>
           </div>
         </div>
-        </div>
-      </main>
+      </div>
 
       <Footer />
     </div>
