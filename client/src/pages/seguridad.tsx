@@ -35,13 +35,13 @@ export default function Seguridad() {
     },
     {
       icon: CreditCard,
-      title: "Pagos Seguros",
-      description: "Procesamos pagos a través de plataformas certificadas PCI-DSS para máxima seguridad financiera.",
+      title: "Pagos Seguros para Profesionales",
+      description: "Los profesionales compran créditos de forma segura a través de Mercado Pago certificado.",
       features: [
+        "Solo profesionales pagan por créditos",
+        "Clientes buscan gratis",
         "Mercado Pago certificado",
-        "Cumplimiento PCI-DSS",
-        "Detección de fraudes",
-        "Transacciones monitoreadas"
+        "Transacciones protegidas"
       ]
     },
     {

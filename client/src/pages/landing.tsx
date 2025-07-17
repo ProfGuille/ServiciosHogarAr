@@ -266,8 +266,8 @@ export default function Landing() {
               <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
                 <Shield className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-4">Pagos seguros</h3>
-              <p className="text-slate-600">Sistema de pagos protegido con garantía de devolución. No pagues hasta estar 100% satisfecho.</p>
+              <h3 className="text-xl font-semibold text-slate-900 mb-4">100% Gratis para clientes</h3>
+              <p className="text-slate-600">Buscá y solicitá presupuestos sin costo. Pagás directamente al profesional por el servicio.</p>
             </div>
             
             <div className="text-center">
@@ -321,8 +321,8 @@ export default function Landing() {
             </div>
             <div className="text-center">
               <Star className="h-16 w-16 mx-auto mb-4 text-green-200" />
-              <h3 className="text-lg font-semibold mb-2">Pagos garantizados</h3>
-              <p className="text-green-100">Sistema de pagos seguro y puntual</p>
+              <h3 className="text-lg font-semibold mb-2">Más oportunidades</h3>
+              <p className="text-green-100">Comprá créditos para responder a solicitudes</p>
             </div>
           </div>
           

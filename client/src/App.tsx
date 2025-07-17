@@ -70,9 +70,10 @@ function Router() {
         <>
           <Route path="/" component={Home} />
           <Route path="/mis-solicitudes" component={MyRequests} />
-          <Route path="/payment/:requestId" component={Payment} />
-          <Route path="/payment-methods/:requestId" component={PaymentMethods} />
-          <Route path="/payment-success/:requestId" component={PaymentSuccess} />
+          {/* Payment routes removed - customers pay professionals directly, not through platform */}
+          {/* <Route path="/payment/:requestId" component={Payment} /> */}
+          {/* <Route path="/payment-methods/:requestId" component={PaymentMethods} /> */}
+          {/* <Route path="/payment-success/:requestId" component={PaymentSuccess} /> */}
           <Route path="/dashboard-profesional" component={ProviderDashboard} />
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/perfil" component={Profile} />
