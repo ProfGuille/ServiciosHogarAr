@@ -99,6 +99,12 @@ Preferred communication style: Simple, everyday language.
 ### Frontend Components
 - **Layout**: Responsive navbar, footer, and page layouts
 - **Service Discovery**: Search, filtering, and category browsing
+- **Service-Specific Pages**: Dedicated pages for each service category:
+  - `/servicios/plomeria` - Plumbing services with specialized UI
+  - `/servicios/electricidad` - Electrical services with safety highlights
+  - `/servicios/pintura` - Painting services with portfolio focus
+  - `/servicios/limpieza` - Cleaning services with schedule options
+  - `/servicios/carpinteria` - Carpentry services with custom work emphasis
 - **Booking System**: Multi-step booking form with validation
 - **Dashboards**: Role-specific dashboards (customer, provider, admin)
 - **UI Library**: Comprehensive component library built on Radix UI
@@ -193,3 +199,4 @@ Preferred communication style: Simple, everyday language.
 5. **Tailwind + Radix**: Consistent, accessible UI components with utility styling
 6. **PostgreSQL Sessions**: Scalable session storage that survives server restarts
 7. **Vite Integration**: Seamless development experience with hot reloading
+8. **Service-Specific Pages**: Individual landing pages for each service category instead of complex filtering

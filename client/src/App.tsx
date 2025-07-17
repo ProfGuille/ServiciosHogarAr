@@ -30,6 +30,10 @@ import Carreras from "@/pages/carreras";
 import Prensa from "@/pages/prensa";
 import Precios from "@/pages/precios";
 import ServiciosPlomeria from "@/pages/servicios-plomeria";
+import ServiciosElectricidad from "@/pages/servicios-electricidad";
+import ServiciosPintura from "@/pages/servicios-pintura";
+import ServiciosLimpieza from "@/pages/servicios-limpieza";
+import ServiciosCarpinteria from "@/pages/servicios-carpinteria";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -53,6 +57,10 @@ function Router() {
       <Route path="/prensa" component={Prensa} />
       <Route path="/precios" component={Precios} />
       <Route path="/servicios/plomeria" component={ServiciosPlomeria} />
+      <Route path="/servicios/electricidad" component={ServiciosElectricidad} />
+      <Route path="/servicios/pintura" component={ServiciosPintura} />
+      <Route path="/servicios/limpieza" component={ServiciosLimpieza} />
+      <Route path="/servicios/carpinteria" component={ServiciosCarpinteria} />
       
       {/* Authentication-dependent routes */}
       {isLoading || !isAuthenticated ? (
