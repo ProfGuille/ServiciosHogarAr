@@ -10,12 +10,15 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function Contacto() {
   const { toast } = useToast();
+  const searchParams = new URLSearchParams(window.location.search);
+  const suggestService = searchParams.get('sugerir') === 'servicio';
+  
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
-    subject: "",
-    message: ""
+    subject: suggestService ? "Sugerencia de nuevo servicio" : "",
+    message: suggestService ? "Me gustaría sugerir que agreguen el siguiente servicio a la plataforma:\n\nServicio: \nDescripción: \n\n¿Por qué sería útil?: " : ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 

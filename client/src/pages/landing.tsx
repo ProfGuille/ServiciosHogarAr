@@ -17,7 +17,21 @@ import {
   Shield,
   Star,
   Search,
-  MapPin
+  MapPin,
+  Flame,
+  HardHat,
+  Wind,
+  Home,
+  Trees,
+  Truck,
+  Laptop,
+  Bug,
+  Sofa,
+  Key,
+  Square,
+  Sun,
+  Plus,
+  MessageCircle
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
@@ -28,6 +42,20 @@ const serviceIcons = {
   carpinteria: Hammer,
   pintura: PaintBucket,
   refrigeracion: Snowflake,
+  gasista: Flame,
+  albañil: HardHat,
+  "técnico de aire": Wind,
+  techista: Home,
+  herrero: Wrench,
+  jardinería: Trees,
+  mudanzas: Truck,
+  "técnico pc": Laptop,
+  fumigador: Bug,
+  "pequeños arreglos": Hammer,
+  tapicero: Sofa,
+  cerrajero: Key,
+  vidriero: Square,
+  "instalador solar": Sun,
 };
 
 export default function Landing() {
@@ -140,7 +168,7 @@ export default function Landing() {
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-            {categories?.map((category) => {
+            {categories?.slice(0, 17).map((category) => {
               const IconComponent = serviceIcons[category.name.toLowerCase() as keyof typeof serviceIcons] || Wrench;
               const categoryPath = category.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
               return (
@@ -157,6 +185,19 @@ export default function Landing() {
                 </Link>
               );
             })}
+            
+            {/* Suggest a Service Button */}
+            <Link href="/contacto?sugerir=servicio">
+              <Card className="text-center shadow-sm hover:shadow-md transition-shadow cursor-pointer group h-full border-dashed border-2">
+                <CardContent className="p-6">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
+                    <Plus className="h-8 w-8 text-gray-500 group-hover:text-white" />
+                  </div>
+                  <h3 className="font-semibold text-slate-900 mb-2">¿No encuentras el servicio?</h3>
+                  <p className="text-sm text-primary font-medium">Sugerir servicio</p>
+                </CardContent>
+              </Card>
+            </Link>
           </div>
         </div>
       </section>
