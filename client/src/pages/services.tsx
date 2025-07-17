@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation, useSearch } from "wouter";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 // import { ServiceSearch } from "@/components/services/service-search";
@@ -18,10 +19,30 @@ export default function Services() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("rating");
   const [showFilters, setShowFilters] = useState(false);
+  const searchParams = new URLSearchParams(useSearch());
 
   useEffect(() => {
     document.title = "Servicios - ServiciosHogar.com.ar";
-  }, []);
+    
+    // Check for category filter from URL
+    const categoryParam = searchParams.get('categoria');
+    if (categoryParam && categories) {
+      // Find category by name (case insensitive)
+      const category = categories.find(cat => 
+        cat.name.toLowerCase().includes(categoryParam.toLowerCase())
+      );
+      if (category) {
+        setSelectedCategory(category.id.toString());
+        setShowFilters(true);
+      }
+    }
+    
+    // Check for search query from URL
+    const searchParam = searchParams.get('buscar');
+    if (searchParam) {
+      setSearchQuery(searchParam);
+    }
+  }, [categories]);
 
   const { data: categories, isLoading: categoriesLoading } = useQuery({
     queryKey: ["/api/categories"],

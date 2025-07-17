@@ -17,11 +17,11 @@ export function Footer() {
     {
       title: "Servicios Populares",
       links: [
-        { label: "Plomero", href: "/servicios" },
-        { label: "Electricista", href: "/servicios" },
-        { label: "Pintor", href: "/servicios" },
-        { label: "Limpieza", href: "/servicios" },
-        { label: "Carpintero", href: "/servicios" },
+        { label: "Plomero", href: "/servicios?categoria=plomeria" },
+        { label: "Electricista", href: "/servicios?categoria=electricidad" },
+        { label: "Pintor", href: "/servicios?categoria=pintura" },
+        { label: "Limpieza", href: "/servicios?categoria=limpieza" },
+        { label: "Carpintero", href: "/servicios?categoria=carpinteria" },
         { label: "Ver todos los servicios", href: "/servicios" },
       ]
     },
@@ -30,16 +30,16 @@ export function Footer() {
       links: [
         { label: "Registrarse como Profesional", href: "/api/login" },
         { label: "Cómo funciona", href: "/como-funciona" },
-        { label: "Guía de precios", href: "/como-funciona" },
+        { label: "Guía de precios", href: "/precios" },
       ]
     },
     {
       title: "Ayuda",
       links: [
         { label: "Cómo funciona", href: "/como-funciona" },
-        { label: "Preguntas frecuentes", href: "/como-funciona" },
+        { label: "Centro de ayuda", href: "/centro-ayuda" },
         { label: "Contacto", href: "/contacto" },
-        { label: "WhatsApp", href: "https://wa.me/5491132452445" },
+        { label: "Sobre nosotros", href: "/about" },
       ]
     }
   ];
@@ -64,13 +64,13 @@ export function Footer() {
             
             {/* Quick Contact */}
             <div className="flex flex-col sm:flex-row gap-3">
-              <a 
-                href="https://wa.me/5491132452445" 
-                className="inline-flex items-center justify-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:scale-105 shadow-lg"
+              <Link 
+                href="/contacto" 
+                className="inline-flex items-center justify-center space-x-2 bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:scale-105 shadow-lg"
               >
-                <Phone className="h-5 w-5" />
-                <span>Consultar por WhatsApp</span>
-              </a>
+                <Mail className="h-5 w-5" />
+                <span>Contactar por Email</span>
+              </Link>
               <Link 
                 href="/servicios"
                 className="inline-flex items-center justify-center space-x-2 border border-slate-600 hover:border-slate-500 text-slate-300 hover:text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:scale-105"

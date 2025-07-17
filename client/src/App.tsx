@@ -28,6 +28,7 @@ import Blog from "@/pages/blog";
 import CentroAyuda from "@/pages/centro-ayuda";
 import Carreras from "@/pages/carreras";
 import Prensa from "@/pages/prensa";
+import Precios from "@/pages/precios";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -49,6 +50,7 @@ function Router() {
       <Route path="/centro-ayuda" component={CentroAyuda} />
       <Route path="/carreras" component={Carreras} />
       <Route path="/prensa" component={Prensa} />
+      <Route path="/precios" component={Precios} />
       
       {/* Authentication-dependent routes */}
       {isLoading || !isAuthenticated ? (
