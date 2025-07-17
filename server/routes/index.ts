@@ -15,6 +15,15 @@ export async function registerRoutes(app: Express) {
     }
   });
 
+  // Test API endpoint
+  app.get("/api/test", (req: Request, res: Response) => {
+    res.json({ 
+      message: "API funcionando correctamente", 
+      timestamp: new Date().toISOString(),
+      status: "ok" 
+    });
+  });
+
   // Ruta test creación prestador temporal
   app.get("/api/create-test-provider", async (_req: Request, res: Response) => {
     try {
