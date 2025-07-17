@@ -85,6 +85,12 @@ export default function ProviderDashboard() {
     enabled: isAuthenticated && !!user?.id,
   });
 
+  // Get credit balance
+  const { data: creditBalance } = useQuery({
+    queryKey: ["/api/providers/me/credits"],
+    enabled: isAuthenticated && !!user?.id,
+  });
+
   // Fetch service requests for this provider
   const { data: requests, isLoading: requestsLoading } = useQuery({
     queryKey: ["/api/requests", { providerId: provider?.id }],
@@ -346,16 +352,25 @@ export default function ProviderDashboard() {
 
           <Card>
             <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="p-2 bg-purple-100 rounded-lg">
-                  <DollarSign className="h-6 w-6 text-purple-600" />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className="p-2 bg-emerald-100 rounded-lg">
+                    <CreditCard className="h-6 w-6 text-emerald-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-slate-600">Créditos disponibles</p>
+                    <p className="text-2xl font-bold text-slate-900">
+                      {creditBalance ? creditBalance.currentCredits : 0}
+                    </p>
+                  </div>
                 </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-slate-600">Ingresos</p>
-                  <p className="text-2xl font-bold text-slate-900">
-                    ARS {statsLoading ? "..." : (stats?.totalEarnings || 0).toLocaleString('es-AR')}
-                  </p>
-                </div>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => window.location.href = "/comprar-creditos"}
+                >
+                  Comprar más
+                </Button>
               </div>
             </CardContent>
           </Card>

@@ -7,6 +7,9 @@ import {
   reviews,
   messages,
   payments,
+  providerCredits,
+  creditPurchases,
+  leadResponses,
   type User,
   type UpsertUser,
   type ServiceCategory,
@@ -37,6 +40,12 @@ export interface IStorage {
   // Service categories
   getServiceCategories(): Promise<ServiceCategory[]>;
   createServiceCategory(category: InsertServiceCategory): Promise<ServiceCategory>;
+  updateServiceCategoryStatus(id: number, isActive: boolean): Promise<ServiceCategory>;
+  
+  // Provider Credits
+  getProviderCredits(providerId: number): Promise<{ currentCredits: number; totalPurchased: number; totalUsed: number } | undefined>;
+  addProviderCredits(providerId: number, credits: number, amount: number): Promise<void>;
+  useProviderCredit(providerId: number): Promise<boolean>;
   
   // Service providers
   getServiceProviders(filters?: {
@@ -142,6 +151,82 @@ export class DatabaseStorage implements IStorage {
       .values(category)
       .returning();
     return newCategory;
+  }
+
+  async updateServiceCategoryStatus(id: number, isActive: boolean): Promise<ServiceCategory> {
+    const [updatedCategory] = await db
+      .update(serviceCategories)
+      .set({ isActive })
+      .where(eq(serviceCategories.id, id))
+      .returning();
+    return updatedCategory;
+  }
+
+  // Provider Credits
+  async getProviderCredits(providerId: number): Promise<{ currentCredits: number; totalPurchased: number; totalUsed: number } | undefined> {
+    const [credits] = await db
+      .select()
+      .from(providerCredits)
+      .where(eq(providerCredits.providerId, providerId));
+    return credits;
+  }
+
+  async addProviderCredits(providerId: number, credits: number, amount: number): Promise<void> {
+    // Check if provider already has credits record
+    const existing = await this.getProviderCredits(providerId);
+    
+    if (existing) {
+      // Update existing credits
+      await db
+        .update(providerCredits)
+        .set({
+          currentCredits: existing.currentCredits + credits,
+          totalPurchased: existing.totalPurchased + credits,
+        })
+        .where(eq(providerCredits.providerId, providerId));
+    } else {
+      // Create new credits record
+      await db
+        .insert(providerCredits)
+        .values({
+          providerId: providerId,
+          currentCredits: credits,
+          totalPurchased: credits,
+          totalUsed: 0,
+        });
+    }
+    
+    // Record purchase
+    await db
+      .insert(creditPurchases)
+      .values({
+        providerId: providerId,
+        credits: credits,
+        amount: amount.toString(),
+        paymentMethod: 'mercadopago',
+        status: 'completed',
+      });
+  }
+
+  async useProviderCredit(providerId: number): Promise<boolean> {
+    const credits = await this.getProviderCredits(providerId);
+    
+    if (!credits || credits.currentCredits < 1) {
+      return false;
+    }
+    
+    await db
+      .update(providerCredits)
+      .set({
+        currentCredits: credits.currentCredits - 1,
+        totalUsed: credits.totalUsed + 1,
+      })
+      .where(eq(providerCredits.providerId, providerId));
+    
+    // Record lead response - we'll need the serviceRequestId to do this properly
+    // For now, just update the credit balance
+    
+    return true;
   }
 
   // Service providers

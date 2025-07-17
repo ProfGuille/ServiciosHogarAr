@@ -77,6 +77,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update category (admin only)
+  app.patch('/api/categories/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.userType !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const categoryId = parseInt(req.params.id);
+      const { isActive } = req.body;
+      
+      // For now, only allow toggling active status
+      const category = await storage.updateServiceCategoryStatus(categoryId, isActive);
+      res.json(category);
+    } catch (error) {
+      console.error("Error updating category:", error);
+      res.status(500).json({ message: "Failed to update category" });
+    }
+  });
+
   // Service Providers
   app.get('/api/providers', async (req, res) => {
     try {
@@ -344,6 +364,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching provider payments:", error);
       res.status(500).json({ message: "Failed to fetch provider payments" });
+    }
+  });
+
+  // Credits Management
+  app.get('/api/providers/me/credits', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (!user || user.userType !== 'provider') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const provider = await storage.getServiceProviderByUserId(user.id);
+      if (!provider) {
+        return res.status(404).json({ message: "Provider profile not found" });
+      }
+      
+      const credits = await storage.getProviderCredits(provider.id);
+      res.json(credits || { currentCredits: 0, totalPurchased: 0, totalUsed: 0 });
+    } catch (error) {
+      console.error("Error fetching credits:", error);
+      res.status(500).json({ message: "Failed to fetch credits" });
+    }
+  });
+
+  app.post('/api/credits/purchase', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (!user || user.userType !== 'provider') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const provider = await storage.getServiceProviderByUserId(user.id);
+      if (!provider) {
+        return res.status(404).json({ message: "Provider profile not found" });
+      }
+      
+      const { credits, amount, packageId } = req.body;
+      
+      // Create Mercado Pago preference
+      const preference = {
+        items: [{
+          title: `${credits} créditos - ServiciosHogar`,
+          quantity: 1,
+          unit_price: amount / 100, // Convert cents to currency units
+          currency_id: "ARS",
+        }],
+        payer: {
+          email: user.email || undefined,
+        },
+        back_urls: {
+          success: `${req.protocol}://${req.get('host')}/comprar-creditos?status=success`,
+          failure: `${req.protocol}://${req.get('host')}/comprar-creditos?status=failure`,
+          pending: `${req.protocol}://${req.get('host')}/comprar-creditos?status=pending`,
+        },
+        auto_return: "approved",
+        metadata: {
+          provider_id: provider.id,
+          credits: credits,
+          package_id: packageId,
+        },
+      };
+      
+      // Here you would integrate with Mercado Pago API
+      // For now, returning a mock response
+      res.json({ 
+        mercadoPagoUrl: `https://www.mercadopago.com.ar/checkout/v1/redirect?preference-id=TEST123`,
+        preferenceId: 'TEST123' 
+      });
+    } catch (error) {
+      console.error("Error creating credit purchase:", error);
+      res.status(500).json({ message: "Failed to create purchase" });
     }
   });
 

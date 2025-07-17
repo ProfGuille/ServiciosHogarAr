@@ -48,6 +48,40 @@ export const serviceCategories = pgTable("service_categories", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Professional Credits System
+export const providerCredits = pgTable("provider_credits", {
+  id: serial("id").primaryKey(),
+  providerId: integer("provider_id").notNull().references(() => serviceProviders.id),
+  currentCredits: integer("current_credits").default(0),
+  totalPurchased: integer("total_purchased").default(0),
+  totalUsed: integer("total_used").default(0),
+  lastPurchaseAt: timestamp("last_purchase_at"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Credit Purchases
+export const creditPurchases = pgTable("credit_purchases", {
+  id: serial("id").primaryKey(),
+  providerId: integer("provider_id").notNull().references(() => serviceProviders.id),
+  credits: integer("credits").notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  paymentMethod: varchar("payment_method"),
+  mercadopagoPaymentId: varchar("mercadopago_payment_id"),
+  status: varchar("status", { enum: ["pending", "completed", "failed"] }).default("pending"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Lead Responses (when provider uses credits to respond)
+export const leadResponses = pgTable("lead_responses", {
+  id: serial("id").primaryKey(),
+  serviceRequestId: integer("service_request_id").notNull().references(() => serviceRequests.id),
+  providerId: integer("provider_id").notNull().references(() => serviceProviders.id),
+  creditsUsed: integer("credits_used").notNull(),
+  responseMessage: text("response_message"),
+  quotedPrice: decimal("quoted_price", { precision: 10, scale: 2 }),
+  respondedAt: timestamp("responded_at").defaultNow(),
+});
+
 // Service providers
 export const serviceProviders = pgTable("service_providers", {
   id: serial("id").primaryKey(),

@@ -1,13 +1,27 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
+import type { ServiceCategory } from "@shared/schema";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { 
   Users,
   Briefcase,
@@ -28,6 +42,9 @@ import {
 export default function AdminDashboard() {
   const { user, isLoading } = useAuth();
   const { toast } = useToast();
+  const [isCreatingCategory, setIsCreatingCategory] = useState(false);
+  const [showCategoryForm, setShowCategoryForm] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<ServiceCategory | null>(null);
 
   // Redirect if not authenticated or not admin
   useEffect(() => {
@@ -59,9 +76,52 @@ export default function AdminDashboard() {
     enabled: !!user && user.userType === 'admin',
   });
 
-  const { data: categories } = useQuery({
+  const { data: categories, refetch: refetchCategories } = useQuery({
     queryKey: ["/api/categories"],
     enabled: !!user && user.userType === 'admin',
+  });
+
+  // Create category mutation
+  const createCategoryMutation = useMutation({
+    mutationFn: async (data: { name: string; description: string; icon?: string }) => {
+      return await apiRequest("POST", "/api/categories", data);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Categoría creada",
+        description: "La categoría se ha creado exitosamente.",
+      });
+      setShowCategoryForm(false);
+      refetchCategories();
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "No se pudo crear la categoría.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update category mutation
+  const updateCategoryMutation = useMutation({
+    mutationFn: async ({ id, ...data }: { id: number; isActive: boolean }) => {
+      return await apiRequest("PATCH", `/api/categories/${id}`, data);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Categoría actualizada",
+        description: "La categoría se ha actualizado exitosamente.",
+      });
+      refetchCategories();
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar la categoría.",
+        variant: "destructive",
+      });
+    },
   });
 
   if (isLoading) {
@@ -450,7 +510,7 @@ export default function AdminDashboard() {
                   <Settings className="h-5 w-5" />
                   Categorías de servicios
                 </CardTitle>
-                <Button>
+                <Button onClick={() => setShowCategoryForm(true)}>
                   Agregar categoría
                 </Button>
               </CardHeader>
@@ -473,10 +533,24 @@ export default function AdminDashboard() {
                           </p>
                         )}
                         <div className="flex gap-2">
-                          <Button size="sm" variant="outline">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => {
+                              setEditingCategory(category);
+                              setShowCategoryForm(true);
+                            }}
+                          >
                             Editar
                           </Button>
-                          <Button size="sm" variant="outline">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => updateCategoryMutation.mutate({ 
+                              id: category.id, 
+                              isActive: !category.isActive 
+                            })}
+                          >
                             {category.isActive ? "Desactivar" : "Activar"}
                           </Button>
                         </div>
@@ -568,6 +642,97 @@ export default function AdminDashboard() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Category Form Dialog */}
+      <Dialog open={showCategoryForm} onOpenChange={setShowCategoryForm}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>
+              {editingCategory ? "Editar categoría" : "Nueva categoría"}
+            </DialogTitle>
+            <DialogDescription>
+              {editingCategory 
+                ? "Modifica los detalles de la categoría."
+                : "Crea una nueva categoría de servicio para la plataforma."}
+            </DialogDescription>
+          </DialogHeader>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              const data = {
+                name: formData.get("name") as string,
+                description: formData.get("description") as string,
+                icon: formData.get("icon") as string,
+              };
+              
+              if (editingCategory) {
+                // TODO: Implement edit functionality
+                toast({
+                  title: "En desarrollo",
+                  description: "La edición de categorías estará disponible pronto.",
+                });
+              } else {
+                createCategoryMutation.mutate(data);
+              }
+            }}
+          >
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="name" className="text-right">
+                  Nombre
+                </Label>
+                <Input
+                  id="name"
+                  name="name"
+                  defaultValue={editingCategory?.name || ""}
+                  className="col-span-3"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="description" className="text-right">
+                  Descripción
+                </Label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  defaultValue={editingCategory?.description || ""}
+                  className="col-span-3"
+                  rows={3}
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="icon" className="text-right">
+                  Icono
+                </Label>
+                <Input
+                  id="icon"
+                  name="icon"
+                  defaultValue={editingCategory?.icon || ""}
+                  className="col-span-3"
+                  placeholder="ej: wrench, hammer, paint-roller"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setShowCategoryForm(false);
+                  setEditingCategory(null);
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={createCategoryMutation.isPending}>
+                {editingCategory ? "Guardar cambios" : "Crear categoría"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </div>

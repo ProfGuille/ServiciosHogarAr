@@ -74,7 +74,7 @@ export default function Landing() {
                 <span className="text-blue-200"> profesionales</span>
               </h1>
               <p className="text-xl mb-8 text-blue-100">
-                Encuentra y contrata servicios de confianza para tu hogar. Profesionales verificados, pagos seguros y garantía de calidad en toda Argentina.
+                Encuentra y contrata servicios de confianza para tu hogar. Profesionales verificados y garantía de calidad en toda Argentina. ¡Es gratis para ti!
               </p>
               
               {/* Search Bar */}
@@ -175,7 +175,7 @@ export default function Landing() {
                 <span className="text-2xl font-bold text-white">1</span>
               </div>
               <h3 className="text-xl font-semibold text-slate-900 mb-4">Describe tu necesidad</h3>
-              <p className="text-slate-600">Contanos qué servicio necesitas y en qué zona te encontrás. Es gratis y sin compromiso.</p>
+              <p className="text-slate-600">Contanos qué servicio necesitas y en qué zona te encontrás. <strong>Es 100% gratis</strong> y sin compromiso.</p>
             </div>
             
             <div className="text-center">

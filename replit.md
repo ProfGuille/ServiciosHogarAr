@@ -61,24 +61,25 @@ Preferred communication style: Simple, everyday language.
 - **Real-time Updates**: Live synchronization across all dashboard components
 - **Mobile Responsive**: Optimized interface for all device sizes
 
-### Payment System (Completed & Tested)
-- **Mercado Pago Integration**: Full integration with Argentina's most popular payment method
-  - ✅ Preference creation working with live credentials
-  - ✅ Sandbox testing environment configured
-  - ✅ Webhook handling for payment confirmation ready
-  - ✅ Automatic payment status updates and service request synchronization
-  - ✅ Support for credit/debit cards, bank transfers, and cash payment locations
-- **Bank Transfer Option**: Free alternative allowing direct bank transfers to platform account
-  - ✅ Clear bank account details provided to customers
-  - ✅ Transfer reference tracking for payment verification
-  - ✅ E2E tested and working
-- **Cash Payment Option**: Free option for direct payment to service providers
-  - ✅ Coordination instructions for in-person cash payments
-  - ✅ Location tracking for payment logistics
-  - ✅ E2E tested and working
-- **Platform Fee System**: 10% commission automatically calculated on all payments
-  - ✅ Automatic calculation across all payment methods
-  - ✅ Database tracking of fees and provider amounts
+### Business Model - Lead Generation (Like HomeSolution.net)
+- **Professionals Pay for Visibility**: Service providers purchase credits to access customer leads
+- **Free for Customers**: Users search and request services at no cost - NO platform fees
+- **Credit System**: Professionals buy credit packages (100, 250, 500, 1000) to respond to service requests
+- **Credit Cost**: Each response to a lead costs 1 credit
+- **No Transaction Fees**: Direct payment between customers and professionals
+- **Payment Processing**: Mercado Pago for credit purchases by professionals
+- **No Credit Expiration**: Credits never expire once purchased
+
+### Payment System (NEEDS REFACTORING)
+- **For Professionals**:
+  - Mercado Pago for purchasing credits/memberships
+  - Credit packages: 100, 250, 500, 1000 credits
+  - Monthly memberships with included credits
+  - Auto-renewal options
+- **For Customers**: 
+  - FREE to search and request services
+  - Direct payment to professionals (outside platform)
+  - No platform fees or commissions
 - **Payment History**: Complete payment tracking for customers, providers, and admin
 - **Payment Status Management**: Real-time status updates across all payment methods
 - **E2E Testing Suite**: Comprehensive testing framework with visual interface

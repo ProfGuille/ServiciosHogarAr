@@ -1,0 +1,370 @@
+import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
+import { isUnauthorizedError } from "@/lib/authUtils";
+import { Navbar } from "@/components/layout/navbar";
+import { Footer } from "@/components/layout/footer";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { 
+  CreditCard, 
+  Check, 
+  Zap, 
+  TrendingUp, 
+  Users, 
+  Shield,
+  Star,
+  ArrowRight,
+  DollarSign
+} from "lucide-react";
+
+// Credit packages configuration
+const creditPackages = [
+  {
+    id: "pack-100",
+    credits: 100,
+    price: 9999,
+    popular: false,
+    description: "Ideal para empezar",
+    perCredit: 99.99,
+  },
+  {
+    id: "pack-250",
+    credits: 250,
+    price: 22499,
+    popular: true,
+    description: "El más elegido",
+    perCredit: 89.99,
+    savings: "10% ahorro",
+  },
+  {
+    id: "pack-500",
+    credits: 500,
+    price: 39999,
+    popular: false,
+    description: "Para profesionales activos",
+    perCredit: 79.99,
+    savings: "20% ahorro",
+  },
+  {
+    id: "pack-1000",
+    credits: 1000,
+    price: 69999,
+    popular: false,
+    description: "Máximo ahorro",
+    perCredit: 69.99,
+    savings: "30% ahorro",
+  },
+];
+
+export default function BuyCredits() {
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { toast } = useToast();
+  const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
+
+  useEffect(() => {
+    document.title = "Comprar Créditos - ServiciosHogar.com.ar";
+    window.scrollTo(0, 0);
+  }, []);
+
+  // Redirect if not authenticated or not a provider
+  useEffect(() => {
+    if (!authLoading && (!isAuthenticated || user?.userType !== 'provider')) {
+      toast({
+        title: "Acceso restringido",
+        description: "Solo los profesionales pueden comprar créditos.",
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 500);
+    }
+  }, [isAuthenticated, authLoading, user, toast]);
+
+  // Get current credits
+  const { data: providerData } = useQuery({
+    queryKey: ["/api/providers/me"],
+    enabled: isAuthenticated && user?.userType === 'provider',
+  });
+
+  const { data: creditBalance } = useQuery({
+    queryKey: ["/api/providers/me/credits"],
+    enabled: isAuthenticated && user?.userType === 'provider',
+  });
+
+  // Purchase credits mutation
+  const purchaseCreditsMutation = useMutation({
+    mutationFn: async (packageId: string) => {
+      const selectedPack = creditPackages.find(p => p.id === packageId);
+      if (!selectedPack) throw new Error("Paquete no válido");
+      
+      return await apiRequest("POST", "/api/credits/purchase", {
+        credits: selectedPack.credits,
+        amount: selectedPack.price,
+        packageId: selectedPack.id,
+      });
+    },
+    onSuccess: (data) => {
+      if (data.mercadoPagoUrl) {
+        window.location.href = data.mercadoPagoUrl;
+      }
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error as Error)) {
+        toast({
+          title: "Sesión expirada",
+          description: "Por favor, inicia sesión nuevamente.",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+      } else {
+        toast({
+          title: "Error",
+          description: "No se pudo procesar la compra. Intenta nuevamente.",
+          variant: "destructive",
+        });
+      }
+    },
+  });
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
+      
+      <main className="py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Header */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-slate-900 mb-4">
+              Comprar Créditos
+            </h1>
+            <p className="text-xl text-slate-600 max-w-3xl mx-auto">
+              Invierte en tu negocio y accede a nuevos clientes. Cada crédito te permite responder a una solicitud de servicio.
+            </p>
+            
+            {creditBalance && (
+              <div className="mt-6 inline-flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-full">
+                <CreditCard className="h-5 w-5 text-blue-600" />
+                <span className="text-blue-900 font-medium">
+                  Balance actual: {creditBalance.currentCredits} créditos
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Benefits */}
+          <div className="mb-12 bg-white rounded-xl shadow-sm p-8">
+            <h2 className="text-2xl font-bold text-slate-900 mb-6">
+              ¿Por qué comprar créditos?
+            </h2>
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="flex gap-4">
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                    <Users className="h-6 w-6 text-green-600" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-slate-900 mb-1">
+                    Acceso a clientes verificados
+                  </h3>
+                  <p className="text-slate-600 text-sm">
+                    Conecta con clientes reales que buscan tus servicios en tu zona.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex gap-4">
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <TrendingUp className="h-6 w-6 text-blue-600" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-slate-900 mb-1">
+                    Haz crecer tu negocio
+                  </h3>
+                  <p className="text-slate-600 text-sm">
+                    Aumenta tu cartera de clientes y genera más ingresos.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex gap-4">
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <Shield className="h-6 w-6 text-purple-600" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-slate-900 mb-1">
+                    Sin comisiones adicionales
+                  </h3>
+                  <p className="text-slate-600 text-sm">
+                    Paga solo por los leads, sin comisiones sobre tus trabajos.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Credit Packages */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            {creditPackages.map((pack) => (
+              <Card 
+                key={pack.id}
+                className={`relative cursor-pointer transition-all ${
+                  selectedPackage === pack.id 
+                    ? 'ring-2 ring-primary shadow-lg' 
+                    : 'hover:shadow-md'
+                } ${pack.popular ? 'border-primary' : ''}`}
+                onClick={() => setSelectedPackage(pack.id)}
+              >
+                {pack.popular && (
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                    <Badge className="bg-primary text-white">
+                      Más popular
+                    </Badge>
+                  </div>
+                )}
+                
+                <CardHeader className="text-center pb-4">
+                  <CardTitle className="text-3xl font-bold">
+                    {pack.credits}
+                  </CardTitle>
+                  <p className="text-slate-600">créditos</p>
+                  <CardDescription className="mt-2">
+                    {pack.description}
+                  </CardDescription>
+                </CardHeader>
+                
+                <CardContent className="space-y-4">
+                  <div className="text-center">
+                    <div className="text-4xl font-bold text-slate-900">
+                      ${pack.price.toLocaleString('es-AR')}
+                    </div>
+                    <p className="text-sm text-slate-500">
+                      ${pack.perCredit} por crédito
+                    </p>
+                    {pack.savings && (
+                      <Badge variant="secondary" className="mt-2">
+                        {pack.savings}
+                      </Badge>
+                    )}
+                  </div>
+                  
+                  <Button 
+                    className="w-full"
+                    variant={selectedPackage === pack.id ? "default" : "outline"}
+                  >
+                    {selectedPackage === pack.id ? (
+                      <>
+                        <Check className="h-4 w-4 mr-2" />
+                        Seleccionado
+                      </>
+                    ) : (
+                      "Seleccionar"
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Purchase Button */}
+          <div className="text-center">
+            <Button
+              size="lg"
+              className="px-8"
+              onClick={() => {
+                if (selectedPackage) {
+                  purchaseCreditsMutation.mutate(selectedPackage);
+                } else {
+                  toast({
+                    title: "Selecciona un paquete",
+                    description: "Debes elegir un paquete de créditos antes de continuar.",
+                    variant: "destructive",
+                  });
+                }
+              }}
+              disabled={!selectedPackage || purchaseCreditsMutation.isPending}
+            >
+              {purchaseCreditsMutation.isPending ? (
+                "Procesando..."
+              ) : (
+                <>
+                  Continuar con el pago
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </>
+              )}
+            </Button>
+            
+            <div className="mt-4 flex items-center justify-center gap-4 text-sm text-slate-600">
+              <div className="flex items-center gap-1">
+                <Shield className="h-4 w-4" />
+                Pago seguro
+              </div>
+              <div className="flex items-center gap-1">
+                <CreditCard className="h-4 w-4" />
+                Procesado por Mercado Pago
+              </div>
+            </div>
+          </div>
+
+          {/* FAQ */}
+          <div className="mt-16 bg-white rounded-xl shadow-sm p-8">
+            <h2 className="text-2xl font-bold text-slate-900 mb-6">
+              Preguntas frecuentes
+            </h2>
+            <div className="space-y-6">
+              <div>
+                <h3 className="font-semibold text-slate-900 mb-2">
+                  ¿Cómo funcionan los créditos?
+                </h3>
+                <p className="text-slate-600">
+                  Cada vez que un cliente solicita un servicio en tu zona y categoría, recibirás una notificación. 
+                  Si decides responder, se descontará 1 crédito de tu balance y podrás acceder a los datos de contacto del cliente.
+                </p>
+              </div>
+              
+              <div>
+                <h3 className="font-semibold text-slate-900 mb-2">
+                  ¿Los créditos tienen vencimiento?
+                </h3>
+                <p className="text-slate-600">
+                  No, los créditos no vencen. Una vez comprados, permanecen en tu cuenta hasta que los uses.
+                </p>
+              </div>
+              
+              <div>
+                <h3 className="font-semibold text-slate-900 mb-2">
+                  ¿Qué pasa si el cliente no contrata mis servicios?
+                </h3>
+                <p className="text-slate-600">
+                  El crédito se consume al responder la solicitud, independientemente del resultado. 
+                  Por eso es importante responder solo a solicitudes que se ajusten a tu perfil y zona de trabajo.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+      
+      <Footer />
+    </div>
+  );
+}

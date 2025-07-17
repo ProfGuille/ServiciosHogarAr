@@ -17,6 +17,7 @@ import Payment from "@/pages/payment";
 import PaymentMethods from "@/pages/payment-methods";
 import PaymentSuccess from "@/pages/payment-success";
 import TestPayments from "@/pages/test-payments";
+import BuyCredits from "@/pages/buy-credits";
 import Profile from "@/pages/profile";
 import About from "@/pages/about";
 import ComoFunciona from "@/pages/como-funciona";
@@ -75,6 +76,7 @@ function Router() {
           <Route path="/dashboard-profesional" component={ProviderDashboard} />
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/perfil" component={Profile} />
+          <Route path="/comprar-creditos" component={BuyCredits} />
         </>
       )}
       <Route component={NotFound} />

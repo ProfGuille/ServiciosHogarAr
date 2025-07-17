@@ -36,8 +36,61 @@ app.use((req, res, next) => {
   next();
 });
 
+// Initialize default categories if database is empty
+async function initializeDefaultCategories() {
+  const { storage } = await import("./storage");
+  const categories = await storage.getServiceCategories();
+  
+  if (categories.length === 0) {
+    console.log("Initializing default service categories...");
+    
+    const defaultCategories = [
+      // Servicios existentes
+      { name: "Plomería", description: "Instalación y reparación de cañerías, grifos, sanitarios", icon: "wrench" },
+      { name: "Electricidad", description: "Instalaciones eléctricas, reparaciones, tableros", icon: "zap" },
+      { name: "Pintura", description: "Pintura interior y exterior, acabados, restauración", icon: "paint-roller" },
+      { name: "Limpieza", description: "Limpieza doméstica, comercial, post-obra", icon: "sparkles" },
+      { name: "Carpintería", description: "Muebles a medida, reparaciones, instalaciones", icon: "hammer" },
+      
+      // Nuevos servicios
+      { name: "Albañilería", description: "Construcción, reformas, reparaciones de mampostería", icon: "brick" },
+      { name: "Gasista", description: "Instalaciones de gas, reparaciones, certificaciones", icon: "flame" },
+      { name: "Cerrajería", description: "Apertura de puertas, cambio de cerraduras, urgencias", icon: "key" },
+      { name: "Jardinería", description: "Mantenimiento de jardines, poda, diseño paisajístico", icon: "tree" },
+      { name: "Mudanzas", description: "Traslados, embalaje, logística de mudanzas", icon: "truck" },
+      { name: "Aire Acondicionado", description: "Instalación, mantenimiento y reparación de equipos", icon: "wind" },
+      { name: "Herrería", description: "Trabajos en metal, rejas, portones, estructuras", icon: "shield" },
+      { name: "Vidriería", description: "Instalación de vidrios, espejos, mamparas", icon: "square" },
+      { name: "Techos", description: "Impermeabilización, tejas, membranas, goteras", icon: "home" },
+      { name: "Pisos y Revestimientos", description: "Colocación de cerámicos, porcelanatos, parquet", icon: "layers" },
+      { name: "Fumigación", description: "Control de plagas, desinfección, sanitización", icon: "bug" },
+      { name: "Tapicería", description: "Retapizado de muebles, cortinas, fundas", icon: "sofa" },
+      { name: "Electrodomésticos", description: "Reparación de heladeras, lavarropas, cocinas", icon: "cpu" },
+      { name: "Alarmas y Seguridad", description: "Instalación de alarmas, cámaras, cercos eléctricos", icon: "shield-check" },
+      { name: "Piscinas", description: "Mantenimiento, limpieza, reparación de piscinas", icon: "droplet" },
+      { name: "Calefacción", description: "Instalación y reparación de calderas, radiadores", icon: "thermometer" },
+      { name: "Decoración", description: "Diseño de interiores, asesoramiento, ambientación", icon: "palette" },
+      { name: "Durlock", description: "Tabiques, cielorrasos, revestimientos en seco", icon: "square-stack" },
+      { name: "Automatización", description: "Portones automáticos, domótica, control remoto", icon: "settings" },
+      { name: "Energía Solar", description: "Paneles solares, instalaciones fotovoltaicas", icon: "sun" },
+    ];
+    
+    for (const category of defaultCategories) {
+      try {
+        await storage.createServiceCategory(category);
+        console.log(`✓ Created category: ${category.name}`);
+      } catch (error) {
+        console.error(`Failed to create category ${category.name}:`, error);
+      }
+    }
+  }
+}
+
 (async () => {
   const server = await registerRoutes(app);
+  
+  // Initialize categories after routes are registered
+  await initializeDefaultCategories();
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
