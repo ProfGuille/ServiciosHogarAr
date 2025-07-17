@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,11 +6,73 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Phone, Mail, MapPin, Clock, MessageCircle } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Contacto() {
+  const { toast } = useToast();
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    subject: "",
+    message: ""
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => {
     document.title = "Contacto - ServiciosHogar.com.ar";
   }, []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validación básica
+    if (!formData.name || !formData.email || !formData.message) {
+      toast({
+        title: "Campos requeridos",
+        description: "Por favor completa nombre, email y mensaje.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    // Simulamos el envío del formulario
+    try {
+      // En producción, esto enviaría los datos a un endpoint del servidor
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      toast({
+        title: "¡Mensaje enviado!",
+        description: "Nos pondremos en contacto contigo pronto.",
+      });
+      
+      // Limpiar el formulario
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        subject: "",
+        message: ""
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "No se pudo enviar el mensaje. Por favor intenta nuevamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -36,38 +98,70 @@ export default function Contacto() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <form className="space-y-6">
+              <form className="space-y-6" onSubmit={handleSubmit}>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-2">Nombre</label>
-                    <Input placeholder="Tu nombre completo" />
+                    <label className="block text-sm font-medium mb-2">Nombre *</label>
+                    <Input 
+                      name="name"
+                      placeholder="Tu nombre completo" 
+                      value={formData.name}
+                      onChange={handleChange}
+                      required
+                    />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2">Email</label>
-                    <Input type="email" placeholder="tu@email.com" />
+                    <label className="block text-sm font-medium mb-2">Email *</label>
+                    <Input 
+                      name="email"
+                      type="email" 
+                      placeholder="tu@email.com" 
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                    />
                   </div>
                 </div>
                 
                 <div>
                   <label className="block text-sm font-medium mb-2">Teléfono</label>
-                  <Input placeholder="+54 11 1234-5678" />
+                  <Input 
+                    name="phone"
+                    placeholder="+54 11 1234-5678" 
+                    value={formData.phone}
+                    onChange={handleChange}
+                  />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium mb-2">Asunto</label>
-                  <Input placeholder="¿En qué podemos ayudarte?" />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">Mensaje</label>
-                  <Textarea 
-                    placeholder="Describe tu consulta o problema..."
-                    rows={5}
+                  <Input 
+                    name="subject"
+                    placeholder="¿En qué podemos ayudarte?" 
+                    value={formData.subject}
+                    onChange={handleChange}
                   />
                 </div>
 
-                <Button className="w-full" size="lg">
-                  Enviar mensaje
+                <div>
+                  <label className="block text-sm font-medium mb-2">Mensaje *</label>
+                  <Textarea 
+                    name="message"
+                    placeholder="Describe tu consulta o problema..."
+                    rows={5}
+                    value={formData.message}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
+                <Button 
+                  className="w-full" 
+                  size="lg" 
+                  type="submit"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Enviando..." : "Enviar mensaje"}
                 </Button>
               </form>
             </CardContent>
