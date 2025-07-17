@@ -20,8 +20,7 @@ import TestPayments from "@/pages/test-payments";
 import Profile from "@/pages/profile";
 import About from "@/pages/about";
 import ComoFunciona from "@/pages/como-funciona";
-import Contacto from "@/pages/contacto";
-import ContactoTest from "@/pages/contacto-test";
+import Contacto from "@/pages/contacto-fixed";
 import Terminos from "@/pages/terminos";
 import Privacidad from "@/pages/privacidad";
 import Seguridad from "@/pages/seguridad";
@@ -48,7 +47,7 @@ function Router() {
       <Route path="/test-payments" component={TestPayments} />
       <Route path="/about" component={About} />
       <Route path="/como-funciona" component={ComoFunciona} />
-      <Route path="/contacto" component={ContactoTest} />
+      <Route path="/contacto" component={Contacto} />
       <Route path="/terminos" component={Terminos} />
       <Route path="/privacidad" component={Privacidad} />
       <Route path="/seguridad" component={Seguridad} />
