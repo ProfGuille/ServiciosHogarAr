@@ -160,6 +160,7 @@ export default function Payment() {
   // Fetch service request details
   const { data: serviceRequest, isLoading: requestLoading } = useQuery({
     queryKey: ["/api/requests", requestId],
+    queryFn: () => fetch(`/api/requests/${requestId}`).then(res => res.json()),
     enabled: !!requestId && !!user,
     retry: false,
   });

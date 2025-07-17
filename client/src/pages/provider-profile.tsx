@@ -26,21 +26,25 @@ export default function ProviderProfile() {
 
   const { data: provider, isLoading: providerLoading } = useQuery({
     queryKey: ["/api/providers", id],
+    queryFn: () => fetch(`/api/providers/${id}`).then(res => res.json()),
     enabled: !!id,
   });
 
   const { data: providerServices } = useQuery({
     queryKey: ["/api/providers", id, "services"],
+    queryFn: () => fetch(`/api/providers/${id}/services`).then(res => res.json()),
     enabled: !!id,
   });
 
   const { data: reviews } = useQuery({
     queryKey: ["/api/providers", id, "reviews"],
+    queryFn: () => fetch(`/api/providers/${id}/reviews`).then(res => res.json()),
     enabled: !!id,
   });
 
   const { data: stats } = useQuery({
     queryKey: ["/api/providers", id, "stats"],
+    queryFn: () => fetch(`/api/providers/${id}/stats`).then(res => res.json()),
     enabled: !!id,
   });
 
