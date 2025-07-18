@@ -8,8 +8,10 @@ This is a full-stack service marketplace platform built with React, Express.js, 
 - Fixed JSX structure errors in provider-dashboard-old.tsx
 - Corrected Navbar component export/import issues 
 - Server successfully running on port 5000
-- Referral system fully operational with social sharing
+- Referral system updated to align with business model (only professionals use credits)
 - Achievement system with 17 badges working correctly
+- Fixed achievement gallery layout issues and superpositions
+- Updated referral rewards to differentiate between customer and professional referrals
 
 ## User Preferences
 
@@ -76,6 +78,7 @@ Preferred communication style: Simple, everyday language.
 - **No Transaction Fees**: Direct payment between customers and professionals
 - **Payment Processing**: Mercado Pago for credit purchases by professionals
 - **No Credit Expiration**: Credits never expire once purchased
+- **Important**: Only professionals use and receive credits, customers use the platform for free
 
 ### Email Notification System (Completed - July 18, 2025)
 - **Built with Nodemailer**: Comprehensive email service with graceful fallback when not configured

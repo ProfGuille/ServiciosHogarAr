@@ -116,7 +116,7 @@ export default function Profile() {
                   Mis Logros
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-0">
                 <AchievementGallery userId={user.id} />
               </CardContent>
             </Card>

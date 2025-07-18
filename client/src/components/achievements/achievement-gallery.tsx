@@ -69,7 +69,7 @@ export function AchievementGallery({ userId }: AchievementGalleryProps) {
   return (
     <div className="space-y-6">
       {/* Summary Stats */}
-      <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg p-6">
+      <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg p-6 mx-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <h3 className="text-lg font-semibold mb-2">Puntos Totales</h3>
@@ -98,27 +98,29 @@ export function AchievementGallery({ userId }: AchievementGalleryProps) {
       </div>
 
       {/* Achievement Tabs */}
-      <Tabs defaultValue="all" className="w-full">
-        <TabsList className="grid grid-cols-5 w-full">
-          <TabsTrigger value="all">Todos</TabsTrigger>
-          {Object.entries(categoryNames).map(([key, name]) => (
-            <TabsTrigger key={key} value={key} className="flex items-center gap-1">
-              {categoryIcons[key as keyof typeof categoryIcons]}
-              <span className="hidden sm:inline">{name}</span>
-            </TabsTrigger>
-          ))}
-        </TabsList>
+      <div className="px-6">
+        <Tabs defaultValue="all" className="w-full">
+          <TabsList className="grid grid-cols-5 w-full">
+            <TabsTrigger value="all">Todos</TabsTrigger>
+            {Object.entries(categoryNames).map(([key, name]) => (
+              <TabsTrigger key={key} value={key} className="flex items-center gap-1">
+                {categoryIcons[key as keyof typeof categoryIcons]}
+                <span className="hidden sm:inline">{name}</span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-        <TabsContent value="all" className="mt-6">
-          <AchievementGrid achievements={allAchievements} />
-        </TabsContent>
-
-        {Object.entries(achievementsByCategory).map(([category, achievements]) => (
-          <TabsContent key={category} value={category} className="mt-6">
-            <AchievementGrid achievements={achievements} />
+          <TabsContent value="all" className="mt-6">
+            <AchievementGrid achievements={allAchievements} />
           </TabsContent>
-        ))}
-      </Tabs>
+
+          {Object.entries(achievementsByCategory).map(([category, achievements]) => (
+            <TabsContent key={category} value={category} className="mt-6">
+              <AchievementGrid achievements={achievements} />
+            </TabsContent>
+          ))}
+        </Tabs>
+      </div>
     </div>
   );
 }
@@ -133,9 +135,9 @@ function AchievementGrid({ achievements }: { achievements: AchievementWithProgre
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
       {achievements.map((achievement) => (
-        <div key={achievement.id} className="flex flex-col items-center space-y-2">
+        <div key={achievement.id} className="flex flex-col items-center p-3 rounded-lg hover:bg-slate-50 transition-colors">
           <AchievementBadge
             achievement={{
               ...achievement,
@@ -144,10 +146,10 @@ function AchievementGrid({ achievements }: { achievements: AchievementWithProgre
             }}
             size="md"
           />
-          <div className="text-center">
-            <p className="text-sm font-medium line-clamp-2">{achievement.name}</p>
+          <div className="text-center mt-2 w-full">
+            <p className="text-sm font-medium line-clamp-2 min-h-[2.5rem]">{achievement.name}</p>
             {achievement.percentComplete !== undefined && !achievement.earnedAt && (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground mt-1">
                 {achievement.percentComplete}%
               </p>
             )}

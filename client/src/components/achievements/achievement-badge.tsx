@@ -47,10 +47,10 @@ export function AchievementBadge({
   const badge = (
     <div
       className={cn(
-        "relative rounded-full border-2 flex items-center justify-center transition-all",
+        "relative rounded-full border-2 flex items-center justify-center transition-all overflow-hidden",
         sizeClasses[size],
         isEarned
-          ? cn(achievement.color, rarityColors[achievement.rarity || "common"])
+          ? rarityColors[achievement.rarity || "common"]
           : "border-gray-300 bg-gray-100 opacity-50",
         className
       )}

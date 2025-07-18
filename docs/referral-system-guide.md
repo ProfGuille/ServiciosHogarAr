@@ -2,7 +2,11 @@
 
 ## Overview
 
-The referral system allows users to invite friends to the platform and earn credits when they sign up and make their first purchase. This creates a viral growth mechanism while rewarding loyal users.
+The referral system allows users to invite friends to the platform. Since only professionals use credits to access leads, the reward system differentiates between customer and professional referrals:
+
+- **Customer Referrals**: Customers can refer other customers to grow the user base (achievements/badges as rewards)
+- **Professional Referrals**: Professionals can refer other professionals and earn credits when referrals purchase credits
+- **Cross Referrals**: Customers can refer professionals and earn special achievements
 
 ## System Architecture
 
@@ -102,24 +106,31 @@ The referral system allows users to invite friends to the platform and earn cred
 
 ### Default Rewards
 
-1. **Signup Bonus**
-   - Referred user: 50 credits
-   - Awarded immediately on registration
+1. **Professional Signup Bonus**
+   - New professional receives 25 credits to try the platform
+   - Applied immediately on registration with referral code
 
-2. **Purchase Bonus**
-   - Referrer: 100 credits
-   - Awarded when referred user makes first purchase
+2. **Professional Purchase Bonus** 
+   - Professional referrer receives 100 credits
+   - Applied when referred professional makes first credit purchase
 
-3. **Milestone Bonuses**
-   - 5 successful referrals: 250 credits
-   - 10 successful referrals: 500 credits
+3. **Professional Milestone Rewards**
+   - 5 successful professional referrals: 250 bonus credits
+   - 10 successful professional referrals: 500 bonus credits
 
-### Credit Usage
+4. **Customer Rewards**
+   - Customer Ambassador Achievement for referring 5 professionals
+   - Special badges for active referrers
+   - No credits (customers don't use credits)
+
+### Credit Usage (Professionals Only)
 
 - Credits never expire
-- Can be used to respond to service requests
+- Used by professionals to respond to service requests
+- Each response costs 1 credit
 - No cash value
 - Non-transferable
+- Customers do not use credits (free platform for them)
 
 ## Implementation Checklist
 

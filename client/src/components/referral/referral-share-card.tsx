@@ -3,11 +3,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Gift, Copy, Share2, Users } from "lucide-react";
+import { Gift, Copy, Share2, Users, CheckCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
 
 export function ReferralShareCard() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [copied, setCopied] = useState(false);
 
   const { data: referralCode, isLoading: codeLoading } = useQuery({
@@ -151,10 +153,38 @@ export function ReferralShareCard() {
             <Users className="h-4 w-4" />
             Beneficios del programa
           </h4>
-          <ul className="text-sm space-y-1 text-muted-foreground">
-            <li>• Tu amigo recibe 50 créditos al registrarse</li>
-            <li>• Tú recibes 100 créditos cuando hace su primera compra</li>
-            <li>• Bonos especiales al alcanzar 5 y 10 referidos</li>
+          <ul className="space-y-2">
+            {user?.userType === 'provider' ? (
+              <>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm">El profesional referido recibe 25 créditos al registrarse</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm">Tú recibes 100 créditos cuando compra su primer paquete</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm">Bonos especiales de 250 y 500 créditos al alcanzar 5 y 10 referidos</span>
+                </li>
+              </>
+            ) : (
+              <>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm">Ayuda a crecer nuestra comunidad de profesionales</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm">Gana logros especiales por referir profesionales verificados</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm">Conviértete en Cliente Embajador con 5 profesionales referidos</span>
+                </li>
+              </>
+            )}
           </ul>
         </div>
       </CardContent>

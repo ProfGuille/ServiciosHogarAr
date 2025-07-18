@@ -11,33 +11,41 @@ async function seedReferralRewards() {
     // Default referral reward configurations
     const defaultRewards = [
       {
-        name: "Bono de Registro para Referido",
-        description: "Créditos gratis cuando te registras con un código de referido",
-        rewardType: "referred_signup",
-        creditAmount: 50, // 50 credits for new user
+        name: "Bono para Profesional Referido",
+        description: "Créditos gratis cuando un profesional se registra con un código de referido",
+        rewardType: "provider_signup",
+        creditAmount: 25, // 25 credits for new provider
         minimumPurchase: null,
         isActive: true,
       },
       {
-        name: "Bono de Primera Compra para Referidor",
-        description: "Créditos cuando tu referido hace su primera compra",
-        rewardType: "referrer_purchase",
-        creditAmount: 100, // 100 credits for referrer
+        name: "Bono para Profesional Referidor",
+        description: "Créditos cuando tu profesional referido hace su primera compra de créditos",
+        rewardType: "provider_referrer_purchase",
+        creditAmount: 100, // 100 credits for provider referrer
         minimumPurchase: null,
         isActive: true,
       },
       {
-        name: "Bono Especial por 5 Referidos",
-        description: "Bonus adicional al alcanzar 5 referidos exitosos",
-        rewardType: "milestone_5",
+        name: "Logro Cliente Embajador",
+        description: "Cuando un cliente refiere a 5 profesionales verificados",
+        rewardType: "customer_ambassador",
+        creditAmount: 0, // No credits for customers, just achievement
+        minimumPurchase: null,
+        isActive: true,
+      },
+      {
+        name: "Bono Especial Profesional - 5 Referidos",
+        description: "Bonus adicional para profesionales que refieren a 5 profesionales exitosos",
+        rewardType: "provider_milestone_5",
         creditAmount: 250,
         minimumPurchase: null,
         isActive: true,
       },
       {
-        name: "Bono Especial por 10 Referidos",
-        description: "Bonus adicional al alcanzar 10 referidos exitosos",
-        rewardType: "milestone_10",
+        name: "Bono Especial Profesional - 10 Referidos",
+        description: "Bonus adicional para profesionales que refieren a 10 profesionales exitosos",
+        rewardType: "provider_milestone_10",
         creditAmount: 500,
         minimumPurchase: null,
         isActive: true,
