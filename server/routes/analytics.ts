@@ -11,7 +11,9 @@ import {
   providerMetrics,
   serviceCategories,
   messages,
-  conversations
+  conversations,
+  creditPurchases,
+  leadResponses
 } from "@shared/schema";
 import { 
   sql, 
@@ -368,6 +370,146 @@ export function registerAnalyticsRoutes(app: Express) {
     } catch (error) {
       console.error("Error fetching conversion funnel:", error);
       res.status(500).json({ error: "Failed to fetch conversion funnel analytics" });
+    }
+  });
+
+  // Credit System Analytics (for business intelligence)
+  app.get("/api/analytics/credits", isAuthenticated, async (req: any, res) => {
+    try {
+      const period = req.query.period || '30d';
+      const daysBack = period === '7d' ? 7 : period === '30d' ? 30 : period === '90d' ? 90 : 365;
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - daysBack);
+
+      // Total credits purchased and used
+      const [creditStats] = await db
+        .select({
+          totalPurchased: sum(creditPurchases.credits),
+          totalRevenue: sum(creditPurchases.amount),
+          purchaseCount: count(creditPurchases.id)
+        })
+        .from(creditPurchases)
+        .where(and(
+          eq(creditPurchases.status, "completed"),
+          gte(creditPurchases.createdAt, startDate)
+        ));
+
+      const [creditsUsed] = await db
+        .select({
+          totalUsed: sum(leadResponses.creditsUsed),
+          responseCount: count(leadResponses.id)
+        })
+        .from(leadResponses)
+        .where(gte(leadResponses.respondedAt, startDate));
+
+      // Daily credit purchases trend
+      const dailyCreditPurchases = await db
+        .select({
+          date: sql<string>`DATE(${creditPurchases.createdAt})`,
+          credits: sum(creditPurchases.credits),
+          revenue: sum(creditPurchases.amount),
+          purchases: count(creditPurchases.id)
+        })
+        .from(creditPurchases)
+        .where(and(
+          eq(creditPurchases.status, "completed"),
+          gte(creditPurchases.createdAt, startDate)
+        ))
+        .groupBy(sql`DATE(${creditPurchases.createdAt})`)
+        .orderBy(sql`DATE(${creditPurchases.createdAt})`);
+
+      // Top credit packages sold
+      const topPackages = await db
+        .select({
+          credits: creditPurchases.credits,
+          count: count(creditPurchases.id),
+          revenue: sum(creditPurchases.amount)
+        })
+        .from(creditPurchases)
+        .where(and(
+          eq(creditPurchases.status, "completed"),
+          gte(creditPurchases.createdAt, startDate)
+        ))
+        .groupBy(creditPurchases.credits)
+        .orderBy(desc(count(creditPurchases.id)));
+
+      res.json({
+        summary: {
+          totalPurchased: Number(creditStats?.totalPurchased || 0),
+          totalRevenue: Number(creditStats?.totalRevenue || 0),
+          purchaseCount: creditStats?.purchaseCount || 0,
+          totalUsed: Number(creditsUsed?.totalUsed || 0),
+          responseCount: creditsUsed?.responseCount || 0,
+          utilizationRate: Number(creditStats?.totalPurchased || 0) > 0 ? 
+            Math.round((Number(creditsUsed?.totalUsed || 0) / Number(creditStats?.totalPurchased || 0)) * 100) : 0
+        },
+        dailyTrend: dailyCreditPurchases.map(row => ({
+          date: row.date,
+          credits: Number(row.credits || 0),
+          revenue: Number(row.revenue || 0),
+          purchases: row.purchases
+        })),
+        topPackages: topPackages.map(pkg => ({
+          credits: pkg.credits,
+          count: pkg.count,
+          revenue: Number(pkg.revenue || 0)
+        }))
+      });
+    } catch (error) {
+      console.error("Error fetching credit analytics:", error);
+      res.status(500).json({ error: "Failed to fetch credit analytics" });
+    }
+  });
+
+  // Real-time Platform Metrics (for dashboard)
+  app.get("/api/analytics/realtime", isAuthenticated, async (req: any, res) => {
+    try {
+      const last24Hours = new Date();
+      last24Hours.setHours(last24Hours.getHours() - 24);
+
+      // Active users in last 24 hours (based on service requests and messages)
+      const [activeUsers] = await db
+        .select({ count: sql<number>`COUNT(DISTINCT user_id)` })
+        .from(analyticsEvents)
+        .where(gte(analyticsEvents.createdAt, last24Hours));
+
+      // Recent activity
+      const [newRequests24h] = await db
+        .select({ count: count() })
+        .from(serviceRequests)
+        .where(gte(serviceRequests.createdAt, last24Hours));
+
+      const [newMessages24h] = await db
+        .select({ count: count() })
+        .from(messages)
+        .where(gte(messages.createdAt, last24Hours));
+
+      const [newProviderResponses24h] = await db
+        .select({ count: count() })
+        .from(leadResponses)
+        .where(gte(leadResponses.respondedAt, last24Hours));
+
+      // Average response time for providers
+      const avgResponseTime = await db.execute(sql`
+        SELECT AVG(
+          EXTRACT(EPOCH FROM (lr.responded_at - sr.created_at)) / 3600
+        ) as avg_hours
+        FROM lead_responses lr
+        JOIN service_requests sr ON lr.service_request_id = sr.id
+        WHERE lr.responded_at >= ${last24Hours}
+      `);
+
+      res.json({
+        activeUsers: Number(activeUsers?.count || 0),
+        newRequests24h: newRequests24h.count,
+        newMessages24h: newMessages24h.count,
+        newResponses24h: newProviderResponses24h.count,
+        avgResponseTimeHours: avgResponseTime.rows[0]?.avg_hours ? 
+          Number(avgResponseTime.rows[0].avg_hours).toFixed(1) : null
+      });
+    } catch (error) {
+      console.error("Error fetching realtime analytics:", error);
+      res.status(500).json({ error: "Failed to fetch realtime analytics" });
     }
   });
 

@@ -14,6 +14,9 @@ import {
   CategoryPerformanceChart,
   PaymentMethodsPieChart,
   MonthlyRevenueChart,
+  CreditTrendChart,
+  ConversionFunnelChart,
+  ProviderPerformanceChart,
 } from '@/components/analytics/charts';
 import {
   TrendingUp,
@@ -102,6 +105,27 @@ export default function AnalyticsDashboard() {
       return response.json();
     },
     enabled: isAuthenticated && user?.userType === 'admin',
+  });
+
+  // Credit System Analytics
+  const { data: creditAnalytics } = useQuery({
+    queryKey: ['analytics', 'credits', timeRange],
+    queryFn: async () => {
+      const response = await fetch(`/api/analytics/credits?period=${timeRange}`);
+      return response.json();
+    },
+    enabled: isAuthenticated && user?.userType === 'admin',
+  });
+
+  // Real-time Metrics
+  const { data: realtimeMetrics } = useQuery({
+    queryKey: ['analytics', 'realtime'],
+    queryFn: async () => {
+      const response = await fetch('/api/analytics/realtime');
+      return response.json();
+    },
+    enabled: isAuthenticated && user?.userType === 'admin',
+    refetchInterval: 30000, // Refresh every 30 seconds
   });
 
   if (isLoading) {
@@ -236,11 +260,60 @@ export default function AnalyticsDashboard() {
           </div>
         )}
 
+        {/* Real-time Metrics */}
+        {realtimeMetrics && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-blue-600">{realtimeMetrics.activeUsers}</p>
+                  <p className="text-xs text-gray-600">Usuarios Activos (24h)</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-green-600">{realtimeMetrics.newRequests24h}</p>
+                  <p className="text-xs text-gray-600">Nuevas Solicitudes (24h)</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-purple-600">{realtimeMetrics.newMessages24h}</p>
+                  <p className="text-xs text-gray-600">Mensajes (24h)</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-orange-600">{realtimeMetrics.newResponses24h}</p>
+                  <p className="text-xs text-gray-600">Respuestas (24h)</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-red-600">
+                    {realtimeMetrics.avgResponseTimeHours ? `${realtimeMetrics.avgResponseTimeHours}h` : 'N/A'}
+                  </p>
+                  <p className="text-xs text-gray-600">Tiempo Respuesta Promedio</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {/* Analytics Tabs */}
         <Tabs value={selectedMetric} onValueChange={setSelectedMetric} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5">
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6">
             <TabsTrigger value="overview">Resumen</TabsTrigger>
             <TabsTrigger value="revenue">Ingresos</TabsTrigger>
+            <TabsTrigger value="credits">Créditos</TabsTrigger>
             <TabsTrigger value="users">Usuarios</TabsTrigger>
             <TabsTrigger value="providers">Profesionales</TabsTrigger>
             <TabsTrigger value="conversion">Conversión</TabsTrigger>
@@ -304,11 +377,140 @@ export default function AnalyticsDashboard() {
             </div>
           </TabsContent>
 
+          {/* Credits Tab */}
+          <TabsContent value="credits" className="space-y-6">
+            {creditAnalytics && (
+              <>
+                {/* Credit System KPIs */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="text-center">
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Créditos Vendidos</p>
+                        <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                          {creditAnalytics.summary?.totalPurchased?.toLocaleString()}
+                        </p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          ${creditAnalytics.summary?.totalRevenue?.toLocaleString()} en ingresos
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="text-center">
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Créditos Utilizados</p>
+                        <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                          {creditAnalytics.summary?.totalUsed?.toLocaleString()}
+                        </p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          {creditAnalytics.summary?.responseCount} respuestas de profesionales
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="text-center">
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Tasa de Utilización</p>
+                        <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                          {creditAnalytics.summary?.utilizationRate}%
+                        </p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          Créditos usados vs comprados
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Credit Trend Chart */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Tendencia de Compras de Créditos</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <CreditTrendChart data={creditAnalytics.dailyTrend || []} height={300} />
+                  </CardContent>
+                </Card>
+
+                {/* Top Credit Packages */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Paquetes de Créditos Más Vendidos</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {creditAnalytics.topPackages?.map((pkg: any, index: number) => (
+                        <div key={pkg.credits} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center space-x-4">
+                            <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
+                              {index + 1}
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-gray-900 dark:text-white">
+                                Paquete de {pkg.credits} créditos
+                              </h4>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                                {pkg.count} ventas
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-semibold text-gray-900 dark:text-white">
+                              ${Number(pkg.revenue).toLocaleString()}
+                            </p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">total ingresos</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
+            )}
+          </TabsContent>
+
+          {/* Users Tab */}
+          <TabsContent value="users" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Crecimiento de Usuarios</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <UserGrowthChart data={userGrowthData || []} height={400} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Providers Tab */}
+          <TabsContent value="providers" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Rendimiento de Profesionales</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ProviderPerformanceChart data={providerPerformance || []} height={400} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* Conversion Tab */}
           <TabsContent value="conversion" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>Embudo de Conversión</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ConversionFunnelChart data={conversionData || []} height={400} />
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Detalles del Embudo</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
