@@ -41,6 +41,7 @@ import { registerWordPressRoutes } from './routes/wordpress';
 import { registerIntegrationRoutes } from './routes/integrations';
 import languageRoutes from './routes/languages';
 import geolocationRoutes from './routes/geolocation';
+import searchRoutes from './routes/search';
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 import { 
@@ -70,6 +71,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Geolocation and route optimization routes
   app.use('/api/geolocation', geolocationRoutes);
+
+  // Search routes
+  app.use('/api', searchRoutes);
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {

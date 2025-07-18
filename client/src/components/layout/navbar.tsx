@@ -36,7 +36,8 @@ export function Navbar() {
 
   const navigationLinks = [
     { href: "/", label: t('nav.home'), icon: Home },
-    { href: "/servicios", label: t('nav.services'), icon: Search },
+    { href: "/buscar", label: t('nav.search'), icon: Search },
+    { href: "/servicios", label: t('nav.services'), icon: Briefcase },
   ];
 
   const authenticatedLinks = [

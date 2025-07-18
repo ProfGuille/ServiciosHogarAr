@@ -23,6 +23,7 @@ import PaymentSuccess from "@/pages/payment-success";
 import TestPayments from "@/pages/test-payments";
 import BuyCredits from "@/pages/buy-credits";
 import GeolocationDashboard from "@/pages/geolocation-dashboard";
+import Search from "@/pages/search";
 import Profile from "@/pages/profile";
 import About from "@/pages/about";
 import ComoFunciona from "@/pages/como-funciona";
@@ -62,6 +63,7 @@ function Router() {
   return (
     <Switch>
       {/* Public routes available to all users */}
+      <Route path="/buscar" component={Search} />
       <Route path="/servicios" component={Services} />
       <Route path="/servicios/:id" component={ServiceDetail} />
       <Route path="/profesional/:id" component={ProviderProfile} />

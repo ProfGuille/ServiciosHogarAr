@@ -78,10 +78,17 @@ export default function Landing() {
   });
 
   const handleSearch = () => {
-    // Redirect to services page with search query
-    let url = '/servicios';
+    // Redirect to advanced search page with search query
+    let url = '/buscar';
+    const params = new URLSearchParams();
     if (searchQuery) {
-      url += `?buscar=${encodeURIComponent(searchQuery)}`;
+      params.set('q', searchQuery);
+    }
+    if (location) {
+      params.set('city', location);
+    }
+    if (params.toString()) {
+      url += `?${params.toString()}`;
     }
     window.location.href = url;
   };
