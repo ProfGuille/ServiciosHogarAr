@@ -72,35 +72,35 @@ export default function Profile() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-gray-500">Nombre</label>
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-gray-500 block">Nombre</label>
                     <p className="text-lg font-semibold">{user.firstName || "No especificado"}</p>
                   </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-500">Apellido</label>
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-gray-500 block">Apellido</label>
                     <p className="text-lg font-semibold">{user.lastName || "No especificado"}</p>
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-gray-500" />
-                  <div>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4 text-gray-500" />
                     <label className="text-sm font-medium text-gray-500">Email</label>
-                    <p className="text-lg">{user.email}</p>
                   </div>
+                  <p className="text-lg pl-6">{user.email}</p>
                 </div>
                 
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-gray-500" />
-                  <div>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-gray-500" />
                     <label className="text-sm font-medium text-gray-500">Miembro desde</label>
-                    <p className="text-lg">
-                      {user.createdAt 
-                        ? format(new Date(user.createdAt), "MMMM yyyy", { locale: es })
-                        : "Fecha no disponible"
-                      }
-                    </p>
                   </div>
+                  <p className="text-lg pl-6">
+                    {user.createdAt 
+                      ? format(new Date(user.createdAt), "MMMM yyyy", { locale: es })
+                      : "Fecha no disponible"
+                    }
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -126,21 +126,17 @@ export default function Profile() {
                 <CardTitle>Estado de la Cuenta</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-gray-500">Tipo de usuario</label>
-                  <div className="mt-1">
-                    <Badge variant={user.userType === 'provider' ? 'default' : 'secondary'}>
-                      {user.userType === 'provider' ? 'Profesional' : 
-                       user.userType === 'admin' ? 'Administrador' : 'Cliente'}
-                    </Badge>
-                  </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-gray-500 block">Tipo de usuario</label>
+                  <Badge variant={user.userType === 'provider' ? 'default' : 'secondary'}>
+                    {user.userType === 'provider' ? 'Profesional' : 
+                     user.userType === 'admin' ? 'Administrador' : 'Cliente'}
+                  </Badge>
                 </div>
                 
-                <div>
-                  <label className="text-sm font-medium text-gray-500">Estado</label>
-                  <div className="mt-1">
-                    <Badge variant="default">Activo</Badge>
-                  </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-gray-500 block">Estado</label>
+                  <Badge variant="default">Activo</Badge>
                 </div>
               </CardContent>
             </Card>
@@ -176,12 +172,12 @@ export default function Profile() {
         </div>
         
         {/* Referral Section */}
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+        <div className="mt-8 space-y-4">
+          <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
             <Gift className="h-6 w-6 text-primary" />
             Programa de Referidos
           </h2>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <ReferralShareCard />
             <ReferralHistory />
           </div>

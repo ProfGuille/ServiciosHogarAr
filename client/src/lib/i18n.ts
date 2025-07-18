@@ -9,6 +9,7 @@ const resources = {
       // Navigation
       nav: {
         home: "Inicio",
+        search: "Buscar",
         services: "Servicios",
         about: "Nosotros",
         howItWorks: "Cómo Funciona",
@@ -298,6 +299,7 @@ const resources = {
       // Navigation
       nav: {
         home: "Home",
+        search: "Search",
         services: "Services",
         about: "About",
         howItWorks: "How It Works",
