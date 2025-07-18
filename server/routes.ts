@@ -34,10 +34,14 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 import { initializeWebSocket } from "./websocket";
+import { registerAnalyticsRoutes } from './routes/analytics';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
+
+  // Analytics routes (admin only)
+  registerAnalyticsRoutes(app);
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {

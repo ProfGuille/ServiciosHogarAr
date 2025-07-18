@@ -221,6 +221,53 @@ export const messages = pgTable("messages", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Analytics Events for Business Intelligence
+export const analyticsEvents = pgTable("analytics_events", {
+  id: serial("id").primaryKey(),
+  eventType: varchar("event_type", { 
+    enum: ["page_view", "service_search", "provider_view", "request_created", "message_sent", "payment_completed", "review_created"] 
+  }).notNull(),
+  userId: varchar("user_id").references(() => users.id),
+  sessionId: varchar("session_id"),
+  metadata: jsonb("metadata"), // Additional event data
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Platform KPIs aggregated daily
+export const dailyStats = pgTable("daily_stats", {
+  id: serial("id").primaryKey(),
+  date: timestamp("date").notNull().unique(),
+  totalUsers: integer("total_users").default(0),
+  newUsers: integer("new_users").default(0),
+  totalProviders: integer("total_providers").default(0),
+  newProviders: integer("new_providers").default(0),
+  totalRequests: integer("total_requests").default(0),
+  newRequests: integer("new_requests").default(0),
+  completedRequests: integer("completed_requests").default(0),
+  totalRevenue: decimal("total_revenue", { precision: 10, scale: 2 }).default("0"),
+  newRevenue: decimal("new_revenue", { precision: 10, scale: 2 }).default("0"),
+  avgResponseTime: decimal("avg_response_time", { precision: 8, scale: 2 }), // in hours
+  conversionRate: decimal("conversion_rate", { precision: 5, scale: 4 }), // percentage
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Provider Performance Metrics
+export const providerMetrics = pgTable("provider_metrics", {
+  id: serial("id").primaryKey(),
+  providerId: integer("provider_id").notNull().references(() => serviceProviders.id),
+  date: timestamp("date").notNull(),
+  profileViews: integer("profile_views").default(0),
+  requestsReceived: integer("requests_received").default(0),
+  requestsAccepted: integer("requests_accepted").default(0),
+  requestsCompleted: integer("requests_completed").default(0),
+  totalEarnings: decimal("total_earnings", { precision: 10, scale: 2 }).default("0"),
+  avgRating: decimal("avg_rating", { precision: 3, scale: 2 }),
+  responseTimeHours: decimal("response_time_hours", { precision: 8, scale: 2 }),
+  creditsUsed: integer("credits_used").default(0),
+  messagesCount: integer("messages_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many, one }) => ({
   serviceProvider: one(serviceProviders, {
@@ -370,4 +417,17 @@ export type Payment = typeof payments.$inferSelect;
 export const insertConversationSchema = createInsertSchema(conversations);
 export type InsertConversation = z.infer<typeof insertConversationSchema>;
 export type Conversation = typeof conversations.$inferSelect;
+
+// Analytics schemas
+export const insertAnalyticsEventSchema = createInsertSchema(analyticsEvents);
+export type InsertAnalyticsEvent = z.infer<typeof insertAnalyticsEventSchema>;
+export type AnalyticsEvent = typeof analyticsEvents.$inferSelect;
+
+export const insertDailyStatSchema = createInsertSchema(dailyStats);
+export type InsertDailyStat = z.infer<typeof insertDailyStatSchema>;
+export type DailyStat = typeof dailyStats.$inferSelect;
+
+export const insertProviderMetricSchema = createInsertSchema(providerMetrics);
+export type InsertProviderMetric = z.infer<typeof insertProviderMetricSchema>;
+export type ProviderMetric = typeof providerMetrics.$inferSelect;
 

@@ -20,7 +20,8 @@ import {
   X,
   Shield,
   Briefcase,
-  FileText
+  FileText,
+  BarChart
 } from "lucide-react";
 
 export function Navbar() {
@@ -42,6 +43,7 @@ export function Navbar() {
 
   const adminLinks = [
     { href: "/admin", label: "Admin", icon: Shield },
+    { href: "/analytics", label: "Analytics", icon: BarChart },
   ];
 
   const UserMenu = () => {

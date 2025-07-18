@@ -1,0 +1,346 @@
+import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useAuth } from '@/hooks/useAuth';
+import { Navbar } from '@/components/layout/navbar';
+import { Footer } from '@/components/layout/footer';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  UserGrowthChart,
+  RevenueChart,
+  CategoryPerformanceChart,
+  PaymentMethodsPieChart,
+  MonthlyRevenueChart,
+} from '@/components/analytics/charts';
+import {
+  TrendingUp,
+  TrendingDown,
+  Users,
+  DollarSign,
+  Calendar,
+  Activity,
+  Eye,
+  MessageCircle,
+  Star,
+  Clock,
+  Target,
+  BarChart3,
+} from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { es } from 'date-fns/locale';
+
+export default function AnalyticsDashboard() {
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const [timeRange, setTimeRange] = useState('30d');
+  const [selectedMetric, setSelectedMetric] = useState('overview');
+
+  // Redirect to login if not authenticated or not admin
+  useEffect(() => {
+    if (!isLoading && (!isAuthenticated || user?.userType !== 'admin')) {
+      window.location.href = '/api/login';
+    }
+  }, [isAuthenticated, isLoading, user]);
+
+  // Platform Overview Statistics
+  const { data: platformStats } = useQuery({
+    queryKey: ['analytics', 'platform-stats', timeRange],
+    queryFn: async () => {
+      const response = await fetch(`/api/analytics/platform-stats?period=${timeRange}`);
+      return response.json();
+    },
+    enabled: isAuthenticated && user?.userType === 'admin',
+  });
+
+  // Revenue Analytics
+  const { data: revenueData } = useQuery({
+    queryKey: ['analytics', 'revenue', timeRange],
+    queryFn: async () => {
+      const response = await fetch(`/api/analytics/revenue?period=${timeRange}`);
+      return response.json();
+    },
+    enabled: isAuthenticated && user?.userType === 'admin',
+  });
+
+  // User Growth Analytics
+  const { data: userGrowthData } = useQuery({
+    queryKey: ['analytics', 'user-growth', timeRange],
+    queryFn: async () => {
+      const response = await fetch(`/api/analytics/user-growth?period=${timeRange}`);
+      return response.json();
+    },
+    enabled: isAuthenticated && user?.userType === 'admin',
+  });
+
+  // Provider Performance
+  const { data: providerPerformance } = useQuery({
+    queryKey: ['analytics', 'provider-performance', timeRange],
+    queryFn: async () => {
+      const response = await fetch(`/api/analytics/provider-performance?period=${timeRange}`);
+      return response.json();
+    },
+    enabled: isAuthenticated && user?.userType === 'admin',
+  });
+
+  // Service Category Analytics
+  const { data: categoryAnalytics } = useQuery({
+    queryKey: ['analytics', 'categories', timeRange],
+    queryFn: async () => {
+      const response = await fetch(`/api/analytics/categories?period=${timeRange}`);
+      return response.json();
+    },
+    enabled: isAuthenticated && user?.userType === 'admin',
+  });
+
+  // Conversion Funnel
+  const { data: conversionData } = useQuery({
+    queryKey: ['analytics', 'conversion-funnel', timeRange],
+    queryFn: async () => {
+      const response = await fetch(`/api/analytics/conversion-funnel?period=${timeRange}`);
+      return response.json();
+    },
+    enabled: isAuthenticated && user?.userType === 'admin',
+  });
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated || user?.userType !== 'admin') {
+    return null;
+  }
+
+
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <Navbar />
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                Analytics Dashboard
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400 mt-2">
+                Comprehensive business intelligence and platform insights
+              </p>
+            </div>
+            
+            <div className="mt-4 md:mt-0 flex gap-4">
+              <Select value={timeRange} onValueChange={setTimeRange}>
+                <SelectTrigger className="w-40">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7d">Últimos 7 días</SelectItem>
+                  <SelectItem value="30d">Últimos 30 días</SelectItem>
+                  <SelectItem value="90d">Últimos 3 meses</SelectItem>
+                  <SelectItem value="1y">Último año</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+
+        {/* KPI Cards */}
+        {platformStats && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Usuarios Totales
+                    </p>
+                    <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                      {platformStats.totalUsers?.toLocaleString()}
+                    </p>
+                    <p className="text-sm text-green-600 flex items-center mt-1">
+                      <TrendingUp className="h-4 w-4 mr-1" />
+                      +{platformStats.newUsersPercent}% este período
+                    </p>
+                  </div>
+                  <Users className="h-12 w-12 text-blue-500" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Profesionales
+                    </p>
+                    <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                      {platformStats.totalProviders?.toLocaleString()}
+                    </p>
+                    <p className="text-sm text-green-600 flex items-center mt-1">
+                      <TrendingUp className="h-4 w-4 mr-1" />
+                      +{platformStats.newProvidersPercent}% este período
+                    </p>
+                  </div>
+                  <Activity className="h-12 w-12 text-green-500" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Ingresos Totales
+                    </p>
+                    <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                      ${platformStats.totalRevenue?.toLocaleString()}
+                    </p>
+                    <p className="text-sm text-green-600 flex items-center mt-1">
+                      <TrendingUp className="h-4 w-4 mr-1" />
+                      +{platformStats.revenueGrowthPercent}% este período
+                    </p>
+                  </div>
+                  <DollarSign className="h-12 w-12 text-yellow-500" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Solicitudes
+                    </p>
+                    <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                      {platformStats.totalRequests?.toLocaleString()}
+                    </p>
+                    <p className="text-sm text-green-600 flex items-center mt-1">
+                      <TrendingUp className="h-4 w-4 mr-1" />
+                      {platformStats.conversionRate}% conversión
+                    </p>
+                  </div>
+                  <Target className="h-12 w-12 text-purple-500" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Analytics Tabs */}
+        <Tabs value={selectedMetric} onValueChange={setSelectedMetric} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5">
+            <TabsTrigger value="overview">Resumen</TabsTrigger>
+            <TabsTrigger value="revenue">Ingresos</TabsTrigger>
+            <TabsTrigger value="users">Usuarios</TabsTrigger>
+            <TabsTrigger value="providers">Profesionales</TabsTrigger>
+            <TabsTrigger value="conversion">Conversión</TabsTrigger>
+          </TabsList>
+
+          {/* Overview Tab */}
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* User Growth Chart */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Crecimiento de Usuarios</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <UserGrowthChart data={userGrowthData || []} />
+                </CardContent>
+              </Card>
+
+              {/* Revenue Trend */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Tendencia de Ingresos</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <RevenueChart data={revenueData?.daily || []} />
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Service Categories Performance */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Rendimiento por Categoría</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CategoryPerformanceChart data={categoryAnalytics || []} height={400} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Revenue Tab */}
+          <TabsContent value="revenue" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Ingresos por Método de Pago</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <PaymentMethodsPieChart data={revenueData?.paymentMethods || []} />
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Ingresos Mensuales</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <MonthlyRevenueChart data={revenueData?.monthly || []} />
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Conversion Tab */}
+          <TabsContent value="conversion" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Embudo de Conversión</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {conversionData?.map((step: any, index: number) => (
+                    <div key={step.step} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div className="flex items-center space-x-4">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white ${
+                          index === 0 ? 'bg-blue-500' : 
+                          index === 1 ? 'bg-green-500' : 
+                          index === 2 ? 'bg-yellow-500' : 'bg-purple-500'
+                        }`}>
+                          {index + 1}
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-gray-900 dark:text-white">{step.step}</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">{step.count} usuarios</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-gray-900 dark:text-white">{step.conversionRate}%</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">conversión</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      <Footer />
+    </div>
+  );
+}
