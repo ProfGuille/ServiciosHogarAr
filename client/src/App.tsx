@@ -22,6 +22,7 @@ import PaymentMethods from "@/pages/payment-methods";
 import PaymentSuccess from "@/pages/payment-success";
 import TestPayments from "@/pages/test-payments";
 import BuyCredits from "@/pages/buy-credits";
+import GeolocationDashboard from "@/pages/geolocation-dashboard";
 import Profile from "@/pages/profile";
 import About from "@/pages/about";
 import ComoFunciona from "@/pages/como-funciona";
@@ -108,6 +109,7 @@ function Router() {
           {/* <Route path="/payment-methods/:requestId" component={PaymentMethods} /> */}
           {/* <Route path="/payment-success/:requestId" component={PaymentSuccess} /> */}
           <Route path="/dashboard-profesional" component={ProviderDashboard} />
+          <Route path="/geolocation" component={GeolocationDashboard} />
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/analytics" component={AnalyticsDashboard} />
           <Route path="/admin/wordpress" component={AdminWordPress} />

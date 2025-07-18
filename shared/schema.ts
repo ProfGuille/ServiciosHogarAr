@@ -552,6 +552,115 @@ export const insertLocalizedContentSchema = createInsertSchema(localizedContent)
 export type InsertLocalizedContent = z.infer<typeof insertLocalizedContentSchema>;
 export type LocalizedContent = typeof localizedContent.$inferSelect;
 
+// Geofencing and location tables
+export const serviceAreas = pgTable("service_areas", {
+  id: serial("id").primaryKey(),
+  providerId: varchar("provider_id").notNull().references(() => serviceProviders.id),
+  name: varchar("name", { length: 200 }).notNull(), // "Buenos Aires Norte", "CABA Zona Sur"
+  centerLat: decimal("center_lat", { precision: 10, scale: 8 }).notNull(),
+  centerLng: decimal("center_lng", { precision: 11, scale: 8 }).notNull(),
+  radiusKm: decimal("radius_km", { precision: 6, scale: 2 }).notNull(), // Service radius in kilometers
+  polygonCoords: jsonb("polygon_coords"), // Array of lat/lng points for complex shapes
+  isActive: boolean("is_active").default(true),
+  priority: integer("priority").default(1), // Higher priority = preferred area
+  maxDailyJobs: integer("max_daily_jobs").default(10),
+  travelCostPerKm: decimal("travel_cost_per_km", { precision: 8, scale: 2 }).default("0.00"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const providerLocations = pgTable("provider_locations", {
+  id: serial("id").primaryKey(),
+  providerId: varchar("provider_id").notNull().references(() => serviceProviders.id),
+  latitude: decimal("latitude", { precision: 10, scale: 8 }).notNull(),
+  longitude: decimal("longitude", { precision: 11, scale: 8 }).notNull(),
+  accuracy: decimal("accuracy", { precision: 8, scale: 2 }), // GPS accuracy in meters
+  timestamp: timestamp("timestamp").defaultNow(),
+  isActive: boolean("is_active").default(true), // Current location
+  locationSource: varchar("location_source", { 
+    enum: ["gps", "manual", "estimated"] 
+  }).default("gps"),
+  address: varchar("address", { length: 500 }),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const routeOptimizations = pgTable("route_optimizations", {
+  id: serial("id").primaryKey(),
+  providerId: varchar("provider_id").notNull().references(() => serviceProviders.id),
+  date: timestamp("date").notNull(),
+  startLat: decimal("start_lat", { precision: 10, scale: 8 }).notNull(),
+  startLng: decimal("start_lng", { precision: 11, scale: 8 }).notNull(),
+  endLat: decimal("end_lat", { precision: 10, scale: 8 }),
+  endLng: decimal("end_lng", { precision: 11, scale: 8 }),
+  totalDistanceKm: decimal("total_distance_km", { precision: 8, scale: 2 }),
+  estimatedDurationMinutes: integer("estimated_duration_minutes"),
+  actualDurationMinutes: integer("actual_duration_minutes"),
+  fuelCostEstimate: decimal("fuel_cost_estimate", { precision: 8, scale: 2 }),
+  tollCosts: decimal("toll_costs", { precision: 8, scale: 2 }).default("0.00"),
+  optimizationAlgorithm: varchar("optimization_algorithm", { 
+    enum: ["nearest_neighbor", "genetic", "dijkstra", "manual"] 
+  }).default("nearest_neighbor"),
+  waypoints: jsonb("waypoints"), // Array of service request locations in optimized order
+  routeData: jsonb("route_data"), // Full route information from mapping service
+  status: varchar("status", { 
+    enum: ["planned", "in_progress", "completed", "cancelled"] 
+  }).default("planned"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const geofences = pgTable("geofences", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 200 }).notNull(), // "Downtown Business District", "Residential Zone A"
+  description: text("description"),
+  centerLat: decimal("center_lat", { precision: 10, scale: 8 }).notNull(),
+  centerLng: decimal("center_lng", { precision: 11, scale: 8 }).notNull(),
+  radiusKm: decimal("radius_km", { precision: 6, scale: 2 }),
+  polygonCoords: jsonb("polygon_coords"), // Array of lat/lng points for complex shapes
+  geofenceType: varchar("geofence_type", { 
+    enum: ["service_zone", "no_travel_zone", "high_priority", "restricted"] 
+  }).notNull(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const locationEvents = pgTable("location_events", {
+  id: serial("id").primaryKey(),
+  providerId: varchar("provider_id").notNull().references(() => serviceProviders.id),
+  eventType: varchar("event_type", { 
+    enum: ["enter_geofence", "exit_geofence", "arrive_job", "complete_job", "break_start", "break_end"] 
+  }).notNull(),
+  latitude: decimal("latitude", { precision: 10, scale: 8 }).notNull(),
+  longitude: decimal("longitude", { precision: 11, scale: 8 }).notNull(),
+  geofenceId: integer("geofence_id").references(() => geofences.id),
+  serviceRequestId: integer("service_request_id").references(() => serviceRequests.id),
+  metadata: jsonb("metadata"), // Additional event data
+  timestamp: timestamp("timestamp").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Location and geofencing schemas
+export const insertServiceAreaSchema = createInsertSchema(serviceAreas);
+export type InsertServiceArea = z.infer<typeof insertServiceAreaSchema>;
+export type ServiceArea = typeof serviceAreas.$inferSelect;
+
+export const insertProviderLocationSchema = createInsertSchema(providerLocations);
+export type InsertProviderLocation = z.infer<typeof insertProviderLocationSchema>;
+export type ProviderLocation = typeof providerLocations.$inferSelect;
+
+export const insertRouteOptimizationSchema = createInsertSchema(routeOptimizations);
+export type InsertRouteOptimization = z.infer<typeof insertRouteOptimizationSchema>;
+export type RouteOptimization = typeof routeOptimizations.$inferSelect;
+
+export const insertGeofenceSchema = createInsertSchema(geofences);
+export type InsertGeofence = z.infer<typeof insertGeofenceSchema>;
+export type Geofence = typeof geofences.$inferSelect;
+
+export const insertLocationEventSchema = createInsertSchema(locationEvents);
+export type InsertLocationEvent = z.infer<typeof insertLocationEventSchema>;
+export type LocationEvent = typeof locationEvents.$inferSelect;
+
 // Relations
 export const usersRelations = relations(users, ({ many, one }) => ({
   serviceProvider: one(serviceProviders, {
