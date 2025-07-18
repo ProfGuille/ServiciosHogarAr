@@ -36,6 +36,7 @@ import ServiciosElectricidad from "@/pages/servicios-electricidad";
 import ServiciosPintura from "@/pages/servicios-pintura";
 import ServiciosLimpieza from "@/pages/servicios-limpieza";
 import ServiciosCarpinteria from "@/pages/servicios-carpinteria";
+import ServiciosGasista from "@/pages/servicios-gasista";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -63,6 +64,7 @@ function Router() {
       <Route path="/servicios/pintura" component={ServiciosPintura} />
       <Route path="/servicios/limpieza" component={ServiciosLimpieza} />
       <Route path="/servicios/carpinteria" component={ServiciosCarpinteria} />
+      <Route path="/servicios/gasista" component={ServiciosGasista} />
 
       {/* Authentication-dependent routes */}
       {isLoading || !isAuthenticated ? (
