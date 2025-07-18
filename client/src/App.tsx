@@ -37,6 +37,20 @@ import ServiciosPintura from "@/pages/servicios-pintura";
 import ServiciosLimpieza from "@/pages/servicios-limpieza";
 import ServiciosCarpinteria from "@/pages/servicios-carpinteria";
 import ServiciosGasista from "@/pages/servicios-gasista";
+import ServiciosAlbanil from "@/pages/servicios-albanil";
+import ServiciosTecnicoAire from "@/pages/servicios-tecnico-aire";
+import ServiciosJardineria from "@/pages/servicios-jardineria";
+import ServiciosCerrajero from "@/pages/servicios-cerrajero";
+import ServiciosMudanzas from "@/pages/servicios-mudanzas";
+import ServiciosHerrero from "@/pages/servicios-herrero";
+import ServiciosTechista from "@/pages/servicios-techista";
+import ServiciosFumigador from "@/pages/servicios-fumigador";
+import ServiciosTecnicoPc from "@/pages/servicios-tecnico-pc";
+import ServiciosPequenosArreglos from "@/pages/servicios-pequenos-arreglos";
+import ServiciosTapicero from "@/pages/servicios-tapicero";
+import ServiciosVidriero from "@/pages/servicios-vidriero";
+import ServiciosInstaladorSolar from "@/pages/servicios-instalador-solar";
+import Messages from "@/pages/messages";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -65,6 +79,19 @@ function Router() {
       <Route path="/servicios/limpieza" component={ServiciosLimpieza} />
       <Route path="/servicios/carpinteria" component={ServiciosCarpinteria} />
       <Route path="/servicios/gasista" component={ServiciosGasista} />
+      <Route path="/servicios/albanil" component={ServiciosAlbanil} />
+      <Route path="/servicios/tecnico-aire" component={ServiciosTecnicoAire} />
+      <Route path="/servicios/jardineria" component={ServiciosJardineria} />
+      <Route path="/servicios/cerrajero" component={ServiciosCerrajero} />
+      <Route path="/servicios/mudanzas" component={ServiciosMudanzas} />
+      <Route path="/servicios/herrero" component={ServiciosHerrero} />
+      <Route path="/servicios/techista" component={ServiciosTechista} />
+      <Route path="/servicios/fumigador" component={ServiciosFumigador} />
+      <Route path="/servicios/tecnico-pc" component={ServiciosTecnicoPc} />
+      <Route path="/servicios/pequenos-arreglos" component={ServiciosPequenosArreglos} />
+      <Route path="/servicios/tapicero" component={ServiciosTapicero} />
+      <Route path="/servicios/vidriero" component={ServiciosVidriero} />
+      <Route path="/servicios/instalador-solar" component={ServiciosInstaladorSolar} />
 
       {/* Authentication-dependent routes */}
       {isLoading || !isAuthenticated ? (
@@ -79,6 +106,7 @@ function Router() {
           {/* <Route path="/payment-success/:requestId" component={PaymentSuccess} /> */}
           <Route path="/dashboard-profesional" component={ProviderDashboard} />
           <Route path="/admin" component={AdminDashboard} />
+          <Route path="/mensajes" component={Messages} />
           <Route path="/perfil" component={Profile} />
           <Route path="/comprar-creditos" component={BuyCredits} />
         </>

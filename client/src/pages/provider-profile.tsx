@@ -20,6 +20,7 @@ import {
   Users,
   Award,
 } from "lucide-react";
+import { StartConversationButton } from "@/components/chat/StartConversationButton";
 
 export default function ProviderProfile() {
   const { id } = useParams();
@@ -172,10 +173,10 @@ export default function ProviderProfile() {
                         <Calendar className="h-4 w-4 mr-2" />
                         Solicitar servicio
                       </Button>
-                      <Button variant="outline" className="flex-1">
-                        <Mail className="h-4 w-4 mr-2" />
-                        Enviar mensaje
-                      </Button>
+                      <StartConversationButton 
+                        provider={provider} 
+                        className="flex-1"
+                      />
                     </div>
                   </div>
                 </div>

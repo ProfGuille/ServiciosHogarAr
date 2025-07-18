@@ -28,10 +28,12 @@ import {
   insertProviderServiceSchema,
   insertServiceRequestSchema,
   insertReviewSchema,
+  insertConversationSchema,
   insertMessageSchema,
   insertPaymentSchema,
 } from "@shared/schema";
 import { z } from "zod";
+import { initializeWebSocket } from "./websocket";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -626,37 +628,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Messages
-  app.get('/api/requests/:id/messages', isAuthenticated, async (req: any, res) => {
+  // Conversations and Messages
+  app.get('/api/conversations', isAuthenticated, async (req: any, res) => {
     try {
-      const serviceRequestId = parseInt(req.params.id);
       const userId = req.user.claims.sub;
+      const conversations = await storage.getConversationsForUser(userId);
+      res.json(conversations);
+    } catch (error) {
+      console.error("Error fetching conversations:", error);
+      res.status(500).json({ message: "Failed to fetch conversations" });
+    }
+  });
+
+  app.post('/api/conversations', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { providerId, customerId, serviceRequestId } = req.body;
       
-      // Check if user has access to this service request
-      const request = await storage.getServiceRequestById(serviceRequestId);
-      if (!request) {
-        return res.status(404).json({ message: "Service request not found" });
+      // Validate that user is either the customer or provider
+      if (userId !== customerId && userId !== providerId) {
+        return res.status(403).json({ message: "Access denied" });
       }
       
-      const user = await storage.getUser(userId);
-      let hasAccess = false;
+      const conversation = await storage.getOrCreateConversation(customerId, providerId, serviceRequestId);
+      res.json(conversation);
+    } catch (error) {
+      console.error("Error creating conversation:", error);
+      res.status(500).json({ message: "Failed to create conversation" });
+    }
+  });
+
+  app.get('/api/conversations/:id/messages', isAuthenticated, async (req: any, res) => {
+    try {
+      const conversationId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      const limit = parseInt(req.query.limit as string) || 50;
+      const offset = parseInt(req.query.offset as string) || 0;
       
-      if (request.customerId === userId) {
-        hasAccess = true;
-      } else if (user?.userType === 'provider') {
-        const provider = await storage.getServiceProviderByUserId(userId);
-        if (provider && request.providerId === provider.id) {
-          hasAccess = true;
-        }
-      } else if (user?.userType === 'admin') {
-        hasAccess = true;
-      }
+      // Check if user has access to this conversation
+      const [conversation] = await storage.getConversationsForUser(userId);
+      const hasAccess = conversation && (
+        conversation.customerId === userId || 
+        conversation.providerId === userId
+      );
       
       if (!hasAccess) {
         return res.status(403).json({ message: "Access denied" });
       }
       
-      const messages = await storage.getMessagesForServiceRequest(serviceRequestId);
+      const messages = await storage.getMessagesForConversation(conversationId, limit, offset);
       res.json(messages);
     } catch (error) {
       console.error("Error fetching messages:", error);
@@ -664,20 +684,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/messages', isAuthenticated, async (req: any, res) => {
+  app.post('/api/conversations/:id/messages', isAuthenticated, async (req: any, res) => {
     try {
+      const conversationId = parseInt(req.params.id);
       const userId = req.user.claims.sub;
+      const { content, messageType = 'text' } = req.body;
       
-      const messageData = insertMessageSchema.parse({
-        ...req.body,
+      // Validate access to conversation
+      const conversations = await storage.getConversationsForUser(userId);
+      const conversation = conversations.find(c => c.id === conversationId);
+      
+      if (!conversation) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const messageData = {
+        conversationId,
         senderId: userId,
-      });
+        content,
+        messageType,
+      };
       
       const message = await storage.createMessage(messageData);
       res.status(201).json(message);
     } catch (error) {
       console.error("Error creating message:", error);
       res.status(500).json({ message: "Failed to create message" });
+    }
+  });
+
+  app.put('/api/conversations/:id/read', isAuthenticated, async (req: any, res) => {
+    try {
+      const conversationId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      await storage.markMessagesAsRead(conversationId, userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error marking messages as read:", error);
+      res.status(500).json({ message: "Failed to mark messages as read" });
     }
   });
 
@@ -1407,5 +1452,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   const httpServer = createServer(app);
+  
+  // Initialize WebSocket server
+  const wsManager = initializeWebSocket(httpServer);
+  
   return httpServer;
 }

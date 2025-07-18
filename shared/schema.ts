@@ -198,13 +198,25 @@ export const reviews = pgTable("reviews", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Message Conversations (to group messages by conversation)
+export const conversations = pgTable("conversations", {
+  id: serial("id").primaryKey(),
+  customerId: varchar("customer_id").notNull().references(() => users.id),
+  providerId: varchar("provider_id").notNull().references(() => users.id),
+  serviceRequestId: integer("service_request_id").references(() => serviceRequests.id),
+  lastMessageAt: timestamp("last_message_at").defaultNow(),
+  customerUnreadCount: integer("customer_unread_count").default(0),
+  providerUnreadCount: integer("provider_unread_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Messages between customers and providers
 export const messages = pgTable("messages", {
   id: serial("id").primaryKey(),
-  serviceRequestId: integer("service_request_id").notNull().references(() => serviceRequests.id),
+  conversationId: integer("conversation_id").notNull().references(() => conversations.id),
   senderId: varchar("sender_id").notNull().references(() => users.id),
-  receiverId: varchar("receiver_id").notNull().references(() => users.id),
   content: text("content").notNull(),
+  messageType: varchar("message_type", { enum: ["text", "image", "file"] }).default("text"),
   isRead: boolean("is_read").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -216,8 +228,9 @@ export const usersRelations = relations(users, ({ many, one }) => ({
     references: [serviceProviders.userId],
   }),
   serviceRequests: many(serviceRequests),
-  sentMessages: many(messages, { relationName: "SentMessages" }),
-  receivedMessages: many(messages, { relationName: "ReceivedMessages" }),
+  sentMessages: many(messages),
+  customerConversations: many(conversations, { relationName: "CustomerConversations" }),
+  providerConversations: many(conversations, { relationName: "ProviderConversations" }),
   givenReviews: many(reviews, { relationName: "GivenReviews" }),
   receivedReviews: many(reviews, { relationName: "ReceivedReviews" }),
 }));
@@ -260,7 +273,7 @@ export const serviceRequestsRelations = relations(serviceRequests, ({ one, many 
     fields: [serviceRequests.categoryId],
     references: [serviceCategories.id],
   }),
-  messages: many(messages),
+  conversations: many(conversations),
   reviews: many(reviews),
   payments: many(payments),
 }));
@@ -295,17 +308,29 @@ export const reviewsRelations = relations(reviews, ({ one }) => ({
   }),
 }));
 
-export const messagesRelations = relations(messages, ({ one }) => ({
+export const conversationsRelations = relations(conversations, ({ one, many }) => ({
+  customer: one(users, {
+    fields: [conversations.customerId],
+    references: [users.id],
+  }),
+  provider: one(users, {
+    fields: [conversations.providerId],
+    references: [users.id],
+  }),
   serviceRequest: one(serviceRequests, {
-    fields: [messages.serviceRequestId],
+    fields: [conversations.serviceRequestId],
     references: [serviceRequests.id],
+  }),
+  messages: many(messages),
+}));
+
+export const messagesRelations = relations(messages, ({ one }) => ({
+  conversation: one(conversations, {
+    fields: [messages.conversationId],
+    references: [conversations.id],
   }),
   sender: one(users, {
     fields: [messages.senderId],
-    references: [users.id],
-  }),
-  receiver: one(users, {
-    fields: [messages.receiverId],
     references: [users.id],
   }),
 }));
@@ -341,4 +366,8 @@ export type Message = typeof messages.$inferSelect;
 export const insertPaymentSchema = createInsertSchema(payments);
 export type InsertPayment = z.infer<typeof insertPaymentSchema>;
 export type Payment = typeof payments.$inferSelect;
+
+export const insertConversationSchema = createInsertSchema(conversations);
+export type InsertConversation = z.infer<typeof insertConversationSchema>;
+export type Conversation = typeof conversations.$inferSelect;
 

@@ -170,7 +170,7 @@ export default function Landing() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
             {categories?.slice(0, 17).map((category) => {
               const IconComponent = serviceIcons[category.name.toLowerCase() as keyof typeof serviceIcons] || Wrench;
-              const categoryPath = category.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+              const categoryPath = category.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-");
               return (
                 <Link key={category.id} href={`/servicios/${categoryPath}`}>
                   <Card className="text-center shadow-sm hover:shadow-md transition-shadow cursor-pointer group h-full">

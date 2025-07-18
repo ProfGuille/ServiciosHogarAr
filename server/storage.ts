@@ -6,6 +6,7 @@ import {
   serviceRequests,
   reviews,
   messages,
+  conversations,
   payments,
   providerCredits,
   creditPurchases,
@@ -24,6 +25,8 @@ import {
   type InsertReview,
   type Message,
   type InsertMessage,
+  type Conversation,
+  type InsertConversation,
   type Payment,
   type InsertPayment,
 } from "@shared/schema";
@@ -85,9 +88,17 @@ export interface IStorage {
   updateReview(id: number, updates: Partial<InsertReview>): Promise<Review | undefined>;
   getReviewByUserAndRequest(reviewerId: string, serviceRequestId: number): Promise<Review | undefined>;
   
-  // Messages
-  getMessagesForServiceRequest(serviceRequestId: number): Promise<Message[]>;
+  // Conversations and Messages
+  getConversationsForUser(userId: string): Promise<(Conversation & { 
+    customer: User; 
+    provider: User; 
+    lastMessage?: Message;
+  })[]>;
+  getOrCreateConversation(customerId: string, providerId: string, serviceRequestId?: number): Promise<Conversation>;
+  getMessagesForConversation(conversationId: number, limit?: number, offset?: number): Promise<(Message & { sender: User })[]>;
   createMessage(message: InsertMessage): Promise<Message>;
+  markMessagesAsRead(conversationId: number, userId: string): Promise<void>;
+  updateConversationUnreadCount(conversationId: number, isCustomerSender: boolean): Promise<void>;
   
   // Analytics
   getProviderStats(providerId: number): Promise<{
@@ -471,13 +482,117 @@ export class DatabaseStorage implements IStorage {
     return review;
   }
 
-  // Messages
-  async getMessagesForServiceRequest(serviceRequestId: number): Promise<Message[]> {
-    return await db
+  // Conversations and Messages
+  async getConversationsForUser(userId: string): Promise<(Conversation & { 
+    customer: User; 
+    provider: User; 
+    lastMessage?: Message;
+  })[]> {
+    // First get conversations for the user
+    const userConversations = await db
       .select()
+      .from(conversations)
+      .where(or(
+        eq(conversations.customerId, userId),
+        eq(conversations.providerId, userId)
+      ))
+      .orderBy(desc(conversations.lastMessageAt));
+
+    // Then get user details for each conversation
+    const result = await Promise.all(
+      userConversations.map(async (conv) => {
+        const [customer] = await db
+          .select()
+          .from(users)
+          .where(eq(users.id, conv.customerId));
+        
+        const [provider] = await db
+          .select()
+          .from(users)
+          .where(eq(users.id, conv.providerId));
+
+        return {
+          ...conv,
+          customer,
+          provider,
+        };
+      })
+    );
+
+    // Get last message for each conversation
+    const conversationsWithMessages = await Promise.all(
+      result.map(async (conv) => {
+        const [lastMessage] = await db
+          .select()
+          .from(messages)
+          .where(eq(messages.conversationId, conv.id))
+          .orderBy(desc(messages.createdAt))
+          .limit(1);
+        
+        return {
+          ...conv,
+          lastMessage,
+        };
+      })
+    );
+
+    return conversationsWithMessages;
+  }
+
+  async getOrCreateConversation(customerId: string, providerId: string, serviceRequestId?: number): Promise<Conversation> {
+    // Try to find existing conversation
+    const [existing] = await db
+      .select()
+      .from(conversations)
+      .where(and(
+        eq(conversations.customerId, customerId),
+        eq(conversations.providerId, providerId)
+      ));
+
+    if (existing) {
+      return existing;
+    }
+
+    // Create new conversation
+    const [newConversation] = await db
+      .insert(conversations)
+      .values({
+        customerId,
+        providerId,
+        serviceRequestId,
+      })
+      .returning();
+
+    return newConversation;
+  }
+
+  async getMessagesForConversation(conversationId: number, limit = 50, offset = 0): Promise<(Message & { sender: User })[]> {
+    return await db
+      .select({
+        id: messages.id,
+        conversationId: messages.conversationId,
+        senderId: messages.senderId,
+        content: messages.content,
+        messageType: messages.messageType,
+        isRead: messages.isRead,
+        createdAt: messages.createdAt,
+        sender: {
+          id: users.id,
+          email: users.email,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+          userType: users.userType,
+          createdAt: users.createdAt,
+          updatedAt: users.updatedAt,
+        },
+      })
       .from(messages)
-      .where(eq(messages.serviceRequestId, serviceRequestId))
-      .orderBy(asc(messages.createdAt));
+      .innerJoin(users, eq(messages.senderId, users.id))
+      .where(eq(messages.conversationId, conversationId))
+      .orderBy(desc(messages.createdAt))
+      .limit(limit)
+      .offset(offset) as any;
   }
 
   async createMessage(message: InsertMessage): Promise<Message> {
@@ -485,7 +600,67 @@ export class DatabaseStorage implements IStorage {
       .insert(messages)
       .values(message)
       .returning();
+
+    // Update conversation last message time and unread counts
+    await this.updateConversationUnreadCount(
+      message.conversationId, 
+      false // Will be determined in the method
+    );
+
     return newMessage;
+  }
+
+  async markMessagesAsRead(conversationId: number, userId: string): Promise<void> {
+    // Mark messages as read
+    await db
+      .update(messages)
+      .set({ isRead: true })
+      .where(and(
+        eq(messages.conversationId, conversationId),
+        eq(messages.senderId, userId)
+      ));
+
+    // Reset unread count for the user
+    const [conversation] = await db
+      .select()
+      .from(conversations)
+      .where(eq(conversations.id, conversationId));
+
+    if (conversation) {
+      const updateData = conversation.customerId === userId
+        ? { customerUnreadCount: 0 }
+        : { providerUnreadCount: 0 };
+
+      await db
+        .update(conversations)
+        .set(updateData)
+        .where(eq(conversations.id, conversationId));
+    }
+  }
+
+  async updateConversationUnreadCount(conversationId: number, isCustomerSender: boolean): Promise<void> {
+    const [conversation] = await db
+      .select()
+      .from(conversations)
+      .where(eq(conversations.id, conversationId));
+
+    if (conversation) {
+      // Increment unread count for the receiver
+      const updateData = isCustomerSender
+        ? { 
+            providerUnreadCount: conversation.providerUnreadCount + 1,
+            lastMessageAt: new Date()
+          }
+        : { 
+            customerUnreadCount: conversation.customerUnreadCount + 1,
+            lastMessageAt: new Date()
+          };
+
+      await db
+        .update(conversations)
+        .set(updateData)
+        .where(eq(conversations.id, conversationId));
+    }
   }
 
   // Analytics
