@@ -4,10 +4,12 @@ import { Footer } from "@/components/layout/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { User, Mail, Phone, MapPin, Calendar, Trophy } from "lucide-react";
+import { User, Mail, Phone, MapPin, Calendar, Trophy, Gift } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { AchievementGallery } from "@/components/achievements/achievement-gallery";
+import { ReferralShareCard } from "@/components/referral/referral-share-card";
+import { ReferralHistory } from "@/components/referral/referral-history";
 
 export default function Profile() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -170,6 +172,18 @@ export default function Profile() {
                 </Button>
               </CardContent>
             </Card>
+          </div>
+        </div>
+        
+        {/* Referral Section */}
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <Gift className="h-6 w-6 text-primary" />
+            Programa de Referidos
+          </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <ReferralShareCard />
+            <ReferralHistory />
           </div>
         </div>
       </div>

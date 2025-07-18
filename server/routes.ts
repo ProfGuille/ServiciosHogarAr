@@ -43,7 +43,9 @@ import languageRoutes from './routes/languages';
 import geolocationRoutes from './routes/geolocation';
 import searchRoutes from './routes/search';
 import achievementRoutes from './routes/achievements';
+import referralRoutes from './routes/referrals';
 import { achievementService } from "./services/achievementService";
+import { referralService } from "./services/referralService";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 import { 
@@ -79,6 +81,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Achievement routes
   app.use('/api/achievements', achievementRoutes);
+  
+  // Referral routes
+  app.use('/api/referrals', referralRoutes);
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {

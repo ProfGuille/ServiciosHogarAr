@@ -58,6 +58,7 @@ import ServiciosTapicero from "@/pages/servicios-tapicero";
 import ServiciosVidriero from "@/pages/servicios-vidriero";
 import ServiciosInstaladorSolar from "@/pages/servicios-instalador-solar";
 import Messages from "@/pages/messages";
+import ReferralApply from "@/pages/referral-apply";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -73,6 +74,7 @@ function Router() {
       {/* Public routes available to all users */}
       <Route path="/buscar" component={Search} />
       <Route path="/servicios" component={Services} />
+      <Route path="/referral" component={ReferralApply} />
       <Route path="/servicios/:id" component={ServiceDetail} />
       <Route path="/profesional/:id" component={ProviderProfile} />
       <Route path="/test-payments" component={TestPayments} />

@@ -555,7 +555,7 @@ export type LocalizedContent = typeof localizedContent.$inferSelect;
 // Geofencing and location tables
 export const serviceAreas = pgTable("service_areas", {
   id: serial("id").primaryKey(),
-  providerId: varchar("provider_id").notNull().references(() => serviceProviders.id),
+  providerId: integer("provider_id").notNull().references(() => serviceProviders.id),
   name: varchar("name", { length: 200 }).notNull(), // "Buenos Aires Norte", "CABA Zona Sur"
   centerLat: decimal("center_lat", { precision: 10, scale: 8 }).notNull(),
   centerLng: decimal("center_lng", { precision: 11, scale: 8 }).notNull(),
@@ -571,7 +571,7 @@ export const serviceAreas = pgTable("service_areas", {
 
 export const providerLocations = pgTable("provider_locations", {
   id: serial("id").primaryKey(),
-  providerId: varchar("provider_id").notNull().references(() => serviceProviders.id),
+  providerId: integer("provider_id").notNull().references(() => serviceProviders.id),
   latitude: decimal("latitude", { precision: 10, scale: 8 }).notNull(),
   longitude: decimal("longitude", { precision: 11, scale: 8 }).notNull(),
   accuracy: decimal("accuracy", { precision: 8, scale: 2 }), // GPS accuracy in meters
@@ -586,7 +586,7 @@ export const providerLocations = pgTable("provider_locations", {
 
 export const routeOptimizations = pgTable("route_optimizations", {
   id: serial("id").primaryKey(),
-  providerId: varchar("provider_id").notNull().references(() => serviceProviders.id),
+  providerId: integer("provider_id").notNull().references(() => serviceProviders.id),
   date: timestamp("date").notNull(),
   startLat: decimal("start_lat", { precision: 10, scale: 8 }).notNull(),
   startLng: decimal("start_lng", { precision: 11, scale: 8 }).notNull(),
@@ -627,7 +627,7 @@ export const geofences = pgTable("geofences", {
 
 export const locationEvents = pgTable("location_events", {
   id: serial("id").primaryKey(),
-  providerId: varchar("provider_id").notNull().references(() => serviceProviders.id),
+  providerId: integer("provider_id").notNull().references(() => serviceProviders.id),
   eventType: varchar("event_type", { 
     enum: ["enter_geofence", "exit_geofence", "arrive_job", "complete_job", "break_start", "break_end"] 
   }).notNull(),
@@ -714,6 +714,65 @@ export type UserAchievement = typeof userAchievements.$inferSelect;
 export const insertAchievementProgressSchema = createInsertSchema(achievementProgress);
 export type InsertAchievementProgress = z.infer<typeof insertAchievementProgressSchema>;
 export type AchievementProgress = typeof achievementProgress.$inferSelect;
+
+// Referral System
+export const referralCodes = pgTable("referral_codes", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 255 }).notNull().references(() => users.id),
+  code: varchar("code", { length: 20 }).notNull().unique(),
+  createdAt: timestamp("created_at").defaultNow(),
+  expiresAt: timestamp("expires_at"),
+});
+
+export const referrals = pgTable("referrals", {
+  id: serial("id").primaryKey(),
+  referrerId: varchar("referrer_id", { length: 255 }).notNull().references(() => users.id),
+  referredId: varchar("referred_id", { length: 255 }).notNull().references(() => users.id),
+  referralCodeId: integer("referral_code_id").notNull().references(() => referralCodes.id),
+  status: varchar("status", { length: 50 }).notNull().default("pending"), // pending, completed, expired
+  rewardCredits: integer("reward_credits").default(0),
+  rewardType: varchar("reward_type", { length: 50 }), // signup_bonus, first_purchase, milestone
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index().on(table.referredId),
+  index().on(table.referrerId),
+]);
+
+export const referralRewards = pgTable("referral_rewards", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  rewardType: varchar("reward_type", { length: 50 }).notNull(), // referrer_signup, referred_signup, referrer_purchase, referred_purchase
+  creditAmount: integer("credit_amount").notNull(),
+  minimumPurchase: decimal("minimum_purchase", { precision: 10, scale: 2 }),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const referralStats = pgTable("referral_stats", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 255 }).notNull().references(() => users.id).unique(),
+  totalReferrals: integer("total_referrals").default(0),
+  successfulReferrals: integer("successful_referrals").default(0),
+  totalCreditsEarned: integer("total_credits_earned").default(0),
+  lastReferralAt: timestamp("last_referral_at"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertReferralCodeSchema = createInsertSchema(referralCodes);
+export const insertReferralSchema = createInsertSchema(referrals);
+export const insertReferralRewardSchema = createInsertSchema(referralRewards);
+export const insertReferralStatsSchema = createInsertSchema(referralStats);
+
+export type ReferralCode = typeof referralCodes.$inferSelect;
+export type InsertReferralCode = z.infer<typeof insertReferralCodeSchema>;
+export type Referral = typeof referrals.$inferSelect;
+export type InsertReferral = z.infer<typeof insertReferralSchema>;
+export type ReferralReward = typeof referralRewards.$inferSelect;
+export type InsertReferralReward = z.infer<typeof insertReferralRewardSchema>;
+export type ReferralStats = typeof referralStats.$inferSelect;
+export type InsertReferralStats = z.infer<typeof insertReferralStatsSchema>;
 
 // Relations
 export const usersRelations = relations(users, ({ many, one }) => ({

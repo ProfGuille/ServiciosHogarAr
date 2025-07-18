@@ -192,6 +192,24 @@ Preferred communication style: Simple, everyday language.
 - **API Endpoints**: Complete REST API for achievement management and progress tracking
 - **Database Schema**: achievements, user_achievements, and achievement_progress tables
 
+### Referral System (Completed - July 18, 2025)
+- **Unique Referral Codes**: 8-character alphanumeric codes generated for each user
+- **Viral Growth Mechanism**: Users share codes via WhatsApp, email, or direct links
+- **Reward Structure**: 
+  - New users receive 50 credits on signup with referral code
+  - Referrers earn 100 credits when referred user makes first purchase
+  - Milestone bonuses at 5 and 10 successful referrals (250 and 500 credits)
+- **Profile Integration**: Referral section in user profile with share card and history
+- **Tracking System**: Complete statistics including total referrals, successful conversions, and credits earned
+- **Frontend Components**:
+  - ReferralShareCard: Display code, stats, and sharing buttons
+  - ReferralHistory: List of all referred users with status tracking
+  - ReferralApply: Landing page for applying referral codes
+- **API Endpoints**: Complete REST API for code generation, application, and tracking
+- **Database Schema**: referral_codes, referrals, referral_rewards, and referral_stats tables
+- **Business Logic**: Prevents self-referrals, validates codes, and handles reward distribution
+- **Documentation**: Comprehensive implementation guide at docs/referral-system-guide.md
+
 ### Payment System (NEEDS REFACTORING)
 - **For Professionals**:
   - Mercado Pago for purchasing credits/memberships
@@ -222,6 +240,11 @@ Preferred communication style: Simple, everyday language.
 - **Achievements**: Gamification system with 15+ predefined achievements
 - **User Achievements**: Tracks earned achievements per user with notification status
 - **Achievement Progress**: Progressive achievement tracking
+- **Referral System Tables**:
+  - **Referral Codes**: Unique codes per user with optional expiration
+  - **Referrals**: Tracks referrer-referred relationships and rewards
+  - **Referral Rewards**: Configurable reward structure for different actions
+  - **Referral Stats**: Aggregated statistics per user
 
 ### Frontend Components
 - **Layout**: Responsive navbar, footer, and page layouts
