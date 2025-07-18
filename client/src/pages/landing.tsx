@@ -62,6 +62,7 @@ const serviceIcons = {
 export default function Landing() {
   const [searchQuery, setSearchQuery] = useState("");
   const [location, setLocation] = useState("");
+  const { t } = useTranslation();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -99,11 +100,10 @@ export default function Landing() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <h1 className="text-4xl lg:text-6xl font-bold mb-6">
-                Conectamos tu hogar con los mejores 
-                <span className="text-blue-200"> profesionales</span>
+                {t('landing.hero.title')}
               </h1>
               <p className="text-xl mb-8 text-blue-100">
-                Encuentra y contrata servicios de confianza para tu hogar. Profesionales verificados y garantía de calidad en toda Argentina. ¡Es gratis para ti!
+                {t('landing.hero.subtitle')}
               </p>
               
               {/* Search Bar */}

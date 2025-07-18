@@ -35,8 +35,19 @@ export default function LanguageSwitcher() {
       await i18n.changeLanguage(languageCode);
       setIsOpen(false);
       
-      // Optionally save preference to backend if user is authenticated
-      // await saveLanguagePreference(languageCode);
+      // Save preference to backend if user is authenticated
+      try {
+        await fetch('/api/user-language-preference', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ languageCode }),
+        });
+      } catch (error) {
+        // Silently fail if user is not authenticated or request fails
+        console.log('Could not save language preference:', error);
+      }
     } catch (error) {
       console.error('Error changing language:', error);
     }

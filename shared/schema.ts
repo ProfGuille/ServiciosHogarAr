@@ -10,6 +10,7 @@ import {
   decimal,
   boolean,
   uuid,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -499,10 +500,10 @@ export const translations = pgTable("translations", {
   pluralValue: text("plural_value"), // For plural forms
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-}, (table) => [
+}, (table) => ({
   // Unique constraint on key + language combination
-  { uniqueKeyLang: unique().on(table.key, table.languageCode) }
-]);
+  uniqueKeyLang: uniqueIndex("unique_key_lang").on(table.key, table.languageCode)
+}));
 
 export const localizedContent = pgTable("localized_content", {
   id: serial("id").primaryKey(),
@@ -521,10 +522,10 @@ export const localizedContent = pgTable("localized_content", {
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-}, (table) => [
+}, (table) => ({
   // Unique constraint on content + language combination
-  { uniqueContentLang: unique().on(table.contentType, table.contentId, table.languageCode) }
-]);
+  uniqueContentLang: uniqueIndex("unique_content_lang").on(table.contentType, table.contentId, table.languageCode)
+}));
 
 export const userLanguagePreferences = pgTable("user_language_preferences", {
   id: serial("id").primaryKey(),
@@ -533,10 +534,10 @@ export const userLanguagePreferences = pgTable("user_language_preferences", {
   isDefault: boolean("is_default").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-}, (table) => [
+}, (table) => ({
   // Unique constraint on user + language combination
-  { uniqueUserLang: unique().on(table.userId, table.languageCode) }
-]);
+  uniqueUserLang: uniqueIndex("unique_user_lang").on(table.userId, table.languageCode)
+}));
 
 // Multi-language schemas
 export const insertLanguageSchema = createInsertSchema(languages);
