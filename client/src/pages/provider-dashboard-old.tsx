@@ -509,12 +509,6 @@ export default function ProviderDashboard() {
                       <Skeleton key={i} className="h-32 w-full" />
                     ))}
                   </div>
-                ) : requests && requests.length > 0 ? (
-                  <div className="space-y-4">
-                    {requests.map((request: ServiceRequest) => (
-                      <Skeleton key={i} className="h-32 w-full" />
-                    ))}
-                  </div>
                 ) : filteredRequests && filteredRequests.length > 0 ? (
                   <div className="space-y-4">
                     {filteredRequests.map((request: ServiceRequest) => (
@@ -688,10 +682,10 @@ export default function ProviderDashboard() {
                     </CardContent>
                   </Card>
                 )}
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
 
       <Footer />

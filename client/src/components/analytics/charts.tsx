@@ -199,13 +199,3 @@ export function ProviderPerformanceChart({ data, height = 400 }: ChartProps) {
     </ResponsiveContainer>
   );
 }
-          dataKey="revenue" 
-          stroke="#ff7300" 
-          fill="#ff7300"
-          fillOpacity={0.3}
-          name="Ingresos Mensuales"
-        />
-      </AreaChart>
-    </ResponsiveContainer>
-  );
-}
