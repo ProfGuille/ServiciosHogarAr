@@ -661,6 +661,60 @@ export const insertLocationEventSchema = createInsertSchema(locationEvents);
 export type InsertLocationEvent = z.infer<typeof insertLocationEventSchema>;
 export type LocationEvent = typeof locationEvents.$inferSelect;
 
+// Achievement system
+export const achievements = pgTable("achievements", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description").notNull(),
+  category: varchar("category", { enum: ["customer", "provider", "platform", "special"] }).notNull(),
+  type: varchar("type", { enum: ["milestone", "streak", "quality", "engagement", "loyalty"] }).notNull(),
+  icon: varchar("icon", { length: 50 }).notNull(), // Icon name from lucide-react
+  color: varchar("color", { length: 50 }).notNull(), // Tailwind color class
+  criteria: jsonb("criteria").notNull(), // JSON object with achievement criteria
+  points: integer("points").default(10),
+  sortOrder: integer("sort_order").default(0),
+  isActive: boolean("is_active").default(true),
+  rarity: varchar("rarity", { enum: ["common", "uncommon", "rare", "epic", "legendary"] }).default("common"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const userAchievements = pgTable("user_achievements", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  achievementId: integer("achievement_id").notNull().references(() => achievements.id),
+  earnedAt: timestamp("earned_at").defaultNow(),
+  progress: integer("progress").default(0), // For progressive achievements
+  progressMax: integer("progress_max").default(1), // Total required for achievement
+  notified: boolean("notified").default(false),
+}, (table) => [
+  uniqueIndex("unique_user_achievement").on(table.userId, table.achievementId),
+  index("idx_user_achievements_user").on(table.userId),
+]);
+
+export const achievementProgress = pgTable("achievement_progress", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  achievementId: integer("achievement_id").notNull().references(() => achievements.id),
+  metric: varchar("metric", { length: 50 }).notNull(), // e.g., "bookings_count", "reviews_given"
+  value: integer("value").default(0),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+}, (table) => [
+  uniqueIndex("unique_user_achievement_metric").on(table.userId, table.achievementId, table.metric),
+]);
+
+// Achievement schemas
+export const insertAchievementSchema = createInsertSchema(achievements);
+export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
+export type Achievement = typeof achievements.$inferSelect;
+
+export const insertUserAchievementSchema = createInsertSchema(userAchievements);
+export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;
+export type UserAchievement = typeof userAchievements.$inferSelect;
+
+export const insertAchievementProgressSchema = createInsertSchema(achievementProgress);
+export type InsertAchievementProgress = z.infer<typeof insertAchievementProgressSchema>;
+export type AchievementProgress = typeof achievementProgress.$inferSelect;
+
 // Relations
 export const usersRelations = relations(users, ({ many, one }) => ({
   serviceProvider: one(serviceProviders, {
@@ -673,6 +727,8 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   providerConversations: many(conversations, { relationName: "ProviderConversations" }),
   givenReviews: many(reviews, { relationName: "GivenReviews" }),
   receivedReviews: many(reviews, { relationName: "ReceivedReviews" }),
+  achievements: many(userAchievements),
+  achievementProgress: many(achievementProgress),
 }));
 
 export const serviceProvidersRelations = relations(serviceProviders, ({ one, many }) => ({

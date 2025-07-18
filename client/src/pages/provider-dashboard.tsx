@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
+import { BadgeShowcase } from "@/components/ui/badge-showcase";
 import {
   Card,
   CardContent,
@@ -461,6 +462,12 @@ export default function ProviderDashboard() {
                   </div>
                 </CardContent>
               </Card>
+              
+              {/* Achievement Showcase */}
+              <BadgeShowcase 
+                userId={user?.id || ""} 
+                className="lg:col-span-2" 
+              />
             </div>
           </TabsContent>
 

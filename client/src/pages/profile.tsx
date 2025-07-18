@@ -4,9 +4,10 @@ import { Footer } from "@/components/layout/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { User, Mail, Phone, MapPin, Calendar } from "lucide-react";
+import { User, Mail, Phone, MapPin, Calendar, Trophy } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { AchievementGallery } from "@/components/achievements/achievement-gallery";
 
 export default function Profile() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -105,6 +106,19 @@ export default function Profile() {
 
           {/* Account Status */}
           <div className="space-y-6">
+            {/* Achievement Gallery */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Trophy className="h-5 w-5 text-yellow-500" />
+                  Mis Logros
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <AchievementGallery userId={user.id} />
+              </CardContent>
+            </Card>
+            
             <Card>
               <CardHeader>
                 <CardTitle>Estado de la Cuenta</CardTitle>

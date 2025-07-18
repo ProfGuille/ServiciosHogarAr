@@ -5,6 +5,8 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
+import { useAchievements } from "@/hooks/useAchievements";
+import { AchievementNotification } from "@/components/achievements/achievement-notification";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
@@ -59,9 +61,15 @@ import Messages from "@/pages/messages";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
+  const { currentAchievement, closeNotification } = useAchievements();
 
   return (
-    <Switch>
+    <>
+      <AchievementNotification 
+        achievement={currentAchievement} 
+        onClose={closeNotification} 
+      />
+      <Switch>
       {/* Public routes available to all users */}
       <Route path="/buscar" component={Search} />
       <Route path="/servicios" component={Services} />
@@ -122,7 +130,8 @@ function Router() {
         </>
       )}
       <Route component={NotFound} />
-    </Switch>
+      </Switch>
+    </>
   );
 }
 

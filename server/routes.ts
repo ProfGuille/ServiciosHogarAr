@@ -42,6 +42,8 @@ import { registerIntegrationRoutes } from './routes/integrations';
 import languageRoutes from './routes/languages';
 import geolocationRoutes from './routes/geolocation';
 import searchRoutes from './routes/search';
+import achievementRoutes from './routes/achievements';
+import { achievementService } from "./services/achievementService";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 import { 
@@ -74,6 +76,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Search routes
   app.use('/api', searchRoutes);
+
+  // Achievement routes
+  app.use('/api/achievements', achievementRoutes);
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
@@ -602,6 +607,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
+      // Check for achievements after creating a service request
+      achievementService.checkAndAwardAchievements(userId).catch(console.error);
+      
       res.status(201).json(request);
     } catch (error) {
       console.error("Error creating service request:", error);
@@ -796,6 +804,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
         
         const review = await storage.createReview(reviewData);
+        
+        // Check for achievements after creating a review
+        achievementService.checkAndAwardAchievements(userId).catch(console.error);
+        
         res.status(201).json(review);
       }
     } catch (error) {
