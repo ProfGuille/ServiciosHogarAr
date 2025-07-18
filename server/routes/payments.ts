@@ -5,6 +5,7 @@ import { payments, serviceProviders, users } from "@shared/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { isAuthenticated } from "../replitAuth";
 import { z } from "zod";
+import { notifyProviderCreditsPurchased } from "../services/email";
 
 // Initialize MercadoPago client
 let mercadopagoClient: MercadoPagoConfig | null = null;
@@ -299,6 +300,23 @@ export function registerPaymentRoutes(app: Express) {
                   updatedAt: new Date(),
                 })
                 .where(eq(serviceProviders.id, provider.id));
+              
+              // Send email notification for credit purchase
+              const user = await db
+                .select()
+                .from(users)
+                .where(eq(users.id, externalRef.userId))
+                .limit(1);
+              
+              if (user[0]?.email && externalRef.type === 'credits') {
+                const amount = paymentRecord.amount ? parseFloat(paymentRecord.amount) : 0;
+                notifyProviderCreditsPurchased(
+                  user[0].email,
+                  provider.businessName,
+                  externalRef.credits,
+                  amount
+                ).catch(console.error); // Don't wait for email
+              }
             }
           }
         }

@@ -39,6 +39,11 @@ import { registerAnalyticsRoutes } from './routes/analytics';
 import { registerPaymentRoutes } from './routes/payments';
 import { db } from "./db";
 import { eq } from "drizzle-orm";
+import { 
+  notifyProviderNewRequest, 
+  notifyCustomerProviderResponse,
+  sendWelcomeEmail 
+} from "./services/email";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -479,7 +484,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Admin can see all requests (no additional filters)
 
       const requests = await storage.getServiceRequests(filters);
-      res.json(requests);
+      
+      // Include provider and category information for each request
+      const enrichedRequests = await Promise.all(
+        requests.map(async (request) => {
+          const category = await storage.getServiceCategoryById(request.categoryId);
+          let provider = null;
+          
+          if (request.providerId) {
+            provider = await storage.getServiceProviderById(request.providerId);
+          }
+          
+          return {
+            ...request,
+            category,
+            provider
+          };
+        })
+      );
+      
+      res.json(enrichedRequests);
     } catch (error) {
       console.error("Error fetching service requests:", error);
       res.status(500).json({ message: "Failed to fetch service requests" });
@@ -526,6 +550,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       const request = await storage.createServiceRequest(requestData);
+      
+      // Get category name for the email
+      const categories = await storage.getServiceCategories();
+      const category = categories.find(c => c.id === request.categoryId);
+      
+      // Get customer details
+      const customer = await storage.getUser(userId);
+      
+      // Notify relevant providers about the new request
+      if (category && customer) {
+        // Get providers in the same city who offer this service
+        const providers = await storage.getServiceProviders({
+          city: request.city,
+          categoryId: request.categoryId,
+          isVerified: true,
+        });
+        
+        // Send email to each provider (in production, you might want to limit this)
+        for (const provider of providers.slice(0, 10)) { // Limit to first 10 providers
+          const providerUser = await storage.getUser(provider.userId);
+          if (providerUser?.email) {
+            notifyProviderNewRequest(
+              providerUser.email,
+              provider.businessName,
+              category.name,
+              customer.firstName || 'Cliente',
+              request.city
+            ).catch(console.error); // Don't wait for emails
+          }
+        }
+      }
+      
       res.status(201).json(request);
     } catch (error) {
       console.error("Error creating service request:", error);
@@ -635,6 +691,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         quotedPrice: quotedPrice?.toString()
       });
 
+      // Get customer and service details for email
+      const customer = await storage.getUser(updatedRequest.customerId);
+      const categories = await storage.getServiceCategories();
+      const category = categories.find(c => c.id === updatedRequest.categoryId);
+      
+      // Send email notification to customer
+      if (customer?.email && category) {
+        notifyCustomerProviderResponse(
+          customer.email,
+          customer.firstName || 'Cliente',
+          provider.businessName,
+          category.name,
+          quotedPrice
+        ).catch(console.error); // Don't wait for email
+      }
+      
       res.json({
         ...updatedRequest,
         remainingCredits: providerData.credits - 1

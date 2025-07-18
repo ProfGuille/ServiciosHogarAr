@@ -70,6 +70,18 @@ Preferred communication style: Simple, everyday language.
 - **Payment Processing**: Mercado Pago for credit purchases by professionals
 - **No Credit Expiration**: Credits never expire once purchased
 
+### Email Notification System (Completed - July 18, 2025)
+- **Built with Nodemailer**: Comprehensive email service with graceful fallback when not configured
+- **Email Templates**: Professional HTML templates for all key platform interactions
+- **Automated Notifications**:
+  - New service request alerts for providers with service details and location
+  - Customer notifications when providers respond with quoted prices
+  - Credit purchase confirmations with transaction details
+  - Welcome emails for new users (customers and providers)
+- **Configuration**: Requires EMAIL_HOST, EMAIL_USER, EMAIL_PASSWORD, EMAIL_FROM, EMAIL_PORT secrets
+- **Development Mode**: Logs email content to console when email service not configured
+- **Integration Points**: Service request creation, provider responses, payment confirmations, user registration
+
 ### Real-time Messaging System (Completed - July 18, 2025)
 - **WebSocket Integration**: Real-time bidirectional communication between users
 - **Conversation Management**: Grouped messaging with unread count tracking
@@ -129,6 +141,12 @@ Preferred communication style: Simple, everyday language.
   - `/servicios/carpinteria` - Carpentry services with custom work emphasis
 - **Booking System**: Multi-step booking form with validation
 - **Dashboards**: Role-specific dashboards (customer, provider, admin)
+- **My Requests Page** (Completed - July 18, 2025): Comprehensive customer dashboard for service requests
+  - Tabbed interface for filtering by status (All, Pending, Quoted, Accepted, Completed)
+  - Detailed request cards with status badges and provider information
+  - Request management actions: accept/reject quotes, cancel requests, leave reviews
+  - Direct messaging integration with providers
+  - Review system with star ratings and comments
 - **UI Library**: Comprehensive component library built on Radix UI
 
 ### API Structure
