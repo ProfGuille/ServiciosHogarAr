@@ -23,42 +23,42 @@ import {
   DollarSign
 } from "lucide-react";
 
-// Credit packages configuration
+// Credit packages configuration - must match backend configuration
 const creditPackages = [
   {
-    id: "pack-100",
+    id: "pack_100",
     credits: 100,
-    price: 9999,
+    price: 2000,
     popular: false,
-    description: "Ideal para empezar",
-    perCredit: 99.99,
+    description: "Ideal para comenzar",
+    perCredit: 20,
   },
   {
-    id: "pack-250",
+    id: "pack_250",
     credits: 250,
-    price: 22499,
+    price: 4500,
     popular: true,
-    description: "El más elegido",
-    perCredit: 89.99,
+    description: "Ahorra 10%",
+    perCredit: 18,
     savings: "10% ahorro",
   },
   {
-    id: "pack-500",
+    id: "pack_500",
     credits: 500,
-    price: 39999,
+    price: 8000,
     popular: false,
-    description: "Para profesionales activos",
-    perCredit: 79.99,
+    description: "Ahorra 20%",
+    perCredit: 16,
     savings: "20% ahorro",
   },
   {
-    id: "pack-1000",
+    id: "pack_1000",
     credits: 1000,
-    price: 69999,
+    price: 15000,
     popular: false,
-    description: "Máximo ahorro",
-    perCredit: 69.99,
-    savings: "30% ahorro",
+    description: "Mejor valor - Ahorra 25%",
+    perCredit: 15,
+    savings: "25% ahorro",
   },
 ];
 
@@ -141,7 +141,7 @@ export default function BuyCredits() {
   });
 
   const { data: creditBalance } = useQuery({
-    queryKey: ["/api/providers/me/credits"],
+    queryKey: ["/api/payments/credits"],
     enabled: isAuthenticated && user?.userType === 'provider',
   });
 
@@ -151,15 +151,14 @@ export default function BuyCredits() {
       const selectedPack = creditPackages.find(p => p.id === packageId);
       if (!selectedPack) throw new Error("Paquete no válido");
       
-      return await apiRequest("POST", "/api/credits/purchase", {
-        credits: selectedPack.credits,
-        amount: selectedPack.price,
+      return await apiRequest("POST", "/api/payments/create-credit-preference", {
         packageId: selectedPack.id,
+        returnUrl: window.location.href,
       });
     },
     onSuccess: (data) => {
-      if (data.mercadoPagoUrl) {
-        window.location.href = data.mercadoPagoUrl;
+      if (data.initPoint) {
+        window.location.href = data.initPoint;
       }
     },
     onError: (error) => {

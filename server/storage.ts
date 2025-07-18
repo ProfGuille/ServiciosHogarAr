@@ -50,6 +50,15 @@ export interface IStorage {
   addProviderCredits(providerId: number, credits: number, amount: number): Promise<void>;
   useProviderCredit(providerId: number): Promise<boolean>;
   
+  // Lead responses
+  createLeadResponse(data: {
+    serviceRequestId: number;
+    providerId: number;
+    creditsUsed: number;
+    responseMessage: string;
+    quotedPrice?: string;
+  }): Promise<any>;
+  
   // Service providers
   getServiceProviders(filters?: {
     city?: string;
@@ -240,6 +249,27 @@ export class DatabaseStorage implements IStorage {
     // For now, just update the credit balance
     
     return true;
+  }
+
+  // Lead responses
+  async createLeadResponse(data: {
+    serviceRequestId: number;
+    providerId: number;
+    creditsUsed: number;
+    responseMessage: string;
+    quotedPrice?: string;
+  }): Promise<any> {
+    const [response] = await db
+      .insert(leadResponses)
+      .values({
+        serviceRequestId: data.serviceRequestId,
+        providerId: data.providerId,
+        creditsUsed: data.creditsUsed,
+        responseMessage: data.responseMessage,
+        quotedPrice: data.quotedPrice,
+      })
+      .returning();
+    return response;
   }
 
   // Service providers

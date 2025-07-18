@@ -31,10 +31,14 @@ import {
   insertConversationSchema,
   insertMessageSchema,
   insertPaymentSchema,
+  serviceProviders,
 } from "@shared/schema";
 import { z } from "zod";
 import { initializeWebSocket } from "./websocket";
 import { registerAnalyticsRoutes } from './routes/analytics';
+import { registerPaymentRoutes } from './routes/payments';
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -42,6 +46,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Analytics routes (admin only)
   registerAnalyticsRoutes(app);
+  
+  // Payment routes for credit purchases
+  registerPaymentRoutes(app);
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
@@ -562,6 +569,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating service request:", error);
       res.status(500).json({ message: "Failed to update service request" });
+    }
+  });
+
+  // Provider responds to a service request (uses 1 credit)
+  app.post('/api/requests/:id/respond', isAuthenticated, async (req: any, res) => {
+    try {
+      const requestId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      // Get provider for this user
+      const provider = await storage.getServiceProviderByUserId(userId);
+      if (!provider) {
+        return res.status(404).json({ message: "Perfil de profesional no encontrado" });
+      }
+
+      // Check if provider has credits (using the new payment system)
+      const [providerData] = await db
+        .select()
+        .from(serviceProviders)
+        .where(eq(serviceProviders.id, provider.id))
+        .limit(1);
+      
+      if (!providerData.credits || providerData.credits < 1) {
+        return res.status(400).json({ 
+          message: "Créditos insuficientes. Necesitas al menos 1 crédito para responder.",
+          needsCredits: true,
+          currentCredits: providerData.credits || 0
+        });
+      }
+
+      const { response, quotedPrice } = req.body;
+      
+      // Validate quoted price if provided
+      if (quotedPrice && (typeof quotedPrice !== 'number' || quotedPrice < 0)) {
+        return res.status(400).json({ message: "Precio cotizado inválido" });
+      }
+
+      // Deduct 1 credit from provider
+      await db
+        .update(serviceProviders)
+        .set({
+          credits: providerData.credits - 1,
+          updatedAt: new Date()
+        })
+        .where(eq(serviceProviders.id, provider.id));
+
+      // Update the request with provider response
+      const updatedRequest = await storage.updateServiceRequest(requestId, {
+        providerId: provider.id,
+        status: 'quoted',
+        ...(quotedPrice && { estimatedBudget: quotedPrice.toString() })
+      });
+
+      if (!updatedRequest) {
+        return res.status(404).json({ message: "Solicitud de servicio no encontrada" });
+      }
+
+      // Create a lead response record
+      await storage.createLeadResponse({
+        serviceRequestId: requestId,
+        providerId: provider.id,
+        creditsUsed: 1,
+        responseMessage: response,
+        quotedPrice: quotedPrice?.toString()
+      });
+
+      res.json({
+        ...updatedRequest,
+        remainingCredits: providerData.credits - 1
+      });
+    } catch (error) {
+      console.error("Error responding to request:", error);
+      res.status(500).json({ message: "Error al responder a la solicitud" });
     }
   });
 

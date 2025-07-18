@@ -87,7 +87,7 @@ export default function ProviderDashboard() {
 
   // Get credit balance
   const { data: creditBalance } = useQuery({
-    queryKey: ["/api/providers/me/credits"],
+    queryKey: ["/api/payments/credits"],
     enabled: isAuthenticated && !!user?.id,
   });
 
@@ -121,7 +121,7 @@ export default function ProviderDashboard() {
       setResponseText("");
       setQuotedPrice("");
     },
-    onError: (error: Error) => {
+    onError: (error: any) => {
       if (isUnauthorizedError(error)) {
         toast({
           title: "Sesión expirada",
@@ -131,6 +131,26 @@ export default function ProviderDashboard() {
         setTimeout(() => window.location.href = "/api/login", 2000);
         return;
       }
+      
+      // Handle insufficient credits error
+      if (error.message?.includes("Créditos insuficientes")) {
+        toast({
+          title: "Créditos insuficientes",
+          description: "Necesitas comprar más créditos para responder a solicitudes.",
+          variant: "destructive",
+          action: (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => window.location.href = "/comprar-creditos"}
+            >
+              Comprar créditos
+            </Button>
+          ),
+        });
+        return;
+      }
+      
       toast({
         title: "Error",
         description: error.message || "No se pudo enviar la respuesta",
@@ -360,7 +380,7 @@ export default function ProviderDashboard() {
                   <div className="ml-4">
                     <p className="text-sm font-medium text-slate-600">Créditos disponibles</p>
                     <p className="text-2xl font-bold text-slate-900">
-                      {creditBalance ? creditBalance.currentCredits : 0}
+                      {creditBalance ? creditBalance.credits : 0}
                     </p>
                   </div>
                 </div>
