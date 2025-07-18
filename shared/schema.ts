@@ -476,6 +476,81 @@ export const insertPartnerIntegrationSchema = createInsertSchema(partnerIntegrat
 export type InsertPartnerIntegration = z.infer<typeof insertPartnerIntegrationSchema>;
 export type PartnerIntegration = typeof partnerIntegrations.$inferSelect;
 
+// Multi-language support tables
+export const languages = pgTable("languages", {
+  id: serial("id").primaryKey(),
+  code: varchar("code", { length: 5 }).notNull().unique(), // es, en, pt-BR
+  name: varchar("name", { length: 100 }).notNull(), // Español, English, Português
+  nativeName: varchar("native_name", { length: 100 }).notNull(), // Español, English, Português
+  flag: varchar("flag", { length: 10 }), // Flag emoji or icon
+  isActive: boolean("is_active").default(true),
+  isDefault: boolean("is_default").default(false),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const translations = pgTable("translations", {
+  id: serial("id").primaryKey(),
+  key: varchar("key", { length: 500 }).notNull(), // page.home.title, service.category.plumbing
+  languageCode: varchar("language_code", { length: 5 }).notNull().references(() => languages.code),
+  value: text("value").notNull(),
+  context: varchar("context", { length: 200 }), // Additional context for translators
+  isPlural: boolean("is_plural").default(false),
+  pluralValue: text("plural_value"), // For plural forms
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  // Unique constraint on key + language combination
+  { uniqueKeyLang: unique().on(table.key, table.languageCode) }
+]);
+
+export const localizedContent = pgTable("localized_content", {
+  id: serial("id").primaryKey(),
+  contentType: varchar("content_type", { 
+    enum: ["service_category", "service_description", "provider_bio", "page_content", "email_template"] 
+  }).notNull(),
+  contentId: varchar("content_id", { length: 100 }).notNull(), // Reference to original content
+  languageCode: varchar("language_code", { length: 5 }).notNull().references(() => languages.code),
+  title: varchar("title", { length: 500 }),
+  description: text("description"),
+  content: text("content"),
+  metaTitle: varchar("meta_title", { length: 160 }),
+  metaDescription: varchar("meta_description", { length: 320 }),
+  keywords: text("keywords"),
+  slug: varchar("slug", { length: 200 }),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  // Unique constraint on content + language combination
+  { uniqueContentLang: unique().on(table.contentType, table.contentId, table.languageCode) }
+]);
+
+export const userLanguagePreferences = pgTable("user_language_preferences", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  languageCode: varchar("language_code", { length: 5 }).notNull().references(() => languages.code),
+  isDefault: boolean("is_default").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  // Unique constraint on user + language combination
+  { uniqueUserLang: unique().on(table.userId, table.languageCode) }
+]);
+
+// Multi-language schemas
+export const insertLanguageSchema = createInsertSchema(languages);
+export type InsertLanguage = z.infer<typeof insertLanguageSchema>;
+export type Language = typeof languages.$inferSelect;
+
+export const insertTranslationSchema = createInsertSchema(translations);
+export type InsertTranslation = z.infer<typeof insertTranslationSchema>;
+export type Translation = typeof translations.$inferSelect;
+
+export const insertLocalizedContentSchema = createInsertSchema(localizedContent);
+export type InsertLocalizedContent = z.infer<typeof insertLocalizedContentSchema>;
+export type LocalizedContent = typeof localizedContent.$inferSelect;
+
 // Relations
 export const usersRelations = relations(users, ({ many, one }) => ({
   serviceProvider: one(serviceProviders, {

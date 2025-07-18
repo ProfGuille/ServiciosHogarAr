@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "@/components/ui/language-switcher";
 import { Button } from "@/components/ui/button";
 import { 
   DropdownMenu, 
@@ -28,22 +30,23 @@ export function Navbar() {
   const [location] = useLocation();
   const { user, isAuthenticated, isLoading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { t } = useTranslation();
 
   const isActive = (path: string) => location === path;
 
   const navigationLinks = [
-    { href: "/", label: "Inicio", icon: Home },
-    { href: "/servicios", label: "Servicios", icon: Search },
+    { href: "/", label: t('nav.home'), icon: Home },
+    { href: "/servicios", label: t('nav.services'), icon: Search },
   ];
 
   const authenticatedLinks = [
-    { href: "/mis-solicitudes", label: "Mis Solicitudes", icon: FileText },
-    { href: "/dashboard-profesional", label: "Dashboard", icon: Briefcase },
+    { href: "/mis-solicitudes", label: t('nav.requests'), icon: FileText },
+    { href: "/dashboard-profesional", label: t('nav.dashboard'), icon: Briefcase },
   ];
 
   const adminLinks = [
-    { href: "/admin", label: "Admin", icon: Shield },
-    { href: "/analytics", label: "Analytics", icon: BarChart },
+    { href: "/admin", label: t('nav.admin'), icon: Shield },
+    { href: "/analytics", label: t('nav.analytics'), icon: BarChart },
   ];
 
   const UserMenu = () => {
@@ -75,24 +78,24 @@ export function Navbar() {
           <DropdownMenuItem asChild>
             <Link href="/perfil">
               <User className="mr-2 h-4 w-4" />
-              Mi Perfil
+              {t('nav.profile')}
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href="/mis-solicitudes">
               <FileText className="mr-2 h-4 w-4" />
-              Mis Solicitudes
+              {t('nav.requests')}
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href="/dashboard-profesional">
               <Settings className="mr-2 h-4 w-4" />
-              Dashboard Profesional
+              {t('nav.dashboard')}
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => window.location.href = "/api/logout"}>
             <LogOut className="mr-2 h-4 w-4" />
-            Cerrar sesión
+            {t('nav.logout')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -160,7 +163,8 @@ export function Navbar() {
 
           {/* User Menu & Auth Buttons */}
           <div className="hidden md:block">
-            <div className="ml-4 flex items-center md:ml-6">
+            <div className="ml-4 flex items-center md:ml-6 space-x-4">
+              <LanguageSwitcher />
               {isLoading ? (
                 <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
               ) : isAuthenticated ? (
@@ -168,10 +172,10 @@ export function Navbar() {
               ) : (
                 <div className="flex items-center space-x-2">
                   <Button variant="ghost" onClick={() => window.location.href = "/api/login"}>
-                    Iniciar sesión
+                    {t('nav.login')}
                   </Button>
                   <Button onClick={() => window.location.href = "/api/login"}>
-                    Registrarse
+                    {t('nav.register')}
                   </Button>
                 </div>
               )}
