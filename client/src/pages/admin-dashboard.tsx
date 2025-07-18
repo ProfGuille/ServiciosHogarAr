@@ -36,7 +36,8 @@ import {
   Calendar,
   Settings,
   FileText,
-  BarChart3
+  BarChart3,
+  Globe
 } from "lucide-react";
 
 export default function AdminDashboard() {
@@ -167,6 +168,18 @@ export default function AdminDashboard() {
             </div>
             
             <div className="flex gap-3">
+              <a href="/analytics">
+                <Button variant="outline">
+                  <BarChart3 className="h-4 w-4 mr-2" />
+                  Analytics
+                </Button>
+              </a>
+              <a href="/admin/wordpress">
+                <Button variant="outline">
+                  <Globe className="h-4 w-4 mr-2" />
+                  WordPress
+                </Button>
+              </a>
               <Button variant="outline">
                 <Settings className="h-4 w-4 mr-2" />
                 Configuración

@@ -14,6 +14,7 @@ import ProviderProfile from "@/pages/provider-profile";
 import ProviderDashboard from "@/pages/provider-dashboard";
 import AdminDashboard from "@/pages/admin-dashboard";
 import AnalyticsDashboard from "@/pages/analytics-dashboard";
+import AdminWordPress from "@/pages/admin-wordpress";
 import MyRequests from "@/pages/my-requests";
 import Payment from "@/pages/payment";
 import PaymentMethods from "@/pages/payment-methods";
@@ -108,6 +109,7 @@ function Router() {
           <Route path="/dashboard-profesional" component={ProviderDashboard} />
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/analytics" component={AnalyticsDashboard} />
+          <Route path="/admin/wordpress" component={AdminWordPress} />
           <Route path="/mensajes" component={Messages} />
           <Route path="/perfil" component={Profile} />
           <Route path="/comprar-creditos" component={BuyCredits} />

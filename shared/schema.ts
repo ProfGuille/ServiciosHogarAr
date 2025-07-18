@@ -268,6 +268,89 @@ export const providerMetrics = pgTable("provider_metrics", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// WordPress Integration Tables
+export const wordpressContent = pgTable("wordpress_content", {
+  id: serial("id").primaryKey(),
+  wordpressId: integer("wordpress_id").unique(), // WordPress post/page ID
+  contentType: varchar("content_type", { enum: ["post", "page", "service", "category"] }).notNull(),
+  title: varchar("title", { length: 500 }).notNull(),
+  slug: varchar("slug", { length: 200 }).notNull().unique(),
+  content: text("content"),
+  excerpt: text("excerpt"),
+  featuredImage: varchar("featured_image"),
+  metaTitle: varchar("meta_title", { length: 160 }),
+  metaDescription: varchar("meta_description", { length: 320 }),
+  metaKeywords: text("meta_keywords"),
+  canonicalUrl: varchar("canonical_url"),
+  isPublished: boolean("is_published").default(false),
+  publishedAt: timestamp("published_at"),
+  lastSyncAt: timestamp("last_sync_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// SEO Metadata for dynamic pages
+export const seoMetadata = pgTable("seo_metadata", {
+  id: serial("id").primaryKey(),
+  pageType: varchar("page_type", { 
+    enum: ["home", "services", "service_detail", "provider_profile", "category", "location"] 
+  }).notNull(),
+  identifier: varchar("identifier"), // Category ID, Provider ID, etc.
+  title: varchar("title", { length: 160 }).notNull(),
+  description: varchar("description", { length: 320 }).notNull(),
+  keywords: text("keywords"),
+  canonicalUrl: varchar("canonical_url"),
+  ogTitle: varchar("og_title", { length: 160 }),
+  ogDescription: varchar("og_description", { length: 320 }),
+  ogImage: varchar("og_image"),
+  structuredData: jsonb("structured_data"), // JSON-LD schema
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// WordPress API Keys for secure communication
+export const wordpressApiKeys = pgTable("wordpress_api_keys", {
+  id: serial("id").primaryKey(),
+  keyName: varchar("key_name", { length: 100 }).notNull(),
+  apiKey: varchar("api_key", { length: 255 }).notNull().unique(),
+  permissions: text("permissions").array(), // Array of allowed operations
+  isActive: boolean("is_active").default(true),
+  lastUsedAt: timestamp("last_used_at"),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Content Sync Log
+export const contentSyncLog = pgTable("content_sync_log", {
+  id: serial("id").primaryKey(),
+  syncType: varchar("sync_type", { enum: ["import", "export", "update", "delete"] }).notNull(),
+  contentType: varchar("content_type", { enum: ["post", "page", "service", "category", "provider"] }).notNull(),
+  contentId: integer("content_id"),
+  wordpressId: integer("wordpress_id"),
+  status: varchar("status", { enum: ["pending", "success", "failed"] }).default("pending"),
+  errorMessage: text("error_message"),
+  syncData: jsonb("sync_data"), // Data that was synced
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// WordPress schema exports
+export const insertWordPressContentSchema = createInsertSchema(wordpressContent);
+export type InsertWordPressContent = z.infer<typeof insertWordPressContentSchema>;
+export type WordPressContent = typeof wordpressContent.$inferSelect;
+
+export const insertSEOMetadataSchema = createInsertSchema(seoMetadata);
+export type InsertSEOMetadata = z.infer<typeof insertSEOMetadataSchema>;
+export type SEOMetadata = typeof seoMetadata.$inferSelect;
+
+export const insertWordPressApiKeySchema = createInsertSchema(wordpressApiKeys);
+export type InsertWordPressApiKey = z.infer<typeof insertWordPressApiKeySchema>;
+export type WordPressApiKey = typeof wordpressApiKeys.$inferSelect;
+
+export const insertContentSyncLogSchema = createInsertSchema(contentSyncLog);
+export type InsertContentSyncLog = z.infer<typeof insertContentSyncLogSchema>;
+export type ContentSyncLog = typeof contentSyncLog.$inferSelect;
+
 // Relations
 export const usersRelations = relations(users, ({ many, one }) => ({
   serviceProvider: one(serviceProviders, {
