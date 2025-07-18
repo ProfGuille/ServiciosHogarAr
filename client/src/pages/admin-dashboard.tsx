@@ -180,6 +180,12 @@ export default function AdminDashboard() {
                   WordPress
                 </Button>
               </a>
+              <a href="/admin/integrations">
+                <Button variant="outline">
+                  <Activity className="h-4 w-4 mr-2" />
+                  Integrations
+                </Button>
+              </a>
               <Button variant="outline">
                 <Settings className="h-4 w-4 mr-2" />
                 Configuración

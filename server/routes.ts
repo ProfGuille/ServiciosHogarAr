@@ -38,6 +38,7 @@ import { initializeWebSocket } from "./websocket";
 import { registerAnalyticsRoutes } from './routes/analytics';
 import { registerPaymentRoutes } from './routes/payments';
 import { registerWordPressRoutes } from './routes/wordpress';
+import { registerIntegrationRoutes } from './routes/integrations';
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 import { 
@@ -58,6 +59,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // WordPress integration routes
   registerWordPressRoutes(app);
+
+  // Third-party integration routes
+  registerIntegrationRoutes(app);
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {

@@ -351,6 +351,131 @@ export const insertContentSyncLogSchema = createInsertSchema(contentSyncLog);
 export type InsertContentSyncLog = z.infer<typeof insertContentSyncLogSchema>;
 export type ContentSyncLog = typeof contentSyncLog.$inferSelect;
 
+// Third-party Integration Tables
+export const thirdPartyPartners = pgTable("third_party_partners", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 200 }).notNull(),
+  slug: varchar("slug", { length: 100 }).notNull().unique(),
+  description: text("description"),
+  website: varchar("website"),
+  contactEmail: varchar("contact_email"),
+  partnerType: varchar("partner_type", { 
+    enum: ["technology", "marketing", "service", "payment", "analytics", "crm", "other"] 
+  }).notNull(),
+  status: varchar("status", { enum: ["active", "pending", "suspended", "terminated"] }).default("pending"),
+  apiVersion: varchar("api_version", { length: 10 }).default("v1"),
+  isVerified: boolean("is_verified").default(false),
+  contractStartDate: timestamp("contract_start_date"),
+  contractEndDate: timestamp("contract_end_date"),
+  monthlyRequestLimit: integer("monthly_request_limit").default(10000),
+  webhookUrl: varchar("webhook_url"),
+  ipWhitelist: text("ip_whitelist").array(),
+  allowedScopes: text("allowed_scopes").array(), // Array of permission scopes
+  metadata: jsonb("metadata"), // Additional partner-specific data
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const partnerApiKeys = pgTable("partner_api_keys", {
+  id: serial("id").primaryKey(),
+  partnerId: integer("partner_id").notNull().references(() => thirdPartyPartners.id),
+  keyName: varchar("key_name", { length: 100 }).notNull(),
+  apiKey: varchar("api_key", { length: 255 }).notNull().unique(),
+  apiSecret: varchar("api_secret", { length: 255 }), // For OAuth-style authentication
+  keyType: varchar("key_type", { enum: ["api_key", "oauth", "jwt"] }).default("api_key"),
+  scopes: text("scopes").array(), // Specific permissions for this key
+  isActive: boolean("is_active").default(true),
+  lastUsedAt: timestamp("last_used_at"),
+  requestCount: integer("request_count").default(0),
+  monthlyRequestCount: integer("monthly_request_count").default(0),
+  rateLimit: integer("rate_limit").default(100), // Requests per minute
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const apiRequestLogs = pgTable("api_request_logs", {
+  id: serial("id").primaryKey(),
+  partnerId: integer("partner_id").references(() => thirdPartyPartners.id),
+  apiKeyId: integer("api_key_id").references(() => partnerApiKeys.id),
+  endpoint: varchar("endpoint", { length: 500 }).notNull(),
+  method: varchar("method", { enum: ["GET", "POST", "PUT", "PATCH", "DELETE"] }).notNull(),
+  statusCode: integer("status_code").notNull(),
+  responseTime: integer("response_time"), // in milliseconds
+  userAgent: varchar("user_agent"),
+  ipAddress: varchar("ip_address", { length: 45 }),
+  requestSize: integer("request_size"), // in bytes
+  responseSize: integer("response_size"), // in bytes
+  errorMessage: text("error_message"),
+  requestData: jsonb("request_data"), // For auditing purposes
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const webhookEvents = pgTable("webhook_events", {
+  id: serial("id").primaryKey(),
+  partnerId: integer("partner_id").notNull().references(() => thirdPartyPartners.id),
+  eventType: varchar("event_type", { 
+    enum: ["user.created", "provider.verified", "request.created", "request.completed", "payment.processed", "review.created"]
+  }).notNull(),
+  webhookUrl: varchar("webhook_url").notNull(),
+  payload: jsonb("payload").notNull(),
+  status: varchar("status", { enum: ["pending", "sent", "failed", "retrying"] }).default("pending"),
+  httpStatus: integer("http_status"),
+  responseBody: text("response_body"),
+  attemptCount: integer("attempt_count").default(0),
+  maxAttempts: integer("max_attempts").default(3),
+  nextRetryAt: timestamp("next_retry_at"),
+  deliveredAt: timestamp("delivered_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const partnerIntegrations = pgTable("partner_integrations", {
+  id: serial("id").primaryKey(),
+  partnerId: integer("partner_id").notNull().references(() => thirdPartyPartners.id),
+  integrationType: varchar("integration_type", { 
+    enum: ["webhook", "api_sync", "data_export", "sso", "payment_gateway", "analytics"] 
+  }).notNull(),
+  configData: jsonb("config_data"), // Integration-specific configuration
+  isEnabled: boolean("is_enabled").default(true),
+  lastSyncAt: timestamp("last_sync_at"),
+  syncFrequency: varchar("sync_frequency", { enum: ["real_time", "hourly", "daily", "weekly", "manual"] }).default("manual"),
+  errorCount: integer("error_count").default(0),
+  lastError: text("last_error"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Partnership analytics
+export const partnerAnalytics = pgTable("partner_analytics", {
+  id: serial("id").primaryKey(),
+  partnerId: integer("partner_id").notNull().references(() => thirdPartyPartners.id),
+  date: timestamp("date").notNull(),
+  apiRequests: integer("api_requests").default(0),
+  webhooksSent: integer("webhooks_sent").default(0),
+  webhooksDelivered: integer("webhooks_delivered").default(0),
+  dataExported: integer("data_exported").default(0), // Number of records
+  errors: integer("errors").default(0),
+  avgResponseTime: decimal("avg_response_time", { precision: 8, scale: 2 }),
+  bandwidthUsed: integer("bandwidth_used").default(0), // in bytes
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Third-party integration schemas
+export const insertThirdPartyPartnerSchema = createInsertSchema(thirdPartyPartners);
+export type InsertThirdPartyPartner = z.infer<typeof insertThirdPartyPartnerSchema>;
+export type ThirdPartyPartner = typeof thirdPartyPartners.$inferSelect;
+
+export const insertPartnerApiKeySchema = createInsertSchema(partnerApiKeys);
+export type InsertPartnerApiKey = z.infer<typeof insertPartnerApiKeySchema>;
+export type PartnerApiKey = typeof partnerApiKeys.$inferSelect;
+
+export const insertWebhookEventSchema = createInsertSchema(webhookEvents);
+export type InsertWebhookEvent = z.infer<typeof insertWebhookEventSchema>;
+export type WebhookEvent = typeof webhookEvents.$inferSelect;
+
+export const insertPartnerIntegrationSchema = createInsertSchema(partnerIntegrations);
+export type InsertPartnerIntegration = z.infer<typeof insertPartnerIntegrationSchema>;
+export type PartnerIntegration = typeof partnerIntegrations.$inferSelect;
+
 // Relations
 export const usersRelations = relations(users, ({ many, one }) => ({
   serviceProvider: one(serviceProviders, {
