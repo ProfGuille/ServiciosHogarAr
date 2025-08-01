@@ -1,0 +1,341 @@
+.
+├── attached_assets
+│   └── Pasted-chunk-RPCDYKBN-js-v-c94d345f-21551-Download-the-React-DevTools-for-a-better-development-experience--1752795330024_1752795330024.txt
+├── audit-funcionalidades-faltantes.md
+├── backend
+│   ├── cambios.txt
+│   ├── drizzle.config.ts
+│   ├── .env
+│   ├── errores-ts.txt
+│   ├── estado_git.txt
+│   ├── estructura.txt
+│   ├── eventType_snippet.ts
+│   ├── fix-import-extensions.mjs
+│   ├── fix-imports.sh
+│   ├── .gitignore
+│   ├── graph.svg
+│   ├── migrations
+│   │   ├── 0000_lonely_black_bird.sql
+│   │   └── meta
+│   │       ├── 0000_snapshot.json
+│   │       └── _journal.json
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── render.yaml
+│   ├── serviceProviders_snippet.ts
+│   ├── src
+│   │   ├── cleanup.ts
+│   │   ├── db.ts
+│   │   ├── drizzle-fix.d.ts
+│   │   ├── global.d.ts
+│   │   ├── index.ts
+│   │   ├── replitAuth.ts
+│   │   ├── routes
+│   │   │   ├── achievements.ts
+│   │   │   ├── analytics.ts
+│   │   │   ├── categories.ts
+│   │   │   ├── geolocation.ts
+│   │   │   ├── index.ts
+│   │   │   ├── integrations.ts
+│   │   │   ├── languages.ts
+│   │   │   ├── payments.ts
+│   │   │   ├── referrals.ts
+│   │   │   ├── search.ts
+│   │   │   ├── test.ts
+│   │   │   └── wordpress.ts
+│   │   ├── seeders
+│   │   │   ├── seed-achievements.ts
+│   │   │   ├── seed-analytics.ts
+│   │   │   ├── seed-categories.ts
+│   │   │   ├── seed-languages.ts
+│   │   │   └── seed-referral-rewards.ts
+│   │   ├── services
+│   │   │   ├── achievementService.ts
+│   │   │   ├── email.ts
+│   │   │   ├── geolocation.ts
+│   │   │   ├── referralService.ts
+│   │   │   ├── searchService.ts
+│   │   │   ├── search.ts
+│   │   │   ├── seo.ts
+│   │   │   └── webhook.ts
+│   │   ├── shared
+│   │   │   ├── Documento sin título
+│   │   │   ├── eventType_snippet.ts
+│   │   │   ├── schema
+│   │   │   │   ├── achievements.ts
+│   │   │   │   ├── appointments.ts
+│   │   │   │   ├── categories.ts
+│   │   │   │   ├── clients.ts
+│   │   │   │   ├── conversations.ts
+│   │   │   │   ├── events.ts
+│   │   │   │   ├── geofences.ts
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── locations.ts
+│   │   │   │   ├── messages.ts
+│   │   │   │   ├── payments.ts
+│   │   │   │   ├── reviews.ts
+│   │   │   │   ├── serviceProviders.ts
+│   │   │   │   ├── serviceRequests.ts
+│   │   │   │   ├── services.ts
+│   │   │   │   ├── users.ts
+│   │   │   │   └── webhooks.ts
+│   │   │   ├── schema_RECUPERADO.ts
+│   │   │   ├── schema.ts
+│   │   │   ├── serviceProviders_snippet.ts
+│   │   │   └── tsconfig.json
+│   │   ├── storage.ts
+│   │   ├── test-db.ts
+│   │   ├── testInsert.ts
+│   │   ├── testTypes.ts
+│   │   └── websocket.ts
+│   ├── src-clean
+│   │   ├── db.ts
+│   │   ├── index.ts
+│   │   ├── shared
+│   │   │   ├── Documento sin título
+│   │   │   ├── schema.ts
+│   │   │   └── tsconfig.json
+│   │   └── storage.ts
+│   ├── start-dev.sh
+│   ├── test-schema.ts
+│   ├── tsconfig.json
+│   └── tsconfig.tsbuildinfo
+├── check_shared.sh
+├── components.json
+├── .config
+│   └── npm
+│       └── node_global
+│           └── lib
+├── docs
+│   ├── advanced-search-system.md
+│   ├── api-integration-guide.md
+│   ├── gamification-achievement-system.md
+│   ├── referral-system-guide.md
+│   └── wordpress-integration.md
+├── e2e-test-runner.js
+├── estructura_actual.txt
+├── estructura.txt
+├── fix-all.sh
+├── fix-imports.sh
+├── fix-ts.sh
+├── frontend
+│   ├── index.html
+│   ├── postcss.config.js
+│   ├── src
+│   │   ├── App.tsx
+│   │   ├── components
+│   │   │   ├── achievements
+│   │   │   │   ├── achievement-badge.tsx
+│   │   │   │   ├── achievement-gallery.tsx
+│   │   │   │   └── achievement-notification.tsx
+│   │   │   ├── analytics
+│   │   │   │   └── charts.tsx
+│   │   │   ├── booking
+│   │   │   │   └── booking-form.tsx
+│   │   │   ├── chat
+│   │   │   │   ├── ChatWindow.tsx
+│   │   │   │   ├── ConversationList.tsx
+│   │   │   │   └── StartConversationButton.tsx
+│   │   │   ├── layout
+│   │   │   │   ├── footer.tsx
+│   │   │   │   ├── navbar.tsx
+│   │   │   │   └── seo-head.tsx
+│   │   │   ├── provider
+│   │   │   │   ├── availability-calendar.tsx
+│   │   │   │   ├── earnings-overview.tsx
+│   │   │   │   └── service-management.tsx
+│   │   │   ├── providers
+│   │   │   │   └── provider-card.tsx
+│   │   │   ├── referral
+│   │   │   │   ├── referral-history.tsx
+│   │   │   │   └── referral-share-card.tsx
+│   │   │   ├── reviews
+│   │   │   │   ├── review-form.tsx
+│   │   │   │   └── reviews-list.tsx
+│   │   │   ├── search
+│   │   │   │   ├── advanced-search-filters.tsx
+│   │   │   │   ├── search-bar.tsx
+│   │   │   │   └── search-results.tsx
+│   │   │   ├── services
+│   │   │   │   ├── service-card.tsx
+│   │   │   │   └── service-search.tsx
+│   │   │   └── ui
+│   │   │       ├── accordion.tsx
+│   │   │       ├── alert-dialog.tsx
+│   │   │       ├── alert.tsx
+│   │   │       ├── aspect-ratio.tsx
+│   │   │       ├── avatar.tsx
+│   │   │       ├── badge-showcase.tsx
+│   │   │       ├── badge.tsx
+│   │   │       ├── breadcrumb.tsx
+│   │   │       ├── button.tsx
+│   │   │       ├── calendar.tsx
+│   │   │       ├── card.tsx
+│   │   │       ├── carousel.tsx
+│   │   │       ├── chart.tsx
+│   │   │       ├── checkbox.tsx
+│   │   │       ├── collapsible.tsx
+│   │   │       ├── command.tsx
+│   │   │       ├── context-menu.tsx
+│   │   │       ├── dialog.tsx
+│   │   │       ├── drawer.tsx
+│   │   │       ├── dropdown-menu.tsx
+│   │   │       ├── form.tsx
+│   │   │       ├── hover-card.tsx
+│   │   │       ├── input-otp.tsx
+│   │   │       ├── input.tsx
+│   │   │       ├── label.tsx
+│   │   │       ├── language-switcher.tsx
+│   │   │       ├── location-tracker.tsx
+│   │   │       ├── menubar.tsx
+│   │   │       ├── navigation-menu.tsx
+│   │   │       ├── pagination.tsx
+│   │   │       ├── popover.tsx
+│   │   │       ├── progress.tsx
+│   │   │       ├── radio-group.tsx
+│   │   │       ├── resizable.tsx
+│   │   │       ├── route-planner.tsx
+│   │   │       ├── scroll-area.tsx
+│   │   │       ├── select.tsx
+│   │   │       ├── separator.tsx
+│   │   │       ├── sheet.tsx
+│   │   │       ├── sidebar.tsx
+│   │   │       ├── skeleton.tsx
+│   │   │       ├── slider.tsx
+│   │   │       ├── switch.tsx
+│   │   │       ├── table.tsx
+│   │   │       ├── tabs.tsx
+│   │   │       ├── textarea.tsx
+│   │   │       ├── toaster.tsx
+│   │   │       ├── toast.tsx
+│   │   │       ├── toggle-group.tsx
+│   │   │       ├── toggle.tsx
+│   │   │       └── tooltip.tsx
+│   │   ├── hooks
+│   │   │   ├── useAchievements.ts
+│   │   │   ├── useAnalytics.ts
+│   │   │   ├── useAuth.ts
+│   │   │   ├── use-debounce.tsx
+│   │   │   ├── use-mobile.tsx
+│   │   │   ├── use-toast.ts
+│   │   │   └── useWebSocket.ts
+│   │   ├── index.css
+│   │   ├── lib
+│   │   │   ├── authUtils.ts
+│   │   │   ├── i18n.ts
+│   │   │   ├── queryClient.ts
+│   │   │   └── utils.ts
+│   │   ├── main.tsx
+│   │   └── pages
+│   │       ├── about.tsx
+│   │       ├── admin-dashboard.tsx
+│   │       ├── admin-integrations.tsx
+│   │       ├── admin-wordpress.tsx
+│   │       ├── analytics-dashboard.tsx
+│   │       ├── blog.tsx
+│   │       ├── buy-credits.tsx
+│   │       ├── carreras.tsx
+│   │       ├── centro-ayuda.tsx
+│   │       ├── como-funciona.tsx
+│   │       ├── contacto-fixed.tsx
+│   │       ├── geolocation-dashboard.tsx
+│   │       ├── home.tsx
+│   │       ├── landing.tsx
+│   │       ├── messages.tsx
+│   │       ├── my-requests.tsx
+│   │       ├── not-found.tsx
+│   │       ├── payment-methods.tsx
+│   │       ├── payment-success.tsx
+│   │       ├── payment.tsx
+│   │       ├── precios.tsx
+│   │       ├── prensa.tsx
+│   │       ├── privacidad.tsx
+│   │       ├── profile.tsx
+│   │       ├── provider-dashboard-old.tsx
+│   │       ├── provider-dashboard.tsx
+│   │       ├── provider-profile.tsx
+│   │       ├── referral-apply.tsx
+│   │       ├── search.tsx
+│   │       ├── seguridad.tsx
+│   │       ├── service-detail.tsx
+│   │       ├── services.tsx
+│   │       ├── servicios-albanil.tsx
+│   │       ├── servicios-carpinteria.tsx
+│   │       ├── servicios-cerrajero.tsx
+│   │       ├── servicios-electricidad.tsx
+│   │       ├── servicios-fumigador.tsx
+│   │       ├── servicios-gasista.tsx
+│   │       ├── servicios-herrero.tsx
+│   │       ├── servicios-instalador-solar.tsx
+│   │       ├── servicios-jardineria.tsx
+│   │       ├── servicios-limpieza.tsx
+│   │       ├── servicios-mudanzas.tsx
+│   │       ├── servicios-pequenos-arreglos.tsx
+│   │       ├── servicios-pintura.tsx
+│   │       ├── servicios-plomeria.tsx
+│   │       ├── servicios-tapicero.tsx
+│   │       ├── servicios-techista.tsx
+│   │       ├── servicios-tecnico-aire.tsx
+│   │       ├── servicios-tecnico-pc.tsx
+│   │       ├── servicios-vidriero.tsx
+│   │       ├── terminos.tsx
+│   │       └── test-payments.tsx
+│   ├── tailwind.config.ts
+│   └── vite.config.ts
+├── frontend-test-checklist.md
+├── .gitignore
+├── limpiar.sh
+├── package.json
+├── package-lock.json
+├── progreso-implementacion-critico.md
+├── .replit
+├── replit.md
+├── server
+│   └── routes.ts
+├── src-backup
+│   ├── db.ts
+│   ├── drizzle-fix.d.ts
+│   ├── global.d.ts
+│   ├── index.ts
+│   ├── replitAuth.ts
+│   ├── routes
+│   │   ├── achievements.ts
+│   │   ├── analytics.ts
+│   │   ├── geolocation.ts
+│   │   ├── index.ts
+│   │   ├── integrations.ts
+│   │   ├── languages.ts
+│   │   ├── payments.ts
+│   │   ├── referrals.ts
+│   │   ├── search.ts
+│   │   ├── test.ts
+│   │   └── wordpress.ts
+│   ├── seeders
+│   │   ├── seed-achievements.ts
+│   │   ├── seed-analytics.ts
+│   │   ├── seed-categories.ts
+│   │   ├── seed-languages.ts
+│   │   └── seed-referral-rewards.ts
+│   ├── services
+│   │   ├── achievementService.ts
+│   │   ├── email.ts
+│   │   ├── geolocation.ts
+│   │   ├── referralService.ts
+│   │   ├── searchService.ts
+│   │   ├── search.ts
+│   │   ├── seo.ts
+│   │   └── webhook.ts
+│   ├── shared
+│   │   ├── Documento sin título
+│   │   ├── schema.ts
+│   │   └── tsconfig.json
+│   ├── storage.ts
+│   ├── test-db.ts
+│   └── websocket.ts
+├── test-payment-flows.md
+├── test-results-summary.md
+├── test-scenarios.json
+├── tsconfig.json
+└── tsconfig.tsbuildinfo
+
+42 directories, 297 files
