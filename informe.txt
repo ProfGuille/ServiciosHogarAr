@@ -1,0 +1,122 @@
+===== INFORME ESTADO DEL PROYECTO ServiciosHogar.com.ar =====
+
+[1] 🔧 Archivos modificados (sin commitear):
+En la rama main
+Tu rama está actualizada con 'origin/main'.
+
+Cambios no rastreados para el commit:
+  (usa "git add <archivo>..." para actualizar lo que será confirmado)
+  (usa "git restore <archivo>..." para descartar los cambios en el directorio de trabajo)
+	modificados:     package.json
+
+Archivos sin seguimiento:
+  (usa "git add <archivo>..." para incluirlo a lo que será confirmado)
+	informe.txt
+
+sin cambios agregados al commit (usa "git add" y/o "git commit -a")
+
+[2] 🔁 Últimos commits:
+b09e030 Corrijo configuración .env, estructura del servidor y registro de rutas
+c66b2c7 Mover tsconfig.json a backend y ajustar configuración para deploy en Render
+9ce3fa6 Primer commit del monorepo completo ServiciosHogarAr
+59d5ea6 Refine achievement display and tailor referral bonuses to user roles
+bc3fc16 Improve the appearance and fix text issues on user profile page
+
+[3] 📦 Archivos package.json (scripts y dependencias):
+{
+  "scripts": {
+    "dev": "tsx -r tsconfig-paths/register -r dotenv/config src/index.ts --watch",
+    "dev:nw": "tsx -r tsconfig-paths/register -r dotenv/config src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "check": "tsc --noEmit",
+    "db:push": "drizzle-kit push"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.1",
+    "bcrypt": "^5.1.1",
+    "connect-pg-simple": "^10.0.0",
+    "cors": "^2.8.5",
+    "date-fns": "^3.6.0",
+    "dotenv": "^17.2.0",
+    "drizzle-orm": "^0.44.4",
+    "drizzle-zod": "^0.7.0",
+    "express": "^4.21.2",
+    "express-rate-limit": "^8.0.1",
+    "express-session": "^1.18.1",
+    "memorystore": "^1.6.7",
+    "mercadopago": "^2.8.0",
+    "mysql2": "^3.14.2",
+    "nanoid": "^5.1.5",
+    "nodemailer": "^7.0.5",
+    "openid-client": "^6.6.2",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0",
+    "ws": "^8.18.3",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/connect-pg-simple": "^7.0.3",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^4.17.21",
+    "@types/express-session": "^1.18.0",
+    "@types/memoizee": "^0.4.12",
+    "@types/node": "^20.16.11",
+    "@types/nodemailer": "^6.4.17",
+    "@types/passport": "^1.0.16",
+    "@types/passport-local": "^1.0.38",
+    "@types/ws": "^8.18.1",
+    "drizzle-kit": "^0.31.4",
+    "madge": "^8.0.0",
+    "ts-node-dev": "^2.0.0",
+    "tsc-alias": "^1.8.16",
+    "tsconfig-paths": "^4.2.0",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  }
+}
+
+[4] 🌐 Archivo .env (ocultando datos sensibles):
+DATABASE_URL=postgresql://neondb_owner:npg_5qKPHc8ILoMN@ep-small-smoke-acoozuz2-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+PORT=5000
+
+
+[5] 🧠 Base de datos (Neon): URL encontrada en .env:
+DATABASE_URL=postgresql://neondb_owner:npg_5qKPHc8ILoMN@ep-small-smoke-acoozuz2-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+
+[6] 🛠 Backend desplegado en Render (configuración):
+Verificar en: https://dashboard.render.com/deploy/srv-...
+
+[7] 🌍 Frontend desplegado en Hostinger:
+Verificar dominio: https://servicioshogar.com.ar
+
+[8] 👥 Instrucciones para desarrolladores externos:
+1. Clonar repositorio:
+   git clone https://github.com/TU_USUARIO/TU_REPO.git
+
+2. Entrar a carpeta del proyecto:
+   cd ServiciosHogarAr
+
+3. Configurar entorno:
+   Crear archivo .env en /backend con las siguientes variables:
+     - DATABASE_URL=postgresql://...
+     - JWT_SECRET=...
+     - FRONTEND_URL=https://servicioshogar.com.ar
+
+4. Ejecutar backend local:
+   cd backend
+   npm install
+   npm run dev
+
+5. Ejecutar frontend local:
+   cd ../frontend
+   npm install
+   npm run dev
+
+6. Revisión de esquema de base de datos (Drizzle):
+   Ver carpeta backend/src/shared/schema
+
+7. Infraestructura:
+   - Base de datos en Neon.tech
+   - Backend en Render.com
+   - Frontend en Hostinger

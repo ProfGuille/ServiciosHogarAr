@@ -5,9 +5,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-  "dev": "tsx --tsconfig backend/tsconfig.json --require tsconfig-paths/register backend/src/dev.ts"
-
-
+    "dev": "cd backend && npm run dev"
 
 
   },
