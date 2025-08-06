@@ -1,0 +1,70 @@
+.
+├── cambios.txt
+├── drizzle.config.ts
+├── .env
+├── estructura.txt
+├── fix-import-extensions.mjs
+├── fix-imports.sh
+├── migrations
+│   ├── 0000_lonely_black_bird.sql
+│   └── meta
+│       ├── 0000_snapshot.json
+│       └── _journal.json
+├── package.json
+├── package-lock.json
+├── src
+│   ├── db.ts
+│   ├── drizzle-fix.d.ts
+│   ├── global.d.ts
+│   ├── index.ts
+│   ├── replitAuth.ts
+│   ├── routes
+│   │   ├── achievements.ts
+│   │   ├── analytics.ts
+│   │   ├── geolocation.ts
+│   │   ├── index.ts
+│   │   ├── integrations.ts
+│   │   ├── languages.ts
+│   │   ├── payments.ts
+│   │   ├── referrals.ts
+│   │   ├── search.ts
+│   │   ├── test.ts
+│   │   └── wordpress.ts
+│   ├── seeders
+│   │   ├── seed-achievements.ts
+│   │   ├── seed-analytics.ts
+│   │   ├── seed-categories.ts
+│   │   ├── seed-languages.ts
+│   │   └── seed-referral-rewards.ts
+│   ├── services
+│   │   ├── achievementService.ts
+│   │   ├── email.ts
+│   │   ├── geolocation.ts
+│   │   ├── referralService.ts
+│   │   ├── searchService.ts
+│   │   ├── search.ts
+│   │   ├── seo.ts
+│   │   └── webhook.ts
+│   ├── shared
+│   │   ├── Documento sin título
+│   │   ├── schema.ts
+│   │   └── tsconfig.json
+│   ├── storage.ts
+│   ├── test-db.ts
+│   ├── testInsert.ts
+│   ├── testTypes.ts
+│   └── websocket.ts
+├── src-clean
+│   ├── db.ts
+│   ├── index.ts
+│   ├── shared
+│   │   ├── Documento sin título
+│   │   ├── schema.ts
+│   │   └── tsconfig.json
+│   └── storage.ts
+├── start-dev.sh
+├── test-schema.ts
+├── tsconfig.json
+└── tsconfig.tsbuildinfo
+
+10 directories, 58 files
