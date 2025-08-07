@@ -61,6 +61,7 @@ import ServiciosInstaladorSolar from "@/pages/servicios-instalador-solar";
 import Messages from "@/pages/messages";
 import ReferralApply from "@/pages/referral-apply";
 import Register from "@/pages/register";
+import LegalCompliance from "@/pages/legal-compliance";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -77,6 +78,7 @@ function Router() {
       <Route path="/buscar" component={Search} />
       <Route path="/servicios" component={Services} />
       <Route path="/register" component={Register} />
+      <Route path="/legal-compliance" component={LegalCompliance} />
       <Route path="/referral" component={ReferralApply} />
       <Route path="/servicios/:id" component={ServiceDetail} />
       <Route path="/profesional/:id" component={ProviderProfile} />

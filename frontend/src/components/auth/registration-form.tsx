@@ -68,6 +68,8 @@ export function RegistrationForm({ onRegister, isLoading = false }: Registration
       newErrors.password = "La contraseña es obligatoria";
     } else if (formData.password.length < 8) {
       newErrors.password = "La contraseña debe tener al menos 8 caracteres";
+    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
+      newErrors.password = "La contraseña debe contener al menos una mayúscula, una minúscula y un número";
     }
 
     // Required legal acceptances
@@ -155,6 +157,9 @@ export function RegistrationForm({ onRegister, isLoading = false }: Registration
               className={errors.password ? "border-red-500" : ""}
             />
             {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
+            <p className="text-xs text-slate-500">
+              Mínimo 8 caracteres, incluye mayúscula, minúscula y número
+            </p>
           </div>
 
           {/* Legal Compliance Section */}

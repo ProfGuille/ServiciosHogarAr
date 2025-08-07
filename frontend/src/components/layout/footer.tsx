@@ -158,6 +158,9 @@ export function Footer() {
               <Link href="/aviso-legal" className="text-slate-400 hover:text-primary transition-colors">
                 Aviso Legal
               </Link>
+              <Link href="/legal-compliance" className="text-slate-400 hover:text-primary transition-colors">
+                Mis Datos
+              </Link>
               <Link href="/contacto" className="text-slate-400 hover:text-primary transition-colors">
                 Contacto
               </Link>
