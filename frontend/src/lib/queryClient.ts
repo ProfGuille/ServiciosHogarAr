@@ -1,5 +1,12 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
+// Get API URL from environment variables
+const API_BASE_URL = import.meta.env.VITE_API_URL || (
+  import.meta.env.DEV 
+    ? 'http://localhost:5000'
+    : 'https://servicioshogar-backend.onrender.com'
+);
+
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
@@ -12,7 +19,10 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const res = await fetch(url, {
+  // Ensure URL is absolute
+  const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
+  
+  const res = await fetch(fullUrl, {
     method,
     headers: data ? { "Content-Type": "application/json" } : {},
     body: data ? JSON.stringify(data) : undefined,
@@ -29,7 +39,11 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey.join("/") as string, {
+    const endpoint = queryKey.join("/") as string;
+    // Ensure URL is absolute
+    const fullUrl = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}/${endpoint}`;
+    
+    const res = await fetch(fullUrl, {
       credentials: "include",
     });
 
