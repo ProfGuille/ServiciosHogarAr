@@ -1,19 +1,8 @@
-import dotenv from "dotenv";
-dotenv.config();
+import { db } from "./db.js";
+import { languages } from "./shared/schema";
 
-import { pool } from "./db.js";
-
-async function testConnection() {
-  try {
-    // Ejecutamos una consulta simple para probar la conexión
-    const result = await pool.query("SELECT NOW()");
-    console.log("Conexión exitosa, hora actual:", result.rows[0]);
-  } catch (error) {
-    console.error("Error conectando a la base de datos:", error);
-  } finally {
-    await pool.end(); // Cerramos la conexión
-  }
+export async function testDb() {
+  // Prueba seleccionando 1 registro de una tabla real
+  await db.select().from(languages).limit(1);
+  return true;
 }
-
-testConnection();
-

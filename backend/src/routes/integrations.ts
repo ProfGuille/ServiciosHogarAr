@@ -6,12 +6,19 @@ const router = Router();
 
 router.get("/", async (req, res) => {
   try {
-    // Verifica que los campos existan en tu schema
     const providers = await db
       .select({
         id: serviceProviders.id,
-        name: serviceProviders.name,
-        createdAt: serviceProviders.createdAt,
+        businessName: serviceProviders.businessName,
+        description: serviceProviders.description,
+        city: serviceProviders.city,
+        province: serviceProviders.province,
+        hourlyRate: serviceProviders.hourlyRate,
+        rating: serviceProviders.rating,
+        totalReviews: serviceProviders.totalReviews,
+        isActive: serviceProviders.isActive,
+        isVerified: serviceProviders.isVerified,
+        experienceYears: serviceProviders.experienceYears,
       })
       .from(serviceProviders);
 

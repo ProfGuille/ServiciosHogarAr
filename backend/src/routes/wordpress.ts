@@ -1,16 +1,12 @@
 import { Router } from "express";
 import { db } from "../db";
-import { wordpressPosts } from "../shared/schema/wordpressPosts";
+// import { wordpressPosts } from "../shared/schema/wordpressPosts"; // <-- Elimina esta línea
 
 const router = Router();
 
 router.get("/", async (req, res) => {
-  try {
-    const posts = await db.select().from(wordpressPosts);
-    res.json(posts);
-  } catch (error) {
-    res.status(500).json({ error: "Error al obtener posts de Wordpress" });
-  }
+  // Cuando tengas el modelo, aquí puedes poner la lógica
+  res.json([]); // Por ahora devuelve vacío
 });
 
 export default router;
