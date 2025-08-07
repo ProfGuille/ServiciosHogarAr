@@ -26,7 +26,7 @@ import {
   sum, 
   avg 
 } from "drizzle-orm";
-import { isAuthenticated } from "../replitAuth";
+// import { isAuthenticated } from "../replitAuth";
 
 export function registerAnalyticsRoutes(app: Express) {
   // Platform Overview Statistics

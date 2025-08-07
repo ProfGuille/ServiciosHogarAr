@@ -44,10 +44,6 @@ Thumbs.db
 .expo/
 .expo-shared/
 
-# Replit
-.replit
-replit.nix
-
 # Otros
 *.tgz
 

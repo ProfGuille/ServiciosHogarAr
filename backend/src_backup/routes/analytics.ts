@@ -26,7 +26,7 @@ import {
   avg,
   inArray
 } from "drizzle-orm";
-import { isAuthenticated } from "../replitAuth.js";
+// import { isAuthenticated } from "../replitAuth.js";
 
 export function registerAnalyticsRoutes(app: Express) {
   // Platform Overview Statistics

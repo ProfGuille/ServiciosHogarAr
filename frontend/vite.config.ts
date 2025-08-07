@@ -1,6 +1,10 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
+# <<<<<<< copilot/fix-500c9e2a-77dc-4336-b7f8-018cdbfecf16
+
+# =======
+# >>>>>>> main
 
 const backendPort = Number(process.env.BACKEND_PORT) || 5000;
 

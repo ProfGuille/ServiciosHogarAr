@@ -25,7 +25,7 @@ import {
   gte,
   like,
 } from "drizzle-orm";
-import { isAuthenticated } from "../replitAuth.js";
+// import { isAuthenticated } from "../replitAuth.js";
 import crypto from "crypto";
 import { rateLimit } from "express-rate-limit";
 
