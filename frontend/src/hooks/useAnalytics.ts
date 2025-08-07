@@ -1,5 +1,8 @@
 import { useAuth } from './useAuth';
 
+// Get the API base URL from environment variables
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+
 // Generate a session ID for analytics tracking
 const generateSessionId = () => {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -23,7 +26,7 @@ export function useAnalytics() {
     metadata: Record<string, any> = {}
   ) => {
     try {
-      await fetch('/api/analytics/track', {
+      await fetch(`${API_BASE_URL}/api/analytics/track`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
