@@ -5,6 +5,7 @@ export const users = pgTable('users', {
   id: serial('id').primaryKey(),
   name: varchar('name', { length: 128 }),
   email: varchar('email', { length: 128 }).notNull(),
+  password: varchar('password', { length: 255 }),
   createdAt: timestamp('created_at').defaultNow(),
   // Legal compliance fields
   termsAcceptedAt: timestamp('terms_accepted_at'),

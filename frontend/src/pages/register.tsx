@@ -29,33 +29,59 @@ export default function Register() {
     setIsLoading(true);
     
     try {
-      // Here would be the actual registration API call
-      // For now, we'll simulate the process and show what would happen
-      
-      console.log("Registration data with legal acceptance:", {
-        ...data,
-        acceptedAt: new Date().toISOString(),
-        ipAddress: "user-ip", // In real implementation, get from backend
-        userAgent: navigator.userAgent,
+      const response = await fetch('/api/users/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          password: data.password,
+          termsAccepted: data.termsAccepted,
+          privacyAccepted: data.privacyAccepted,
+          legalDisclaimerAccepted: data.legalDisclaimerAccepted,
+          dataProcessingConsent: data.dataProcessingConsent,
+          marketingConsent: data.marketingConsent,
+        }),
       });
 
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Error al crear la cuenta');
+      }
+
+      // Log for legal audit trail (client-side)
+      console.log("Registration successful with legal compliance:", {
+        userId: result.user.id,
+        email: result.user.email,
+        acceptedAt: result.user.termsAcceptedAt,
+        legalAcceptances: {
+          terms: data.termsAccepted,
+          privacy: data.privacyAccepted,
+          legalDisclaimer: data.legalDisclaimerAccepted,
+          dataProcessing: data.dataProcessingConsent,
+          marketing: data.marketingConsent,
+        }
+      });
 
       toast({
         title: "¡Cuenta creada exitosamente!",
-        description: "Se ha enviado un email de verificación a tu dirección de correo.",
+        description: "Su cuenta ha sido creada y todos los términos legales han sido registrados correctamente.",
         duration: 5000,
       });
 
-      // In real implementation, redirect to email verification or login
-      // window.location.href = "/api/login"; 
+      // In real implementation, redirect to login or email verification
+      setTimeout(() => {
+        window.location.href = "/api/login"; 
+      }, 2000);
       
     } catch (error) {
       console.error("Registration error:", error);
       toast({
         title: "Error al crear la cuenta",
-        description: "Por favor, inténtalo de nuevo más tarde.",
+        description: error instanceof Error ? error.message : "Por favor, inténtalo de nuevo más tarde.",
         variant: "destructive",
         duration: 5000,
       });
