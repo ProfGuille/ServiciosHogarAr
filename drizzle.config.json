@@ -1,0 +1,10 @@
+{
+  "schema": "./backend/src/shared/schema/index.ts",
+  "out": "./backend/migrations",
+  "driver": "pg",
+  "dbCredentials": {
+    "connectionString": "ENV:DATABASE_URL"
+  },
+  "dialect": "postgresql"
+}
+

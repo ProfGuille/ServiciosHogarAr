@@ -1,15 +1,12 @@
-import { pgTable, serial, varchar, text, integer, timestamp, numeric } from 'drizzle-orm/pg-core';
-import { serviceProviders } from './serviceProviders';
-import { categories } from './categories';
+import { pgTable, serial, varchar, integer } from "drizzle-orm/pg-core";
+import { InferSelectModel, InferInsertModel } from "drizzle-orm";
 
 export const services = pgTable('services', {
   id: serial('id').primaryKey(),
-  providerId: integer('provider_id').notNull().references(() => serviceProviders.id),
-  categoryId: integer('category_id').notNull().references(() => categories.id),
-  title: varchar('title', { length: 255 }).notNull(),
-  description: text('description'),
-  price: numeric('price', { precision: 10, scale: 2 }), // mejor para precios con decimales
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  name: varchar('name', { length: 128 }),
+  description: varchar('description', { length: 1024 }),
+  categoryId: integer('category_id'), // <--- AGREGADO para relaciones
 });
 
+export type Service = InferSelectModel<typeof services>;
+export type InsertService = InferInsertModel<typeof services>;

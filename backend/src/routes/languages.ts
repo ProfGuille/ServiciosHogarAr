@@ -1,191 +1,53 @@
 import { Router } from "express";
-import { db } from "../db.js";
-import { languages, translations, localizedContent, userLanguagePreferences } from "@shared/schema";
-import { eq, and } from "drizzle-orm";
-import { isAuthenticated } from "../replitAuth.js";
+import { db } from "../db";
+import { languages, translations, userLanguagePreferences } from "../shared/schema";
 
 const router = Router();
 
-// Get all available languages
-router.get("/languages", async (req, res) => {
+router.get("/", async (req, res) => {
   try {
-    const availableLanguages = await db
+    const activeLanguages = await db
       .select()
       .from(languages)
-      .where(eq(languages.isActive, true))
-      .orderBy(languages.sortOrder);
-
-    res.json({
-      success: true,
-      data: availableLanguages
-    });
+      .where({ isActive: true });
+    res.json(activeLanguages);
   } catch (error) {
-    console.error("Error fetching languages:", error);
-    res.status(500).json({
-      success: false,
-      error: "Failed to fetch languages"
-    });
+    res.status(500).json({ error: "Error al obtener idiomas" });
   }
 });
 
-// Get translations for a specific language
 router.get("/translations/:languageCode", async (req, res) => {
+  const { languageCode } = req.params;
   try {
-    const { languageCode } = req.params;
-
-    const translationData = await db
+    const translation = await db
       .select()
       .from(translations)
-      .where(eq(translations.languageCode, languageCode));
-
-    // Convert array to nested object structure
-    const translationsObject: Record<string, any> = {};
-    translationData.forEach((translation: {key: string; value: string}) => {
-      const keys = translation.key.split('.');
-      let current = translationsObject;
-      
-      for (let i = 0; i < keys.length - 1; i++) {
-        if (!current[keys[i]]) {
-          current[keys[i]] = {};
-        }
-        current = current[keys[i]];
-      }
-      
-      current[keys[keys.length - 1]] = translation.value;
-    });
-
-    res.json({
-      success: true,
-      data: translationsObject
-    });
+      .where({ languageCode });
+    res.json(translation);
   } catch (error) {
-    console.error("Error fetching translations:", error);
-    res.status(500).json({
-      success: false,
-      error: "Failed to fetch translations"
-    });
+    res.status(500).json({ error: "Error al obtener traducciones" });
   }
 });
 
-// Get localized content
-router.get("/content/:contentType/:contentId/:languageCode", async (req, res) => {
+router.get("/:languageCode", async (req, res) => {
+  const { languageCode } = req.params;
   try {
-    const { contentType, contentId, languageCode } = req.params;
-
-    const [content] = await db
-      .select()
-      .from(localizedContent)
-      .where(
-        and(
-          eq(localizedContent.contentType, contentType),
-          eq(localizedContent.contentId, contentId),
-          eq(localizedContent.languageCode, languageCode)
-        )
-      );
-
-    if (!content) {
-      return res.status(404).json({
-        success: false,
-        error: "Content not found"
-      });
-    }
-
-    res.json({
-      success: true,
-      data: content
-    });
-  } catch (error) {
-    console.error("Error fetching localized content:", error);
-    res.status(500).json({
-      success: false,
-      error: "Failed to fetch content"
-    });
-  }
-});
-
-// Save user language preference (authenticated route)
-router.post("/user-language-preference", isAuthenticated, async (req, res) => {
-  try {
-    const userId = req.user?.claims?.sub;
-    const { languageCode } = req.body;
-
-    if (!userId) {
-      return res.status(401).json({
-        success: false,
-        error: "User not authenticated"
-      });
-    }
-
-    // Check if language exists
-    const [language] = await db
+    const language = await db
       .select()
       .from(languages)
-      .where(eq(languages.code, languageCode));
-
-    if (!language) {
-      return res.status(400).json({
-        success: false,
-        error: "Invalid language code"
-      });
-    }
-
-    // Upsert user language preference
-    await db
-      .insert(userLanguagePreferences)
-      .values({
-        userId,
-        languageCode,
-        isDefault: true
-      })
-      .onConflictDoUpdate({
-        target: [userLanguagePreferences.userId, userLanguagePreferences.languageCode],
-        set: {
-          updatedAt: new Date()
-        }
-      });
-
-    res.json({
-      success: true,
-      message: "Language preference saved"
-    });
+      .where({ code: languageCode });
+    res.json(language);
   } catch (error) {
-    console.error("Error saving language preference:", error);
-    res.status(500).json({
-      success: false,
-      error: "Failed to save language preference"
-    });
+    res.status(500).json({ error: "Error al obtener idioma" });
   }
 });
 
-// Get user language preference (authenticated route)
-router.get("/user-language-preference", isAuthenticated, async (req, res) => {
-  try {
-    const userId = req.user?.claims?.sub;
+router.get("/user/preference", async (req, res) => {
+  const userId = req.user?.id;
+  if (!userId) return res.status(401).json({ error: "No autenticado" });
 
-    if (!userId) {
-      return res.status(401).json({
-        success: false,
-        error: "User not authenticated"
-      });
-    }
-
-    const [preference] = await db
-      .select()
-      .from(userLanguagePreferences)
-      .where(eq(userLanguagePreferences.userId, userId));
-
-    res.json({
-      success: true,
-      data: preference || null
-    });
-  } catch (error) {
-    console.error("Error fetching user language preference:", error);
-    res.status(500).json({
-      success: false,
-      error: "Failed to fetch language preference"
-    });
-  }
+  const preference = await db.select().from(userLanguagePreferences).where({ userId });
+  res.json(preference);
 });
 
 export default router;
-

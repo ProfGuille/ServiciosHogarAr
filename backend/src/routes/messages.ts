@@ -1,27 +1,22 @@
-import { Router } from 'express';
-import { db } from '@/db';
-import { eq } from 'drizzle-orm';
-import { messages } from '@/shared/schema/messages';
+import { Router } from "express";
+import { db } from "../db"; // Corrige el import
+import { messages } from "../shared/schema/messages"; // Asegúrate de tener el schema
 
 const router = Router();
 
-// GET /api/messages/:conversationId
-router.get('/:conversationId', async (req, res) => {
-  const { conversationId } = req.params;
-
+// Obtener mensajes por conversationId
+router.get("/:conversationId", async (req, res) => {
+  const conversationId = Number(req.params.conversationId);
   try {
-    const results = await db
+    // Usa el nombre del campo tal cual está en tu schema: conversationId (camelCase)
+    const msgs = await db
       .select()
       .from(messages)
-      .where(eq(messages.conversationId, conversationId));
-
-    res.json(results);
+      .where({ conversationId });
+    res.json(msgs);
   } catch (error) {
-    console.error('Error fetching messages:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    res.status(500).json({ error: "Error al obtener mensajes" });
   }
 });
 
-// ✅ Exportación por default corregida
 export default router;
-

@@ -1,18 +1,16 @@
-import { Router, Request, Response } from 'express';
-import { db } from '../db';
-import { services } from "@shared/schema";
+import { Router } from "express";
+import { db } from "../db";
+import { services } from "../shared/schema/services";
 
 const router = Router();
 
-router.get('/', async (req: Request, res: Response) => {
+router.get("/", async (req, res) => {
   try {
     const result = await db.select().from(services);
     res.json(result);
-  } catch (err) {
-    console.error('Error fetching services:', err);
-    res.status(500).json({ error: 'Internal server error' });
+  } catch (error) {
+    res.status(500).json({ error: "Error al obtener servicios" });
   }
 });
 
 export default router;
-

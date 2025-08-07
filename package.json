@@ -6,13 +6,12 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "cd backend && npm run dev"
-
-
   },
   "devDependencies": {
     "@types/connect-pg-simple": "^7.0.3",
     "@types/memoizee": "^0.4.12",
     "@types/nodemailer": "^6.4.17",
+    "drizzle-kit": "^0.20.10",
     "tsconfig-paths": "^4.2.0",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3"
@@ -25,4 +24,3 @@
     "zod": "^3.25.76"
   }
 }
-

@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
 import { serviceRequests } from "../serviceRequests";
-import { clients } from "../clients";
-import { services } from "../services";
+import { clients } from "../clients";   // Debes tener este archivo
+import { services } from "../services"; // Debes tener este archivo
 
 export const serviceRequestsRelations = relations(serviceRequests, ({ one }) => ({
   client: one(clients, {
@@ -13,4 +13,3 @@ export const serviceRequestsRelations = relations(serviceRequests, ({ one }) => 
     references: [services.id],
   }),
 }));
-

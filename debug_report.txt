@@ -1,0 +1,1519 @@
+===== DRIZZLE SCHEMAS =====
+import { integer, pgTable, serial, text } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
+import { serviceProviders } from './serviceProviders';
+
+/**
+ * geofences: áreas geográficas definidas por prestadores para limitar su radio de servicio
+ */
+export const geofences = pgTable('geofences', {
+  id: serial('id').primaryKey(),
+  serviceProviderId: integer('service_provider_id').notNull().references(() => serviceProviders.id),
+  name: text('name').notNull(),
+  coordinates: text('coordinates').notNull(), // GeoJSON en formato texto
+});
+
+/**
+ * Relaciones: cada geofence pertenece a un solo prestador
+ */
+export const geofencesRelations = relations(geofences, ({ one }) => ({
+  serviceProvider: one(serviceProviders, {
+    fields: [geofences.serviceProviderId],
+    references: [serviceProviders.id],
+  }),
+}));
+
+import { pgTable, serial, varchar, integer, timestamp } from 'drizzle-orm/pg-core';
+
+export const conversations = pgTable('conversations', {
+  id: serial('id').primaryKey(),
+  customerId: varchar('customer_id', { length: 255 }).notNull(),
+  providerId: varchar('provider_id', { length: 255 }).notNull(),
+  serviceRequestId: integer('service_request_id'),
+  lastMessageAt: timestamp('last_message_at').defaultNow(),
+  customerUnreadCount: integer('customer_unread_count').default(0),
+  providerUnreadCount: integer('provider_unread_count').default(0),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+import { integer, pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
+import { serviceProviders } from './serviceProviders.js';
+
+export const providerCredits = pgTable('provider_credits', {
+  id: serial('id').primaryKey(),
+  providerId: integer('provider_id').notNull().references(() => serviceProviders.id),
+  amount: integer('amount').notNull(),
+  reason: text('reason').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const providerCreditsRelations = relations(providerCredits, ({ one }) => ({
+  provider: one(serviceProviders, {
+    fields: [providerCredits.providerId],
+    references: [serviceProviders.id],
+  }),
+}));
+
+import { pgTable, serial, varchar, integer, text, timestamp, boolean } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
+import { conversations } from './conversations.js';
+import { users } from './users.js';
+
+export const messages = pgTable('messages', {
+  id: serial('id').primaryKey(),
+  conversationId: integer('conversation_id').notNull().references(() => conversations.id),
+  senderId: varchar('sender_id', { length: 255 }).notNull().references(() => users.id),
+  content: text('content').notNull(),
+  isRead: boolean('is_read').default(false).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const messagesRelations = relations(messages, ({ one }) => ({
+  conversation: one(conversations, {
+    fields: [messages.conversationId],
+    references: [conversations.id],
+  }),
+  sender: one(users, {
+    fields: [messages.senderId],
+    references: [users.id],
+  }),
+}));
+
+import { pgTable, serial, varchar, timestamp } from 'drizzle-orm/pg-core';
+
+export const categories = pgTable('categories', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 100 }).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+import { pgTable, serial, varchar } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
+import { translations } from './translations';
+
+export const languages = pgTable('languages', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 50 }).notNull(),
+  code: varchar('code', { length: 10 }).notNull(),
+});
+
+export const languagesRelations = relations(languages, ({ many }) => ({
+  translations: many(translations),
+}));
+
+import { pgTable, serial, varchar, timestamp } from 'drizzle-orm/pg-core';
+
+export const clients = pgTable('clients', {
+  id: serial('id').primaryKey(),
+  email: varchar('email', { length: 255 }).notNull(),
+  firstName: varchar('first_name', { length: 100 }).notNull(),
+  lastName: varchar('last_name', { length: 100 }),
+  phone: varchar('phone', { length: 50 }),
+  profileImageUrl: varchar('profile_image_url', { length: 255 }),
+  userType: varchar('user_type', { length: 50 }).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+import { integer, pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
+import { clients } from './clients.js';
+import { serviceCategories } from './serviceCategories.js';
+
+export const serviceRequests = pgTable('service_requests', {
+  id: serial('id').primaryKey(),
+  clientId: integer('client_id').notNull().references(() => clients.id),
+  categoryId: integer('category_id').notNull().references(() => serviceCategories.id),
+  description: text('description').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const serviceRequestsRelations = relations(serviceRequests, ({ one }) => ({
+  client: one(clients, {
+    fields: [serviceRequests.clientId],
+    references: [clients.id],
+  }),
+  category: one(serviceCategories, {
+    fields: [serviceRequests.categoryId],
+    references: [serviceCategories.id],
+  }),
+}));
+
+import { pgTable, serial, varchar, text, integer, timestamp, numeric } from 'drizzle-orm/pg-core';
+import { serviceProviders } from './serviceProviders';
+import { categories } from './categories';
+
+export const services = pgTable('services', {
+  id: serial('id').primaryKey(),
+  providerId: integer('provider_id').notNull().references(() => serviceProviders.id),
+  categoryId: integer('category_id').notNull().references(() => categories.id),
+  title: varchar('title', { length: 255 }).notNull(),
+  description: text('description'),
+  price: numeric('price', { precision: 10, scale: 2 }), // mejor para precios con decimales
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+import { pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
+
+export const users = pgTable('users', {
+  id: serial('id').primaryKey(),
+  email: text('email').notNull().unique(),
+  firstName: text('first_name').notNull(),
+  lastName: text('last_name').notNull(),
+  profileImageUrl: text('profile_image_url'),
+  userType: text('user_type').notNull(), // 'customer' o 'provider'
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const usersRelations = relations(users, ({}) => ({}));
+
+import { pgTable, serial, integer, numeric, timestamp } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
+import { clients } from './clients';
+
+export const creditPurchases = pgTable('credit_purchases', {
+  id: serial('id').primaryKey(),
+  clientId: integer('client_id').notNull().references(() => clients.id),
+  amount: numeric('amount', { precision: 10, scale: 2 }).notNull(),
+  creditsPurchased: integer('credits_purchased').notNull(),
+  purchasedAt: timestamp('purchased_at').defaultNow(),
+});
+
+export const creditPurchasesRelations = relations(creditPurchases, ({ one }) => ({
+  client: one(clients, {
+    fields: [creditPurchases.clientId],
+    references: [clients.id],
+  }),
+}));
+
+// backend/src/shared/schema/index.ts
+
+export * from './achievements';
+export * from './analyticsEvents';
+export * from './appointments';
+export * from './categories';
+export * from './clients';
+export * from './conversations';
+export * from './creditPurchases';
+export * from './dailyStats';
+export * from './events';
+export * from './geofences';
+export * from './languages';
+export * from './leadResponses';
+export * from './locations';
+export * from './messages';
+export * from './payments';
+export * from './providerCredits';
+export * from './providerMetrics';
+export * from './providerServices';
+export * from './referralRewards';
+export * from './reviews';
+export * from './serviceCategories';
+export * from './serviceProviders';
+export * from './serviceRequests';
+export * from './services';
+export * from './translations';
+export * from './users';
+export * from './webhooks';
+export * from './relations/serviceRequestsRelations';
+
+
+import { relations } from "drizzle-orm";
+import { serviceRequests } from "../serviceRequests";
+import { clients } from "../clients";
+import { services } from "../services";
+
+export const serviceRequestsRelations = relations(serviceRequests, ({ one }) => ({
+  client: one(clients, {
+    fields: [serviceRequests.clientId],
+    references: [clients.id],
+  }),
+  service: one(services, {
+    fields: [serviceRequests.serviceId],
+    references: [services.id],
+  }),
+}));
+
+// backend/src/shared/schema/serviceCategories.ts
+
+import { pgTable, serial, varchar, timestamp } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
+import { providerServices } from './providerServices';
+
+export const serviceCategories = pgTable('service_categories', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 100 }).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const serviceCategoriesRelations = relations(serviceCategories, ({ many }) => ({
+  providerServices: many(providerServices),
+}));
+
+import { pgTable, serial, integer, varchar, text, timestamp } from 'drizzle-orm/pg-core';
+import { clients } from './clients';
+
+export const achievements = pgTable('achievements', {
+  id: serial('id').primaryKey(),
+  clientId: integer('client_id').notNull().references(() => clients.id),
+  title: varchar('title', { length: 255 }).notNull(),
+  description: text('description'),  // cambié a text para mayor flexibilidad
+  achievedAt: timestamp('achieved_at').defaultNow().notNull(),
+});
+
+import { pgTable, serial, integer, varchar, text, numeric, boolean, timestamp } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
+import { serviceProviders } from './serviceProviders';
+import { serviceCategories } from './serviceCategories';
+
+export const providerServices = pgTable('provider_services', {
+  id: serial('id').primaryKey(),
+  providerId: integer('provider_id').references(() => serviceProviders.id).notNull(),
+  categoryId: integer('category_id').references(() => serviceCategories.id).notNull(),
+  customServiceName: varchar('custom_service_name', { length: 200 }),
+  description: text('description'),
+  basePrice: numeric('base_price', { precision: 10, scale: 2 }),
+  isActive: boolean('is_active').default(true),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const providerServicesRelations = relations(providerServices, ({ one }) => ({
+  provider: one(serviceProviders, {
+    fields: [providerServices.providerId],
+    references: [serviceProviders.id],
+  }),
+  category: one(serviceCategories, {
+    fields: [providerServices.categoryId],
+    references: [serviceCategories.id],
+  }),
+}));
+
+import { pgTable, serial, integer, text, timestamp } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
+import { appointments } from './appointments';
+
+export const reviews = pgTable('reviews', {
+  id: serial('id').primaryKey(),
+  appointmentId: integer('appointment_id').notNull().references(() => appointments.id),
+  rating: integer('rating').notNull(),
+  comment: text('comment'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const reviewsRelations = relations(reviews, ({ one }) => ({
+  appointment: one(appointments, {
+    fields: [reviews.appointmentId],
+    references: [appointments.id],
+  }),
+}));
+
+import { pgTable, serial, integer, text, timestamp } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
+import { serviceProviders } from './serviceProviders';
+import { services } from './services';
+
+export const leadResponses = pgTable('lead_responses', {
+  id: serial('id').primaryKey(),
+  providerId: integer('provider_id').notNull().references(() => serviceProviders.id),
+  serviceId: integer('service_id').notNull().references(() => services.id),
+  message: text('message').notNull(),
+  status: text('status').notNull().default('pending'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+});
+
+export const leadResponsesRelations = relations(leadResponses, ({ one }) => ({
+  provider: one(serviceProviders, {
+    fields: [leadResponses.providerId],
+    references: [serviceProviders.id],
+  }),
+  service: one(services, {
+    fields: [leadResponses.serviceId],
+    references: [services.id],
+  }),
+}));
+
+import { pgTable, text } from "drizzle-orm/pg-core";
+import { languages } from "./languages";
+import { relations } from "drizzle-orm";
+
+export const translations = pgTable("translations", {
+  key: text("key").notNull(),
+  lang: text("lang").notNull().references(() => languages.code),
+  value: text("value").notNull(),
+});
+
+export const translationsRelations = relations(translations, ({ one }) => ({
+  language: one(languages, {
+    fields: [translations.lang],
+    references: [languages.code],
+  }),
+}));
+
+import { pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
+
+export const webhooks = pgTable('webhooks', {
+  id: serial('id').primaryKey(),
+  event: text('event').notNull(),
+  payload: text('payload').notNull(),
+  receivedAt: timestamp('received_at', { withTimezone: true }).defaultNow(),
+});
+import { pgTable, serial, integer, varchar, text, timestamp } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
+import { clients } from './clients';
+
+export const analyticsEvents = pgTable('analytics_events', {
+  id: serial('id').primaryKey(),
+  clientId: integer('client_id').references(() => clients.id),
+  eventType: varchar('event_type', { length: 100 }).notNull(),
+  eventData: text('event_data'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+// Relación con clients
+export const analyticsEventsRelations = relations(analyticsEvents, ({ one }) => ({
+  client: one(clients, {
+    fields: [analyticsEvents.clientId],
+    references: [clients.id],
+  }),
+}));
+
+import { pgTable, integer, date } from 'drizzle-orm/pg-core';
+import { serviceProviders } from './serviceProviders';
+import { relations } from 'drizzle-orm';
+
+export const providerMetrics = pgTable('provider_metrics', {
+  providerId: integer('provider_id').primaryKey().references(() => serviceProviders.id),
+  yearMonth: date('year_month').notNull(), // formato YYYY-MM-01
+  searches: integer('searches').notNull(),
+  profileViews: integer('profile_views').notNull(),
+  contacts: integer('contacts').notNull(),
+});
+
+export const providerMetricsRelations = relations(providerMetrics, ({ one }) => ({
+  provider: one(serviceProviders, {
+    fields: [providerMetrics.providerId],
+    references: [serviceProviders.id],
+  }),
+}));
+
+import { pgTable, date, integer, text } from 'drizzle-orm/pg-core';
+
+export const dailyStats = pgTable('daily_stats', {
+  date: date('date').primaryKey(),
+  totalUsers: integer('total_users').notNull(),
+  totalServiceProviders: integer('total_service_providers').notNull(),
+  totalReviews: integer('total_reviews').notNull(),
+  totalSearches: integer('total_searches').notNull(),
+  note: text('note'),
+});
+
+// No relaciones necesarias en este modelo, ya que es tabla estadística simple.
+
+import { pgTable, serial, integer, timestamp, varchar, text } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
+import { clients } from './clients';
+import { services } from './services';
+
+/**
+ * appointments: citas o turnos solicitados por clientes para un servicio específico
+ */
+export const appointments = pgTable('appointments', {
+  id: serial('id').primaryKey(),
+  clientId: integer('client_id').notNull().references(() => clients.id),
+  serviceId: integer('service_id').notNull().references(() => services.id),
+  appointmentDate: timestamp('appointment_date', { withTimezone: true }).notNull(),
+  status: varchar('status', { length: 50 }).notNull(), // Ej: pending, confirmed, cancelled
+  notes: text('notes'),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+/**
+ * Relaciones: cada turno pertenece a un cliente y a un servicio
+ */
+export const appointmentsRelations = relations(appointments, ({ one }) => ({
+  client: one(clients, {
+    fields: [appointments.clientId],
+    references: [clients.id],
+  }),
+  service: one(services, {
+    fields: [appointments.serviceId],
+    references: [services.id],
+  }),
+}));
+
+import { pgTable, serial, integer, text, timestamp } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
+import { users } from './users';
+
+export const referralRewards = pgTable('referral_rewards', {
+  id: serial('id').primaryKey(),
+  referrerUserId: integer('referrer_user_id').notNull(),
+  referredUserId: integer('referred_user_id').notNull(),
+  rewardType: text('reward_type').notNull(),
+  rewardAmount: integer('reward_amount').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const referralRewardsRelations = relations(referralRewards, ({ one }) => ({
+  referrerUser: one(users, {
+    fields: [referralRewards.referrerUserId],
+    references: [users.id],
+  }),
+  referredUser: one(users, {
+    fields: [referralRewards.referredUserId],
+    references: [users.id],
+  }),
+}));
+
+import { integer, pgTable, serial, text, timestamp, numeric } from 'drizzle-orm/pg-core';
+import { appointments } from './appointments';
+
+export const payments = pgTable('payments', {
+  id: serial('id').primaryKey(),
+  appointmentId: integer('appointment_id').notNull().references(() => appointments.id),
+  amount: numeric('amount', { precision: 10, scale: 2 }).notNull().$type<number>(),
+  method: text('method').notNull(),
+  status: text('status').notNull(),
+  paidAt: timestamp('paid_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+import { pgTable, serial, integer, text, numeric } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
+import { users } from './users';
+
+export const locations = pgTable('locations', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').notNull().references(() => users.id),
+  address: text('address').notNull(),
+  latitude: numeric('latitude', { precision: 10, scale: 8 }).notNull().$type<number>(),
+  longitude: numeric('longitude', { precision: 11, scale: 8 }).notNull().$type<number>(),
+});
+
+export const locationsRelations = relations(locations, ({ one }) => ({
+  user: one(users, {
+    fields: [locations.userId],
+    references: [users.id],
+  }),
+}));
+
+import { pgTable, serial, varchar, text, timestamp } from 'drizzle-orm/pg-core';
+
+export const events = pgTable('events', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 150 }).notNull(),
+  description: text('description'),
+  eventDate: timestamp('event_date'),
+});
+
+// No relaciones definidas actualmente, porque esta tabla parece independiente.
+
+import { pgTable, serial, varchar, text, timestamp, integer } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
+import { users } from './users';
+
+export const serviceProviders = pgTable('service_providers', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').notNull().references(() => users.id),
+  companyName: varchar('company_name', { length: 255 }),
+  description: text('description'),
+  phone: varchar('phone', { length: 50 }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const serviceProvidersRelations = relations(serviceProviders, ({ one }) => ({
+  user: one(users, {
+    fields: [serviceProviders.userId],
+    references: [users.id],
+  }),
+}));
+
+\n\n===== STORAGE.TS =====
+// src/storage.ts
+import {
+  users,
+  serviceCategories,
+  serviceProviders,
+  providerServices,
+  serviceRequests,
+  reviews,
+  messages,
+  conversations,
+  payments,
+  providerCredits,
+  creditPurchases,
+  leadResponses,
+  type User,
+  type UpsertUser,
+  type ServiceCategory,
+  type InsertServiceCategory,
+  type ServiceProvider,
+  type InsertServiceProvider,
+  type ProviderService,
+  type InsertProviderService,
+  type ServiceRequest,
+  type InsertServiceRequest,
+  type Review,
+  type InsertReview,
+  type Message,
+  type InsertMessage,
+  type Conversation,
+  type InsertConversation,
+  type Payment,
+  type InsertPayment,
+} from "@shared/schema";
+
+import { db } from "./db.js";
+import { eq, desc, asc, like, and, or, sql, count } from "drizzle-orm";
+import { randomUUID } from 'crypto';
+
+export interface IStorage {
+  getUser(id: string): Promise<User | undefined>;
+  upsertUser(user: UpsertUser): Promise<User>;
+  getAllUsers(): Promise<User[]>;
+  getServiceCategories(): Promise<ServiceCategory[]>;
+  getServiceCategoryById(id: number): Promise<ServiceCategory | undefined>;
+  createServiceCategory(category: InsertServiceCategory): Promise<ServiceCategory>;
+  updateServiceCategoryStatus(id: number, isActive: boolean): Promise<ServiceCategory>;
+  getProviderCredits(providerId: number): Promise<{ currentCredits: number; totalPurchased: number; totalUsed: number } | undefined>;
+  addProviderCredits(providerId: number, credits: number, amount: number): Promise<void>;
+  useProviderCredit(providerId: number): Promise<boolean>;
+  createLeadResponse(data: {
+    serviceRequestId: number;
+    providerId: number;
+    creditsUsed: number;
+    responseMessage: string;
+    quotedPrice?: string;
+  }): Promise<any>;
+  getServiceProviders(filters?: {
+    city?: string;
+    categoryId?: number;
+    isVerified?: boolean;
+    limit?: number;
+    offset?: number;
+  }): Promise<ServiceProvider[]>;
+  getServiceProviderById(id: number): Promise<ServiceProvider | undefined>;
+  getServiceProviderByUserId(userId: string): Promise<ServiceProvider | undefined>;
+  createServiceProvider(provider: InsertServiceProvider): Promise<ServiceProvider>;
+  updateServiceProvider(id: number, updates: Partial<InsertServiceProvider>): Promise<ServiceProvider | undefined>;
+  getProviderServices(providerId: number): Promise<ProviderService[]>;
+  createProviderService(service: InsertProviderService): Promise<ProviderService>;
+  updateProviderService(id: number, updates: Partial<InsertProviderService>): Promise<ProviderService | undefined>;
+  deleteProviderService(id: number): Promise<void>;
+  getServiceRequests(filters?: {
+    customerId?: string;
+    providerId?: number;
+    status?: string;
+    city?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<ServiceRequest[]>;
+  getServiceRequestById(id: number): Promise<ServiceRequest | undefined>;
+  createServiceRequest(request: InsertServiceRequest): Promise<ServiceRequest>;
+  updateServiceRequest(id: number, updates: Partial<InsertServiceRequest>): Promise<ServiceRequest | undefined>;
+  getReviewsForProvider(providerId: number): Promise<Review[]>;
+  createReview(review: InsertReview): Promise<Review>;
+  updateReview(id: number, updates: Partial<InsertReview>): Promise<Review | undefined>;
+  getReviewByUserAndRequest(reviewerId: string, serviceRequestId: number): Promise<Review | undefined>;
+  getConversationsForUser(userId: string): Promise<(Conversation & {
+    customer: User;
+    provider: User;
+    lastMessage?: Message;
+  })[]>;
+  getOrCreateConversation(customerId: string, providerId: string, serviceRequestId?: number): Promise<Conversation>;
+  getMessagesForConversation(conversationId: number, limit?: number, offset?: number): Promise<(Message & { sender: User })[]>;
+  createMessage(message: InsertMessage): Promise<Message>;
+  markMessagesAsRead(conversationId: number, userId: string): Promise<void>;
+  updateConversationUnreadCount(conversationId: number, isCustomerSender: boolean): Promise<void>;
+  getProviderStats(providerId: number): Promise<{
+    totalJobs: number;
+    completedJobs: number;
+    averageRating: number;
+    totalEarnings: number;
+  }>;
+  getPlatformStats(): Promise<{
+    totalUsers: number;
+    totalProviders: number;
+    totalRequests: number;
+    totalCompletedJobs: number;
+  }>;
+  createPayment(payment: InsertPayment): Promise<Payment>;
+  getPaymentsByCustomer(customerId: string): Promise<Payment[]>;
+  getPaymentsByProvider(providerId: number): Promise<Payment[]>;
+  getAllPayments(): Promise<Payment[]>;
+  getPaymentByServiceRequest(serviceRequestId: number): Promise<Payment | undefined>;
+
+  // Función extra que querés agregar para insertar todo junto
+  insertUserProviderAndServices(): Promise<void>;
+}
+
+export class DatabaseStorage implements IStorage {
+  async getUser(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: { ...userData, updatedAt: new Date() },
+      })
+      .returning();
+    return user;
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users).orderBy(users.createdAt);
+  }
+
+  async getServiceCategories(): Promise<ServiceCategory[]> {
+    return await db.select().from(serviceCategories).orderBy(serviceCategories.name);
+  }
+
+  async getServiceCategoryById(id: number): Promise<ServiceCategory | undefined> {
+    const [category] = await db.select().from(serviceCategories).where(eq(serviceCategories.id, id));
+    return category;
+  }
+
+  async createServiceCategory(category: InsertServiceCategory): Promise<ServiceCategory> {
+    const [created] = await db.insert(serviceCategories).values(category).returning();
+    return created;
+  }
+
+  async updateServiceCategoryStatus(id: number, isActive: boolean): Promise<ServiceCategory> {
+    const [updated] = await db.update(serviceCategories).set({ isActive }).where(eq(serviceCategories.id, id)).returning();
+    return updated;
+  }
+
+  async getProviderCredits(providerId: number): Promise<{ currentCredits: number; totalPurchased: number; totalUsed: number } | undefined> {
+    const [credits] = await db.select({
+      currentCredits: providerCredits.currentCredits,
+      totalPurchased: providerCredits.totalPurchased,
+      totalUsed: providerCredits.totalUsed,
+    }).from(providerCredits).where(eq(providerCredits.providerId, providerId));
+    return credits;
+  }
+
+  async addProviderCredits(providerId: number, credits: number, amount: number): Promise<void> {
+   await db.insert(creditPurchases).values({
+  providerId: providerId,
+  credits: credits,
+  amount: amount.toFixed(2),  // Convertir number a string con 2 decimales
+  createdAt: new Date(),      // No "purchasedAt", sino "createdAt"
+  status: "pending",          // Agregá status si es requerido
+});
+
+
+    await db.update(providerCredits).set({
+      currentCredits: sql`${providerCredits.currentCredits} + ${credits}`,
+      totalPurchased: sql`${providerCredits.totalPurchased} + ${credits}`,
+    }).where(eq(providerCredits.providerId, providerId));
+  }
+
+  async useProviderCredit(providerId: number): Promise<boolean> {
+    const [credit] = await db.select().from(providerCredits).where(eq(providerCredits.providerId, providerId));
+    if (!credit || credit.currentCredits <= 0) {
+      return false;
+    }
+    await db.update(providerCredits).set({
+      credits: sql`${providerCredits.credits} - 1`,
+      totalUsed: sql`${providerCredits.totalUsed} + 1`,
+    }).where(eq(providerCredits.providerId, providerId));
+    return true;
+  }
+
+  async createLeadResponse(data: {
+    serviceRequestId: number;
+    providerId: number;
+    creditsUsed: number;
+    responseMessage: string;
+    quotedPrice?: string;
+  }): Promise<any> {
+    return await db.insert(leadResponses).values(data).returning();
+  }
+
+  async getServiceProviders(filters?: {
+    city?: string;
+    categoryId?: number;
+    isVerified?: boolean;
+    limit?: number;
+    offset?: number;
+  }): Promise<ServiceProvider[]> {
+    let query = db.select().from(serviceProviders);
+
+    if (filters) {
+      if (filters.city) query = query.where(like(serviceProviders.city, `%${filters.city}%`));
+      if (filters.categoryId) query = query.where(eq(serviceProviders.categoryId, filters.categoryId));
+      if (filters.isVerified !== undefined) query = query.where(eq(serviceProviders.isVerified, filters.isVerified));
+    }
+
+    if (filters?.limit) query = query.limit(filters.limit);
+    if (filters?.offset) query = query.offset(filters.offset);
+
+    return await query.orderBy(asc(serviceProviders.businessName));
+  }
+
+  async getServiceProviderById(id: number): Promise<ServiceProvider | undefined> {
+    const [provider] = await db.select().from(serviceProviders).where(eq(serviceProviders.id, id));
+    return provider;
+  }
+
+  async getServiceProviderByUserId(userId: string): Promise<ServiceProvider | undefined> {
+    const [provider] = await db.select().from(serviceProviders).where(eq(serviceProviders.userId, userId));
+    return provider;
+  }
+
+  async createServiceProvider(provider: InsertServiceProvider): Promise<ServiceProvider> {
+    const [created] = await db.insert(serviceProviders).values(provider).returning();
+    return created;
+  }
+
+  async updateServiceProvider(id: number, updates: Partial<InsertServiceProvider>): Promise<ServiceProvider | undefined> {
+    const [updated] = await db.update(serviceProviders).set(updates).where(eq(serviceProviders.id, id)).returning();
+    return updated;
+  }
+
+  async getProviderServices(providerId: number): Promise<ProviderService[]> {
+    return await db.select().from(providerServices).where(eq(providerServices.providerId, providerId));
+  }
+
+  async createProviderService(service: InsertProviderService): Promise<ProviderService> {
+    const [created] = await db.insert(providerServices).values(service).returning();
+    return created;
+  }
+
+  async updateProviderService(id: number, updates: Partial<InsertProviderService>): Promise<ProviderService | undefined> {
+    const [updated] = await db.update(providerServices).set(updates).where(eq(providerServices.id, id)).returning();
+    return updated;
+  }
+
+  async deleteProviderService(id: number): Promise<void> {
+    await db.delete(providerServices).where(eq(providerServices.id, id));
+  }
+
+  async getServiceRequests(filters?: {
+    customerId?: string;
+    providerId?: number;
+    status?: string;
+    city?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<ServiceRequest[]> {
+    let query = db.select().from(serviceRequests);
+
+    if (filters) {
+      if (filters.customerId) query = query.where(eq(serviceRequests.customerId, filters.customerId));
+      if (filters.providerId) query = query.where(eq(serviceRequests.providerId, filters.providerId));
+      if (filters.status) query = query.where(eq(serviceRequests.status, filters.status));
+      if (filters.city) query = query.where(like(serviceRequests.city, `%${filters.city}%`));
+    }
+
+    if (filters?.limit) query = query.limit(filters.limit);
+    if (filters?.offset) query = query.offset(filters.offset);
+
+    return await query.orderBy(desc(serviceRequests.createdAt));
+  }
+
+  async getServiceRequestById(id: number): Promise<ServiceRequest | undefined> {
+    const [request] = await db.select().from(serviceRequests).where(eq(serviceRequests.id, id));
+    return request;
+  }
+
+  async createServiceRequest(request: InsertServiceRequest): Promise<ServiceRequest> {
+    const [created] = await db.insert(serviceRequests).values(request).returning();
+    return created;
+  }
+
+  async updateServiceRequest(id: number, updates: Partial<InsertServiceRequest>): Promise<ServiceRequest | undefined> {
+    const [updated] = await db.update(serviceRequests).set(updates).where(eq(serviceRequests.id, id)).returning();
+    return updated;
+  }
+
+  async getReviewsForProvider(providerId: number): Promise<Review[]> {
+    return await db.select().from(reviews).where(eq(reviews.providerId, providerId));
+  }
+
+  async createReview(review: InsertReview): Promise<Review> {
+    const [created] = await db.insert(reviews).values(review).returning();
+    return created;
+  }
+
+  async updateReview(id: number, updates: Partial<InsertReview>): Promise<Review | undefined> {
+    const [updated] = await db.update(reviews).set(updates).where(eq(reviews.id, id)).returning();
+    return updated;
+  }
+
+  async getReviewByUserAndRequest(reviewerId: string, serviceRequestId: number): Promise<Review | undefined> {
+    const [review] = await db.select().from(reviews).where(
+      and(eq(reviews.reviewerId, reviewerId), eq(reviews.serviceRequestId, serviceRequestId))
+    );
+    return review;
+  }
+
+  async getConversationsForUser(userId: string): Promise<(Conversation & {
+    customer: User;
+    provider: User;
+    lastMessage?: Message;
+  })[]> {
+    // Consulta más elaborada con joins, ejemplo simplificado
+    // Deberías hacer el join a users para customer y provider y mensajes para lastMessage
+    return [];
+  }
+
+  async getOrCreateConversation(customerId: string, providerId: string, serviceRequestId?: number): Promise<Conversation> {
+    // Lógica para obtener o crear conversación
+    throw new Error("Not implemented");
+  }
+
+  async getMessagesForConversation(conversationId: number, limit?: number, offset?: number): Promise<(Message & { sender: User })[]> {
+    // Traer mensajes con info del remitente
+    return [];
+  }
+
+  async createMessage(message: InsertMessage): Promise<Message> {
+    const [created] = await db.insert(messages).values(message).returning();
+    return created;
+  }
+
+  async markMessagesAsRead(conversationId: number, userId: string): Promise<void> {
+    // Actualizar estado leído mensajes
+  }
+
+  async updateConversationUnreadCount(conversationId: number, isCustomerSender: boolean): Promise<void> {
+    // Actualizar contador no leídos
+  }
+
+  async getProviderStats(providerId: number): Promise<{
+    totalJobs: number;
+    completedJobs: number;
+    averageRating: number;
+    totalEarnings: number;
+  }> {
+    // Consultas estadísticas agregadas
+    return {
+      totalJobs: 0,
+      completedJobs: 0,
+      averageRating: 0,
+      totalEarnings: 0,
+    };
+  }
+
+  async getPlatformStats(): Promise<{
+    totalUsers: number;
+    totalProviders: number;
+    totalRequests: number;
+    totalCompletedJobs: number;
+  }> {
+    // Estadísticas generales plataforma
+    return {
+      totalUsers: 0,
+      totalProviders: 0,
+      totalRequests: 0,
+      totalCompletedJobs: 0,
+    };
+  }
+
+  async createPayment(payment: InsertPayment): Promise<Payment> {
+    const [created] = await db.insert(payments).values(payment).returning();
+    return created;
+  }
+
+  async getPaymentsByCustomer(customerId: string): Promise<Payment[]> {
+    return await db.select().from(payments).where(eq(payments.customerId, customerId));
+  }
+
+  async getPaymentsByProvider(providerId: number): Promise<Payment[]> {
+    return await db.select().from(payments).where(eq(payments.providerId, providerId));
+  }
+
+  async getAllPayments(): Promise<Payment[]> {
+    return await db.select().from(payments);
+  }
+
+  async getPaymentByServiceRequest(serviceRequestId: number): Promise<Payment | undefined> {
+    const [payment] = await db.select().from(payments).where(eq(payments.serviceRequestId, serviceRequestId));
+    return payment;
+  }
+
+  // Función extra para insertar usuario, proveedor y servicios de ejemplo
+  async insertUserProviderAndServices(): Promise<void> {
+    const userData: UpsertUser = {
+      id: '123',
+      email: 'testuser@example.com',
+      firstName: 'Test',
+      lastName: 'User',
+      userType: 'provider',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    const providerData: InsertServiceProvider = {
+      userId: userData.id,
+      businessName: 'Prestador de Prueba',
+      description: 'Descripción de prueba.',
+      experienceYears: 3,
+      serviceAreas: ['Ciudad 1', 'Provincia 1'],
+      hourlyRate: "1000.00",
+      phoneNumber: '123456789',
+      address: 'Calle Falsa 123',
+      city: 'Ciudad',
+      province: 'Provincia',
+      postalCode: '0000',
+      isVerified: false,
+      isActive: true,
+      rating: "4.50",
+      totalReviews: 10,
+      profileImageUrl: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    try {
+      await db.insert(users).values(userData).onConflictDoUpdate({
+        target: users.id,
+        set: { ...userData, updatedAt: new Date() },
+      });
+
+      await db.insert(serviceProviders).values(providerData).onConflictDoUpdate({
+        target: serviceProviders.userId,
+        set: { ...providerData, updatedAt: new Date() },
+      });
+
+      // Ejemplo de servicios para el proveedor
+      const servicesToInsert: InsertProviderService[] = [
+        {
+          providerId: providerData.userId,
+          categoryId: 1,
+          customServiceName: 'Servicio ejemplo 1',
+          description: 'Descripción del servicio 1',
+          basePrice: "1500.00",
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          providerId: providerData.userId,
+          categoryId: 2,
+          customServiceName: 'Servicio ejemplo 2',
+          description: 'Descripción del servicio 2',
+          basePrice: "2000.00",
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ];
+
+      for (const service of servicesToInsert) {
+        await db.insert(providerServices).values(service).onConflictDoNothing();
+      }
+
+      console.log('Usuario, proveedor y servicios insertados o actualizados correctamente.');
+    } catch (error) {
+      console.error('Error en insertUserProviderAndServices:', error);
+      throw error;
+    }
+  }
+}
+
+export const storage = new DatabaseStorage();
+// storage.ts (al final del archivo)
+
+import { db } from './db.js';
+import { users, serviceProviders, providerServices } from "@shared/schema";
+
+export async function insertUserProviderAndServices() {
+  // Insertar usuario
+  const [createdUser] = await db.insert(users).values({
+    id: '123',
+    email: 'testuser@example.com',
+    firstName: 'Test',
+    lastName: 'User',
+    userType: 'provider',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  }).returning();
+
+  // Insertar proveedor
+  const [createdProvider] = await db.insert(serviceProviders).values({
+    userId: createdUser.id,
+    businessName: 'Prestador de Prueba',
+    description: 'Descripción de prueba.',
+    experienceYears: 3,
+    serviceAreas: ['Ciudad 1', 'Provincia 1'],
+    hourlyRate: "1000.00",
+    phoneNumber: '123456789',
+    address: 'Calle Falsa 123',
+    city: 'Ciudad',
+    province: 'Provincia',
+    postalCode: '0000',
+    isVerified: false,
+    isActive: true,
+    rating: "4.50",
+    totalReviews: 10,
+    profileImageUrl: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  }).returning();
+
+  // Insertar servicios para proveedor (si querés)
+  await db.insert(providerServices).values([
+    {
+      providerId: createdProvider.id,
+      categoryId: 1,
+      customServiceName: 'Servicio A',
+      description: 'Descripción Servicio A',
+      basePrice: "500.00",
+      isActive: true,
+      createdAt: new Date(),
+    },
+    {
+      providerId: createdProvider.id,
+      categoryId: 2,
+      customServiceName: 'Servicio B',
+      description: 'Descripción Servicio B',
+      basePrice: "750.00",
+      isActive: true,
+      createdAt: new Date(),
+    }
+  ]);
+
+  return { createdUser, createdProvider };
+}
+export async function insertUserProviderAndServicesTest() {
+  try {
+    const [createdUser] = await db.insert(users).values({
+      id: randomUUID(),  // genera un id único para evitar duplicados
+      email: `testuser_${Date.now()}@example.com`,
+      firstName: 'Test',
+      lastName: 'User',
+      userType: 'provider',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }).returning();
+
+    console.log('Usuario creado:', createdUser);
+
+    const [createdProvider] = await db.insert(serviceProviders).values({
+      userId: createdUser.id,
+      businessName: 'Prestador de Prueba',
+      description: 'Descripción de prueba.',
+      experienceYears: 3,
+      serviceAreas: ['Ciudad 1', 'Provincia 1'],
+      hourlyRate: "1000.00",
+      phoneNumber: '123456789',
+      address: 'Calle Falsa 123',
+      city: 'Ciudad',
+      province: 'Provincia',
+      postalCode: '0000',
+      isVerified: false,
+      isActive: true,
+      rating: "4.50",
+      totalReviews: 10,
+      profileImageUrl: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }).returning();
+
+    console.log('Proveedor creado:', createdProvider);
+  } catch (error) {
+    console.error('Error en inserción test:', error);
+  }
+}
+
+\n\n===== WEBSOCKET.TS =====
+import { WebSocketServer, WebSocket } from 'ws';
+import { Server } from 'http';
+import { storage } from "./storage.js";
+import type { Message, User } from "@shared/schema";
+
+// Definición manual porque ws no exporta VerifyClientInfo
+interface VerifyClientInfo {
+  origin: string;
+  secWebSocketKey: string;
+  secWebSocketVersion: string;
+  req: import('http').IncomingMessage;
+}
+
+// Interfaces faltantes que se usan en la clase
+interface AuthenticatedWebSocket extends WebSocket {
+  userId?: string;
+  user?: User;
+}
+
+interface WebSocketMessage {
+  type: 'join_conversation' | 'send_message' | 'typing' | 'stop_typing' | 'ping';
+  conversationId?: number;
+  content?: string;
+  messageType?: 'text' | 'image' | 'file';
+}
+
+interface BroadcastMessage {
+  type: 'new_message' | 'user_typing' | 'user_stopped_typing' | 'conversation_updated' | 'pong';
+  conversationId?: number;
+  message?: Message & { sender: User };
+  userId?: string;
+  content?: any;
+}
+
+
+export class WebSocketManager {
+  private wss: WebSocketServer;
+  private connections: Map<string, AuthenticatedWebSocket[]> = new Map();
+  private conversationRooms: Map<number, Set<string>> = new Map();
+
+  constructor(server: Server) {
+    this.wss = new WebSocketServer({ 
+      server, 
+      path: '/ws',
+      verifyClient: (info: VerifyClientInfo) => {
+        // Podés agregar validaciones aquí
+        return true;
+      }
+    });
+
+    this.setupWebSocketServer();
+  }
+
+  private setupWebSocketServer() {
+    this.wss.on('connection', (ws, request) => {
+      const authWs = ws as AuthenticatedWebSocket;
+
+      console.log('New WebSocket connection');
+
+      authWs.on('message', async (data) => {
+        try {
+          const message: WebSocketMessage = JSON.parse(data.toString());
+          await this.handleMessage(authWs, message);
+        } catch (error) {
+          console.error('WebSocket message error:', error);
+          authWs.send(JSON.stringify({ 
+            type: 'error', 
+            message: 'Invalid message format' 
+          }));
+        }
+      });
+
+      authWs.on('close', () => {
+        this.handleDisconnection(authWs);
+      });
+
+      authWs.on('error', (error: unknown) => {
+        console.error('WebSocket error:', error);
+      });
+
+      // Send welcome message
+      authWs.send(JSON.stringify({ 
+        type: 'connected', 
+        message: 'WebSocket connected successfully' 
+      }));
+    });
+  }
+
+  private async handleMessage(ws: AuthenticatedWebSocket, message: WebSocketMessage) {
+    try {
+      switch (message.type) {
+        case 'join_conversation':
+          if (message.conversationId && ws.userId) {
+            await this.joinConversation(ws, message.conversationId);
+          }
+          break;
+
+        case 'send_message':
+          if (message.conversationId && message.content && ws.userId) {
+            await this.handleSendMessage(ws, message.conversationId, message.content, message.messageType || 'text');
+          }
+          break;
+
+        case 'typing':
+          if (message.conversationId && ws.userId) {
+            this.broadcastToConversation(message.conversationId, {
+              type: 'user_typing',
+              conversationId: message.conversationId,
+              userId: ws.userId
+            }, ws.userId);
+          }
+          break;
+
+        case 'stop_typing':
+          if (message.conversationId && ws.userId) {
+            this.broadcastToConversation(message.conversationId, {
+              type: 'user_stopped_typing',
+              conversationId: message.conversationId,
+              userId: ws.userId
+            }, ws.userId);
+          }
+          break;
+
+        case 'ping':  // <-- Aquí manejamos ping
+          ws.send(JSON.stringify({ type: 'pong', message: 'pong' }));
+          break;
+
+        default:
+          ws.send(JSON.stringify({ 
+            type: 'error', 
+            message: 'Unknown message type' 
+          }));
+      }
+    } catch (error) {
+      console.error('Message handling error:', error);
+      ws.send(JSON.stringify({ 
+        type: 'error', 
+        message: 'Failed to process message' 
+      }));
+    }
+  }
+
+  public authenticateConnection(ws: AuthenticatedWebSocket, userId: string, user: User) {
+    ws.userId = userId;
+    ws.user = user;
+
+    if (!this.connections.has(userId)) {
+      this.connections.set(userId, []);
+    }
+    this.connections.get(userId)!.push(ws);
+
+    console.log(`User ${userId} authenticated on WebSocket`);
+  }
+
+  private async joinConversation(ws: AuthenticatedWebSocket, conversationId: number) {
+    if (!ws.userId) return;
+
+    if (!this.conversationRooms.has(conversationId)) {
+      this.conversationRooms.set(conversationId, new Set());
+    }
+    this.conversationRooms.get(conversationId)!.add(ws.userId);
+
+    await storage.markMessagesAsRead(conversationId, ws.userId);
+
+    ws.send(JSON.stringify({
+      type: 'joined_conversation',
+      conversationId
+    }));
+
+    console.log(`User ${ws.userId} joined conversation ${conversationId}`);
+  }
+
+  private async handleSendMessage(ws: AuthenticatedWebSocket, conversationId: number, content: string, messageType: string) {
+    if (!ws.userId) return;
+
+    try {
+      const newMessage = await storage.createMessage({
+        conversationId,
+        senderId: ws.userId,
+        content,
+        messageType: messageType as any,
+      });
+
+      const [messageWithSender] = await storage.getMessagesForConversation(conversationId, 1, 0);
+
+      this.broadcastToConversation(conversationId, {
+        type: 'new_message',
+        conversationId,
+        message: messageWithSender
+      });
+
+      console.log(`Message sent in conversation ${conversationId} by user ${ws.userId}`);
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      ws.send(JSON.stringify({
+        type: 'error',
+        message: 'Failed to send message'
+      }));
+    }
+  }
+
+  private broadcastToConversation(conversationId: number, message: BroadcastMessage, excludeUserId?: string) {
+    const room = this.conversationRooms.get(conversationId);
+    if (!room) return;
+
+    room.forEach(userId => {
+      if (excludeUserId && userId === excludeUserId) return;
+
+      const userConnections = this.connections.get(userId);
+      if (userConnections) {
+        userConnections.forEach(ws => {
+          const socket = ws as WebSocket;
+          if (socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify(message));
+          }
+        });
+      }
+    });
+  }
+
+  private handleDisconnection(ws: AuthenticatedWebSocket) {
+    if (!ws.userId) return;
+
+    const userConnections = this.connections.get(ws.userId);
+    if (userConnections) {
+      const index = userConnections.indexOf(ws);
+      if (index > -1) {
+        userConnections.splice(index, 1);
+      }
+      
+      if (userConnections.length === 0) {
+        this.connections.delete(ws.userId);
+      }
+    }
+
+    this.conversationRooms.forEach((users, conversationId) => {
+      if (ws.userId && users.has(ws.userId)) {
+        users.delete(ws.userId);
+        if (users.size === 0) {
+          this.conversationRooms.delete(conversationId);
+        }
+      }
+    });
+
+    console.log(`User ${ws.userId} disconnected from WebSocket`);
+  }
+
+  public broadcastToUser(userId: string, message: BroadcastMessage) {
+    const userConnections = this.connections.get(userId);
+    if (userConnections) {
+      userConnections.forEach(ws => {
+        const socket = ws as WebSocket;
+        if (socket.readyState === WebSocket.OPEN) {
+          socket.send(JSON.stringify(message));
+        }
+      });
+    }
+  }
+
+  public getActiveUsers(): string[] {
+    return Array.from(this.connections.keys());
+  }
+
+  public isUserOnline(userId: string): boolean {
+    const connections = this.connections.get(userId);
+    return !!(connections && connections.length > 0);
+  }
+} // Fin clase WebSocketManager
+
+let wsManager: WebSocketManager | null = null;
+
+export function initializeWebSocket(server: Server): WebSocketManager {
+  if (!wsManager) {
+    wsManager = new WebSocketManager(server);
+  }
+  return wsManager;
+}
+
+export function getWebSocketManager(): WebSocketManager | null {
+  return wsManager;
+}
+
+\n\n===== TEST-DB.TS =====
+import dotenv from "dotenv";
+dotenv.config();
+
+import { pool } from "./db.js";
+
+async function testConnection() {
+  try {
+    // Ejecutamos una consulta simple para probar la conexión
+    const result = await pool.query("SELECT NOW()");
+    console.log("Conexión exitosa, hora actual:", result.rows[0]);
+  } catch (error) {
+    console.error("Error conectando a la base de datos:", error);
+  } finally {
+    await pool.end(); // Cerramos la conexión
+  }
+}
+
+testConnection();
+
+\n\n===== PACKAGE.JSON =====
+{
+  "name": "servicioshogar-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx -r tsconfig-paths/register -r dotenv/config src/index.ts --watch",
+    "dev:nw": "tsx -r tsconfig-paths/register -r dotenv/config src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "check": "tsc --noEmit",
+    "db:push": "drizzle-kit push"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.1",
+    "bcrypt": "^5.1.1",
+    "connect-pg-simple": "^10.0.0",
+    "cors": "^2.8.5",
+    "date-fns": "^3.6.0",
+    "dotenv": "^17.2.0",
+    "drizzle-orm": "^0.44.4",
+    "drizzle-zod": "^0.7.0",
+    "express": "^4.21.2",
+    "express-rate-limit": "^8.0.1",
+    "express-session": "^1.18.1",
+    "memorystore": "^1.6.7",
+    "mercadopago": "^2.8.0",
+    "mysql2": "^3.14.2",
+    "nanoid": "^5.1.5",
+    "nodemailer": "^7.0.5",
+    "openid-client": "^6.6.2",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0",
+    "ws": "^8.18.3",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/connect-pg-simple": "^7.0.3",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^4.17.21",
+    "@types/express-session": "^1.18.0",
+    "@types/memoizee": "^0.4.12",
+    "@types/node": "^20.16.11",
+    "@types/nodemailer": "^6.4.17",
+    "@types/passport": "^1.0.16",
+    "@types/passport-local": "^1.0.38",
+    "@types/ws": "^8.18.1",
+    "drizzle-kit": "^0.31.4",
+    "madge": "^8.0.0",
+    "ts-node-dev": "^2.0.0",
+    "tsc-alias": "^1.8.16",
+    "tsconfig-paths": "^4.2.0",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  }
+}
+\n\n===== DRIZZLE CONFIG =====
+// backend/drizzle.config.ts
+import { defineConfig } from "drizzle-kit";
+import * as dotenv from "dotenv";
+import path from "path";
+
+dotenv.config({ path: path.resolve(__dirname, ".env") });
+console.log("DATABASE_URL:", process.env.DATABASE_URL);
+
+if (!process.env.DATABASE_URL) {
+  throw new Error("DATABASE_URL, ensure the database is provisioned");
+}
+
+export default defineConfig({
+  out: "./migrations",
+schema: './src/shared/schema/*.ts',
+
+  dialect: "postgresql",
+  dbCredentials: {
+    url: process.env.DATABASE_URL,
+  },
+});
+
+\n\n===== MIGRATIONS LIST =====

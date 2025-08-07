@@ -8,6 +8,3 @@ export const dailyStats = pgTable('daily_stats', {
   totalSearches: integer('total_searches').notNull(),
   note: text('note'),
 });
-
-// No relaciones necesarias en este modelo, ya que es tabla estadística simple.
-

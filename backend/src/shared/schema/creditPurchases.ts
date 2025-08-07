@@ -1,19 +1,14 @@
-import { pgTable, serial, integer, numeric, timestamp } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
-import { clients } from './clients';
+import { pgTable, serial, integer, varchar, timestamp } from "drizzle-orm/pg-core";
+import { InferSelectModel } from "drizzle-orm";
 
 export const creditPurchases = pgTable('credit_purchases', {
   id: serial('id').primaryKey(),
-  clientId: integer('client_id').notNull().references(() => clients.id),
-  amount: numeric('amount', { precision: 10, scale: 2 }).notNull(),
-  creditsPurchased: integer('credits_purchased').notNull(),
-  purchasedAt: timestamp('purchased_at').defaultNow(),
+  userId: integer('user_id').notNull(),
+  providerId: integer('provider_id').notNull(),
+  amount: integer('amount').notNull(), // Campo agregado
+  status: varchar('status', { length: 32 }), // Campo agregado
+  createdAt: timestamp('created_at').defaultNow(),
+  // ...otros campos que tengas...
 });
 
-export const creditPurchasesRelations = relations(creditPurchases, ({ one }) => ({
-  client: one(clients, {
-    fields: [creditPurchases.clientId],
-    references: [clients.id],
-  }),
-}));
-
+export type CreditPurchase = InferSelectModel<typeof creditPurchases>;

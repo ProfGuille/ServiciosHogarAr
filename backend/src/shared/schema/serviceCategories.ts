@@ -1,16 +1,9 @@
-// backend/src/shared/schema/serviceCategories.ts
-
-import { pgTable, serial, varchar, timestamp } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
-import { providerServices } from './providerServices';
+import { pgTable, serial, varchar } from "drizzle-orm/pg-core";
 
 export const serviceCategories = pgTable('service_categories', {
   id: serial('id').primaryKey(),
-  name: varchar('name', { length: 100 }).notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
+  name: varchar('name', { length: 128 }).notNull(),
 });
 
-export const serviceCategoriesRelations = relations(serviceCategories, ({ many }) => ({
-  providerServices: many(providerServices),
-}));
-
+export type ServiceCategory = typeof serviceCategories.$inferSelect;
+export type InsertServiceCategory = typeof serviceCategories.$inferInsert;

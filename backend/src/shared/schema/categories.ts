@@ -1,9 +1,9 @@
-import { pgTable, serial, varchar, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, serial, varchar } from "drizzle-orm/pg-core";
+import { InferSelectModel } from "drizzle-orm";
 
 export const categories = pgTable('categories', {
   id: serial('id').primaryKey(),
-  name: varchar('name', { length: 100 }).notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  name: varchar('name', { length: 128 }),
 });
 
+export type Category = InferSelectModel<typeof categories>;

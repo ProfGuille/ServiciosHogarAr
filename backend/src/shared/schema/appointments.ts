@@ -1,33 +1,14 @@
-import { pgTable, serial, integer, timestamp, varchar, text } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
-import { clients } from './clients';
-import { services } from './services';
+import { pgTable, serial, integer, timestamp, varchar } from "drizzle-orm/pg-core";
+import { InferSelectModel } from "drizzle-orm";
 
-/**
- * appointments: citas o turnos solicitados por clientes para un servicio específico
- */
 export const appointments = pgTable('appointments', {
   id: serial('id').primaryKey(),
-  clientId: integer('client_id').notNull().references(() => clients.id),
-  serviceId: integer('service_id').notNull().references(() => services.id),
-  appointmentDate: timestamp('appointment_date', { withTimezone: true }).notNull(),
-  status: varchar('status', { length: 50 }).notNull(), // Ej: pending, confirmed, cancelled
-  notes: text('notes'),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  providerId: integer('provider_id').notNull(),
+  clientId: integer('client_id').notNull(),
+  serviceId: integer('service_id'), // <-- AGREGA ESTA LÍNEA
+  scheduledAt: timestamp('scheduled_at').notNull(),
+  status: varchar('status', { length: 32 }),
+  createdAt: timestamp('created_at').defaultNow(),
 });
 
-/**
- * Relaciones: cada turno pertenece a un cliente y a un servicio
- */
-export const appointmentsRelations = relations(appointments, ({ one }) => ({
-  client: one(clients, {
-    fields: [appointments.clientId],
-    references: [clients.id],
-  }),
-  service: one(services, {
-    fields: [appointments.serviceId],
-    references: [services.id],
-  }),
-}));
-
+export type Appointment = InferSelectModel<typeof appointments>;
