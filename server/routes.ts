@@ -1,9 +1,20 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+// import { setupAuth, isAuthenticated } from "./replitAuth"; // Removed Replit Auth
 import Stripe from "stripe";
 import { MercadoPagoConfig, Preference, Payment } from "mercadopago";
+
+// Simple auth stubs to replace Replit Auth (for legacy server - not actively used)
+async function setupAuth(app: Express) {
+  // No-op: Auth setup removed
+}
+
+function isAuthenticated(req: any, res: any, next: any) {
+  // Simple bypass for legacy code
+  req.user = { claims: { sub: 'legacy-user' } };
+  next();
+}
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');

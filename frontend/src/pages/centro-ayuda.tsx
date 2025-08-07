@@ -20,7 +20,7 @@ export default function CentroAyuda() {
       questions: [
         {
           question: "¿Cómo crear una cuenta en ServiciosHogar?",
-          answer: "Puedes registrarte haciendo clic en 'Iniciar Sesión' en la parte superior de la página. Usamos Replit Auth para un proceso seguro y rápido."
+          answer: "Puedes registrarte haciendo clic en 'Iniciar Sesión' en la parte superior de la página. Usamos un sistema de autenticación seguro y rápido."
         },
         {
           question: "¿Cómo buscar profesionales en mi zona?",
