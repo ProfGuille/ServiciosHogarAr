@@ -155,6 +155,12 @@ export function Footer() {
               <Link href="/privacidad" className="text-slate-400 hover:text-primary transition-colors">
                 Privacidad
               </Link>
+              <Link href="/aviso-legal" className="text-slate-400 hover:text-primary transition-colors">
+                Aviso Legal
+              </Link>
+              <Link href="/legal-compliance" className="text-slate-400 hover:text-primary transition-colors">
+                Mis Datos
+              </Link>
               <Link href="/contacto" className="text-slate-400 hover:text-primary transition-colors">
                 Contacto
               </Link>

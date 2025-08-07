@@ -102,18 +102,28 @@ export default function Privacidad() {
 
           <Card>
             <CardHeader>
-              <CardTitle>5. Sus Derechos</CardTitle>
+              <CardTitle>5. Sus Derechos (Ley 25.326 de Protección de Datos Personales)</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="mb-4">Usted tiene derecho a:</p>
+              <p className="mb-4">
+                Conforme a la Ley 25.326 de Protección de Datos Personales de Argentina, usted tiene derecho a:
+              </p>
               <ul className="list-disc pl-6 space-y-2">
-                <li><strong>Acceder:</strong> Solicitar copia de su información personal</li>
-                <li><strong>Rectificar:</strong> Corregir información inexacta</li>
-                <li><strong>Eliminar:</strong> Solicitar eliminación de sus datos</li>
-                <li><strong>Portabilidad:</strong> Obtener sus datos en formato transferible</li>
-                <li><strong>Oposición:</strong> Objetar ciertos usos de su información</li>
-                <li><strong>Limitación:</strong> Restringir el procesamiento de sus datos</li>
+                <li><strong>Información:</strong> Conocer la existencia y finalidad de archivos de datos personales</li>
+                <li><strong>Acceso:</strong> Solicitar y obtener información sobre sus datos almacenados</li>
+                <li><strong>Rectificación:</strong> Corregir, actualizar o completar datos inexactos o incompletos</li>
+                <li><strong>Supresión:</strong> Solicitar la eliminación de datos cuando sean excesivos o tratados ilícitamente</li>
+                <li><strong>Oposición:</strong> Oponerse al tratamiento de sus datos en casos específicos</li>
+                <li><strong>Portabilidad:</strong> Obtener una copia de sus datos en formato estructurado</li>
               </ul>
+              
+              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h4 className="font-semibold text-blue-800 mb-2">Ejercicio de Derechos</h4>
+                <p className="text-blue-700 text-sm">
+                  Para ejercer estos derechos, contacte a: <strong>privacidad@servicioshogar.com.ar</strong>
+                  <br />Responderemos su solicitud dentro de los 10 días hábiles establecidos por ley.
+                </p>
+              </div>
             </CardContent>
           </Card>
 

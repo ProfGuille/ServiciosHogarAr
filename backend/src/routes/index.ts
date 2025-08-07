@@ -1,18 +1,59 @@
 import express from 'express';
 import usersRoutes from './users.js';
+import authRoutes from './auth.js';
 import clientsRoutes from './clients.js';
 import conversationsRoutes from './conversations.js';
 import messagesRoutes from './messages.js';
-import serviceRequestsRouter from './serviceRequests';
-
-
 
 export function registerRoutes(app: express.Express) {
-  console.log('Registrando rutas...');
+  console.log('Registrando rutas de la API...');
+  
+  // Authentication routes
+  app.use('/api/auth', authRoutes);
+  
+  // Core routes
   app.use('/api/users', usersRoutes);
   app.use('/api/clients', clientsRoutes);
   app.use('/api/conversations', conversationsRoutes);
   app.use('/api/messages', messagesRoutes);
-  app.use('/api/service-requests', serviceRequestsRouter);
+  
+  // Service-related routes
+  try {
+    // Dynamically import optional routes
+    import('./serviceRequests.js').then(module => {
+      app.use('/api/service-requests', module.default);
+    }).catch(() => {
+      console.log('⚠️ serviceRequests routes not available yet');
+    });
+    
+    import('./services.js').then(module => {
+      app.use('/api/services', module.default);
+    }).catch(() => {
+      console.log('⚠️ services routes not available yet');
+    });
+    
+    import('./serviceProviders.js').then(module => {
+      app.use('/api/providers', module.default);
+    }).catch(() => {
+      console.log('⚠️ serviceProviders routes not available yet');
+    });
+    
+    import('./payments.js').then(module => {
+      app.use('/api/payments', module.default);
+    }).catch(() => {
+      console.log('⚠️ payments routes not available yet');
+    });
+    
+    import('./categories.js').then(module => {
+      app.use('/api/categories', module.default);
+    }).catch(() => {
+      console.log('⚠️ categories routes not available yet');
+    });
+
+  } catch (error) {
+    console.log('⚠️ Some optional routes not loaded:', error.message);
+  }
+
+  console.log('✅ Rutas registradas exitosamente');
 }
 

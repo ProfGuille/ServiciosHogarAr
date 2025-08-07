@@ -175,9 +175,27 @@ export function Navbar() {
                   <Button variant="ghost" onClick={() => window.location.href = "/api/login"}>
                     {t('nav.login')}
                   </Button>
-                  <Button onClick={() => window.location.href = "/api/login"}>
-                    {t('nav.register')}
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button>
+                        {t('nav.register')}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem asChild>
+                        <Link href="/register">
+                          <User className="mr-2 h-4 w-4" />
+                          Registro Cliente
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/register-provider">
+                          <Briefcase className="mr-2 h-4 w-4" />
+                          Registro Proveedor
+                        </Link>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               )}
             </div>
@@ -239,12 +257,14 @@ export function Navbar() {
                   >
                     Iniciar sesión
                   </Button>
-                  <Button 
-                    className="w-full justify-start"
-                    onClick={() => window.location.href = "/api/login"}
-                  >
-                    Registrarse
-                  </Button>
+                  <Link href="/register">
+                    <Button 
+                      className="w-full justify-start"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Registrarse
+                    </Button>
+                  </Link>
                 </div>
               )}
             </div>

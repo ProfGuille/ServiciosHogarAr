@@ -1,283 +1,176 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
-import { ServiceManagement } from "@/components/provider/service-management";
-import { EarningsOverview } from "@/components/provider/earnings-overview";
-import { AvailabilityCalendar } from "@/components/provider/availability-calendar";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
-import { isUnauthorizedError } from "@/lib/authUtils";
-import { apiRequest } from "@/lib/queryClient";
-import { BadgeShowcase } from "@/components/ui/badge-showcase";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Calendar,
-  Clock,
-  MapPin,
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  Clock, 
+  CreditCard, 
+  MapPin, 
+  Calendar, 
+  DollarSign, 
+  AlertCircle,
+  CheckCircle,
   Phone,
   Mail,
   User,
-  DollarSign,
-  CheckCircle,
-  XCircle,
-  MessageSquare,
+  Briefcase,
   TrendingUp,
   Star,
-  AlertCircle,
-  Settings,
-  Briefcase,
+  Eye,
+  Loader2
 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import type { ServiceRequest, ServiceProvider } from "@shared/schema";
+
+interface ServiceRequest {
+  id: number;
+  title: string;
+  description: string;
+  categoryId: number;
+  city: string;
+  estimatedBudget: number;
+  isUrgent: boolean;
+  createdAt: string;
+  preferredDate?: string;
+  creditCost: number;
+}
+
+interface PurchasedLead {
+  id: number;
+  providerId: number;
+  requestId: number;
+  creditCost: number;
+  purchasedAt: string;
+  serviceRequest: {
+    id: number;
+    title: string;
+    description: string;
+    city: string;
+    estimatedBudget: number;
+    isUrgent: boolean;
+    preferredDate?: string;
+    status: string;
+  };
+  clientContact: {
+    name: string;
+    email: string;
+    phone: string;
+  };
+}
+
+interface CreditTransaction {
+  id: number;
+  providerId: number;
+  type: string;
+  credits: number;
+  description: string;
+  createdAt: string;
+}
+
+const categoryNames = {
+  1: "Plomería",
+  2: "Electricidad", 
+  3: "Carpintería",
+  4: "Pintura",
+  5: "Limpieza",
+  6: "Jardinería",
+  7: "Techado",
+  8: "Aire Acondicionado",
+  9: "Cerrajería",
+  10: "Albañilería"
+};
 
 export default function ProviderDashboard() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedTab, setSelectedTab] = useState("overview");
-  const [responseText, setResponseText] = useState("");
-  const [quotedPrice, setQuotedPrice] = useState("");
-  const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(null);
+  const [selectedTab, setSelectedTab] = useState("available");
 
-  // Redirect to login if not authenticated
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
+    if (!authLoading && (!isAuthenticated || user?.userType !== 'provider')) {
       toast({
-        title: "Acceso requerido",
-        description: "Debes iniciar sesión para acceder al dashboard.",
+        title: "Acceso denegado",
+        description: "Esta página es solo para proveedores de servicios.",
         variant: "destructive",
       });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 2000);
     }
-  }, [isAuthenticated, authLoading, toast]);
+  }, [isAuthenticated, authLoading, user, toast]);
 
-  // Fetch provider profile
-  const { data: provider, isLoading: providerLoading } = useQuery({
-    queryKey: ["/api/providers/me"],
-    enabled: isAuthenticated && !!user?.id,
+  // Fetch available service requests
+  const { data: availableRequests, isLoading: availableLoading } = useQuery({
+    queryKey: ["/api/provider/available-requests"],
+    enabled: isAuthenticated && user?.userType === 'provider',
+    refetchInterval: 30000, // Refresh every 30 seconds
   });
 
-  // Get credit balance
-  const { data: creditBalance } = useQuery({
-    queryKey: ["/api/payments/credits"],
-    enabled: isAuthenticated && !!user?.id,
+  // Fetch purchased leads
+  const { data: purchasedLeads, isLoading: purchasedLoading } = useQuery({
+    queryKey: ["/api/provider/my-purchases"],
+    enabled: isAuthenticated && user?.userType === 'provider',
   });
 
-  // Fetch service requests for this provider
-  const { data: requests, isLoading: requestsLoading } = useQuery({
-    queryKey: ["/api/requests", { providerId: provider?.id }],
-    enabled: !!provider?.id,
+  // Fetch credit history
+  const { data: creditHistory, isLoading: creditLoading } = useQuery({
+    queryKey: ["/api/provider/credit-history"],
+    enabled: isAuthenticated && user?.userType === 'provider',
   });
 
-  // Fetch provider stats
-  const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: [`/api/providers/${provider?.id}/stats`],
-    enabled: !!provider?.id,
-  });
-
-  // Mutation to respond to requests
-  const respondToRequestMutation = useMutation({
-    mutationFn: async ({ requestId, response, price }: { requestId: number; response: string; price?: number }) => {
-      return await apiRequest("POST", `/api/requests/${requestId}/respond`, {
-        response,
-        quotedPrice: price,
+  // Purchase lead mutation
+  const purchaseLeadMutation = useMutation({
+    mutationFn: async (requestId: number) => {
+      const response = await fetch(`/api/provider/purchase-lead/${requestId}`, {
+        method: 'POST',
+        credentials: 'include',
       });
-    },
-    onSuccess: () => {
-      toast({
-        title: "Respuesta enviada",
-        description: "Tu respuesta ha sido enviada al cliente",
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/requests"] });
-      setSelectedRequest(null);
-      setResponseText("");
-      setQuotedPrice("");
-    },
-    onError: (error: any) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Sesión expirada",
-          description: "Tu sesión ha expirado. Iniciando sesión...",
-          variant: "destructive",
-        });
-        setTimeout(() => window.location.href = "/api/login", 2000);
-        return;
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Error al comprar contacto');
       }
       
-      // Handle insufficient credits error
-      if (error.message?.includes("Créditos insuficientes")) {
-        toast({
-          title: "Créditos insuficientes",
-          description: "Necesitas comprar más créditos para responder a solicitudes.",
-          variant: "destructive",
-          action: (
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => window.location.href = "/comprar-creditos"}
-            >
-              Comprar créditos
-            </Button>
-          ),
-        });
-        return;
-      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "¡Contacto comprado!",
+        description: `Has obtenido el contacto del cliente. Créditos restantes: ${data.remainingCredits}`,
+      });
       
-      toast({
-        title: "Error",
-        description: error.message || "No se pudo enviar la respuesta",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Mutation to update request status
-  const updateRequestStatusMutation = useMutation({
-    mutationFn: async ({ requestId, status }: { requestId: number; status: string }) => {
-      return await apiRequest("PUT", `/api/requests/${requestId}`, {
-        status,
-        ...(status === "completed" && { completedAt: new Date().toISOString() }),
-      });
-    },
-    onSuccess: () => {
-      toast({
-        title: "Estado actualizado",
-        description: "El estado de la solicitud ha sido actualizado",
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/requests"] });
+      // Refresh queries
+      queryClient.invalidateQueries({ queryKey: ["/api/provider/available-requests"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/provider/my-purchases"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/provider/credit-history"] });
     },
     onError: (error: Error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Sesión expirada",
-          description: "Tu sesión ha expirado. Iniciando sesión...",
-          variant: "destructive",
-        });
-        setTimeout(() => window.location.href = "/api/login", 2000);
-        return;
-      }
       toast({
-        title: "Error",
-        description: error.message || "No se pudo actualizar el estado",
+        title: "Error al comprar contacto",
+        description: error.message,
         variant: "destructive",
       });
     },
   });
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "quoted":
-        return "bg-blue-100 text-blue-800";
-      case "accepted":
-        return "bg-green-100 text-green-800";
-      case "in_progress":
-        return "bg-purple-100 text-purple-800";
-      case "completed":
-        return "bg-emerald-100 text-emerald-800";
-      case "cancelled":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case "pending":
-        return "Pendiente";
-      case "quoted":
-        return "Cotizada";
-      case "accepted":
-        return "Aceptada";
-      case "in_progress":
-        return "En progreso";
-      case "completed":
-        return "Completada";
-      case "cancelled":
-        return "Cancelada";
-      default:
-        return status;
-    }
-  };
-
-  const handleRespond = () => {
-    if (!selectedRequest || !responseText.trim()) return;
-    
-    const price = quotedPrice ? parseFloat(quotedPrice) : undefined;
-    
-    respondToRequestMutation.mutate({
-      requestId: selectedRequest.id,
-      response: responseText,
-      price,
-    });
-  };
-
-  const handleStatusUpdate = (requestId: number, status: string) => {
-    updateRequestStatusMutation.mutate({ requestId, status });
-  };
-
-  if (authLoading || providerLoading) {
+  if (!isAuthenticated || user?.userType !== 'provider') {
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-gray-50">
         <Navbar />
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <Skeleton key={i} className="h-48 w-full" />
-            ))}
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-slate-50">
-        <Navbar />
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Acceso requerido</CardTitle>
-              <CardDescription>
-                Debes iniciar sesión para acceder al dashboard de profesionales.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button onClick={() => window.location.href = "/api/login"}>
-                Iniciar sesión
+        <div className="container mx-auto px-4 py-8">
+          <Card className="max-w-md mx-auto">
+            <CardContent className="text-center p-8">
+              <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+              <h2 className="text-xl font-semibold mb-2">Acceso Restringido</h2>
+              <p className="text-gray-600 mb-4">
+                Esta página es solo para proveedores de servicios registrados.
+              </p>
+              <Button onClick={() => window.location.href = "/register-provider"}>
+                Registrarse como Proveedor
               </Button>
             </CardContent>
           </Card>
@@ -287,417 +180,312 @@ export default function ProviderDashboard() {
     );
   }
 
-  if (!provider) {
-    return (
-      <div className="min-h-screen bg-slate-50">
-        <Navbar />
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Perfil de profesional no encontrado</CardTitle>
-              <CardDescription>
-                No tienes un perfil de profesional registrado. Contacta al administrador para activar tu cuenta.
-              </CardDescription>
-            </CardHeader>
-          </Card>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
       
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">
-            Dashboard - {provider.businessName}
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Dashboard del Proveedor
           </h1>
-          <p className="text-lg text-slate-600">
-            Gestiona tu negocio, servicios y ganancias desde un solo lugar
+          <p className="text-gray-600">
+            Bienvenido de vuelta, {user?.name}
           </p>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <Calendar className="h-6 w-6 text-blue-600" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-slate-600">Trabajos totales</p>
-                  <p className="text-2xl font-bold text-slate-900">
-                    {statsLoading ? "..." : stats?.totalJobs || 0}
-                  </p>
-                </div>
+        {/* Credit Balance Card */}
+        <Card className="mb-8 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold mb-1">Créditos Disponibles</h3>
+                <p className="text-blue-100">
+                  Usa tus créditos para acceder a información de contacto de clientes
+                </p>
               </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="p-2 bg-green-100 rounded-lg">
-                  <CheckCircle className="h-6 w-6 text-green-600" />
+              <div className="text-right">
+                <div className="text-3xl font-bold mb-1">
+                  {creditLoading ? (
+                    <Skeleton className="h-8 w-16 bg-blue-400" />
+                  ) : (
+                    creditHistory?.currentCredits || 0
+                  )}
                 </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-slate-600">Completados</p>
-                  <p className="text-2xl font-bold text-slate-900">
-                    {statsLoading ? "..." : stats?.completedJobs || 0}
-                  </p>
-                </div>
+                <p className="text-blue-100 text-sm">créditos</p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </CardContent>
+        </Card>
 
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="p-2 bg-yellow-100 rounded-lg">
-                  <Star className="h-6 w-6 text-yellow-600" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-slate-600">Rating promedio</p>
-                  <p className="text-2xl font-bold text-slate-900">
-                    {provider.rating || "N/A"}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="p-2 bg-emerald-100 rounded-lg">
-                    <CreditCard className="h-6 w-6 text-emerald-600" />
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-slate-600">Créditos disponibles</p>
-                    <p className="text-2xl font-bold text-slate-900">
-                      {creditBalance ? creditBalance.credits : 0}
-                    </p>
-                  </div>
-                </div>
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={() => window.location.href = "/comprar-creditos"}
-                >
-                  Comprar más
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Main Dashboard Tabs */}
+        {/* Tabs */}
         <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="overview">Resumen</TabsTrigger>
-            <TabsTrigger value="requests">Solicitudes</TabsTrigger>
-            <TabsTrigger value="services">Servicios</TabsTrigger>
-            <TabsTrigger value="earnings">Ganancias</TabsTrigger>
-            <TabsTrigger value="calendar">Calendario</TabsTrigger>
-            <TabsTrigger value="settings">Configuración</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 mb-6">
+            <TabsTrigger value="available">Solicitudes Disponibles</TabsTrigger>
+            <TabsTrigger value="purchased">Mis Contactos</TabsTrigger>
+            <TabsTrigger value="credits">Historial de Créditos</TabsTrigger>
           </TabsList>
 
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="mt-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5" />
-                    Estadísticas Generales
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between">
-                      <span>Trabajos completados:</span>
-                      <span className="font-semibold">{stats?.completedJobs || 0}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Rating promedio:</span>
-                      <span className="font-semibold">{provider.rating || "N/A"}/5</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Ingresos totales:</span>
-                      <span className="font-semibold">ARS ${(stats?.totalEarnings || 0).toLocaleString('es-AR')}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Briefcase className="h-5 w-5" />
-                    Información del Perfil
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div>
-                      <p className="text-sm text-gray-500">Negocio</p>
-                      <p className="font-medium">{provider.businessName}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Ubicación</p>
-                      <p className="font-medium">{provider.city}, {provider.province}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Estado</p>
-                      <Badge variant={provider.isVerified ? "default" : "secondary"}>
-                        {provider.isVerified ? "Verificado" : "Pendiente"}
-                      </Badge>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              {/* Achievement Showcase */}
-              <BadgeShowcase 
-                userId={user?.id || ""} 
-                className="lg:col-span-2" 
-              />
-            </div>
-          </TabsContent>
-
-          {/* Services Tab */}
-          <TabsContent value="services" className="mt-6">
-            <ServiceManagement providerId={provider.id} />
-          </TabsContent>
-
-          {/* Earnings Tab */}
-          <TabsContent value="earnings" className="mt-6">
-            <EarningsOverview providerId={provider.id} />
-          </TabsContent>
-
-          {/* Calendar Tab */}
-          <TabsContent value="calendar" className="mt-6">
-            <AvailabilityCalendar providerId={provider.id} />
-          </TabsContent>
-
-          {/* Settings Tab */}
-          <TabsContent value="settings" className="mt-6">
+          {/* Available Requests Tab */}
+          <TabsContent value="available">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
-                  Configuración del Perfil
-                </CardTitle>
+                <CardTitle>Solicitudes de Trabajo Disponibles</CardTitle>
                 <CardDescription>
-                  Gestiona tu información profesional
+                  Solicitudes que coinciden con tus categorías de servicio. Cada contacto cuesta 5 créditos.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="font-medium mb-4">Información de contacto</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-medium">Teléfono</label>
-                        <Input defaultValue={provider.phone || ""} />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium">Email</label>
-                        <Input defaultValue={provider.email || ""} />
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-medium mb-4">Descripción profesional</h4>
-                    <Textarea 
-                      defaultValue={provider.description || ""} 
-                      placeholder="Describe tu experiencia y servicios..."
-                      className="min-h-[100px]"
-                    />
-                  </div>
-
-                  <div className="flex justify-end">
-                    <Button>Guardar cambios</Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Requests Tab */}
-          <TabsContent value="requests" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Solicitudes de servicio</CardTitle>
-                <CardDescription>
-                  Gestiona las solicitudes de tus clientes
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {requestsLoading ? (
+                {availableLoading ? (
                   <div className="space-y-4">
-                    {[...Array(3)].map((_, i) => (
+                    {[1, 2, 3].map((i) => (
                       <Skeleton key={i} className="h-32 w-full" />
                     ))}
                   </div>
-                ) : requests && requests.length > 0 ? (
+                ) : !availableRequests?.length ? (
+                  <div className="text-center py-8">
+                    <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-600 mb-2">
+                      No hay solicitudes disponibles
+                    </h3>
+                    <p className="text-gray-500">
+                      Vuelve pronto para ver nuevas oportunidades de trabajo.
+                    </p>
+                  </div>
+                ) : (
                   <div className="space-y-4">
-                    {requests.map((request: ServiceRequest) => (
-                      <Card key={request.id}>
+                    {availableRequests.map((request: ServiceRequest) => (
+                      <Card key={request.id} className="border-l-4 border-l-blue-500">
                         <CardContent className="p-6">
                           <div className="flex justify-between items-start mb-4">
-                            <div>
-                              <h3 className="text-lg font-semibold">{request.title}</h3>
-                              <p className="text-sm text-gray-600">
-                                Solicitud #{request.id}
-                              </p>
-                            </div>
-                            <Badge className={getStatusColor(request.status)}>
-                              {getStatusText(request.status)}
-                            </Badge>
-                          </div>
-
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-2 text-sm">
-                                <Calendar className="w-4 h-4 text-gray-500" />
-                                <span>
-                                  {request.preferredDate 
-                                    ? format(new Date(request.preferredDate), "PPP", { locale: es })
-                                    : "Fecha no especificada"
-                                  }
-                                </span>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <h3 className="text-lg font-semibold">{request.title}</h3>
+                                {request.isUrgent && (
+                                  <Badge variant="destructive" className="text-xs">
+                                    URGENTE
+                                  </Badge>
+                                )}
+                                <Badge variant="secondary" className="text-xs">
+                                  {categoryNames[request.categoryId as keyof typeof categoryNames]}
+                                </Badge>
                               </div>
-                              
-                              <div className="flex items-center gap-2 text-sm">
-                                <MapPin className="w-4 h-4 text-gray-500" />
-                                <span>{request.address}, {request.city}</span>
-                              </div>
-
-                              {request.estimatedBudget && (
-                                <div className="flex items-center gap-2 text-sm">
-                                  <DollarSign className="w-4 h-4 text-gray-500" />
-                                  <span>Presupuesto: ARS {Number(request.estimatedBudget).toLocaleString('es-AR')}</span>
-                                </div>
-                              )}
-                            </div>
-
-                            <div>
-                              <p className="text-sm font-medium mb-1">Descripción:</p>
-                              <p className="text-sm text-gray-600 leading-relaxed">
+                              <p className="text-gray-600 mb-3 line-clamp-2">
                                 {request.description}
                               </p>
+                              
+                              <div className="flex items-center gap-4 text-sm text-gray-500">
+                                <div className="flex items-center gap-1">
+                                  <MapPin className="h-4 w-4" />
+                                  {request.city}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <DollarSign className="h-4 w-4" />
+                                  ${request.estimatedBudget?.toLocaleString()} ARS
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="h-4 w-4" />
+                                  {request.preferredDate ? 
+                                    format(new Date(request.preferredDate), "dd/MM/yyyy", { locale: es }) :
+                                    "Fecha flexible"
+                                  }
+                                </div>
+                              </div>
                             </div>
-                          </div>
-
-                          <div className="flex justify-end gap-2">
-                            {request.status === "pending" && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setSelectedRequest(request)}
-                              >
-                                <MessageSquare className="w-4 h-4 mr-2" />
-                                Responder
-                              </Button>
-                            )}
                             
-                            {["quoted", "accepted"].includes(request.status) && (
+                            <div className="flex flex-col items-end gap-2">
+                              <div className="text-right">
+                                <div className="text-lg font-bold text-blue-600">
+                                  {request.creditCost} créditos
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  para ver contacto
+                                </div>
+                              </div>
+                              
                               <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleStatusUpdate(request.id, "in_progress")}
+                                onClick={() => purchaseLeadMutation.mutate(request.id)}
+                                disabled={purchaseLeadMutation.isPending || (creditHistory?.currentCredits || 0) < request.creditCost}
+                                className="bg-blue-600 hover:bg-blue-700"
                               >
-                                Marcar en progreso
+                                {purchaseLeadMutation.isPending ? (
+                                  <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Comprando...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Eye className="mr-2 h-4 w-4" />
+                                    Ver Contacto
+                                  </>
+                                )}
                               </Button>
-                            )}
-
-                            {request.status === "in_progress" && (
-                              <Button
-                                variant="default"
-                                size="sm"
-                                onClick={() => handleStatusUpdate(request.id, "completed")}
-                              >
-                                <CheckCircle className="w-4 h-4 mr-2" />
-                                Completar
-                              </Button>
-                            )}
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
                     ))}
                   </div>
-                ) : (
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Purchased Leads Tab */}
+          <TabsContent value="purchased">
+            <Card>
+              <CardHeader>
+                <CardTitle>Mis Contactos Comprados</CardTitle>
+                <CardDescription>
+                  Clientes cuya información de contacto has adquirido
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {purchasedLoading ? (
+                  <div className="space-y-4">
+                    {[1, 2].map((i) => (
+                      <Skeleton key={i} className="h-40 w-full" />
+                    ))}
+                  </div>
+                ) : !purchasedLeads?.length ? (
                   <div className="text-center py-8">
-                    <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      No tienes solicitudes
+                    <Briefcase className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-600 mb-2">
+                      Aún no has comprado contactos
                     </h3>
                     <p className="text-gray-500">
-                      Cuando los clientes soliciten tus servicios, aparecerán aquí
+                      Comienza comprando contactos de las solicitudes disponibles.
                     </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {purchasedLeads.map((lead: PurchasedLead) => (
+                      <Card key={lead.id} className="border-l-4 border-l-green-500">
+                        <CardContent className="p-6">
+                          <div className="flex justify-between items-start mb-4">
+                            <div className="flex-1">
+                              <h3 className="text-lg font-semibold mb-2">
+                                {lead.serviceRequest.title}
+                              </h3>
+                              <p className="text-gray-600 mb-3">
+                                {lead.serviceRequest.description}
+                              </p>
+                              
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                  <h4 className="font-semibold text-sm mb-2">Información del Cliente:</h4>
+                                  <div className="space-y-1 text-sm">
+                                    <div className="flex items-center gap-2">
+                                      <User className="h-4 w-4 text-blue-600" />
+                                      <span className="font-medium">{lead.clientContact.name}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <Mail className="h-4 w-4 text-blue-600" />
+                                      <a href={`mailto:${lead.clientContact.email}`} className="text-blue-600 hover:underline">
+                                        {lead.clientContact.email}
+                                      </a>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <Phone className="h-4 w-4 text-blue-600" />
+                                      <a href={`tel:${lead.clientContact.phone}`} className="text-blue-600 hover:underline">
+                                        {lead.clientContact.phone}
+                                      </a>
+                                    </div>
+                                  </div>
+                                </div>
+                                
+                                <div>
+                                  <h4 className="font-semibold text-sm mb-2">Detalles del Trabajo:</h4>
+                                  <div className="space-y-1 text-sm text-gray-600">
+                                    <div className="flex items-center gap-2">
+                                      <MapPin className="h-4 w-4" />
+                                      {lead.serviceRequest.city}
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <DollarSign className="h-4 w-4" />
+                                      ${lead.serviceRequest.estimatedBudget?.toLocaleString()} ARS
+                                    </div>
+                                    {lead.serviceRequest.preferredDate && (
+                                      <div className="flex items-center gap-2">
+                                        <Calendar className="h-4 w-4" />
+                                        {format(new Date(lead.serviceRequest.preferredDate), "dd/MM/yyyy", { locale: es })}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="text-right">
+                              <div className="text-sm text-gray-500 mb-1">
+                                Comprado el {format(new Date(lead.purchasedAt), "dd/MM/yyyy", { locale: es })}
+                              </div>
+                              <Badge variant="outline" className="text-xs">
+                                {lead.creditCost} créditos gastados
+                              </Badge>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Credit History Tab */}
+          <TabsContent value="credits">
+            <Card>
+              <CardHeader>
+                <CardTitle>Historial de Créditos</CardTitle>
+                <CardDescription>
+                  Registro de todas las transacciones de créditos
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {creditLoading ? (
+                  <div className="space-y-3">
+                    {[1, 2, 3, 4].map((i) => (
+                      <Skeleton key={i} className="h-16 w-full" />
+                    ))}
+                  </div>
+                ) : !creditHistory?.transactions?.length ? (
+                  <div className="text-center py-8">
+                    <CreditCard className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-600 mb-2">
+                      Sin transacciones
+                    </h3>
+                    <p className="text-gray-500">
+                      Tu historial de transacciones aparecerá aquí.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {creditHistory.transactions.map((transaction: CreditTransaction) => (
+                      <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <div className="font-medium">{transaction.description}</div>
+                          <div className="text-sm text-gray-500">
+                            {format(new Date(transaction.createdAt), "dd/MM/yyyy HH:mm", { locale: es })}
+                          </div>
+                        </div>
+                        <div className={`font-semibold ${
+                          transaction.credits > 0 ? 'text-green-600' : 'text-red-600'
+                        }`}>
+                          {transaction.credits > 0 ? '+' : ''}{transaction.credits} créditos
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
-
-        {/* Response Dialog */}
-        <Dialog open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Responder a solicitud</DialogTitle>
-              <DialogDescription>
-                Envía una respuesta al cliente con tu cotización
-              </DialogDescription>
-            </DialogHeader>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium">Tu respuesta</label>
-                <Textarea
-                  value={responseText}
-                  onChange={(e) => setResponseText(e.target.value)}
-                  placeholder="Escribe tu respuesta al cliente..."
-                  className="mt-1"
-                />
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium">Precio cotizado (opcional)</label>
-                <Input
-                  type="number"
-                  value={quotedPrice}
-                  onChange={(e) => setQuotedPrice(e.target.value)}
-                  placeholder="5000"
-                  className="mt-1"
-                />
-              </div>
-              
-              <div className="flex justify-end space-x-2">
-                <Button variant="outline" onClick={() => setSelectedRequest(null)}>
-                  Cancelar
-                </Button>
-                <Button 
-                  onClick={handleRespond}
-                  disabled={!responseText.trim() || respondToRequestMutation.isPending}
-                >
-                  {respondToRequestMutation.isPending ? "Enviando..." : "Enviar respuesta"}
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
       </div>
-      
+
       <Footer />
     </div>
   );

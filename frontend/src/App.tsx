@@ -10,6 +10,7 @@ import { AchievementNotification } from "@/components/achievements/achievement-n
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
+import Login from "@/pages/login";
 import Services from "@/pages/services";
 import ServiceDetail from "@/pages/service-detail";
 import ProviderProfile from "@/pages/provider-profile";
@@ -32,6 +33,7 @@ import ComoFunciona from "@/pages/como-funciona";
 import Contacto from "@/pages/contacto-fixed";
 import Terminos from "@/pages/terminos";
 import Privacidad from "@/pages/privacidad";
+import AvisoLegal from "@/pages/aviso-legal";
 import Seguridad from "@/pages/seguridad";
 import Blog from "@/pages/blog";
 import CentroAyuda from "@/pages/centro-ayuda";
@@ -59,6 +61,10 @@ import ServiciosVidriero from "@/pages/servicios-vidriero";
 import ServiciosInstaladorSolar from "@/pages/servicios-instalador-solar";
 import Messages from "@/pages/messages";
 import ReferralApply from "@/pages/referral-apply";
+import Register from "@/pages/register";
+import RegisterProvider from "@/pages/register-provider";
+import LegalCompliance from "@/pages/legal-compliance";
+import CreateRequest from "@/pages/create-request";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -72,8 +78,12 @@ function Router() {
       />
       <Switch>
       {/* Public routes available to all users */}
+      <Route path="/login" component={Login} />
       <Route path="/buscar" component={Search} />
       <Route path="/servicios" component={Services} />
+      <Route path="/register" component={Register} />
+      <Route path="/register-provider" component={RegisterProvider} />
+      <Route path="/legal-compliance" component={LegalCompliance} />
       <Route path="/referral" component={ReferralApply} />
       <Route path="/servicios/:id" component={ServiceDetail} />
       <Route path="/profesional/:id" component={ProviderProfile} />
@@ -83,6 +93,7 @@ function Router() {
       <Route path="/contacto" component={Contacto} />
       <Route path="/terminos" component={Terminos} />
       <Route path="/privacidad" component={Privacidad} />
+      <Route path="/aviso-legal" component={AvisoLegal} />
       <Route path="/seguridad" component={Seguridad} />
       <Route path="/blog" component={Blog} />
       <Route path="/centro-ayuda" component={CentroAyuda} />
@@ -116,6 +127,7 @@ function Router() {
         <>
           <Route path="/" component={Home} />
           <Route path="/mis-solicitudes" component={MyRequests} />
+          <Route path="/crear-solicitud" component={CreateRequest} />
           {/* Payment routes removed - customers pay professionals directly, not through platform */}
           {/* <Route path="/payment/:requestId" component={Payment} /> */}
           {/* <Route path="/payment-methods/:requestId" component={PaymentMethods} /> */}
