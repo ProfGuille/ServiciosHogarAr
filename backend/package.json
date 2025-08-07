@@ -14,9 +14,11 @@
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
+    "@googlemaps/google-maps-services-js": "^3.4.2",
     "@neondatabase/serverless": "^1.0.1",
     "@types/bcrypt": "^6.0.0",
     "@types/cookie-parser": "^1.4.9",
+    "@types/web-push": "^3.6.4",
     "bcrypt": "^5.1.1",
     "connect-pg-simple": "^10.0.0",
     "cookie-parser": "^1.4.7",
@@ -32,10 +34,13 @@
     "mercadopago": "^2.8.0",
     "mysql2": "^3.14.2",
     "nanoid": "^5.1.5",
+    "node-cron": "^4.2.1",
     "nodemailer": "^7.0.5",
     "openid-client": "^6.6.2",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
+    "socket.io": "^4.8.1",
+    "web-push": "^3.6.7",
     "ws": "^8.18.3",
     "zod": "^3.24.2"
   },
