@@ -175,9 +175,11 @@ export function Navbar() {
                   <Button variant="ghost" onClick={() => window.location.href = "/api/login"}>
                     {t('nav.login')}
                   </Button>
-                  <Button onClick={() => window.location.href = "/api/login"}>
-                    {t('nav.register')}
-                  </Button>
+                  <Link href="/register">
+                    <Button>
+                      {t('nav.register')}
+                    </Button>
+                  </Link>
                 </div>
               )}
             </div>
@@ -239,12 +241,14 @@ export function Navbar() {
                   >
                     Iniciar sesión
                   </Button>
-                  <Button 
-                    className="w-full justify-start"
-                    onClick={() => window.location.href = "/api/login"}
-                  >
-                    Registrarse
-                  </Button>
+                  <Link href="/register">
+                    <Button 
+                      className="w-full justify-start"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Registrarse
+                    </Button>
+                  </Link>
                 </div>
               )}
             </div>
