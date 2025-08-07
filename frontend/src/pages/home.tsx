@@ -153,7 +153,7 @@ export default function Home() {
                         : 'Aún no has realizado ninguna solicitud'
                       }
                     </p>
-                    <Button className="mt-4" variant="outline">
+                    <Button className="mt-4" variant="outline" onClick={() => window.location.href = user.userType === 'provider' ? '/buscar' : '/crear-solicitud'}>
                       {user.userType === 'provider' 
                         ? 'Explorar solicitudes'
                         : 'Crear nueva solicitud'
@@ -219,24 +219,24 @@ export default function Home() {
               <CardContent className="space-y-3">
                 {user.userType === 'customer' ? (
                   <>
-                    <Button className="w-full" size="sm">
+                    <Button className="w-full" size="sm" onClick={() => window.location.href = "/crear-solicitud"}>
                       <Calendar className="h-4 w-4 mr-2" />
                       Nueva solicitud
                     </Button>
-                    <Button variant="outline" className="w-full" size="sm">
+                    <Button variant="outline" className="w-full" size="sm" onClick={() => window.location.href = "/buscar"}>
                       <User className="h-4 w-4 mr-2" />
                       Buscar profesionales
                     </Button>
                   </>
                 ) : (
                   <>
-                    <Button className="w-full" size="sm">
+                    <Button className="w-full" size="sm" onClick={() => window.location.href = "/perfil"}>
                       <User className="h-4 w-4 mr-2" />
                       Mi perfil
                     </Button>
-                    <Button variant="outline" className="w-full" size="sm">
+                    <Button variant="outline" className="w-full" size="sm" onClick={() => window.location.href = "/dashboard-profesional"}>
                       <Calendar className="h-4 w-4 mr-2" />
-                      Ver agenda
+                      Ver dashboard
                     </Button>
                   </>
                 )}

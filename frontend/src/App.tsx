@@ -63,6 +63,7 @@ import Messages from "@/pages/messages";
 import ReferralApply from "@/pages/referral-apply";
 import Register from "@/pages/register";
 import LegalCompliance from "@/pages/legal-compliance";
+import CreateRequest from "@/pages/create-request";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -124,6 +125,7 @@ function Router() {
         <>
           <Route path="/" component={Home} />
           <Route path="/mis-solicitudes" component={MyRequests} />
+          <Route path="/crear-solicitud" component={CreateRequest} />
           {/* Payment routes removed - customers pay professionals directly, not through platform */}
           {/* <Route path="/payment/:requestId" component={Payment} /> */}
           {/* <Route path="/payment-methods/:requestId" component={PaymentMethods} /> */}
