@@ -32,6 +32,7 @@ import ComoFunciona from "@/pages/como-funciona";
 import Contacto from "@/pages/contacto-fixed";
 import Terminos from "@/pages/terminos";
 import Privacidad from "@/pages/privacidad";
+import AvisoLegal from "@/pages/aviso-legal";
 import Seguridad from "@/pages/seguridad";
 import Blog from "@/pages/blog";
 import CentroAyuda from "@/pages/centro-ayuda";
@@ -83,6 +84,7 @@ function Router() {
       <Route path="/contacto" component={Contacto} />
       <Route path="/terminos" component={Terminos} />
       <Route path="/privacidad" component={Privacidad} />
+      <Route path="/aviso-legal" component={AvisoLegal} />
       <Route path="/seguridad" component={Seguridad} />
       <Route path="/blog" component={Blog} />
       <Route path="/centro-ayuda" component={CentroAyuda} />

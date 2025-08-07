@@ -144,11 +144,30 @@ export default function Terminos() {
               <CardTitle>8. Limitación de Responsabilidad</CardTitle>
             </CardHeader>
             <CardContent>
-              <p>
-                ServiciosHogar.com.ar actúa como intermediario y no será responsable por 
-                daños directos, indirectos, incidentales o consecuentes que resulten del 
-                uso de nuestros servicios o de los servicios prestados por profesionales.
-              </p>
+              <div className="space-y-4">
+                <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <h4 className="font-semibold text-red-800 mb-2">LIMITACIÓN EXPRESA DE RESPONSABILIDAD</h4>
+                  <p className="text-red-700 text-sm">
+                    En los términos más amplios permitidos por la ley argentina, ServiciosHogar.com.ar 
+                    excluye toda responsabilidad por:
+                  </p>
+                </div>
+                
+                <ul className="list-disc pl-6 space-y-2">
+                  <li>Daños directos, indirectos, incidentales, especiales o consecuentes</li>
+                  <li>Lucro cesante, pérdida de datos o interrupción de actividades</li>
+                  <li>Actos u omisiones de los prestadores de servicios registrados</li>
+                  <li>Calidad, seguridad o legalidad de los servicios prestados por terceros</li>
+                  <li>Cumplimiento de acuerdos entre usuarios y prestadores</li>
+                  <li>Disponibilidad continua e ininterrumpida de la plataforma</li>
+                </ul>
+                
+                <p className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded text-amber-800 text-sm">
+                  <strong>Responsabilidad máxima:</strong> En caso de que se determine alguna 
+                  responsabilidad de nuestra parte, esta estará limitada al monto pagado por 
+                  comisiones de servicios en los últimos 30 días, sin exceder $10.000 ARS.
+                </p>
+              </div>
             </CardContent>
           </Card>
 
