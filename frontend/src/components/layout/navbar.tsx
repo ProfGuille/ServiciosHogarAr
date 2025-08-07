@@ -175,11 +175,27 @@ export function Navbar() {
                   <Button variant="ghost" onClick={() => window.location.href = "/api/login"}>
                     {t('nav.login')}
                   </Button>
-                  <Link href="/register">
-                    <Button>
-                      {t('nav.register')}
-                    </Button>
-                  </Link>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button>
+                        {t('nav.register')}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem asChild>
+                        <Link href="/register">
+                          <User className="mr-2 h-4 w-4" />
+                          Registro Cliente
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/register-provider">
+                          <Briefcase className="mr-2 h-4 w-4" />
+                          Registro Proveedor
+                        </Link>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               )}
             </div>

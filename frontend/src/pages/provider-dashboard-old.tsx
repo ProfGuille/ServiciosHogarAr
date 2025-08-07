@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
+import { BadgeShowcase } from "@/components/ui/badge-showcase";
 import {
   Card,
   CardContent,
@@ -85,6 +86,12 @@ export default function ProviderDashboard() {
     enabled: isAuthenticated && !!user?.id,
   });
 
+  // Get credit balance
+  const { data: creditBalance } = useQuery({
+    queryKey: ["/api/payments/credits"],
+    enabled: isAuthenticated && !!user?.id,
+  });
+
   // Fetch service requests for this provider
   const { data: requests, isLoading: requestsLoading } = useQuery({
     queryKey: ["/api/requests", { providerId: provider?.id }],
@@ -93,22 +100,16 @@ export default function ProviderDashboard() {
 
   // Fetch provider stats
   const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ["/api/providers", provider?.id, "stats"],
+    queryKey: [`/api/providers/${provider?.id}/stats`],
     enabled: !!provider?.id,
   });
 
-  // Mutation to respond to service request
+  // Mutation to respond to requests
   const respondToRequestMutation = useMutation({
-    mutationFn: async ({ requestId, response, price }: { 
-      requestId: number; 
-      response: string; 
-      price?: number;
-    }) => {
-      return await apiRequest("PUT", `/api/requests/${requestId}`, {
-        status: price ? "quoted" : "accepted",
-        providerResponse: response,
+    mutationFn: async ({ requestId, response, price }: { requestId: number; response: string; price?: number }) => {
+      return await apiRequest("POST", `/api/requests/${requestId}/respond`, {
+        response,
         quotedPrice: price,
-        quotedAt: new Date().toISOString(),
       });
     },
     onSuccess: () => {
@@ -121,7 +122,36 @@ export default function ProviderDashboard() {
       setResponseText("");
       setQuotedPrice("");
     },
-    onError: (error: Error) => {
+    onError: (error: any) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Sesión expirada",
+          description: "Tu sesión ha expirado. Iniciando sesión...",
+          variant: "destructive",
+        });
+        setTimeout(() => window.location.href = "/api/login", 2000);
+        return;
+      }
+      
+      // Handle insufficient credits error
+      if (error.message?.includes("Créditos insuficientes")) {
+        toast({
+          title: "Créditos insuficientes",
+          description: "Necesitas comprar más créditos para responder a solicitudes.",
+          variant: "destructive",
+          action: (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => window.location.href = "/comprar-creditos"}
+            >
+              Comprar créditos
+            </Button>
+          ),
+        });
+        return;
+      }
+      
       toast({
         title: "Error",
         description: error.message || "No se pudo enviar la respuesta",
@@ -276,13 +306,6 @@ export default function ProviderDashboard() {
     );
   }
 
-  const filteredRequests = requests?.filter((request: ServiceRequest) => {
-    if (selectedTab === "pending") return request.status === "pending";
-    if (selectedTab === "active") return ["quoted", "accepted", "in_progress"].includes(request.status);
-    if (selectedTab === "completed") return ["completed", "cancelled"].includes(request.status);
-    return true;
-  });
-
   return (
     <div className="min-h-screen bg-slate-50">
       <Navbar />
@@ -294,7 +317,7 @@ export default function ProviderDashboard() {
             Dashboard - {provider.businessName}
           </h1>
           <p className="text-lg text-slate-600">
-            Gestiona tus solicitudes de servicio y revisa tu rendimiento
+            Gestiona tu negocio, servicios y ganancias desde un solo lugar
           </p>
         </div>
 
@@ -350,16 +373,25 @@ export default function ProviderDashboard() {
 
           <Card>
             <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="p-2 bg-purple-100 rounded-lg">
-                  <DollarSign className="h-6 w-6 text-purple-600" />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className="p-2 bg-emerald-100 rounded-lg">
+                    <CreditCard className="h-6 w-6 text-emerald-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-slate-600">Créditos disponibles</p>
+                    <p className="text-2xl font-bold text-slate-900">
+                      {creditBalance ? creditBalance.credits : 0}
+                    </p>
+                  </div>
                 </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-slate-600">Ingresos</p>
-                  <p className="text-2xl font-bold text-slate-900">
-                    ARS {statsLoading ? "..." : (stats?.totalEarnings || 0).toLocaleString('es-AR')}
-                  </p>
-                </div>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => window.location.href = "/comprar-creditos"}
+                >
+                  Comprar más
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -430,6 +462,12 @@ export default function ProviderDashboard() {
                   </div>
                 </CardContent>
               </Card>
+              
+              {/* Achievement Showcase */}
+              <BadgeShowcase 
+                userId={user?.id || ""} 
+                className="lg:col-span-2" 
+              />
             </div>
           </TabsContent>
 
@@ -509,9 +547,9 @@ export default function ProviderDashboard() {
                       <Skeleton key={i} className="h-32 w-full" />
                     ))}
                   </div>
-                ) : filteredRequests && filteredRequests.length > 0 ? (
+                ) : requests && requests.length > 0 ? (
                   <div className="space-y-4">
-                    {filteredRequests.map((request: ServiceRequest) => (
+                    {requests.map((request: ServiceRequest) => (
                       <Card key={request.id}>
                         <CardContent className="p-6">
                           <div className="flex justify-between items-start mb-4">
@@ -559,135 +597,107 @@ export default function ProviderDashboard() {
                             </div>
                           </div>
 
-                          {request.customerNotes && (
-                            <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-                              <p className="text-sm font-medium mb-1">Notas del cliente:</p>
-                              <p className="text-sm text-gray-700">{request.customerNotes}</p>
-                            </div>
-                          )}
-
-                          <div className="flex justify-between items-center pt-4 border-t border-gray-200">
-                            <p className="text-xs text-gray-500">
-                              Creada el {format(new Date(request.createdAt), "PPP", { locale: es })}
-                            </p>
+                          <div className="flex justify-end gap-2">
+                            {request.status === "pending" && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setSelectedRequest(request)}
+                              >
+                                <MessageSquare className="w-4 h-4 mr-2" />
+                                Responder
+                              </Button>
+                            )}
                             
-                            <div className="flex gap-2">
-                              {request.status === "pending" && (
-                                <Dialog>
-                                  <DialogTrigger asChild>
-                                    <Button 
-                                      size="sm"
-                                      onClick={() => setSelectedRequest(request)}
-                                    >
-                                      <MessageSquare className="w-4 h-4 mr-1" />
-                                      Responder
-                                    </Button>
-                                  </DialogTrigger>
-                                  <DialogContent>
-                                    <DialogHeader>
-                                      <DialogTitle>Responder solicitud</DialogTitle>
-                                      <DialogDescription>
-                                        Envía una respuesta al cliente para esta solicitud
-                                      </DialogDescription>
-                                    </DialogHeader>
-                                    
-                                    <div className="space-y-4">
-                                      <div>
-                                        <label className="text-sm font-medium">Respuesta</label>
-                                        <Textarea
-                                          placeholder="Escribe tu respuesta al cliente..."
-                                          value={responseText}
-                                          onChange={(e) => setResponseText(e.target.value)}
-                                          className="mt-1"
-                                        />
-                                      </div>
-                                      
-                                      <div>
-                                        <label className="text-sm font-medium">Precio cotizado (opcional)</label>
-                                        <Input
-                                          type="number"
-                                          placeholder="5000"
-                                          value={quotedPrice}
-                                          onChange={(e) => setQuotedPrice(e.target.value)}
-                                          className="mt-1"
-                                        />
-                                        <p className="text-xs text-gray-500 mt-1">
-                                          Si incluyes un precio, la solicitud se marcará como "cotizada"
-                                        </p>
-                                      </div>
-                                      
-                                      <div className="flex gap-2">
-                                        <Button
-                                          onClick={handleRespond}
-                                          disabled={!responseText.trim() || respondToRequestMutation.isPending}
-                                        >
-                                          {respondToRequestMutation.isPending ? "Enviando..." : "Enviar respuesta"}
-                                        </Button>
-                                      </div>
-                                    </div>
-                                  </DialogContent>
-                                </Dialog>
-                              )}
-                              
-                              {request.status === "quoted" && (
-                                <Button 
-                                  size="sm" 
-                                  variant="outline"
-                                  onClick={() => handleStatusUpdate(request.id, "accepted")}
-                                  disabled={updateRequestStatusMutation.isPending}
-                                >
-                                  Aceptar trabajo
-                                </Button>
-                              )}
-                              
-                              {request.status === "accepted" && (
-                                <Button 
-                                  size="sm"
-                                  onClick={() => handleStatusUpdate(request.id, "in_progress")}
-                                  disabled={updateRequestStatusMutation.isPending}
-                                >
-                                  Marcar en progreso
-                                </Button>
-                              )}
-                              
-                              {request.status === "in_progress" && (
-                                <Button 
-                                  size="sm"
-                                  onClick={() => handleStatusUpdate(request.id, "completed")}
-                                  disabled={updateRequestStatusMutation.isPending}
-                                >
-                                  <CheckCircle className="w-4 h-4 mr-1" />
-                                  Completar
-                                </Button>
-                              )}
-                            </div>
+                            {["quoted", "accepted"].includes(request.status) && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleStatusUpdate(request.id, "in_progress")}
+                              >
+                                Marcar en progreso
+                              </Button>
+                            )}
+
+                            {request.status === "in_progress" && (
+                              <Button
+                                variant="default"
+                                size="sm"
+                                onClick={() => handleStatusUpdate(request.id, "completed")}
+                              >
+                                <CheckCircle className="w-4 h-4 mr-2" />
+                                Completar
+                              </Button>
+                            )}
                           </div>
                         </CardContent>
                       </Card>
                     ))}
                   </div>
                 ) : (
-                  <Card>
-                    <CardContent className="text-center py-8">
-                      <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">
-                        No hay solicitudes
-                      </h3>
-                      <p className="text-gray-600">
-                        {selectedTab === "pending" 
-                          ? "No tienes solicitudes pendientes en este momento."
-                          : `No tienes solicitudes ${selectedTab === "active" ? "activas" : "finalizadas"}.`
-                        }
-                      </p>
-                    </CardContent>
-                  </Card>
+                  <div className="text-center py-8">
+                    <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      No tienes solicitudes
+                    </h3>
+                    <p className="text-gray-500">
+                      Cuando los clientes soliciten tus servicios, aparecerán aquí
+                    </p>
+                  </div>
                 )}
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
-      </div>
 
+        {/* Response Dialog */}
+        <Dialog open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Responder a solicitud</DialogTitle>
+              <DialogDescription>
+                Envía una respuesta al cliente con tu cotización
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Tu respuesta</label>
+                <Textarea
+                  value={responseText}
+                  onChange={(e) => setResponseText(e.target.value)}
+                  placeholder="Escribe tu respuesta al cliente..."
+                  className="mt-1"
+                />
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium">Precio cotizado (opcional)</label>
+                <Input
+                  type="number"
+                  value={quotedPrice}
+                  onChange={(e) => setQuotedPrice(e.target.value)}
+                  placeholder="5000"
+                  className="mt-1"
+                />
+              </div>
+              
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => setSelectedRequest(null)}>
+                  Cancelar
+                </Button>
+                <Button 
+                  onClick={handleRespond}
+                  disabled={!responseText.trim() || respondToRequestMutation.isPending}
+                >
+                  {respondToRequestMutation.isPending ? "Enviando..." : "Enviar respuesta"}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+      
       <Footer />
     </div>
   );
