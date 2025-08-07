@@ -26,7 +26,7 @@ import {
   like,
   inArray
 } from "drizzle-orm";
-import { isAuthenticated } from "../replitAuth";
+// import { isAuthenticated } from "../replitAuth";
 import crypto from "crypto";
 import { rateLimit } from 'express-rate-limit';
 

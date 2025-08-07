@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { isAuthenticated } from "../replitAuth.js";
+// import { isAuthenticated } from "../replitAuth.js";
 import { achievementService } from "../services/achievementService.js";
 
 const router = Router();

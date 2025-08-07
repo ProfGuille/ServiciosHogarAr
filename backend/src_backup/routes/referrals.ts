@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { isAuthenticated } from "../replitAuth.js";
+// import { isAuthenticated } from "../replitAuth.js";
 import { referralService } from "../services/referralService.js";
 import { z } from "zod";
 

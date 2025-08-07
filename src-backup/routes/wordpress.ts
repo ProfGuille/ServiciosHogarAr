@@ -16,7 +16,7 @@ import {
   desc, 
   count 
 } from "drizzle-orm";
-import { isAuthenticated } from "../replitAuth";
+// import { isAuthenticated } from "../replitAuth";
 import crypto from "crypto";
 
 // Middleware to validate WordPress API key

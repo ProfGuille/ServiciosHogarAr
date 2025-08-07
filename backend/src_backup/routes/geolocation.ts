@@ -10,7 +10,7 @@ import {
   locationEvents,
 } from "../shared/schema.js";
 import { eq, and, desc } from "drizzle-orm";
-import { isAuthenticated } from "../replitAuth.js";
+// import { isAuthenticated } from "../replitAuth.js";
 import { insertServiceAreaSchema, insertGeofenceSchema } from "../shared/schema.js";
 
 const router = Router();

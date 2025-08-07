@@ -3,7 +3,7 @@ import { MercadoPagoConfig, Preference, Payment } from "mercadopago";
 import { db } from "../db.js";
 import { payments, serviceProviders, users } from "../shared/schema.js";
 import { eq, and, desc } from "drizzle-orm";
-import { isAuthenticated } from "../replitAuth.js";
+// import { isAuthenticated } from "../replitAuth.js";
 import { z } from "zod";
 import { notifyProviderCreditsPurchased } from "../services/email.js";
 

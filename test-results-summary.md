@@ -38,7 +38,7 @@
 - ✅ Registros de pago funcionando
 
 ### APIs Backend
-- ✅ Autenticación con Replit Auth
+- ✅ Sistema de autenticación
 - ✅ CRUD completo de servicios
 - ✅ Sistema de pagos modular
 - ✅ Dashboard administrativo

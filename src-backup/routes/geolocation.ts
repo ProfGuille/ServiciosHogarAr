@@ -13,7 +13,7 @@ import {
   insertGeofenceSchema
 } from "./shared/schema";
 import { eq, and, desc, gte, sql } from "drizzle-orm";
-import { isAuthenticated } from "../replitAuth";
+// import { isAuthenticated } from "../replitAuth";
 import { z } from "zod";
 
 const router = Router();

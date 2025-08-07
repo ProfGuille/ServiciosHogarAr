@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db } from "../db.js";
 import { languages, translations, localizedContent, userLanguagePreferences } from "../shared/schema.js";
 import { eq, and } from "drizzle-orm";
-import { isAuthenticated } from "../replitAuth.js";
+// import { isAuthenticated } from "../replitAuth.js";
 
 const router = Router();
 

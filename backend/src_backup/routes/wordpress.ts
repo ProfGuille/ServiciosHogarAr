@@ -17,7 +17,7 @@ import {
   desc, 
   count 
 } from "drizzle-orm";
-import { isAuthenticated } from "../replitAuth.js";
+// import { isAuthenticated } from "../replitAuth.js";
 import crypto from "crypto";
 
 const router = Router();
