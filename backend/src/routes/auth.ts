@@ -3,6 +3,7 @@ import { db } from '../db.js';
 import { users } from '../shared/schema/index.js';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcrypt';
+import { generateJWTToken } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -109,7 +110,9 @@ router.post('/login', async (req: any, res: Response) => {
         email: user.email,
         createdAt: user.createdAt,
         userType: 'customer' // Default role
-      }
+      },
+      // Generate JWT token for real-time features
+      token: generateJWTToken(user.id, user.email, 'customer')
     });
 
   } catch (error) {
@@ -142,6 +145,51 @@ router.get('/check', (req: any, res: Response) => {
     isAuthenticated,
     userId: isAuthenticated ? req.session.userId : null
   });
+});
+
+// Get JWT token for authenticated user (for WebSocket/real-time features)
+router.get('/token', requireAuth, async (req: any, res: Response) => {
+  try {
+    const userId = req.session.userId;
+    const userEmail = req.session.userEmail;
+
+    // Get user details to determine role
+    const userResult = await db
+      .select({
+        id: users.id,
+        email: users.email,
+        name: users.name
+      })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+    if (userResult.length === 0) {
+      return res.status(401).json({ error: 'Usuario no encontrado' });
+    }
+
+    const user = userResult[0];
+    
+    // TODO: Check if user is a provider (check serviceProviders table)
+    const userRole = 'customer'; // Default role, enhance later
+
+    const token = generateJWTToken(user.id, user.email, userRole);
+
+    res.json({
+      token,
+      expiresIn: '24h',
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: userRole
+      }
+    });
+
+  } catch (error) {
+    console.error('Error generating JWT token:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
 });
 
 export default router;

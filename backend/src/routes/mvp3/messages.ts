@@ -3,14 +3,14 @@ import express from 'express';
 import { db } from '../../db.js';
 import { messages, conversations, users, serviceProviders } from '../../shared/schema/index.js';
 import { eq, and, desc, sql, or } from 'drizzle-orm';
-import { requireAuth } from '../../middleware/auth.js';
+import { requireJWTAuth } from '../../middleware/auth.js';
 
 const router = express.Router();
 
 // Get conversations for a user
-router.get('/conversations', requireAuth, async (req, res) => {
+router.get('/conversations', requireJWTAuth, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user!.id;
 
     // Get conversations where user is either client or provider
     const userConversations = await db
@@ -74,9 +74,9 @@ router.get('/conversations', requireAuth, async (req, res) => {
 });
 
 // Get messages for a conversation
-router.get('/conversations/:conversationId/messages', requireAuth, async (req, res) => {
+router.get('/conversations/:conversationId/messages', requireJWTAuth, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user!.id;
     const conversationId = parseInt(req.params.conversationId);
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 50;
@@ -170,9 +170,9 @@ router.get('/conversations/:conversationId/messages', requireAuth, async (req, r
 });
 
 // Create a new conversation
-router.post('/conversations', requireAuth, async (req, res) => {
+router.post('/conversations', requireJWTAuth, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user!.id;
     const { providerId, serviceRequestId, initialMessage } = req.body;
 
     // Validate input
@@ -238,9 +238,9 @@ router.post('/conversations', requireAuth, async (req, res) => {
 });
 
 // Send a message (REST endpoint, WebSocket is preferred for real-time)
-router.post('/conversations/:conversationId/messages', requireAuth, async (req, res) => {
+router.post('/conversations/:conversationId/messages', requireJWTAuth, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user!.id;
     const conversationId = parseInt(req.params.conversationId);
     const { content, messageType = 'text', attachmentUrl } = req.body;
 
@@ -298,9 +298,9 @@ router.post('/conversations/:conversationId/messages', requireAuth, async (req, 
 });
 
 // Get conversation details
-router.get('/conversations/:conversationId', requireAuth, async (req, res) => {
+router.get('/conversations/:conversationId', requireJWTAuth, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user!.id;
     const conversationId = parseInt(req.params.conversationId);
 
     const conversation = await db
