@@ -1,32 +1,27 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
+# <<<<<<< copilot/fix-500c9e2a-77dc-4336-b7f8-018cdbfecf16
 
+# =======
+# >>>>>>> main
 
 const backendPort = Number(process.env.BACKEND_PORT) || 5000;
 
 export default defineConfig({
-  plugins: [
-  react()
-],
-
+  plugins: [react()],
   resolve: {
     alias: {
-      "@": path.resolve(import.meta.dirname, "client", "src"),
-      "@shared": path.resolve(import.meta.dirname, "shared"),
-      "@assets": path.resolve(import.meta.dirname, "attached_assets"),
+      "@": path.resolve(__dirname, "src"),
+      "@shared": path.resolve(__dirname, "..", "backend", "src", "shared"),
+      "@assets": path.resolve(__dirname, "..", "attached_assets"),
     },
   },
-  root: path.resolve(import.meta.dirname, "client"),
   build: {
-    outDir: path.resolve(import.meta.dirname, "dist/public"),
+    outDir: path.resolve(__dirname, "dist"),
     emptyOutDir: true,
   },
   server: {
-    fs: {
-      strict: true,
-      deny: ["**/.*"],
-    },
     proxy: {
       "/api": {
         target: `http://localhost:${backendPort}`,
@@ -35,4 +30,5 @@ export default defineConfig({
       },
     },
   },
+  publicDir: "public",
 });
