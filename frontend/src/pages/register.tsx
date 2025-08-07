@@ -74,7 +74,7 @@ export default function Register() {
 
       // In real implementation, redirect to login or email verification
       setTimeout(() => {
-        window.location.href = "/api/login"; 
+        window.location.href = "/login"; 
       }, 2000);
       
     } catch (error) {
@@ -113,7 +113,7 @@ export default function Register() {
           <p className="text-sm text-slate-600">
             ¿Ya tienes una cuenta?{" "}
             <button 
-              onClick={() => window.location.href = "/api/login"}
+              onClick={() => window.location.href = "/login"}
               className="text-primary hover:underline font-medium"
             >
               Iniciar sesión

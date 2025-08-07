@@ -10,6 +10,7 @@ import { AchievementNotification } from "@/components/achievements/achievement-n
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
+import Login from "@/pages/login";
 import Services from "@/pages/services";
 import ServiceDetail from "@/pages/service-detail";
 import ProviderProfile from "@/pages/provider-profile";
@@ -75,6 +76,7 @@ function Router() {
       />
       <Switch>
       {/* Public routes available to all users */}
+      <Route path="/login" component={Login} />
       <Route path="/buscar" component={Search} />
       <Route path="/servicios" component={Services} />
       <Route path="/register" component={Register} />
