@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import ChatFloatingButton from "@/components/Chat/ChatFloatingButton";
+import { useAuth } from "@/hooks/useAuth";
 import { 
   Star, 
   MapPin, 
@@ -17,13 +19,15 @@ import {
   Phone, 
   Mail,
   Calendar,
-  ArrowLeft
+  ArrowLeft,
+  MessageCircle
 } from "lucide-react";
 import { useState } from "react";
 
 export default function ServiceDetail() {
   const { id } = useParams();
   const [showBookingForm, setShowBookingForm] = useState(false);
+  const { user, isAuthenticated } = useAuth();
 
   const { data: provider, isLoading: providerLoading } = useQuery({
     queryKey: ["/api/providers", id],
@@ -274,10 +278,28 @@ export default function ServiceDetail() {
                   </Button>
                 )}
                 
-                <Button variant="outline" className="w-full">
-                  <Mail className="h-4 w-4 mr-2" />
-                  Enviar mensaje
-                </Button>
+                {isAuthenticated ? (
+                  <Button variant="outline" className="w-full" onClick={() => {
+                    // This would open chat with the provider
+                    const event = new CustomEvent('openChat', { 
+                      detail: { 
+                        providerId: provider.id,
+                        initialMessage: `Hola! Me interesa el servicio: ${provider.businessName}`
+                      }
+                    });
+                    window.dispatchEvent(event);
+                  }}>
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    Chat directo
+                  </Button>
+                ) : (
+                  <Button variant="outline" className="w-full" onClick={() => {
+                    window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
+                  }}>
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    Iniciar sesión para chatear
+                  </Button>
+                )}
               </CardContent>
             </Card>
 
@@ -334,6 +356,17 @@ export default function ServiceDetail() {
             />
           </div>
         </div>
+      )}
+
+      {/* Chat Floating Button - MVP3 Phase 3 Integration */}
+      {isAuthenticated && provider && (
+        <ChatFloatingButton
+          initialProviderId={provider.id}
+          initialMessage={`Hola! Me interesa el servicio: ${provider.businessName}`}
+          position="bottom-right"
+          size="medium"
+          showUnreadBadge={true}
+        />
       )}
 
       <Footer />

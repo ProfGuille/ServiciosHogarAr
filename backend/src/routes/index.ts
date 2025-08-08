@@ -4,6 +4,8 @@ import authRoutes from './auth.js';
 import clientsRoutes from './clients.js';
 import conversationsRoutes from './conversations.js';
 import messagesRoutes from './messages.js';
+import searchRoutes from './search.js';
+import geolocationRoutes from './geolocation.js';
 
 export function registerRoutes(app: express.Express) {
   console.log('Registrando rutas de la API...');
@@ -16,6 +18,10 @@ export function registerRoutes(app: express.Express) {
   app.use('/api/clients', clientsRoutes);
   app.use('/api/conversations', conversationsRoutes);
   app.use('/api/messages', messagesRoutes);
+  
+  // MVP3 Phase 3: Search and Geolocation routes
+  app.use('/api/search', searchRoutes);
+  app.use('/api/geolocation', geolocationRoutes);
   
   // Service-related routes
   try {

@@ -7,6 +7,7 @@ import { ServiceSearch } from "@/components/services/service-search";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import ChatFloatingButton from "@/components/Chat/ChatFloatingButton";
 import { useQuery } from "@tanstack/react-query";
 import { 
   Clock, 
@@ -287,6 +288,15 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* Chat Floating Button - MVP3 Integration */}
+      {user && (
+        <ChatFloatingButton
+          position="bottom-right"
+          size="medium"
+          showUnreadBadge={true}
+        />
+      )}
 
       <Footer />
     </div>

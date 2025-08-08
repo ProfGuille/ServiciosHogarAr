@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSearch as useWouterSearch } from 'wouter';
 import { Navbar } from '@/components/layout/navbar';
@@ -6,9 +6,15 @@ import { Footer } from '@/components/layout/footer';
 import { SearchBar } from '@/components/search/search-bar';
 import { AdvancedSearchFilters } from '@/components/search/advanced-search-filters';
 import { SearchResults } from '@/components/search/search-results';
+import { LeafletMap } from '@/components/maps/LeafletMap';
 import { Button } from '@/components/ui/button';
-import { Filter, X } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Filter, X, MapPin, List, Navigation, Loader2 } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
+import { useGeolocation } from '@/hooks/useGeolocation';
+import { useToast } from '@/hooks/use-toast';
 
 interface SearchFilters {
   query?: string;
@@ -24,13 +30,28 @@ interface SearchFilters {
   languages?: string[];
   hasCredits?: boolean;
   sortBy?: string;
+  // Geolocation filters - MVP3 Phase 3
+  latitude?: number;
+  longitude?: number;
+  radius?: number; // in kilometers
+  useCurrentLocation?: boolean;
 }
 
 export default function Search() {
+  const { toast } = useToast();
   const urlSearchParams = new URLSearchParams(useWouterSearch());
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const itemsPerPage = 20;
+
+  // Geolocation hook
+  const { 
+    location: userLocation, 
+    getCurrentLocation, 
+    loading: geoLoading,
+    calculateDistance 
+  } = useGeolocation();
 
   // Initialize filters from URL params
   const [filters, setFilters] = useState<SearchFilters>(() => {
@@ -114,6 +135,11 @@ export default function Search() {
     if (filters.hasCredits) params.set('hasCredits', 'true');
     if (filters.sortBy) params.set('sortBy', filters.sortBy);
     
+    // Geolocation parameters - MVP3 Phase 3
+    if (filters.latitude !== undefined) params.set('latitude', filters.latitude.toString());
+    if (filters.longitude !== undefined) params.set('longitude', filters.longitude.toString());
+    if (filters.radius !== undefined) params.set('radius', filters.radius.toString());
+    
     params.set('limit', itemsPerPage.toString());
     params.set('offset', ((currentPage - 1) * itemsPerPage).toString());
 
@@ -124,6 +150,42 @@ export default function Search() {
   const { data: searchResults, isLoading } = useQuery({
     queryKey: ['/api/search/providers', filters, currentPage],
     queryFn: () => apiRequest('GET', `/api/search/providers?${buildSearchParams()}`),
+  });
+
+  // Process results to add distance if location is available
+  const processedResults = React.useMemo(() => {
+    if (!searchResults?.providers || !userLocation) {
+      return searchResults;
+    }
+
+    const providersWithDistance = searchResults.providers.map((provider: any) => {
+      if (provider.latitude && provider.longitude) {
+        const distance = calculateDistance(
+          userLocation.lat,
+          userLocation.lng,
+          provider.latitude,
+          provider.longitude
+        );
+        return { ...provider, distance };
+      }
+      return provider;
+    });
+
+    // Sort by distance if location-based search
+    if (filters.latitude && filters.longitude && filters.sortBy === 'distance') {
+      providersWithDistance.sort((a, b) => (a.distance || 999) - (b.distance || 999));
+    }
+
+    return {
+      ...searchResults,
+      providers: providersWithDistance
+    };
+  }, [searchResults, userLocation, calculateDistance, filters.latitude, filters.longitude, filters.sortBy]);
+
+  // Fetch categories for filters
+  const { data: categories } = useQuery({
+    queryKey: ['/api/categories'],
+    queryFn: () => apiRequest('GET', '/api/categories'),
   });
 
   const handleSearch = (query: string) => {
@@ -139,6 +201,55 @@ export default function Search() {
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Location-related handlers - MVP3 Phase 3
+  const handleUseCurrentLocation = async () => {
+    try {
+      const location = await getCurrentLocation();
+      setFilters(prev => ({
+        ...prev,
+        latitude: location.lat,
+        longitude: location.lng,
+        useCurrentLocation: true,
+        radius: prev.radius || 10, // Default 10km radius
+        sortBy: 'distance'
+      }));
+      setCurrentPage(1);
+      
+      toast({
+        title: "Ubicación actualizada",
+        description: "Se activó la búsqueda por cercanía.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error de ubicación",
+        description: "No se pudo obtener tu ubicación actual.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleRadiusChange = (radius: number) => {
+    setFilters(prev => ({ ...prev, radius }));
+    setCurrentPage(1);
+  };
+
+  const handleClearLocation = () => {
+    setFilters(prev => ({
+      ...prev,
+      latitude: undefined,
+      longitude: undefined,
+      radius: undefined,
+      useCurrentLocation: false,
+      sortBy: prev.sortBy === 'distance' ? 'relevance' : prev.sortBy
+    }));
+    setCurrentPage(1);
+  };
+
+  const handleProviderClick = (provider: any) => {
+    // Navigate to provider profile or open chat
+    window.location.href = `/profesional/${provider.id}`;
   };
 
   const activeFilterCount = Object.entries(filters).filter(
@@ -167,7 +278,7 @@ export default function Search() {
               filters={filters}
               onFiltersChange={handleFiltersChange}
               categories={categories || []}
-              facets={searchResults?.facets}
+              facets={processedResults?.facets}
             />
           </aside>
 
@@ -190,15 +301,118 @@ export default function Search() {
               </Button>
             </div>
 
-            {/* Results */}
-            <SearchResults
-              providers={searchResults?.data || []}
-              isLoading={isLoading}
-              total={searchResults?.total || 0}
-              currentPage={currentPage}
-              itemsPerPage={itemsPerPage}
-              onPageChange={handlePageChange}
-            />
+            {/* Location controls and view toggle - MVP3 Phase 3 */}
+            <Card className="mb-6">
+              <CardContent className="p-4">
+                <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+                  <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+                    <Button
+                      variant={filters.useCurrentLocation ? "default" : "outline"}
+                      onClick={handleUseCurrentLocation}
+                      disabled={geoLoading}
+                      size="sm"
+                    >
+                      {geoLoading ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <Navigation className="w-4 h-4 mr-2" />
+                      )}
+                      Cerca de mí
+                    </Button>
+
+                    {filters.useCurrentLocation && (
+                      <>
+                        <div className="flex items-center gap-2">
+                          <select 
+                            value={filters.radius || 10}
+                            onChange={(e) => handleRadiusChange(Number(e.target.value))}
+                            className="text-sm border rounded px-2 py-1"
+                          >
+                            <option value={1}>1 km</option>
+                            <option value={5}>5 km</option>
+                            <option value={10}>10 km</option>
+                            <option value={20}>20 km</option>
+                            <option value={50}>50 km</option>
+                          </select>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleClearLocation}
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        <Badge variant="secondary" className="text-xs">
+                          <MapPin className="w-3 h-3 mr-1" />
+                          Búsqueda por ubicación activa
+                        </Badge>
+                      </>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button
+                      variant={viewMode === 'list' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setViewMode('list')}
+                    >
+                      <List className="w-4 h-4 mr-2" />
+                      Lista
+                    </Button>
+                    <Button
+                      variant={viewMode === 'map' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setViewMode('map')}
+                    >
+                      <MapPin className="w-4 h-4 mr-2" />
+                      Mapa
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Results display */}
+            {viewMode === 'list' ? (
+              <SearchResults
+                providers={processedResults?.data || []}
+                isLoading={isLoading}
+                total={processedResults?.total || 0}
+                currentPage={currentPage}
+                itemsPerPage={itemsPerPage}
+                onPageChange={handlePageChange}
+                showDistance={filters.useCurrentLocation}
+              />
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MapPin className="w-5 h-5" />
+                    Mapa de Proveedores
+                    {processedResults?.data && (
+                      <Badge variant="secondary">
+                        {processedResults.data.length} resultados
+                      </Badge>
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <LeafletMap
+                    center={
+                      userLocation && filters.useCurrentLocation 
+                        ? [userLocation.lat, userLocation.lng]
+                        : [-34.6037, -58.3816] // Buenos Aires default
+                    }
+                    zoom={filters.radius ? Math.max(10, 16 - Math.log2(filters.radius)) : 13}
+                    providers={processedResults?.data || []}
+                    userLocation={userLocation && filters.useCurrentLocation ? userLocation : undefined}
+                    searchRadius={filters.radius}
+                    onProviderClick={handleProviderClick}
+                    height="600px"
+                  />
+                </CardContent>
+              </Card>
+            )}
           </main>
         </div>
       </div>
@@ -209,7 +423,7 @@ export default function Search() {
           filters={filters}
           onFiltersChange={handleFiltersChange}
           categories={categories || []}
-          facets={searchResults?.facets}
+          facets={processedResults?.facets}
           showMobileFilters={showMobileFilters}
           onCloseMobileFilters={() => setShowMobileFilters(false)}
         />
