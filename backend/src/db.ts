@@ -34,7 +34,7 @@ export const db = drizzle(sql, { schema });
 
 export async function runMigrations() {
   console.log('Ejecutando migraciones...');
-  await migrate(db, { migrationsFolder: 'drizzle' });
+  await migrate(db, { migrationsFolder: 'migrations' });
   console.log('Migraciones completadas.');
 }
 

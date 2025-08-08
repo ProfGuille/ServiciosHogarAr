@@ -5,8 +5,8 @@ import path from "path";
 dotenv.config({ path: path.resolve(__dirname, ".env") });
 
 export default defineConfig({
-  schema: path.resolve(__dirname, "src/shared/schema/*.ts"),
-  out: path.resolve(__dirname, "migrations"),
+  schema: "./src/shared/schema/*.ts",
+  out: "./migrations",
   dialect: "postgresql",
   dbCredentials: {
     url: process.env.DATABASE_URL as string,

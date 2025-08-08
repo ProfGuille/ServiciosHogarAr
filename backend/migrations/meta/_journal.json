@@ -8,6 +8,13 @@
       "when": 1752728875137,
       "tag": "0000_lonely_black_bird",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1736377447000,
+      "tag": "0001_add_appointments_notifications",
+      "breakpoints": true
     }
   ]
 }
