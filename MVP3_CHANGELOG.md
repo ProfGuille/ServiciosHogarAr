@@ -222,3 +222,46 @@ frontend/src/
 **Última Actualización**: 17 Julio 2025 - 01:35 ART  
 **Estado**: Fase 2 COMPLETADA (100%) - Iniciando Fase 3  
 **Próximo Milestone**: Sistema de geolocalización con Google Maps
+
+---
+
+## 💰 ACTUALIZACIÓN ESTRATÉGICA - Migración a Recursos Gratuitos
+
+### ✅ COMPLETADO - Análisis de Costos y Migración (Enero 2025)
+
+**Decisión Estratégica**:
+Basado en feedback del propietario (@ProfGuille), se decidió priorizar **recursos 100% gratuitos** hasta que la plataforma genere ingresos suficientes para justificar APIs premium.
+
+**Cambios Implementados**:
+1. **Eliminación Google Maps**:
+   - ❌ Removido `@googlemaps/google-maps-services-js` del backend
+   - ✅ Migración completa a OpenStreetMap + Leaflet
+   - ✅ Uso de Nominatim para geocodificación (gratuito)
+
+2. **Actualización MVP3_PLAN.md**:
+   - ✅ Todas las tecnologías marcadas como "GRATUITAS"
+   - ✅ Alternativas específicas documentadas
+   - ✅ Plan de escalamiento basado en métricas de ingresos
+
+3. **Documentación Estrategia Costo-Cero**:
+   - ✅ Creado `FREE_ALTERNATIVES.md` (5,400+ caracteres)
+   - ✅ Análisis comparativo de servicios gratuitos vs pagos
+   - ✅ Métricas claras para futuros upgrades
+
+4. **Enfoque en Monetización por Créditos**:
+   - ✅ Actualizada página buy-credits.tsx con comparativas
+   - ✅ Ejemplos claros de ahorro vs. competencia (0% vs 10-15% comisión)
+   - ✅ Cálculos específicos de ROI para proveedores
+
+**Tecnologías Confirmadas GRATUITAS**:
+- **Mapas**: OpenStreetMap + Leaflet (react-leaflet ya instalado)
+- **Geocodificación**: Nominatim API (sin límites razonables)
+- **Email**: SMTP gratuito (Gmail/Brevo hasta 300 emails/día)
+- **Push**: Web Push API nativo del navegador
+- **Búsqueda**: PostgreSQL full-text search (incluido en Neon)
+- **Analytics**: Google Analytics 4 tier gratuito o custom con Chart.js
+
+**Beneficio Inmediato**:
+- 💰 **$0 en costos de APIs** hasta generar $500+ USD/mes
+- 🚀 **Sin límites artificiales** en crecimiento inicial
+- 📈 **ROI puro** desde el primer cliente

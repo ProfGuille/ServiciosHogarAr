@@ -217,7 +217,61 @@ export default function BuyCredits() {
           {/* Benefits */}
           <div className="mb-12 bg-white rounded-xl shadow-sm p-8">
             <h2 className="text-2xl font-bold text-slate-900 mb-6">
-              ¿Por qué comprar créditos?
+              ¿Por qué nuestro modelo es mejor?
+            </h2>
+            <div className="grid md:grid-cols-2 gap-8 mb-8">
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900 mb-3 text-green-600">
+                  ✓ Modelo ServiciosHogar (Créditos)
+                </h3>
+                <ul className="space-y-2 text-slate-600">
+                  <li>• <strong>0% comisión</strong> sobre trabajos realizados</li>
+                  <li>• Pagas solo por acceso a leads verificados</li>
+                  <li>• Predictibilidad en costos operativos</li>
+                  <li>• Sin sorpresas en facturación</li>
+                  <li>• Créditos sin vencimiento</li>
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900 mb-3 text-red-600">
+                  ✗ Competencia Tradicional
+                </h3>
+                <ul className="space-y-2 text-slate-600">
+                  <li>• <strong>10-15% comisión</strong> sobre cada trabajo</li>
+                  <li>• Menos ganancia neta por servicio</li>
+                  <li>• Costos variables impredecibles</li>
+                  <li>• Dependencia de sus sistemas de pago</li>
+                  <li>• Pérdida de control sobre facturación</li>
+                </ul>
+              </div>
+            </div>
+            
+            <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+              <h3 className="font-semibold text-green-900 mb-2 flex items-center gap-2">
+                <DollarSign className="h-5 w-5" />
+                Ejemplo de Ahorro Real
+              </h3>
+              <div className="grid md:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-green-800"><strong>Trabajo de $10,000:</strong></p>
+                  <p className="text-green-700">• Con ServiciosHogar: Costo fijo ~$20 (1 crédito)</p>
+                  <p className="text-green-700">• <strong>Ganancia neta: $9,980</strong></p>
+                </div>
+                <div>
+                  <p className="text-red-800"><strong>Mismo trabajo en competencia:</strong></p>
+                  <p className="text-red-700">• Con comisión 12%: $1,200</p>
+                  <p className="text-red-700">• <strong>Ganancia neta: $8,800</strong></p>
+                </div>
+              </div>
+              <p className="text-green-900 font-semibold mt-3">
+                💰 <strong>Ahorro: $1,180 por trabajo</strong> - ¡Más del 13% adicional en tu bolsillo!
+              </p>
+            </div>
+          </div>
+
+          <div className="mb-12 bg-white rounded-xl shadow-sm p-8">
+            <h2 className="text-2xl font-bold text-slate-900 mb-6">
+              Cómo funciona el sistema de créditos
             </h2>
             <div className="grid md:grid-cols-3 gap-6">
               <div className="flex gap-4">
@@ -260,10 +314,10 @@ export default function BuyCredits() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-slate-900 mb-1">
-                    Sin comisiones adicionales
+                    Sin comisiones sobre trabajos
                   </h3>
                   <p className="text-slate-600 text-sm">
-                    Paga solo por los leads, sin comisiones sobre tus trabajos.
+                    Solo pagas por el acceso al lead. El 100% de tus ingresos son tuyos, sin comisiones sobre trabajos realizados.
                   </p>
                 </div>
               </div>

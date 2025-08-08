@@ -15,7 +15,20 @@
 - ✅ 6 proveedores + 12 servicios activos
 - ✅ Backend desplegado (Render) + BD PostgreSQL (Neon)
 
-### Necesidades Detectadas para MVP 3
+### Monetización Basada en Créditos (Modelo Principal)
+**Sistema de Ingresos Sin Comisiones**:
+- **Proveedores compran créditos** para acceder a leads de clientes
+- **1 crédito = 1 respuesta** a solicitud de servicio
+- **Sin comisiones** sobre trabajos realizados (0% vs. competencia 10-15%)
+- **Paquetes escalables** con descuentos por volumen
+- **Suscripciones mensuales** opcionales para proveedores frecuentes
+- **Márgenes altos** con costos operativos mínimos
+
+**Ventajas del Modelo**:
+- **Ingresos predecibles** y recurrentes por créditos
+- **Barrera baja de entrada** para proveedores (sin % sobre ventas)
+- **Escalabilidad rápida** sin gestión de pagos complejos
+- **Flexibilidad** para proveedores ocasionales vs. intensivos
 1. **Comunicación**: Falta chat proveedor-cliente
 2. **Localización**: Sin búsqueda geográfica
 3. **Búsqueda**: Filtros básicos, falta avanzada
@@ -38,26 +51,28 @@
 - Archivos adjuntos (imágenes)
 - Chat móvil optimizado
 
-**Tecnologías**:
+**Tecnologías GRATUITAS**:
 - Socket.io (tiempo real)
 - Schema mensajes en BD
-- UI chat responsive
+- UI chat responsive con Tailwind
 
-### 2. Geolocalización Inteligente
-**Objetivo**: Búsqueda por ubicación y distancia
+### 2. Geolocalización Inteligente (100% GRATUITA)
+**Objetivo**: Búsqueda por ubicación y distancia sin costos
 
 **Funcionalidades**:
-- Integración Google Maps API
+- Integración OpenStreetMap con Leaflet (GRATIS)
 - Búsqueda por radio de distancia (1km, 5km, 10km, 20km)
-- Geolocalización automática del usuario
-- Cálculo de distancia proveedor-cliente
+- Geolocalización automática del usuario (API nativa del navegador)
+- Cálculo de distancia proveedor-cliente (algoritmo Haversine)
 - Mapa interactivo con markers de proveedores
 - Filtro automático por zona
+- Geocodificación con Nominatim (servicio gratuito)
 
-**Tecnologías**:
-- Google Maps JavaScript API
-- Geolocation API del navegador
-- Cálculo de distancias Haversine
+**Tecnologías GRATUITAS**:
+- OpenStreetMap + Leaflet (react-leaflet ya instalado)
+- Geolocation API del navegador (nativa)
+- Nominatim API para geocodificación (gratuita)
+- Cálculo de distancias Haversine (algoritmo propio)
 
 ### 3. Búsqueda Avanzada y Filtros
 **Objetivo**: Encontrar proveedores de forma inteligente
@@ -71,10 +86,10 @@
 - Búsqueda predictiva con autocompletado
 - Guardado de búsquedas favoritas
 
-**Tecnologías**:
-- Elasticsearch o búsqueda SQL optimizada
+**Tecnologías GRATUITAS**:
+- PostgreSQL full-text search (incluido en Neon)
 - Debouncing para búsqueda en tiempo real
-- Indexación de texto completo
+- Indexación de texto completo nativa
 
 ### 4. Dashboard Proveedor Professional
 **Objetivo**: Gestión completa del negocio
@@ -87,10 +102,10 @@
 - **Analytics**: Gráficos de performance
 - **Configuración**: Perfil profesional avanzado
 
-**Tecnologías**:
+**Tecnologías GRATUITAS**:
 - React Calendar para disponibilidad
-- Charts.js para estadísticas
-- Drag & drop para servicios
+- Chart.js para estadísticas
+- Drag & drop nativo HTML5
 
 ### 5. Sistema de Notificaciones
 **Objetivo**: Comunicación automática efectiva
@@ -103,11 +118,11 @@
 - **Centro de notificaciones** en app
 - **Preferencias** de notificación
 
-**Tecnologías**:
-- Nodemailer + templates HTML
-- Web Push API
-- Service Workers
-- Cron jobs para recordatorios
+**Tecnologías GRATUITAS**:
+- Nodemailer + SMTP gratuito (Gmail, Brevo, etc.)
+- Web Push API (estándar del navegador)
+- Service Workers (nativo)
+- Node-cron para recordatorios (sin servicios externos)
 
 ### 6. PWA y Optimización Móvil
 **Objetivo**: App móvil nativa-like
@@ -120,11 +135,11 @@
 - **Push notifications** nativas
 - **Caching** inteligente de datos
 
-**Tecnologías**:
-- PWA Manifest
-- Workbox para service workers
-- Critical CSS inlining
-- Image optimization
+**Tecnologías GRATUITAS**:
+- PWA Manifest (estándar web)
+- Workbox para service workers (Google, pero gratuito)
+- Critical CSS inlining (build-time)
+- Image optimization con Vite (incluido)
 
 ---
 
@@ -136,9 +151,9 @@
 **Tareas**:
 - [ ] Crear documentación MVP 3
 - [ ] Actualizar schemas BD (mensajes, notificaciones)
-- [ ] Instalar dependencias nuevas
+- [ ] Instalar dependencias nuevas (todas gratuitas)
 - [ ] Configurar estructura carpetas frontend/backend
-- [ ] Setup Google Maps API
+- [ ] Setup OpenStreetMap + Leaflet (gratuito)
 - [ ] Configurar Socket.io
 
 **Entregables**:
@@ -166,11 +181,12 @@
 **Objetivos**: Búsqueda geográfica inteligente
 
 **Tareas**:
-- [ ] Integración Google Maps
-- [ ] Geolocalización usuario
-- [ ] Cálculo distancias
+- [ ] Integración OpenStreetMap + Leaflet (gratuito)
+- [ ] Geolocalización usuario (API nativa navegador)
+- [ ] Cálculo distancias (algoritmo Haversine propio)
 - [ ] Filtros por radio
-- [ ] Mapa interactivo
+- [ ] Mapa interactivo con markers
+- [ ] Geocodificación con Nominatim (gratuito)
 - [ ] Optimización performance
 
 **Entregables**:
@@ -256,9 +272,9 @@ backend/
 ├── websockets/
 │   └── chat.ts         # Socket.io handlers
 ├── services/
-│   ├── email.service.ts
-│   ├── push.service.ts
-│   └── maps.service.ts
+│   ├── email.service.ts    # SMTP gratuito
+│   ├── push.service.ts     # Web Push API nativo  
+│   └── maps.service.ts     # OpenStreetMap + Nominatim
 └── cron/
     └── reminders.ts    # Tareas programadas
 ```
@@ -267,10 +283,10 @@ backend/
 ```
 frontend/src/
 ├── components/
-│   ├── Chat/           # Sistema mensajería
-│   ├── Maps/           # Componentes mapas
-│   ├── Search/         # Búsqueda avanzada
-│   └── Notifications/  # Centro notificaciones
+│   ├── Chat/             # Sistema mensajería
+│   ├── Maps/             # OpenStreetMap + Leaflet
+│   ├── Search/           # Búsqueda avanzada
+│   └── Notifications/    # Centro notificaciones
 ├── hooks/
 │   ├── useSocket.ts    # WebSocket hook
 │   ├── useGeolocation.ts
@@ -282,26 +298,53 @@ frontend/src/
 └── sw.ts              # Service Worker
 ```
 
-### Nuevas Dependencias
+### Nuevas Dependencias (100% GRATUITAS)
 ```json
 {
   "backend": [
     "socket.io",
-    "nodemailer",
+    "nodemailer", 
     "web-push",
-    "node-cron",
-    "@googlemaps/google-maps-services-js"
+    "node-cron"
   ],
   "frontend": [
     "socket.io-client",
-    "react-map-gl",
-    "workbox-webpack-plugin",
+    "react-leaflet",
+    "workbox-webpack-plugin", 
     "react-calendar",
     "chart.js",
     "react-chartjs-2"
   ]
 }
 ```
+
+---
+
+## 💰 ESTRATEGIA COSTO-CERO HASTA MONETIZACIÓN
+
+### Principios de Desarrollo Económico
+**Objetivo**: Crecimiento orgánico sin inversión en APIs pagas hasta generar ingresos significativos
+
+**Recursos Gratuitos Utilizados**:
+- **Frontend**: React + Vite + Tailwind (gratuitos)
+- **Backend**: Node.js + Express (gratuitos)
+- **Base de Datos**: PostgreSQL en Neon (tier gratuito)
+- **Hosting**: Render.com (tier gratuito para backend)
+- **Mapas**: OpenStreetMap + Leaflet (completamente gratuitos)
+- **Email**: SMTP gratuito (Gmail/Brevo hasta 300 emails/día)
+- **Push Notifications**: Web Push API nativo del navegador
+- **Autenticación**: JWT + bcrypt (bibliotecas gratuitas)
+- **Pagos**: MercadoPago (comisiones solo sobre transacciones exitosas)
+
+**Escalamiento Gradual**:
+1. **Fase inicial (0-100 proveedores)**: 100% recursos gratuitos
+2. **Crecimiento (100-1000 proveedores)**: Upgrade hosting (~$20/mes)
+3. **Escala (1000+ proveedores)**: Considerar APIs premium solo con ROI comprobado
+
+**Métricas para Upgrade**:
+- **Ingresos mensuales**: > $500 USD constantes
+- **Proveedores activos**: > 500 usuarios
+- **Limitaciones técnicas**: Tráfico > tier gratuito
 
 ---
 
