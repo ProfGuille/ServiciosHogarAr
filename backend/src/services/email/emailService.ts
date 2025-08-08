@@ -1,5 +1,6 @@
 // backend/src/services/email/emailService.ts
 import nodemailer from 'nodemailer';
+import type { Transporter } from 'nodemailer';
 import { db } from '../../db.js';
 import { notifications, notificationPreferences, users } from '../../shared/schema/index.js';
 import { eq } from 'drizzle-orm';
@@ -21,7 +22,7 @@ export interface EmailTemplate {
 }
 
 export class EmailService {
-  private transporter: nodemailer.Transporter;
+  private transporter: ReturnType<typeof nodemailer.createTransporter>;
 
   constructor(config: EmailConfig) {
     this.transporter = nodemailer.createTransporter(config);

@@ -3,10 +3,30 @@ import { serviceProviders } from "../shared/schema/serviceProviders";
 import { providerLocations } from "../shared/schema/providerLocations";
 import { services } from "../shared/schema/services";
 import { categories } from "../shared/schema/categories";
+import { users } from "../shared/schema/users";
 import { db } from "../db";
 import { sql, and, gte, lte, or, eq, ilike, desc, asc, inArray, SQL } from "drizzle-orm";
 
 const router = Router();
+
+// Type for provider query result
+type ProviderQueryResult = {
+  id: number;
+  businessName: string | null;
+  businessDescription: string | null;
+  averageRating: string | null;
+  totalReviews: number;
+  isVerified: boolean;
+  credits: number | null;
+  city: string | null;
+  province: string | null;
+  phone: string | null;
+  email: string;
+  lastActive: Date | null;
+  latitude?: number;
+  longitude?: number;
+  address?: string | null;
+};
 
 // Haversine distance calculation function
 function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
@@ -103,7 +123,7 @@ async function searchProviders(query: any) {
 
   // Rating and review filters
   if (minRating) {
-    conditions.push(gte(serviceProviders.averageRating, parseFloat(minRating)));
+    conditions.push(gte(serviceProviders.averageRating, minRating));
   }
   if (hasReviews === 'true') {
     conditions.push(gte(serviceProviders.totalReviews, 1));
@@ -153,7 +173,7 @@ async function searchProviders(query: any) {
           city: serviceProviders.city,
           province: serviceProviders.province,
           phone: serviceProviders.phone,
-          email: serviceProviders.email,
+          email: users.email,
           lastActive: serviceProviders.lastActive,
           latitude: sql<number>`CAST(${providerLocations.latitude} AS DECIMAL(10,8))`,
           longitude: sql<number>`CAST(${providerLocations.longitude} AS DECIMAL(11,8))`,
@@ -163,6 +183,10 @@ async function searchProviders(query: any) {
         .innerJoin(
           providerLocations,
           eq(serviceProviders.id, providerLocations.providerId)
+        )
+        .innerJoin(
+          users,
+          eq(serviceProviders.userId, users.id)
         )
         .where(
           and(
@@ -176,11 +200,11 @@ async function searchProviders(query: any) {
 
       // Calculate distances and filter by radius
       const providersWithDistance = providersQuery
-        .map(provider => {
+        .map((provider: ProviderQueryResult & { latitude: number; longitude: number }) => {
           const distance = haversineDistance(lat, lng, provider.latitude, provider.longitude);
           return { ...provider, distance };
         })
-        .filter(provider => provider.distance <= radiusKm);
+        .filter((provider: ProviderQueryResult & { distance: number }) => provider.distance <= radiusKm);
 
       // Sort by distance or other criteria
       let sortedProviders = [...providersWithDistance];
@@ -241,10 +265,14 @@ async function searchProviders(query: any) {
       city: serviceProviders.city,
       province: serviceProviders.province,
       phone: serviceProviders.phone,
-      email: serviceProviders.email,
+      email: users.email,
       lastActive: serviceProviders.lastActive,
     })
     .from(serviceProviders)
+    .innerJoin(
+      users,
+      eq(serviceProviders.userId, users.id)
+    )
     .where(and(...conditions))
     .orderBy(orderBy)
     .limit(limitNum)

@@ -58,10 +58,10 @@ const providers = [
 ];
 
 // Credit transactions for audit
-const creditTransactions = [];
+const creditTransactions: any[] = [];
 
 // Leads purchased by providers (provider has paid to access client contact)
-const purchasedLeads = [];
+const purchasedLeads: any[] = [];
 
 // Helper function to generate session ID
 function generateSessionId() {
@@ -88,7 +88,7 @@ app.post('/api/auth/login', async (req, res) => {
     }
 
     // Find user in customers first
-    let user = users.find(u => u.email === email);
+    let user: any = users.find(u => u.email === email);
     let userType = 'customer';
     
     // If not found in customers, check providers
@@ -129,12 +129,12 @@ app.post('/api/auth/login', async (req, res) => {
         email: user.email,
         userType,
         createdAt: user.createdAt,
-        ...(userType === 'provider' && {
+        ...(userType === 'provider' && user.businessName && {
           businessName: user.businessName,
           city: user.city,
           credits: user.credits,
           isVerified: user.isVerified,
-          serviceCategories: user.serviceCategories
+          serviceCategories: (user as any).serviceCategories
         })
       }
     });
@@ -158,7 +158,7 @@ app.get('/api/auth/user', (req, res) => {
     }
 
     // Find user based on type stored in session
-    let user;
+    let user: any;
     if (session.userType === 'provider') {
       user = providers.find(p => p.id === session.userId);
     } else {
@@ -175,12 +175,12 @@ app.get('/api/auth/user', (req, res) => {
       email: user.email,
       userType: session.userType,
       createdAt: user.createdAt,
-      ...(session.userType === 'provider' && {
+      ...(session.userType === 'provider' && user.businessName && {
         businessName: user.businessName,
         city: user.city,
         credits: user.credits,
         isVerified: user.isVerified,
-        serviceCategories: user.serviceCategories
+        serviceCategories: (user as any).serviceCategories
       })
     });
 
@@ -337,7 +337,7 @@ app.post('/api/auth/register-provider', async (req, res) => {
       businessName,
       city,
       phone,
-      serviceCategories: serviceCategories.map(id => Number(id)),
+      serviceCategories: serviceCategories.map((id: string) => Number(id)),
       credits: 10, // Initial free credits
       isVerified: false, // Needs admin verification
       createdAt: new Date(),
@@ -571,10 +571,10 @@ app.post('/api/requests', (req, res) => {
       userId: session.userId,
       status: "pending",
       city,
-      estimatedBudget: estimatedBudget ? Number(estimatedBudget) : null,
+      estimatedBudget: estimatedBudget ? Number(estimatedBudget) : 0,
       isUrgent: Boolean(isUrgent),
       createdAt: new Date(),
-      preferredDate: preferredDate ? new Date(preferredDate) : null
+      preferredDate: preferredDate ? new Date(preferredDate) : new Date(),
     };
 
     serviceRequests.push(newRequest);
@@ -722,6 +722,10 @@ app.post('/api/provider/purchase-lead/:requestId', (req, res) => {
     // Get client contact information
     const client = users.find(u => u.id === serviceRequest.userId);
     
+    if (!client) {
+      return res.status(404).json({ error: 'Cliente no encontrado' });
+    }
+    
     res.json({
       message: 'Contacto comprado exitosamente',
       purchase,
@@ -771,7 +775,10 @@ app.get('/api/provider/my-purchases', (req, res) => {
       .filter(purchase => purchase.providerId === provider.id)
       .map(purchase => {
         const serviceRequest = serviceRequests.find(r => r.id === purchase.requestId);
+        if (!serviceRequest) return null;
+        
         const client = users.find(u => u.id === serviceRequest.userId);
+        if (!client) return null;
         
         return {
           ...purchase,
@@ -791,7 +798,8 @@ app.get('/api/provider/my-purchases', (req, res) => {
             phone: "+54 11 xxxx-xxxx" // Placeholder
           }
         };
-      });
+      })
+      .filter(purchase => purchase !== null);
 
     res.json(myPurchases);
   } catch (error) {

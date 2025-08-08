@@ -117,6 +117,7 @@ export default function Search() {
   // Fetch categories for filters
   const { data: categories } = useQuery({
     queryKey: ['/api/categories'],
+    queryFn: () => apiRequest('GET', '/api/categories'),
   });
 
   // Build search query params
@@ -181,12 +182,6 @@ export default function Search() {
       providers: providersWithDistance
     };
   }, [searchResults, userLocation, calculateDistance, filters.latitude, filters.longitude, filters.sortBy]);
-
-  // Fetch categories for filters
-  const { data: categories } = useQuery({
-    queryKey: ['/api/categories'],
-    queryFn: () => apiRequest('GET', '/api/categories'),
-  });
 
   const handleSearch = (query: string) => {
     setFilters(prev => ({ ...prev, query }));

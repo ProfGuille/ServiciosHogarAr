@@ -2,6 +2,7 @@
 import webpush from 'web-push';
 import { db } from '../../db.js';
 import { pushSubscriptions, notifications, notificationPreferences } from '../../shared/schema/index.js';
+import type { PushSubscription } from '../../shared/schema/pushSubscriptions.js';
 import { eq } from 'drizzle-orm';
 
 export interface PushNotificationPayload {
@@ -55,7 +56,7 @@ export class PushService {
       }
 
       // Send to all user devices
-      const sendPromises = subscriptions.map(async (sub) => {
+      const sendPromises = subscriptions.map(async (sub: PushSubscription) => {
         const subscription = {
           endpoint: sub.endpoint,
           keys: {

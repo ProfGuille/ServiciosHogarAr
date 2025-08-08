@@ -29,6 +29,7 @@ export const serviceProviders = pgTable('service_providers', {
   isOnline: boolean('is_online').default(false), // For chat status
   lastSeenAt: timestamp('last_seen_at'),
   lastActive: timestamp('last_active'), // Added as alias/additional field
+  createdAt: timestamp('created_at').defaultNow(), // Added for sorting
 });
 
 export type Provider = InferSelectModel<typeof serviceProviders>;
