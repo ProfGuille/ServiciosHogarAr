@@ -22,10 +22,10 @@ export interface EmailTemplate {
 }
 
 export class EmailService {
-  private transporter: ReturnType<typeof nodemailer.createTransporter>;
+  private transporter: ReturnType<typeof nodemailer.createTransport>;
 
   constructor(config: EmailConfig) {
-    this.transporter = nodemailer.createTransporter(config);
+    this.transporter = nodemailer.createTransport(config);
   }
 
   async sendEmail(to: string, template: EmailTemplate): Promise<boolean> {
