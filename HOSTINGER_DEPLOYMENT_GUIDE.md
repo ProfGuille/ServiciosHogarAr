@@ -23,6 +23,15 @@ npm run build
 
 Este comando creará la carpeta `dist/` con todos los archivos optimizados para producción.
 
+### 1.3 Build del Backend (Si es necesario)
+```bash
+# El backend ya está desplegado en Render, pero si necesitas hacer build local:
+cd backend
+npm run build  # Incluye corrección automática de imports ES Module
+```
+
+**Nota**: El backend utiliza ES modules y cuenta con corrección automática de imports durante el build. Ver [ES_MODULE_FIX.md](../ES_MODULE_FIX.md) para más detalles.
+
 ### 2. Configuración de Hostinger
 
 #### 2.1 Acceso al Panel de Control
@@ -129,6 +138,21 @@ npm run preview
 npm run typecheck
 ```
 
+### Backend (ES Modules)
+```bash
+# Build con corrección automática de imports
+cd backend
+npm run build  # Ejecuta: node fix-import-extensions.mjs && tsc
+
+# Desarrollo local
+npm run dev
+
+# Producción
+npm start
+```
+
+**Importante**: El backend utiliza ES modules y requiere extensiones `.js` en los imports. El proceso de build las corrige automáticamente.
+
 ### Actualizar Deployment
 ```bash
 # 1. Hacer cambios en el código
@@ -177,6 +201,8 @@ Apache/PHP Server    Node.js/Express    PostgreSQL
 - **Estado**: TanStack Query
 - **Routing**: Wouter
 - **Build**: Vite + Rollup
+- **Backend**: Node.js + Express + TypeScript (ES Modules)
+- **Build Backend**: Automatizado con corrección de imports ES Module
 
 ### Archivos de Configuración
 - `vite.config.ts` - Configuración de build

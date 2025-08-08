@@ -36,6 +36,7 @@
 ### 6. Automatización ✅
 - **`deploy-hostinger.sh`**: Script de despliegue automatizado
 - **`verify-deployment.sh`**: Script de verificación post-despliegue
+- **Build automatizado**: Backend con corrección de imports ES Module
 - Ambos scripts incluyen validaciones y mensajes informativos
 
 ### 7. Documentación ✅
@@ -91,6 +92,11 @@ docs/
 2. **Upload**: Subir `frontend/dist/*` a `public_html/`
 3. **Verify**: `./verify-deployment.sh`
 4. **Test**: Abrir https://servicioshogar.com.ar
+
+**Notas importantes**:
+- El backend utiliza ES modules con corrección automática de imports
+- Build del backend: `cd backend && npm run build` (ejecuta `fix-import-extensions.mjs && tsc`)
+- Ver [ES_MODULE_FIX.md](ES_MODULE_FIX.md) para detalles técnicos
 
 ### Verificaciones Post-Despliegue
 - [ ] Página principal carga
