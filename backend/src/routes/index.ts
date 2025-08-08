@@ -25,6 +25,35 @@ export function registerRoutes(app: express.Express) {
   app.use('/api/search-suggestions', searchSuggestionsRoutes);
   app.use('/api/geolocation', geolocationRoutes);
   
+  // MVP3 Phase 5: Enhanced Provider Dashboard routes
+  try {
+    import('./provider-services.js').then(module => {
+      app.use('/api/provider/services', module.default);
+    }).catch(() => {
+      console.log('⚠️ provider-services routes not available yet');
+    });
+    
+    import('./provider-availability.js').then(module => {
+      app.use('/api/provider/availability', module.default);
+    }).catch(() => {
+      console.log('⚠️ provider-availability routes not available yet');
+    });
+    
+    import('./provider-analytics.js').then(module => {
+      app.use('/api/provider/analytics', module.default);
+    }).catch(() => {
+      console.log('⚠️ provider-analytics routes not available yet');
+    });
+    
+    import('./provider-clients.js').then(module => {
+      app.use('/api/provider/clients', module.default);
+    }).catch(() => {
+      console.log('⚠️ provider-clients routes not available yet');
+    });
+  } catch (error) {
+    console.log('⚠️ Provider dashboard routes not loaded:', (error as Error).message);
+  }
+  
   // Service-related routes
   try {
     // Dynamically import optional routes
