@@ -1,10 +1,10 @@
 import { Router } from 'express';
-import { db } from '@/db';
+import { db } from '../db.js';
 import { eq } from 'drizzle-orm';
-import { serviceRequests } from '@/shared/schema/serviceRequests';
-import { clients } from '@/shared/schema/clients';
-import { serviceProviders } from '@/shared/schema/serviceProviders';
-import { services } from '@/shared/schema/services';
+import { serviceRequests } from '../shared/schema/serviceRequests.js';
+import { clients } from '../shared/schema/clients.js';
+import { serviceProviders } from '../shared/schema/serviceProviders.js';
+import { services } from '../shared/schema/services.js';
 
 const router = Router();
 
