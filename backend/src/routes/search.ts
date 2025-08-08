@@ -84,6 +84,11 @@ async function searchProviders(query: any) {
     latitude,
     longitude,
     radius,
+    // New filters for Phase 4
+    availability, // 'today', 'tomorrow', 'week', 'anytime'
+    responseTime, // 'fast' (<2h), 'medium' (<24h), 'slow' (>24h)
+    experienceYears,
+    languages,
     limit = 20,
     offset = 0
   } = query;
@@ -94,10 +99,18 @@ async function searchProviders(query: any) {
   // Build base query conditions
   const conditions = [eq(serviceProviders.isActive, true)];
 
-  // Text search
+  // Text search with PostgreSQL full-text search
   if (searchQuery) {
+    // Use PostgreSQL full-text search for better relevance
+    const searchTerms = searchQuery.split(' ').map((term: string) => term.trim()).filter(Boolean);
+    const tsQuery = searchTerms.join(' & ');
+    
     conditions.push(
       or(
+        // Full-text search on business name and description
+        sql`to_tsvector('spanish', COALESCE(${serviceProviders.businessName}, '')) @@ to_tsquery('spanish', ${tsQuery})`,
+        sql`to_tsvector('spanish', COALESCE(${serviceProviders.businessDescription}, '')) @@ to_tsquery('spanish', ${tsQuery})`,
+        // Fallback to ILIKE for partial matches
         ilike(serviceProviders.businessName, `%${searchQuery}%`),
         ilike(serviceProviders.businessDescription || serviceProviders.businessName, `%${searchQuery}%`)
       ) as SQL
@@ -137,6 +150,41 @@ async function searchProviders(query: any) {
   // Credits filter
   if (hasCredits === 'true') {
     conditions.push(gte(serviceProviders.credits, 1));
+  }
+
+  // Experience filter
+  if (experienceYears) {
+    const minExperience = parseInt(experienceYears);
+    if (!isNaN(minExperience)) {
+      conditions.push(gte(serviceProviders.experienceYears, minExperience));
+    }
+  }
+
+  // Response time filter (based on lastActive)
+  if (responseTime) {
+    const now = new Date();
+    switch (responseTime) {
+      case 'fast': // Active in last 2 hours
+        const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
+        conditions.push(gte(serviceProviders.lastActive, twoHoursAgo));
+        break;
+      case 'medium': // Active in last 24 hours
+        const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        conditions.push(gte(serviceProviders.lastActive, oneDayAgo));
+        break;
+      // 'slow' or no filter for longer periods
+    }
+  }
+
+  // Languages filter (would need to be implemented with proper schema)
+  // For now, skip this filter
+
+  // Availability filter (simplified - would need proper booking system)
+  if (availability && availability !== 'anytime') {
+    // This is a simplified version - in a real system you'd check actual calendar availability
+    // For now, we'll filter by providers who have been active recently
+    const recentlyActive = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // Last week
+    conditions.push(gte(serviceProviders.lastActive, recentlyActive));
   }
 
   // Price filters (would need to be implemented based on services pricing)
@@ -248,6 +296,12 @@ async function searchProviders(query: any) {
       break;
     case 'newest':
       orderBy = desc(serviceProviders.createdAt);
+      break;
+    case 'response_time':
+      orderBy = desc(serviceProviders.lastActive);
+      break;
+    case 'experience':
+      orderBy = desc(serviceProviders.experienceYears);
       break;
     default:
       orderBy = desc(serviceProviders.lastActive);

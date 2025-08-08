@@ -3,15 +3,18 @@ import { useQuery } from '@tanstack/react-query';
 import { useSearch as useWouterSearch } from 'wouter';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
-import { SearchBar } from '@/components/search/search-bar';
+import { EnhancedSearchBar } from '@/components/search/enhanced-search-bar';
 import { AdvancedSearchFilters } from '@/components/search/advanced-search-filters';
 import { SearchResults } from '@/components/search/search-results';
+import { SavedSearches } from '@/components/search/saved-searches';
+import { QuickFilters } from '@/components/search/quick-filters';
 import { LeafletMap } from '@/components/maps/LeafletMap';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Filter, X, MapPin, List, Navigation, Loader2 } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { Filter, X, MapPin, List, Navigation, Loader2, Bookmark, TrendingUp } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useToast } from '@/hooks/use-toast';
@@ -183,8 +186,37 @@ export default function Search() {
     };
   }, [searchResults, userLocation, calculateDistance, filters.latitude, filters.longitude, filters.sortBy]);
 
-  const handleSearch = (query: string) => {
-    setFilters(prev => ({ ...prev, query }));
+  const handleSearch = (query: string, additionalFilters?: any) => {
+    setFilters(prev => ({ 
+      ...prev, 
+      query,
+      ...(additionalFilters || {})
+    }));
+    setCurrentPage(1);
+  };
+
+  // Handle loading saved search
+  const handleLoadSavedSearch = (savedSearch: any) => {
+    setFilters({
+      query: savedSearch.query,
+      ...savedSearch.filters
+    });
+    setCurrentPage(1);
+  };
+
+  // Handle removing individual filters
+  const handleRemoveFilter = (key: string) => {
+    setFilters(prev => {
+      const newFilters = { ...prev };
+      delete newFilters[key];
+      return newFilters;
+    });
+    setCurrentPage(1);
+  };
+
+  // Handle clearing all filters
+  const handleClearAllFilters = () => {
+    setFilters({ sortBy: 'relevance' });
     setCurrentPage(1);
   };
 
@@ -257,10 +289,11 @@ export default function Search() {
       
       <div className="bg-white border-b sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <SearchBar 
+          <EnhancedSearchBar 
             onSearch={handleSearch} 
             initialQuery={filters.query || ''}
             showLocation={true}
+            placeholder="Buscar servicios, profesionales, categorías..."
           />
         </div>
       </div>
@@ -268,7 +301,17 @@ export default function Search() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex gap-8">
           {/* Desktop filters sidebar */}
-          <aside className="hidden lg:block w-80 flex-shrink-0">
+          <aside className="hidden lg:block w-80 flex-shrink-0 space-y-6">
+            {/* Saved Searches */}
+            <SavedSearches
+              currentFilters={filters}
+              currentQuery={filters.query || ''}
+              onLoadSearch={handleLoadSavedSearch}
+            />
+            
+            <Separator />
+            
+            {/* Advanced Filters */}
             <AdvancedSearchFilters
               filters={filters}
               onFiltersChange={handleFiltersChange}
@@ -366,6 +409,41 @@ export default function Search() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Quick filters and results header */}
+            <div className="space-y-4">
+              {/* Quick filters */}
+              <QuickFilters
+                filters={filters}
+                onRemoveFilter={handleRemoveFilter}
+                onClearAll={handleClearAllFilters}
+              />
+
+              {/* Results summary */}
+              {processedResults && (
+                <div className="flex items-center justify-between py-2 border-b">
+                  <div className="text-sm text-gray-600">
+                    {processedResults.total > 0 ? (
+                      <>
+                        <span className="font-medium">{processedResults.total}</span> resultado{processedResults.total !== 1 ? 's' : ''} encontrado{processedResults.total !== 1 ? 's' : ''}
+                        {filters.query && (
+                          <span> para "<span className="font-medium">{filters.query}</span>"</span>
+                        )}
+                        {filters.useCurrentLocation && (
+                          <span> cerca de tu ubicación</span>
+                        )}
+                      </>
+                    ) : (
+                      <span>No se encontraron resultados</span>
+                    )}
+                  </div>
+                  
+                  <div className="text-xs text-gray-500">
+                    Página {currentPage} de {Math.ceil((processedResults?.total || 0) / itemsPerPage)}
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Results display */}
             {viewMode === 'list' ? (
