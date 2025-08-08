@@ -14,6 +14,9 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
+// Serve uploaded files
+app.use('/uploads', express.static('uploads'));
+
 // In-memory session store (for development only)
 const sessions = new Map();
 

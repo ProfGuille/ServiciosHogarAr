@@ -76,6 +76,17 @@ export function registerRoutes(app: express.Express) {
     console.log('⚠️ Analytics routes not loaded:', (error as Error).message);
   }
   
+  // Upload routes
+  try {
+    import('./upload.js').then(module => {
+      app.use('/api/upload', module.default);
+    }).catch(() => {
+      console.log('⚠️ upload routes not available yet');
+    });
+  } catch (error) {
+    console.log('⚠️ Upload routes not loaded:', (error as Error).message);
+  }
+  
   // Service-related routes
   try {
     // Dynamically import optional routes
