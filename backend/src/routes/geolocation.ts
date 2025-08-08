@@ -86,7 +86,7 @@ router.get("/search", async (req, res) => {
         latitude: sql<number>`CAST(${providerLocations.latitude} AS DECIMAL(10,8))`,
         longitude: sql<number>`CAST(${providerLocations.longitude} AS DECIMAL(11,8))`,
         address: providerLocations.address,
-        lastActive: serviceProviders.lastActive,
+        lastActive: serviceProviders.lastActive || serviceProviders.lastSeenAt,
       })
       .from(serviceProviders)
       .innerJoin(
@@ -105,14 +105,14 @@ router.get("/search", async (req, res) => {
 
     // Calculate actual distances and filter by radius
     const providersWithDistance = providersInBounds
-      .map(provider => {
+      .map((provider: any) => {
         const distance = haversineDistance(lat, lng, provider.latitude, provider.longitude);
         return { ...provider, distance };
       })
-      .filter(provider => provider.distance <= radiusKm);
+      .filter((provider: any) => provider.distance <= radiusKm);
 
     // Sort results
-    const sortedProviders = providersWithDistance.sort((a, b) => {
+    const sortedProviders = providersWithDistance.sort((a: any, b: any) => {
       switch (sortBy) {
         case 'distance':
           return a.distance - b.distance;

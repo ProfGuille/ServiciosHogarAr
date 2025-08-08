@@ -136,8 +136,8 @@ router.get('/conversations/:conversationId/messages', requireJWTAuth, async (req
     // Mark messages as read for the current user
     if (conversationMessages.length > 0) {
       const unreadMessageIds = conversationMessages
-        .filter(msg => msg.senderId !== userId && !msg.isRead)
-        .map(msg => msg.id);
+        .filter((msg: any) => msg.senderId !== userId && !msg.isRead)
+        .map((msg: any) => msg.id);
 
       if (unreadMessageIds.length > 0) {
         await db

@@ -57,7 +57,7 @@ export function registerRoutes(app: express.Express) {
     });
 
   } catch (error) {
-    console.log('⚠️ Some optional routes not loaded:', error.message);
+    console.log('⚠️ Some optional routes not loaded:', (error as Error).message);
   }
 
   console.log('✅ Rutas registradas exitosamente');

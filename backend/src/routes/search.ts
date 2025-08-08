@@ -4,7 +4,7 @@ import { providerLocations } from "../shared/schema/providerLocations";
 import { services } from "../shared/schema/services";
 import { categories } from "../shared/schema/categories";
 import { db } from "../db";
-import { sql, and, gte, lte, or, eq, ilike, desc, asc, inArray } from "drizzle-orm";
+import { sql, and, gte, lte, or, eq, ilike, desc, asc, inArray, SQL } from "drizzle-orm";
 
 const router = Router();
 
@@ -79,8 +79,8 @@ async function searchProviders(query: any) {
     conditions.push(
       or(
         ilike(serviceProviders.businessName, `%${searchQuery}%`),
-        ilike(serviceProviders.businessDescription, `%${searchQuery}%`)
-      )
+        ilike(serviceProviders.businessDescription || serviceProviders.businessName, `%${searchQuery}%`)
+      ) as SQL
     );
   }
 
