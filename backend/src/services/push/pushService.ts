@@ -20,19 +20,43 @@ export interface PushNotificationPayload {
 }
 
 export class PushService {
+  private isConfigured: boolean = false;
+
   constructor() {
-    // Set VAPID details
-    webpush.setVapidDetails(
-      'mailto:' + (process.env.VAPID_EMAIL || 'admin@servicioshogar.com.ar'),
-      process.env.VAPID_PUBLIC_KEY || '',
-      process.env.VAPID_PRIVATE_KEY || ''
-    );
+    // Check if VAPID keys are configured
+    const vapidEmail = process.env.VAPID_EMAIL || 'admin@servicioshogar.com.ar';
+    const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
+    const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
+
+    if (vapidPublicKey && vapidPrivateKey) {
+      try {
+        // Set VAPID details
+        webpush.setVapidDetails(
+          'mailto:' + vapidEmail,
+          vapidPublicKey,
+          vapidPrivateKey
+        );
+        this.isConfigured = true;
+        console.log('Push service configured successfully');
+      } catch (error) {
+        console.warn('Failed to configure push service:', error instanceof Error ? error.message : String(error));
+        this.isConfigured = false;
+      }
+    } else {
+      console.warn('Push service not configured: Missing VAPID_PUBLIC_KEY or VAPID_PRIVATE_KEY environment variables');
+      this.isConfigured = false;
+    }
   }
 
   async sendPushNotification(
     subscription: any,
     payload: PushNotificationPayload
   ): Promise<boolean> {
+    if (!this.isConfigured) {
+      console.warn('Push service not configured, skipping notification');
+      return false;
+    }
+
     try {
       await webpush.sendNotification(subscription, JSON.stringify(payload));
       return true;
@@ -43,6 +67,11 @@ export class PushService {
   }
 
   async sendToUser(userId: number, payload: PushNotificationPayload): Promise<void> {
+    if (!this.isConfigured) {
+      console.warn('Push service not configured, skipping user notification');
+      return;
+    }
+
     try {
       // Get all active subscriptions for user
       const subscriptions = await db
