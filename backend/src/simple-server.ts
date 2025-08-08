@@ -839,6 +839,228 @@ app.get('/api/provider/credit-history', (req, res) => {
   }
 });
 
+// ============================================
+// AI MATCHING SYSTEM - Post MVP 3 Feature
+// ============================================
+
+/**
+ * POST /api/ai/find-matches
+ * Smart Provider-Client Matching Algorithm
+ */
+app.post('/api/ai/find-matches', (req, res) => {
+  try {
+    const { 
+      categoryId, 
+      city, 
+      latitude, 
+      longitude, 
+      estimatedBudget, 
+      isUrgent = false,
+      maxResults = 5 
+    } = req.body;
+
+    if (!categoryId || !city) {
+      return res.status(400).json({ 
+        error: 'Category ID and city are required' 
+      });
+    }
+
+    // Filter providers by category and availability
+    const eligibleProviders = providers.filter(provider => 
+      provider.serviceCategories.includes(parseInt(categoryId)) && 
+      provider.credits >= 1 && 
+      provider.isVerified
+    );
+
+    // Calculate AI match scores
+    const matches = eligibleProviders.map(provider => {
+      const matchScore = calculateAIMatchScore(provider, {
+        categoryId: parseInt(categoryId),
+        city,
+        latitude: latitude ? parseFloat(latitude) : undefined,
+        longitude: longitude ? parseFloat(longitude) : undefined,
+        estimatedBudget: estimatedBudget ? parseFloat(estimatedBudget) : undefined,
+        isUrgent: Boolean(isUrgent)
+      });
+      
+      return {
+        providerId: provider.id,
+        provider: {
+          id: provider.id,
+          businessName: provider.businessName,
+          city: provider.city,
+          phone: provider.phone,
+          isVerified: provider.isVerified,
+          averageRating: provider.averageRating || 4.5,
+          completedJobs: provider.completedJobs || 0
+        },
+        matchScore: matchScore.totalScore,
+        distance: matchScore.distance,
+        estimatedResponseTime: matchScore.estimatedResponseTime,
+        recommendationReason: matchScore.recommendationReason,
+        breakdown: matchScore.breakdown
+      };
+    });
+
+    // Sort by match score and limit results
+    const sortedMatches = matches
+      .sort((a, b) => b.matchScore - a.matchScore)
+      .slice(0, parseInt(maxResults));
+
+    // Get category info
+    const category = categories.find(cat => cat.id === parseInt(categoryId));
+
+    res.json({
+      success: true,
+      data: {
+        requestInfo: {
+          categoryId: parseInt(categoryId),
+          categoryName: category?.name || 'Unknown',
+          city,
+          isUrgent,
+          totalProviders: providers.length,
+          matchingProviders: sortedMatches.length
+        },
+        matches: sortedMatches
+      }
+    });
+
+  } catch (error) {
+    console.error('Error in AI matching:', error);
+    res.status(500).json({ 
+      error: 'Error finding matches',
+      details: error.message 
+    });
+  }
+});
+
+/**
+ * GET /api/ai/match-stats
+ * Get AI matching system statistics
+ */
+app.get('/api/ai/match-stats', (req, res) => {
+  try {
+    const totalProviders = providers.length;
+    const verifiedProviders = providers.filter(p => p.isVerified).length;
+    const activeProviders = providers.filter(p => p.isVerified && p.credits >= 1).length;
+
+    res.json({
+      success: true,
+      data: {
+        totalProviders,
+        verifiedProviders,
+        activeProviders,
+        matchingAlgorithm: {
+          version: "1.0",
+          description: "Smart AI-powered provider-client matching",
+          factors: [
+            { name: "Category Match", weight: "25%" },
+            { name: "Location", weight: "20%" },
+            { name: "Quality Score", weight: "20%" },
+            { name: "Availability", weight: "15%" },
+            { name: "Response Time", weight: "10%" },
+            { name: "Credits", weight: "10%" }
+          ]
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Error getting match stats:', error);
+    res.status(500).json({ 
+      error: 'Error getting statistics',
+      details: error.message 
+    });
+  }
+});
+
+/**
+ * AI Matching Score Calculation Function
+ * Intelligent algorithm that scores provider-client compatibility
+ */
+function calculateAIMatchScore(provider, request) {
+  const breakdown = {
+    categoryMatch: 0,
+    locationScore: 0,
+    qualityScore: 0,
+    availabilityScore: 0,
+    responseScore: 0,
+    creditsScore: 0
+  };
+
+  // Category Match (25% weight)
+  if (provider.serviceCategories.includes(request.categoryId)) {
+    breakdown.categoryMatch = 100;
+  }
+
+  // Location Score (20% weight)
+  if (request.city && provider.city) {
+    if (request.city.toLowerCase() === provider.city.toLowerCase()) {
+      breakdown.locationScore = 90;
+    } else {
+      breakdown.locationScore = 50; // Different city
+    }
+  } else {
+    breakdown.locationScore = 70; // Default
+  }
+
+  // Quality Score (20% weight)
+  let qualityScore = 0;
+  if (provider.isVerified) qualityScore += 30;
+  
+  const rating = provider.averageRating || 4.5;
+  qualityScore += (rating / 5) * 50;
+  
+  const jobs = provider.completedJobs || 0;
+  if (jobs >= 50) qualityScore += 20;
+  else if (jobs >= 20) qualityScore += 15;
+  else if (jobs >= 5) qualityScore += 10;
+  else qualityScore += 5;
+  
+  breakdown.qualityScore = Math.min(qualityScore, 100);
+
+  // Availability Score (15% weight)
+  breakdown.availabilityScore = request.isUrgent ? 70 : 80; // Assume generally available
+
+  // Response Score (10% weight)
+  breakdown.responseScore = 75; // Default good response time
+
+  // Credits Score (10% weight)
+  if (provider.credits >= 20) breakdown.creditsScore = 100;
+  else if (provider.credits >= 10) breakdown.creditsScore = 80;
+  else if (provider.credits >= 5) breakdown.creditsScore = 60;
+  else breakdown.creditsScore = 40;
+
+  // Calculate weighted total score
+  const totalScore = 
+    breakdown.categoryMatch * 0.25 +
+    breakdown.locationScore * 0.20 +
+    breakdown.qualityScore * 0.20 +
+    breakdown.availabilityScore * 0.15 +
+    breakdown.responseScore * 0.10 +
+    breakdown.creditsScore * 0.10;
+
+  // Generate recommendation reason
+  const reasons = [];
+  if (breakdown.qualityScore >= 80) reasons.push("⭐ Excelente calificación");
+  if (breakdown.locationScore >= 80) reasons.push("📍 Muy cerca de ti");
+  if (breakdown.responseScore >= 80) reasons.push("⚡ Respuesta rápida");
+  if (provider.isVerified) reasons.push("🛡️ Profesional verificado");
+  if (reasons.length === 0) reasons.push("🔧 Especialista en el servicio");
+
+  return {
+    totalScore: Math.round(totalScore),
+    breakdown,
+    distance: 0, // Would calculate with real coordinates
+    estimatedResponseTime: "En 4 horas",
+    recommendationReason: reasons.slice(0, 2).join(" • ")
+  };
+}
+
+// ============================================
+// END AI MATCHING SYSTEM
+// ============================================
+
 // 404 handler
 app.use('/api/*', (req, res) => {
   res.status(404).json({ error: 'Endpoint no encontrado' });

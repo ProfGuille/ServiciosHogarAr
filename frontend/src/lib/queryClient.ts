@@ -3,7 +3,7 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 // Get API URL from environment variables
 const API_BASE_URL = import.meta.env.VITE_API_URL || (
   import.meta.env.DEV 
-    ? 'http://localhost:5000'
+    ? 'http://localhost:3000'
     : 'https://servicioshogar-backend.onrender.com'
 );
 
