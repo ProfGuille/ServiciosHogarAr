@@ -139,6 +139,85 @@ export class EmailService {
     };
   }
 
+  appointmentReminderTemplate(data: {
+    clientName: string;
+    providerName: string;
+    appointmentDate: string;
+    timeToAppointment: string;
+  }): EmailTemplate {
+    return {
+      subject: `Recordatorio: Tu servicio con ${data.providerName}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #f59e0b;">⏰ Recordatorio de Servicio</h2>
+          <p>Hola ${data.clientName},</p>
+          <p>Te recordamos que tienes un servicio programado:</p>
+          
+          <div style="background: #fef3c7; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+            <h3 style="margin-top: 0; color: #92400e;">En ${data.timeToAppointment}</h3>
+            <p><strong>Proveedor:</strong> ${data.providerName}</p>
+            <p><strong>Fecha y hora:</strong> ${data.appointmentDate}</p>
+          </div>
+          
+          <p>Por favor, asegúrate de estar disponible en el horario acordado.</p>
+          <p>Si necesitas contactar al proveedor, puedes hacerlo a través de nuestra plataforma.</p>
+          
+          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+            <p style="color: #6b7280; font-size: 14px;">
+              ServiciosHogar.com.ar - Tu plataforma de confianza para servicios del hogar
+            </p>
+          </div>
+        </div>
+      `,
+      text: `Recordatorio: Tu servicio con ${data.providerName}\n\nEn ${data.timeToAppointment}\nFecha: ${data.appointmentDate}\n\nAsegúrate de estar disponible en el horario acordado.`
+    };
+  }
+
+  followUpTemplate(data: {
+    clientName: string;
+    providerName: string;
+    serviceName: string;
+    reviewUrl: string;
+  }): EmailTemplate {
+    return {
+      subject: `¿Cómo fue tu experiencia con ${data.providerName}?`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #8b5cf6;">💜 ¿Cómo fue tu experiencia?</h2>
+          <p>Hola ${data.clientName},</p>
+          <p>Esperamos que el servicio "${data.serviceName}" con <strong>${data.providerName}</strong> haya sido de tu agrado.</p>
+          
+          <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="margin-top: 0;">Tu opinión es muy importante</h3>
+            <p>Tu feedback nos ayuda a:</p>
+            <ul>
+              <li>Mantener la calidad del servicio</li>
+              <li>Ayudar a otros usuarios en su elección</li>
+              <li>Reconocer a los mejores proveedores</li>
+            </ul>
+          </div>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${data.reviewUrl}" style="background: #8b5cf6; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">
+              ⭐ Escribir Reseña
+            </a>
+          </div>
+          
+          <p style="color: #6b7280; font-size: 14px;">
+            <em>Tu reseña será anónima y ayudará a mejorar nuestra comunidad de servicios.</em>
+          </p>
+          
+          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+            <p style="color: #6b7280; font-size: 14px;">
+              ServiciosHogar.com.ar - Tu plataforma de confianza para servicios del hogar
+            </p>
+          </div>
+        </div>
+      `,
+      text: `¿Cómo fue tu experiencia con ${data.providerName}?\n\nTu opinión sobre el servicio "${data.serviceName}" es muy importante para nosotros.\n\nEscribir reseña: ${data.reviewUrl}`
+    };
+  }
+
   // Send notification with email preferences check
   async sendNotificationEmail(
     userId: number, 
@@ -197,6 +276,12 @@ export class EmailService {
           break;
         case 'booking_reminder':
           template = this.bookingReminderTemplate(templateData);
+          break;
+        case 'appointment_reminder':
+          template = this.appointmentReminderTemplate(templateData);
+          break;
+        case 'follow_up':
+          template = this.followUpTemplate(templateData);
           break;
         case 'new_message':
           template = this.newMessageTemplate(templateData);
