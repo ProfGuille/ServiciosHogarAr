@@ -65,6 +65,17 @@ export function registerRoutes(app: express.Express) {
     console.log('⚠️ Notifications routes not loaded:', (error as Error).message);
   }
   
+  // Analytics routes
+  try {
+    import('./analytics.js').then(module => {
+      app.use('/api/analytics', module.default);
+    }).catch(() => {
+      console.log('⚠️ analytics routes not available yet');
+    });
+  } catch (error) {
+    console.log('⚠️ Analytics routes not loaded:', (error as Error).message);
+  }
+  
   // Service-related routes
   try {
     // Dynamically import optional routes
