@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import ChatFloatingButton from "@/components/Chat/ChatFloatingButton";
+// import ChatFloatingButton from "@/components/Chat/ChatFloatingButton";
 import { useAuth } from "@/hooks/useAuth";
 import { 
   Star, 
@@ -359,6 +359,7 @@ export default function ServiceDetail() {
       )}
 
       {/* Chat Floating Button - MVP3 Phase 3 Integration */}
+      {/* TODO: Implement chat floating button 
       {isAuthenticated && provider && (
         <ChatFloatingButton
           initialProviderId={provider.id}
@@ -368,6 +369,7 @@ export default function ServiceDetail() {
           showUnreadBadge={true}
         />
       )}
+      */}
 
       <Footer />
     </div>
