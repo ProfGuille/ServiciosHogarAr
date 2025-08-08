@@ -5,7 +5,7 @@ import { db } from "../db";
 import { serviceProviders } from "../shared/schema/serviceProviders";
 import { providerServices } from "../shared/schema/providerServices";
 import { services } from "../shared/schema/services";
-import { sql, and, gte, lte, or, eq, ilike, desc, asc } from "drizzle-orm";
+import { sql, and, gte, lte, or, eq, ilike, desc, asc, isNotNull } from "drizzle-orm";
 
 const router = Router();
 
@@ -73,10 +73,10 @@ router.get("/location-search", async (req, res) => {
       .where(
         and(
           eq(serviceProviders.isActive, true),
-          gte(serviceProviders.averageRating || 0, minRatingNum),
-          lte(serviceProviders.hourlyRate || 0, maxPriceNum),
-          serviceProviders.latitude !== null,
-          serviceProviders.longitude !== null
+          gte(serviceProviders.averageRating, minRatingNum.toString()),
+          lte(serviceProviders.hourlyRate, maxPriceNum),
+          isNotNull(serviceProviders.latitude),
+          isNotNull(serviceProviders.longitude)
         )
       );
 
@@ -93,8 +93,29 @@ router.get("/location-search", async (req, res) => {
     const providers = await query.limit(parseInt(limit as string) || 50);
 
     // Filter by distance and enhance with distance calculation
-    const providersWithDistance = providers
-      .map(provider => {
+    type ProviderResult = {
+      id: number;
+      businessName: string | null;
+      businessDescription: string | null; 
+      city: string | null;
+      province: string | null;
+      averageRating: string | null;
+      totalReviews: number;
+      credits: number | null;
+      isVerified: boolean;
+      phone: string | null;
+      latitude: number | null;
+      longitude: number | null;
+      hourlyRate: number;
+      description: string | null;
+    };
+
+    type ProviderWithDistance = ProviderResult & {
+      distance: number;
+    };
+
+    const providersWithDistance: ProviderWithDistance[] = providers
+      .map((provider: ProviderResult) => {
         if (!provider.latitude || !provider.longitude) return null;
         
         const distance = calculateDistance(
@@ -109,36 +130,36 @@ router.get("/location-search", async (req, res) => {
           distance: Math.round(distance * 10) / 10 // Round to 1 decimal
         };
       })
-      .filter((provider): provider is NonNullable<typeof provider> => 
-        provider !== null && provider.distance <= radiusKm
+      .filter((provider: ProviderResult | null): provider is ProviderWithDistance => 
+        provider !== null && (provider as ProviderWithDistance).distance <= radiusKm
       );
 
     // Sort results
-    let sortedProviders = providersWithDistance;
+    let sortedProviders: ProviderWithDistance[] = providersWithDistance;
     switch (sortBy) {
       case 'distance':
-        sortedProviders.sort((a, b) => a.distance - b.distance);
+        sortedProviders.sort((a: ProviderWithDistance, b: ProviderWithDistance) => a.distance - b.distance);
         break;
       case 'rating':
-        sortedProviders.sort((a, b) => (Number(b.averageRating) || 0) - (Number(a.averageRating) || 0));
+        sortedProviders.sort((a: ProviderWithDistance, b: ProviderWithDistance) => (Number(b.averageRating) || 0) - (Number(a.averageRating) || 0));
         break;
       case 'price':
-        sortedProviders.sort((a, b) => (a.hourlyRate || 0) - (b.hourlyRate || 0));
+        sortedProviders.sort((a: ProviderWithDistance, b: ProviderWithDistance) => (a.hourlyRate || 0) - (b.hourlyRate || 0));
         break;
     }
 
     // Get services for each provider
     const providersWithServices = await Promise.all(
-      sortedProviders.map(async (provider) => {
+      sortedProviders.map(async (provider: ProviderWithDistance) => {
         try {
           const providerServicesList = await db
             .select({
-              id: services.id,
-              name: services.name,
-              basePrice: services.basePrice
+              id: providerServices.id,
+              serviceName: providerServices.serviceName,
+              customServiceName: providerServices.customServiceName,
+              categoryId: providerServices.categoryId
             })
-            .from(services)
-            .innerJoin(providerServices, eq(services.id, providerServices.serviceId))
+            .from(providerServices)
             .where(eq(providerServices.providerId, provider.id))
             .limit(3);
 

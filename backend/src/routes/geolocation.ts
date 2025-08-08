@@ -4,7 +4,7 @@ import { serviceProviders } from "../shared/schema/serviceProviders";
 import { providerServices } from "../shared/schema/providerServices";
 import { services } from "../shared/schema/services";
 import { db } from "../db";
-import { sql, and, gte, lte, or, eq, ilike, desc, asc } from "drizzle-orm";
+import { sql, and, gte, lte, or, eq, ilike, desc, asc, isNotNull } from "drizzle-orm";
 
 const router = Router();
 
@@ -217,10 +217,10 @@ router.get("/providers/search", async (req, res) => {
       .where(
         and(
           eq(serviceProviders.isActive, true),
-          gte(serviceProviders.averageRating, minRatingNum),
+          gte(serviceProviders.averageRating, minRatingNum.toString()),
           lte(serviceProviders.hourlyRate, maxPriceNum),
-          serviceProviders.latitude !== null,
-          serviceProviders.longitude !== null
+          isNotNull(serviceProviders.latitude),
+          isNotNull(serviceProviders.longitude)
         )
       );
 
@@ -237,8 +237,26 @@ router.get("/providers/search", async (req, res) => {
     const providers = await query.limit(parseInt(limit as string) || 50);
 
     // Filter by distance and enhance with distance calculation
-    const providersWithDistance = providers
-      .map(provider => {
+    type ProviderResult = {
+      id: number;
+      businessName: string | null;
+      city: string | null;
+      averageRating: string | null;
+      totalReviews: number;
+      credits: number | null;
+      isVerified: boolean;
+      phone: string | null;
+      latitude: number | null;
+      longitude: number | null;
+      hourlyRate: number;
+    };
+
+    type ProviderWithDistance = ProviderResult & {
+      distance: number;
+    };
+
+    const providersWithDistance: ProviderWithDistance[] = providers
+      .map((provider: ProviderResult) => {
         const distance = haversineDistance(
           lat, 
           lng, 
@@ -251,40 +269,40 @@ router.get("/providers/search", async (req, res) => {
           distance: Math.round(distance * 10) / 10 // Round to 1 decimal
         };
       })
-      .filter(provider => provider.distance <= radiusKm);
+      .filter((provider: ProviderWithDistance) => provider.distance <= radiusKm);
 
     // Sort results
-    let sortedProviders = providersWithDistance;
+    let sortedProviders: ProviderWithDistance[] = providersWithDistance;
     switch (sortBy) {
       case 'distance':
-        sortedProviders.sort((a, b) => a.distance - b.distance);
+        sortedProviders.sort((a: ProviderWithDistance, b: ProviderWithDistance) => a.distance - b.distance);
         break;
       case 'rating':
-        sortedProviders.sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0));
+        sortedProviders.sort((a: ProviderWithDistance, b: ProviderWithDistance) => (parseFloat(b.averageRating || '0')) - (parseFloat(a.averageRating || '0')));
         break;
       case 'price':
-        sortedProviders.sort((a, b) => (a.hourlyRate || 0) - (b.hourlyRate || 0));
+        sortedProviders.sort((a: ProviderWithDistance, b: ProviderWithDistance) => (a.hourlyRate || 0) - (b.hourlyRate || 0));
         break;
     }
 
     // Get services for each provider (optional enhancement)
     const providersWithServices = await Promise.all(
-      sortedProviders.map(async (provider) => {
+      sortedProviders.map(async (provider: ProviderWithDistance) => {
         try {
-          const providerServices = await db
+          const providerServicesList = await db
             .select({
-              id: services.id,
-              name: services.name,
-              basePrice: services.basePrice
+              id: providerServices.id,
+              serviceName: providerServices.serviceName,
+              customServiceName: providerServices.customServiceName,
+              categoryId: providerServices.categoryId
             })
-            .from(services)
-            .innerJoin(providerServices, eq(services.id, providerServices.serviceId))
+            .from(providerServices)
             .where(eq(providerServices.providerId, provider.id))
             .limit(3);
 
           return {
             ...provider,
-            services: providerServices
+            services: providerServicesList
           };
         } catch (error) {
           return {
@@ -314,7 +332,5 @@ router.get("/providers/search", async (req, res) => {
     });
   }
 });
-
-export default router;
 
 export default router;
