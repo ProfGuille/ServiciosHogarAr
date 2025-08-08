@@ -14,6 +14,9 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
+// Serve uploaded files
+app.use('/uploads', express.static('uploads'));
+
 // In-memory session store (for development only)
 const sessions = new Map();
 
@@ -48,6 +51,8 @@ const providers = [
     credits: 50,
     isVerified: true,
     phone: "+54 11 1234-5678",
+    averageRating: 4.8,
+    totalReviews: 25,
     createdAt: new Date(),
     termsAcceptedAt: new Date(),
     privacyPolicyAcceptedAt: new Date(),
@@ -340,6 +345,8 @@ app.post('/api/auth/register-provider', async (req, res) => {
       serviceCategories: serviceCategories.map((id: string) => Number(id)),
       credits: 10, // Initial free credits
       isVerified: false, // Needs admin verification
+      averageRating: 0, // New provider starts with 0 rating
+      totalReviews: 0, // New provider starts with 0 reviews
       createdAt: new Date(),
       termsAcceptedAt: new Date(),
       privacyPolicyAcceptedAt: new Date(),
@@ -892,7 +899,7 @@ app.post('/api/ai/find-matches', (req, res) => {
           phone: provider.phone,
           isVerified: provider.isVerified,
           averageRating: provider.averageRating || 4.5,
-          completedJobs: provider.completedJobs || 0
+          completedJobs: provider.totalReviews || 0
         },
         matchScore: matchScore.totalScore,
         distance: matchScore.distance,
@@ -929,7 +936,7 @@ app.post('/api/ai/find-matches', (req, res) => {
     console.error('Error in AI matching:', error);
     res.status(500).json({ 
       error: 'Error finding matches',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 });
@@ -969,7 +976,7 @@ app.get('/api/ai/match-stats', (req, res) => {
     console.error('Error getting match stats:', error);
     res.status(500).json({ 
       error: 'Error getting statistics',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 });
@@ -978,7 +985,7 @@ app.get('/api/ai/match-stats', (req, res) => {
  * AI Matching Score Calculation Function
  * Intelligent algorithm that scores provider-client compatibility
  */
-function calculateAIMatchScore(provider, request) {
+function calculateAIMatchScore(provider: any, request: any) {
   const breakdown = {
     categoryMatch: 0,
     locationScore: 0,
@@ -1011,7 +1018,7 @@ function calculateAIMatchScore(provider, request) {
   const rating = provider.averageRating || 4.5;
   qualityScore += (rating / 5) * 50;
   
-  const jobs = provider.completedJobs || 0;
+  const jobs = provider.totalReviews || 0;
   if (jobs >= 50) qualityScore += 20;
   else if (jobs >= 20) qualityScore += 15;
   else if (jobs >= 5) qualityScore += 10;

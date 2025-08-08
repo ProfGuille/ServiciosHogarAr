@@ -2,7 +2,7 @@
 import { Router } from 'express';
 import { AIMatchingService } from '../../services/ai/matchingService.js';
 import { db } from '../../db.js';
-import { serviceProviders, serviceCategories, serviceRequests } from '../../../shared/schema.js';
+import { serviceProviders, categories, serviceRequests } from '../../shared/schema/index.js';
 import { eq, and, gte } from 'drizzle-orm';
 
 const router = Router();
@@ -37,13 +37,11 @@ router.post('/find-matches', async (req, res) => {
       city: serviceProviders.city,
       latitude: serviceProviders.latitude,
       longitude: serviceProviders.longitude,
-      serviceCategories: serviceProviders.serviceCategories,
       isVerified: serviceProviders.isVerified,
       credits: serviceProviders.credits,
       phone: serviceProviders.phone,
       averageRating: serviceProviders.averageRating,
-      completedJobs: serviceProviders.completedJobs,
-      responseTimeHours: serviceProviders.responseTimeHours,
+      totalReviews: serviceProviders.totalReviews,
       isOnline: serviceProviders.isOnline,
       lastSeenAt: serviceProviders.lastSeenAt
     })
@@ -72,7 +70,7 @@ router.post('/find-matches', async (req, res) => {
     };
 
     // Enhanced providers with availability info
-    const enhancedProviders = providers.map(provider => ({
+    const enhancedProviders = providers.map((provider: any) => ({
       ...provider,
       availability: {
         isAvailable: provider.isOnline || false,
@@ -93,8 +91,8 @@ router.post('/find-matches', async (req, res) => {
 
     // Fetch category info for context
     const category = await db.select()
-      .from(serviceCategories)
-      .where(eq(serviceCategories.id, categoryId))
+      .from(categories)
+      .where(eq(categories.id, categoryId))
       .limit(1);
 
     res.json({
@@ -132,7 +130,7 @@ router.post('/find-matches', async (req, res) => {
     console.error('Error in AI matching:', error);
     res.status(500).json({ 
       error: 'Error finding matches',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 });
@@ -148,8 +146,8 @@ router.get('/recommendations/:userId', async (req, res) => {
 
     const recommendations = await AIMatchingService.getPersonalizedRecommendations(
       parseInt(userId),
-      categoryId ? parseInt(categoryId) : undefined,
-      parseInt(limit)
+      categoryId ? parseInt(categoryId as string) : undefined,
+      parseInt(limit as string)
     );
 
     res.json({
@@ -161,7 +159,7 @@ router.get('/recommendations/:userId', async (req, res) => {
     console.error('Error getting recommendations:', error);
     res.status(500).json({ 
       error: 'Error getting recommendations',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 });
@@ -209,7 +207,7 @@ router.post('/update-performance', async (req, res) => {
     console.error('Error updating performance:', error);
     res.status(500).json({ 
       error: 'Error updating performance',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 });
@@ -261,7 +259,7 @@ router.get('/match-stats', async (req, res) => {
     console.error('Error getting match stats:', error);
     res.status(500).json({ 
       error: 'Error getting statistics',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 });

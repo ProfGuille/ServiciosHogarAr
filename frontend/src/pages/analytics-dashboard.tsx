@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { BusinessIntelligenceDashboard } from '@/components/analytics/BusinessIntelligenceDashboard';
 import {
   UserGrowthChart,
   RevenueChart,
@@ -31,6 +32,8 @@ import {
   Clock,
   Target,
   BarChart3,
+  Brain,
+  Zap,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -38,7 +41,7 @@ import { es } from 'date-fns/locale';
 export default function AnalyticsDashboard() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [timeRange, setTimeRange] = useState('30d');
-  const [selectedMetric, setSelectedMetric] = useState('overview');
+  const [selectedMetric, setSelectedMetric] = useState('bi');
 
   // Redirect to login if not authenticated or not admin
   useEffect(() => {
@@ -310,7 +313,11 @@ export default function AnalyticsDashboard() {
 
         {/* Analytics Tabs */}
         <Tabs value={selectedMetric} onValueChange={setSelectedMetric} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6">
+          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7">
+            <TabsTrigger value="bi" className="flex items-center gap-2">
+              <Brain className="h-4 w-4" />
+              Business Intelligence
+            </TabsTrigger>
             <TabsTrigger value="overview">Resumen</TabsTrigger>
             <TabsTrigger value="revenue">Ingresos</TabsTrigger>
             <TabsTrigger value="credits">Créditos</TabsTrigger>
@@ -318,6 +325,11 @@ export default function AnalyticsDashboard() {
             <TabsTrigger value="providers">Profesionales</TabsTrigger>
             <TabsTrigger value="conversion">Conversión</TabsTrigger>
           </TabsList>
+
+          {/* Business Intelligence Tab */}
+          <TabsContent value="bi" className="space-y-6">
+            <BusinessIntelligenceDashboard />
+          </TabsContent>
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">

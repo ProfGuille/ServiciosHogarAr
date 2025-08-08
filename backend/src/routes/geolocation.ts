@@ -1,8 +1,10 @@
 import { Router } from "express";
 import { providerLocations } from "../shared/schema/providerLocations";
 import { serviceProviders } from "../shared/schema/serviceProviders";
+import { providerServices } from "../shared/schema/providerServices";
+import { services } from "../shared/schema/services";
 import { db } from "../db";
-import { sql, and, gte, lte, or, eq, ilike, desc, asc } from "drizzle-orm";
+import { sql, and, gte, lte, or, eq, ilike, desc, asc, isNotNull } from "drizzle-orm";
 
 const router = Router();
 
@@ -166,6 +168,168 @@ router.post("/geocode", async (req, res) => {
   } catch (error) {
     console.error('Geocoding error:', error);
     res.status(500).json({ error: "Error en geocodificación" });
+  }
+});
+
+// Location-based provider search
+router.get("/providers/search", async (req, res) => {
+  try {
+    const { 
+      latitude, 
+      longitude, 
+      radius = 10, 
+      category,
+      search,
+      minRating = 0,
+      maxPrice = 100000,
+      sortBy = 'distance',
+      limit = 50
+    } = req.query;
+
+    if (!latitude || !longitude) {
+      return res.status(400).json({ 
+        error: "Latitud y longitud son requeridas" 
+      });
+    }
+
+    const lat = parseFloat(latitude as string);
+    const lng = parseFloat(longitude as string);
+    const radiusKm = parseFloat(radius as string);
+    const minRatingNum = parseFloat(minRating as string);
+    const maxPriceNum = parseFloat(maxPrice as string);
+
+    // Base query for providers with location data
+    let query = db
+      .select({
+        id: serviceProviders.id,
+        businessName: serviceProviders.businessName,
+        city: serviceProviders.city,
+        averageRating: serviceProviders.averageRating,
+        totalReviews: serviceProviders.totalReviews,
+        credits: serviceProviders.credits,
+        isVerified: serviceProviders.isVerified,
+        phone: serviceProviders.phone,
+        latitude: serviceProviders.latitude,
+        longitude: serviceProviders.longitude,
+        hourlyRate: serviceProviders.hourlyRate
+      })
+      .from(serviceProviders)
+      .where(
+        and(
+          eq(serviceProviders.isActive, true),
+          gte(serviceProviders.averageRating, minRatingNum.toString()),
+          lte(serviceProviders.hourlyRate, maxPriceNum),
+          isNotNull(serviceProviders.latitude),
+          isNotNull(serviceProviders.longitude)
+        )
+      );
+
+    // Add search term filter
+    if (search) {
+      query = query.where(
+        or(
+          ilike(serviceProviders.businessName, `%${search}%`),
+          ilike(serviceProviders.description, `%${search}%`)
+        )
+      );
+    }
+
+    const providers = await query.limit(parseInt(limit as string) || 50);
+
+    // Filter by distance and enhance with distance calculation
+    type ProviderResult = {
+      id: number;
+      businessName: string | null;
+      city: string | null;
+      averageRating: string | null;
+      totalReviews: number;
+      credits: number | null;
+      isVerified: boolean;
+      phone: string | null;
+      latitude: number | null;
+      longitude: number | null;
+      hourlyRate: number;
+    };
+
+    type ProviderWithDistance = ProviderResult & {
+      distance: number;
+    };
+
+    const providersWithDistance: ProviderWithDistance[] = providers
+      .map((provider: ProviderResult) => {
+        const distance = haversineDistance(
+          lat, 
+          lng, 
+          provider.latitude!, 
+          provider.longitude!
+        );
+        
+        return {
+          ...provider,
+          distance: Math.round(distance * 10) / 10 // Round to 1 decimal
+        };
+      })
+      .filter((provider: ProviderWithDistance) => provider.distance <= radiusKm);
+
+    // Sort results
+    let sortedProviders: ProviderWithDistance[] = providersWithDistance;
+    switch (sortBy) {
+      case 'distance':
+        sortedProviders.sort((a: ProviderWithDistance, b: ProviderWithDistance) => a.distance - b.distance);
+        break;
+      case 'rating':
+        sortedProviders.sort((a: ProviderWithDistance, b: ProviderWithDistance) => (parseFloat(b.averageRating || '0')) - (parseFloat(a.averageRating || '0')));
+        break;
+      case 'price':
+        sortedProviders.sort((a: ProviderWithDistance, b: ProviderWithDistance) => (a.hourlyRate || 0) - (b.hourlyRate || 0));
+        break;
+    }
+
+    // Get services for each provider (optional enhancement)
+    const providersWithServices = await Promise.all(
+      sortedProviders.map(async (provider: ProviderWithDistance) => {
+        try {
+          const providerServicesList = await db
+            .select({
+              id: providerServices.id,
+              serviceName: providerServices.serviceName,
+              customServiceName: providerServices.customServiceName,
+              categoryId: providerServices.categoryId
+            })
+            .from(providerServices)
+            .where(eq(providerServices.providerId, provider.id))
+            .limit(3);
+
+          return {
+            ...provider,
+            services: providerServicesList
+          };
+        } catch (error) {
+          return {
+            ...provider,
+            services: []
+          };
+        }
+      })
+    );
+
+    res.json({
+      success: true,
+      data: providersWithServices,
+      pagination: {
+        total: providersWithDistance.length,
+        limit: parseInt(limit as string) || 50,
+        searchLocation: { latitude: lat, longitude: lng },
+        radius: radiusKm
+      }
+    });
+
+  } catch (error) {
+    console.error('Location search error:', error);
+    res.status(500).json({ 
+      error: "Error en búsqueda por ubicación",
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
   }
 });
 
