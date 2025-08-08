@@ -1,9 +1,9 @@
 import express from 'express';
 import { z } from 'zod';
-import { db } from '../db';
-import { serviceProviders } from '../shared/schema';
+import { db } from "../db.js";
+import { serviceProviders } from "../shared/schema/index.js";
 import { eq, and, desc } from 'drizzle-orm';
-import { requireAuth } from '../middleware/auth';
+import { requireAuth } from "../middleware/auth.js";
 
 const router = express.Router();
 

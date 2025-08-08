@@ -4,7 +4,7 @@ import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
-import { db } from '../db';
+import { db } from "../db.js";
 
 // Cargar variables de entorno
 const envPath = path.resolve(__dirname, '../../.env');

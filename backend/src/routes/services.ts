@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { db } from "../db";
-import { services } from "../shared/schema/services";
+import { db } from "../db.js";
+import { services } from "../shared/schema/services.js";
 
 const router = Router();
 

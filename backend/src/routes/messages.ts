@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { db } from "../db"; // Corrige el import
-import { messages } from "../shared/schema/messages"; // Asegúrate de tener el schema
+import { db } from "../db.js"; // Corrige el import
+import { messages } from "../shared/schema/messages.js"; // Asegúrate de tener el schema
 
 const router = Router();
 

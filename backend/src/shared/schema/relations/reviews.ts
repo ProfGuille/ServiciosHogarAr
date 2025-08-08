@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
-import { reviews } from "../reviews";
-import { users } from "../users";
-import { serviceRequests } from "../serviceRequests";
+import { reviews } from "../reviews.js";
+import { users } from "../users.js";
+import { serviceRequests } from "../serviceRequests.js";
 
 export const reviewsRelations = relations(reviews, ({ one }) => ({
   reviewer: one(users, {

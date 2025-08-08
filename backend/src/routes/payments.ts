@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { db } from "../db";
-import { payments } from "../shared/schema/payments";
+import { db } from "../db.js";
+import { payments } from "../shared/schema/payments.js";
 
 const router = Router();
 

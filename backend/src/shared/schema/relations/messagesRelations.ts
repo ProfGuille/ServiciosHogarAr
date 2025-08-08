@@ -1,7 +1,7 @@
 import { relations } from 'drizzle-orm';
-import { messages } from '../messages';
-import { conversations } from '../conversations';
-import { users } from '../users';
+import { messages } from "../messages.js";
+import { conversations } from "../conversations.js";
+import { users } from "../users.js";
 
 export const messagesRelations = relations(messages, ({ one }) => ({
   conversation: one(conversations, {

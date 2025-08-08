@@ -1,5 +1,5 @@
 // Elimina imports de tipos que no existan
-// import { InsertLanguage } from "./shared/schema/languages";
+// import { InsertLanguage } from "./shared/schema/languages.js";
 
 // Si necesitas el tipo para Drizzle:
 export type InsertLanguage = {

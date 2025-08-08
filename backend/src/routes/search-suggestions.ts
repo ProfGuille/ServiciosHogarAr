@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { serviceProviders } from "../shared/schema/serviceProviders";
-import { services } from "../shared/schema/services";
-import { categories } from "../shared/schema/categories";
-import { users } from "../shared/schema/users";
-import { db } from "../db";
+import { serviceProviders } from "../shared/schema/serviceProviders.js";
+import { services } from "../shared/schema/services.js";
+import { categories } from "../shared/schema/categories.js";
+import { users } from "../shared/schema/users.js";
+import { db } from "../db.js";
 import { sql, ilike, or, desc, eq, and } from "drizzle-orm";
 
 const router = Router();

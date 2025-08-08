@@ -11,7 +11,7 @@ if (!process.env.DATABASE_URL) {
 import { drizzle } from 'drizzle-orm/neon-http';
 import { migrate } from 'drizzle-orm/neon-http/migrator';
 import { neon } from '@neondatabase/serverless';
-import * as schema from './shared/schema'; // importá TODO el schema aquí
+import * as schema from "./shared/schema/index.js"; // importá TODO el schema aquí
 
 const sql = neon(process.env.DATABASE_URL);
 

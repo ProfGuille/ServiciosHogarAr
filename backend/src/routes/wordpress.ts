@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { db } from "../db";
-// import { wordpressPosts } from "../shared/schema/wordpressPosts"; // <-- Elimina esta línea
+import { db } from "../db.js";
+// import { wordpressPosts } from "../shared/schema/wordpressPosts.js"; // <-- Elimina esta línea
 
 const router = Router();
 

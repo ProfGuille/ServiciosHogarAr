@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
-import { appointments } from "../appointments";
-import { clients } from "../clients";
-import { services } from "../services";
+import { appointments } from "../appointments.js";
+import { clients } from "../clients.js";
+import { services } from "../services.js";
 
 export const appointmentsRelations = relations(appointments, ({ one }) => ({
   client: one(clients, {

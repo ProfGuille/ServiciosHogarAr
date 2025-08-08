@@ -1,22 +1,22 @@
-export * from "./serviceProviders";
-export * from "./providerServices";
-// export * from "./serviceCategories"; // <-- Comenta o elimina esta línea
-export * from "./reviews";
-export * from "./serviceRequests";
-export * from "./providerCredits";
-export * from "./providerLocations";
-export * from "./leadResponses";
-export * from "./users";
-export * from "./payments";
-export * from "./analyticsEvents";
-export * from "./messages";
-export * from "./conversations";
-export * from "./creditPurchases";
-export * from "./referrals";
-export * from "./languages";
-export * from "./categories";         // <-- Deja solo esta línea para categorías
-export * from "./appointments";
-export * from "./translations";
+export * from "./serviceProviders.js";
+export * from "./providerServices.js";
+// export * from "./serviceCategories.js"; // <-- Comenta o elimina esta línea
+export * from "./reviews.js";
+export * from "./serviceRequests.js";
+export * from "./providerCredits.js";
+export * from "./providerLocations.js";
+export * from "./leadResponses.js";
+export * from "./users.js";
+export * from "./payments.js";
+export * from "./analyticsEvents.js";
+export * from "./messages.js";
+export * from "./conversations.js";
+export * from "./creditPurchases.js";
+export * from "./referrals.js";
+export * from "./languages.js";
+export * from "./categories.js";         // <-- Deja solo esta línea para categorías
+export * from "./appointments.js";
+export * from "./translations.js";
 // MVP 3: New schemas
-export * from "./notifications";
-export * from "./pushSubscriptions";
+export * from "./notifications.js";
+export * from "./pushSubscriptions.js";
