@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "@/components/ui/language-switcher";
+import { NotificationCenter } from "@/components/notifications";
 import { Button } from "@/components/ui/button";
 import { 
   DropdownMenu, 
@@ -169,7 +170,10 @@ export function Navbar() {
               {isLoading ? (
                 <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
               ) : isAuthenticated ? (
-                <UserMenu />
+                <>
+                  <NotificationCenter />
+                  <UserMenu />
+                </>
               ) : (
                 <div className="flex items-center space-x-2">
                   <Button variant="ghost" onClick={() => window.location.href = "/api/login"}>

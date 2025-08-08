@@ -4,6 +4,7 @@ import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
 import { registerRoutes } from "./routes/index.js";
 import { db } from "./db.js";
+import { notificationCron } from "./cron/notificationCron.js";
 import dotenv from "dotenv";
 import path from "path";
 import "./types/session.js"; // Import session type extensions
@@ -116,4 +117,8 @@ app.listen(PORT, () => {
   console.log(`🚀 Servidor ejecutándose en puerto ${PORT}`);
   console.log(`📝 Entorno: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🗄️ Base de datos: ${process.env.DATABASE_URL ? 'Conectada' : 'No configurada'}`);
+  
+  // Start notification cron jobs
+  notificationCron.start();
+  console.log(`⏰ Notification cron jobs iniciados`);
 });

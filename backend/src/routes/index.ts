@@ -54,6 +54,17 @@ export function registerRoutes(app: express.Express) {
     console.log('⚠️ Provider dashboard routes not loaded:', (error as Error).message);
   }
   
+  // MVP3 Phase 6: Notifications routes
+  try {
+    import('./mvp3/notifications.js').then(module => {
+      app.use('/api/notifications', module.default);
+    }).catch(() => {
+      console.log('⚠️ notifications routes not available yet');
+    });
+  } catch (error) {
+    console.log('⚠️ Notifications routes not loaded:', (error as Error).message);
+  }
+  
   // Service-related routes
   try {
     // Dynamically import optional routes
