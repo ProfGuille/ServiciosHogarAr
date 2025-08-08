@@ -11,10 +11,12 @@ interface AchievementGalleryProps {
 }
 
 interface AchievementWithProgress extends Achievement {
-  earnedAt?: Date;
   currentProgress?: number;
   targetProgress?: number;
   percentComplete?: number;
+  // Ensure required properties are explicitly included
+  id: string;
+  name: string;
 }
 
 export function AchievementGallery({ userId }: AchievementGalleryProps) {

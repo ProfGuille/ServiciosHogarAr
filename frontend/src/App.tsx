@@ -31,10 +31,15 @@ import Profile from "@/pages/profile";
 import About from "@/pages/about";
 import ComoFunciona from "@/pages/como-funciona";
 import Contacto from "@/pages/contacto-fixed";
+// Legacy routes - redirected to /legal/
 import Terminos from "@/pages/terminos";
 import Privacidad from "@/pages/privacidad";
-import AvisoLegal from "@/pages/aviso-legal";
 import Seguridad from "@/pages/seguridad";
+// New legal pages with proper Argentine compliance
+import TerminosLegal from "@/pages/legal/terminos";
+import PrivacidadLegal from "@/pages/legal/privacidad";
+import AvisoLegalNuevo from "@/pages/legal/aviso";
+import AvisoLegal from "@/pages/aviso-legal";
 import Blog from "@/pages/blog";
 import CentroAyuda from "@/pages/centro-ayuda";
 import Carreras from "@/pages/carreras";
@@ -91,8 +96,13 @@ function Router() {
       <Route path="/about" component={About} />
       <Route path="/como-funciona" component={ComoFunciona} />
       <Route path="/contacto" component={Contacto} />
-      <Route path="/terminos" component={Terminos} />
-      <Route path="/privacidad" component={Privacidad} />
+      {/* Legal pages - new structure */}
+      <Route path="/legal/terminos" component={TerminosLegal} />
+      <Route path="/legal/privacidad" component={PrivacidadLegal} />
+      <Route path="/legal/aviso" component={AvisoLegalNuevo} />
+      {/* Legacy redirects for SEO */}
+      <Route path="/terminos" component={TerminosLegal} />
+      <Route path="/privacidad" component={PrivacidadLegal} />
       <Route path="/aviso-legal" component={AvisoLegal} />
       <Route path="/seguridad" component={Seguridad} />
       <Route path="/blog" component={Blog} />

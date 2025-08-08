@@ -41,6 +41,15 @@ export function Footer() {
         { label: "Contacto", href: "/contacto" },
         { label: "Sobre nosotros", href: "/about" },
       ]
+    },
+    {
+      title: "Legal",
+      links: [
+        { label: "Términos y Condiciones", href: "/legal/terminos" },
+        { label: "Política de Privacidad", href: "/legal/privacidad" },
+        { label: "Aviso Legal", href: "/legal/aviso" },
+        { label: "Seguridad", href: "/seguridad" },
+      ]
     }
   ];
 
@@ -48,7 +57,7 @@ export function Footer() {
     <footer className="bg-slate-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
           
           {/* Brand Section */}
           <div className="lg:col-span-2">
@@ -61,6 +70,13 @@ export function Footer() {
             <p className="text-slate-300 text-base mb-6 max-w-md">
               Conectamos hogares argentinos con profesionales verificados para cualquier servicio que necesites.
             </p>
+            
+            {/* Legal Disclaimer */}
+            <div className="bg-slate-800 border border-slate-700 rounded-lg p-4 mb-6">
+              <p className="text-slate-400 text-xs leading-relaxed">
+                <strong className="text-slate-300">Plataforma de intermediación:</strong> ServiciosHogar.com.ar actúa únicamente como vínculo neutral entre clientes y prestadores independientes. No participamos en contrataciones ni asumimos responsabilidad por servicios prestados.
+              </p>
+            </div>
             
             {/* Quick Contact */}
             <div className="flex flex-col sm:flex-row gap-3">
@@ -149,17 +165,14 @@ export function Footer() {
             </div>
             
             <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
-              <Link href="/terminos" className="text-slate-400 hover:text-primary transition-colors">
+              <Link href="/legal/terminos" className="text-slate-400 hover:text-primary transition-colors">
                 Términos
               </Link>
-              <Link href="/privacidad" className="text-slate-400 hover:text-primary transition-colors">
+              <Link href="/legal/privacidad" className="text-slate-400 hover:text-primary transition-colors">
                 Privacidad
               </Link>
-              <Link href="/aviso-legal" className="text-slate-400 hover:text-primary transition-colors">
+              <Link href="/legal/aviso" className="text-slate-400 hover:text-primary transition-colors">
                 Aviso Legal
-              </Link>
-              <Link href="/legal-compliance" className="text-slate-400 hover:text-primary transition-colors">
-                Mis Datos
               </Link>
               <Link href="/contacto" className="text-slate-400 hover:text-primary transition-colors">
                 Contacto

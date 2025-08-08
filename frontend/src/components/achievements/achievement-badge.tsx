@@ -1,3 +1,4 @@
+import React from "react";
 import { cn } from "@/lib/utils";
 import * as Icons from "lucide-react";
 import { type Achievement } from "@shared/schema";
@@ -41,7 +42,7 @@ export function AchievementBadge({
   showTooltip = true,
   className,
 }: AchievementBadgeProps) {
-  const Icon = Icons[achievement.icon as keyof typeof Icons] || Icons.Award;
+  const Icon = (Icons[achievement.icon as keyof typeof Icons] || Icons.Award) as React.ComponentType<any>;
   const isEarned = !!achievement.earnedAt;
 
   const badge = (
