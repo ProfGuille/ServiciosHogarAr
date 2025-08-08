@@ -22,13 +22,26 @@ export interface EmailTemplate {
 }
 
 export class EmailService {
-  private transporter: ReturnType<typeof nodemailer.createTransport>;
+  private transporter: ReturnType<typeof nodemailer.createTransport> | null = null;
+  private isConfigured: boolean = false;
 
   constructor(config: EmailConfig) {
-    this.transporter = nodemailer.createTransport(config);
+    try {
+      this.transporter = nodemailer.createTransport(config);
+      this.isConfigured = true;
+      console.log('Email service configured successfully');
+    } catch (error) {
+      console.warn('Failed to configure email service:', error instanceof Error ? error.message : String(error));
+      this.isConfigured = false;
+    }
   }
 
   async sendEmail(to: string, template: EmailTemplate): Promise<boolean> {
+    if (!this.isConfigured || !this.transporter) {
+      console.warn('Email service not configured, skipping email');
+      return false;
+    }
+
     try {
       const info = await this.transporter.sendMail({
         from: process.env.EMAIL_FROM || 'noreply@servicioshogar.com.ar',
@@ -311,6 +324,7 @@ export class EmailService {
 }
 
 // Create singleton instance
+// Email configuration with defaults for missing environment variables
 const emailConfig: EmailConfig = {
   host: process.env.SMTP_HOST || 'smtp.gmail.com',
   port: parseInt(process.env.SMTP_PORT || '587'),
@@ -321,4 +335,10 @@ const emailConfig: EmailConfig = {
   }
 };
 
-export const emailService = new EmailService(emailConfig);
+// Only instantiate if basic config is available
+export const emailService = (process.env.SMTP_HOST && process.env.SMTP_USER) 
+  ? new EmailService(emailConfig) 
+  : (() => {
+      console.warn('Email service not configured: Missing SMTP_HOST or SMTP_USER environment variables');
+      return null;
+    })();
