@@ -14,6 +14,7 @@ import Home from "@/pages/home";
 import Login from "@/pages/login";
 import Services from "@/pages/services";
 import ServicesSimple from "@/pages/services-simple";
+import SmartSearch from "@/pages/smart-search";
 import ServiceDetail from "@/pages/service-detail";
 import ProviderProfile from "@/pages/provider-profile";
 import ProviderDashboard from "@/pages/provider-dashboard";
@@ -89,6 +90,7 @@ function Router() {
       {/* Public routes available to all users */}
       <Route path="/login" component={Login} />
       <Route path="/buscar" component={Search} />
+      <Route path="/ai-search" component={SmartSearch} />
       <Route path="/servicios" component={ServicesSimple} />
       <Route path="/register" component={Register} />
       <Route path="/register-provider" component={RegisterProvider} />
