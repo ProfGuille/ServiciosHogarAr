@@ -56,6 +56,10 @@ interface SearchFilters {
   languages?: string[];
   hasCredits?: boolean;
   
+  // Availability & Response Time (Phase 4)
+  availability?: string; // 'today', 'tomorrow', 'week', 'anytime'
+  responseTime?: string; // 'fast', 'medium', 'slow'
+  
   // Sorting
   sortBy?: string;
 }
@@ -143,10 +147,12 @@ export function AdvancedSearchFilters({
               <SelectItem value="relevance">Más relevantes</SelectItem>
               <SelectItem value="rating">Mejor calificación</SelectItem>
               <SelectItem value="reviews">Más reseñas</SelectItem>
+              <SelectItem value="distance">Más cercano</SelectItem>
               <SelectItem value="price_low">Precio: menor a mayor</SelectItem>
               <SelectItem value="price_high">Precio: mayor a menor</SelectItem>
               <SelectItem value="experience">Mayor experiencia</SelectItem>
               <SelectItem value="response_time">Respuesta más rápida</SelectItem>
+              <SelectItem value="newest">Más recientes</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -447,6 +453,71 @@ export function AdvancedSearchFilters({
                     </div>
                   ))}
                 </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Availability & Response Time */}
+          <AccordionItem value="availability">
+            <AccordionTrigger>
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4" />
+                Disponibilidad
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="space-y-4">
+              <div>
+                <Label>Disponibilidad</Label>
+                <Select
+                  value={localFilters.availability || ''}
+                  onValueChange={(value) => updateFilter('availability', value || undefined)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Cualquier momento" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Cualquier momento</SelectItem>
+                    <SelectItem value="today">Hoy</SelectItem>
+                    <SelectItem value="tomorrow">Mañana</SelectItem>
+                    <SelectItem value="week">Esta semana</SelectItem>
+                    <SelectItem value="anytime">Cuando sea</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Tiempo de respuesta</Label>
+                <RadioGroup
+                  value={localFilters.responseTime || ''}
+                  onValueChange={(value) => updateFilter('responseTime', value || undefined)}
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="" id="response-any" />
+                      <Label htmlFor="response-any" className="cursor-pointer">
+                        Cualquier tiempo
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="fast" id="response-fast" />
+                      <Label htmlFor="response-fast" className="cursor-pointer">
+                        Rápido (menos de 2 horas)
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="medium" id="response-medium" />
+                      <Label htmlFor="response-medium" className="cursor-pointer">
+                        Moderado (menos de 24 horas)
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="slow" id="response-slow" />
+                      <Label htmlFor="response-slow" className="cursor-pointer">
+                        Sin prisa (más de 24 horas)
+                      </Label>
+                    </div>
+                  </div>
+                </RadioGroup>
               </div>
             </AccordionContent>
           </AccordionItem>

@@ -17,3 +17,6 @@ export * from "./languages";
 export * from "./categories";         // <-- Deja solo esta línea para categorías
 export * from "./appointments";
 export * from "./translations";
+// MVP 3: New schemas
+export * from "./notifications";
+export * from "./pushSubscriptions";
