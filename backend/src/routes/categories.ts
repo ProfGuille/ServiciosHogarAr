@@ -1,6 +1,6 @@
 // src/routes/categories.ts
 import { Router } from 'express';
-import { db } from '../db';
+import { db } from "../db.js";
 import { categories } from "@shared/schema";
 
 const router = Router();

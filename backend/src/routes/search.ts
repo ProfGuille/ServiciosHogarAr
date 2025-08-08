@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { serviceProviders } from "../shared/schema/serviceProviders";
-import { providerLocations } from "../shared/schema/providerLocations";
-import { services } from "../shared/schema/services";
-import { categories } from "../shared/schema/categories";
-import { users } from "../shared/schema/users";
-import { db } from "../db";
+import { serviceProviders } from "../shared/schema/serviceProviders.js";
+import { providerLocations } from "../shared/schema/providerLocations.js";
+import { services } from "../shared/schema/services.js";
+import { categories } from "../shared/schema/categories.js";
+import { users } from "../shared/schema/users.js";
+import { db } from "../db.js";
 import { sql, and, gte, lte, or, eq, ilike, desc, asc, inArray, SQL } from "drizzle-orm";
 
 const router = Router();

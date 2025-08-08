@@ -1,5 +1,5 @@
 import { db } from "./db.js";
-import { languages } from "./shared/schema";
+import { languages } from "./shared/schema/index.js";
 
 export async function testDb() {
   // Prueba seleccionando 1 registro de una tabla real

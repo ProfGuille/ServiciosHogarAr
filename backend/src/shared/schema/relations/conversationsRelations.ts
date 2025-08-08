@@ -1,6 +1,6 @@
 import { relations } from "drizzle-orm";
-import { conversations } from "../conversations";
-import { users } from "../users";
+import { conversations } from "../conversations.js";
+import { users } from "../users.js";
 
 export const conversationsRelations = relations(conversations, ({ one }) => ({
   client: one(users, {

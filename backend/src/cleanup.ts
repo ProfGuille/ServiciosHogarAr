@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
-import { db } from "./db";
-import { serviceProviders } from "./shared/schema/serviceProviders";
-import { users } from "./shared/schema/users";
+import { db } from "./db.js";
+import { serviceProviders } from "./shared/schema/serviceProviders.js";
+import { users } from "./shared/schema/users.js";
 
 // Limpieza por ID numérico
 await db.delete(serviceProviders).where(eq(serviceProviders.userId, 123));

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { db } from '../db.js';
-import { users, serviceProviders } from '../shared/schema';
+import { users, serviceProviders } from "../shared/schema/index.js";
 
 import { eq } from 'drizzle-orm';
 

@@ -16,35 +16,56 @@ Markdown
 cd frontend
 npm install
 npm run build
-2. Preparación de Archivos para Hostinger
-Los archivos generados se encuentran en la carpeta frontend/dist/:
+```
 
-index.html - Archivo principal
-assets/ - CSS, JavaScript y otros recursos
-.htaccess - Configuración de Apache para SPA
-3. Subir Archivos a Hostinger
-Acceder al Panel de Control de Hostinger
+**Nota sobre Backend**: El backend utiliza ES modules y cuenta con corrección automática de imports durante el build. Si necesitas hacer build del backend:
 
-Ir a hPanel → Administrador de Archivos
-Navegar a public_html/
-Subir los Archivos
+```bash
+cd backend
+npm run build  # Ejecuta: node fix-import-extensions.mjs && tsc
+```
 
-Eliminar cualquier contenido existente en public_html/
-Subir todo el contenido de la carpeta frontend/dist/
-Subir también el archivo frontend/.htaccess
-4. Configuración del Dominio
+Ver [ES_MODULE_FIX.md](ES_MODULE_FIX.md) para detalles sobre la implementación de ES modules.
+
+### 2. Preparación de Archivos para Hostinger
+
+Los archivos generados se encuentran en la carpeta `frontend/dist/`:
+
+- `index.html` - Archivo principal
+- `assets/` - CSS, JavaScript y otros recursos
+- `.htaccess` - Configuración de Apache para SPA
+
+### 3. Subir Archivos a Hostinger
+
+#### Acceder al Panel de Control de Hostinger
+
+1. Ir a hPanel → Administrador de Archivos
+2. Navegar a `public_html/`
+
+#### Subir los Archivos
+
+1. Eliminar cualquier contenido existente en `public_html/`
+2. Subir todo el contenido de la carpeta `frontend/dist/`
+3. Subir también el archivo `frontend/.htaccess`
+
+### 4. Configuración del Dominio
+
 Asegurar que serviciosHogar.com.ar esté correctamente configurado:
 
-DNS apuntando a Hostinger
-Certificado SSL habilitado
-WWW redirect configurado (opcional)
-5. Variables de Entorno
+- DNS apuntando a Hostinger
+- Certificado SSL habilitado
+- WWW redirect configurado (opcional)
+
+### 5. Variables de Entorno
+
 El frontend está configurado para usar automáticamente:
 
-Producción: https://servicioshogar-backend.onrender.com (Render)
-Desarrollo: http://localhost:5000
-6. Verificación Post-Despliegue
-Verificar Funcionalidad Básica:
+- **Producción**: https://servicioshogar-backend.onrender.com (Render)
+- **Desarrollo**: http://localhost:5000
+
+### 6. Verificación Post-Despliegue
+
+#### Verificar Funcionalidad Básica:
 
 ✅ Página principal carga correctamente
 ✅ Navegación entre páginas funciona

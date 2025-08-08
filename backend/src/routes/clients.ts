@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { db } from "../db"; // Importa el archivo db.ts
-import { clients } from "../shared/schema/clients"; // Ajusta el path según tu estructura
+import { db } from "../db.js"; // Importa el archivo db.ts
+import { clients } from "../shared/schema/clients.js"; // Ajusta el path según tu estructura
 import { eq } from "drizzle-orm";
 
 const router = Router();

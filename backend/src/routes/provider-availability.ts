@@ -1,7 +1,7 @@
 import express from 'express';
-import { db } from '../db';
-import { serviceProviders } from '../shared/schema';
-import { requireAuth } from '../middleware/auth';
+import { db } from "../db.js";
+import { serviceProviders } from "../shared/schema/index.js";
+import { requireAuth } from "../middleware/auth.js";
 
 const router = express.Router();
 

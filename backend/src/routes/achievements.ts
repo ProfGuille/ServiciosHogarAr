@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { db } from "../db";
-import { achievements } from "../shared/schema/achievements";
+import { db } from "../db.js";
+import { achievements } from "../shared/schema/achievements.js";
 import { eq } from "drizzle-orm";
 
 const router = Router();

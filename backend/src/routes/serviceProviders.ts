@@ -1,10 +1,10 @@
 import { Router } from "express";
-import users from "./users"; // Usa el import por defecto si tu archivo exporta default
-import { serviceCategories } from "../shared/schema/serviceCategories"; // Corrige la ruta (asumiendo que es un schema compartido)
-import { db } from "../db";
-import { serviceProviders } from "../shared/schema/serviceProviders";
-import { providerServices } from "../shared/schema/providerServices";
-import { services } from "../shared/schema/services";
+import users from "./users.js"; // Usa el import por defecto si tu archivo exporta default
+import { serviceCategories } from "../shared/schema/serviceCategories.js"; // Corrige la ruta (asumiendo que es un schema compartido)
+import { db } from "../db.js";
+import { serviceProviders } from "../shared/schema/serviceProviders.js";
+import { providerServices } from "../shared/schema/providerServices.js";
+import { services } from "../shared/schema/services.js";
 import { sql, and, gte, lte, or, eq, ilike, desc, asc, isNotNull } from "drizzle-orm";
 
 const router = Router();

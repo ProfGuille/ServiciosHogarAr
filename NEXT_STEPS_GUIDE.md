@@ -32,6 +32,9 @@
 - **Advanced filtering** by radius, rating, and price
 
 ### 🛠️ Technical Improvements
+- **Fixed ES Module import issues** for Node.js compatibility
+- **Automated import extension correction** in build process
+- **Enhanced TypeScript build system** with proper ES module support
 - **Fixed TypeScript build errors** across all modules
 - **Enhanced file upload system** with multer integration
 - **Performance optimizations** with bundle splitting (2.6MB → 933KB)
@@ -99,7 +102,7 @@ cp frontend/.env.example frontend/.env
 
 ### 3. Build & Deploy
 ```bash
-# Build backend
+# Build backend (includes ES module import fix)
 cd backend && npm run build
 
 # Build frontend with optimizations
@@ -107,6 +110,8 @@ cd frontend && npm run build
 
 # Deploy to production server
 ```
+
+**Important**: The backend now uses ES modules with automatic import extension correction. The build process runs `fix-import-extensions.mjs` before TypeScript compilation to ensure Node.js compatibility.
 
 ### 4. Test New Features
 ```bash

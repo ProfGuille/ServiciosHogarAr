@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
-import { users } from "../users";
-import { achievements } from "../achievements";
-import { analyticsEvents } from "../analyticsEvents";
+import { users } from "../users.js";
+import { achievements } from "../achievements.js";
+import { analyticsEvents } from "../analyticsEvents.js";
 
 export const usersRelations = relations(users, ({ many }) => ({
   achievements: many(achievements),

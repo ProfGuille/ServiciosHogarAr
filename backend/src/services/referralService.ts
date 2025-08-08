@@ -1,6 +1,6 @@
 import { referrals } from "@shared/schema/referrals";
 import { referralRewards } from "@shared/schema/referralRewards";
-import { db } from "../db";
+import { db } from "../db.js";
 import { eq } from "drizzle-orm";
 
 /**
