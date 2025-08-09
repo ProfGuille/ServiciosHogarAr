@@ -1,6 +1,6 @@
 // backend/src/cron/notificationCron.ts
 import cron from 'node-cron';
-import { db } from '../db.js';
+import { db, areRequiredTablesReady } from '../db.js';
 import { appointments, serviceRequests, notifications, users, serviceProviders } from '../shared/schema/index.js';
 import { EmailService } from '../services/email/emailService.js';
 import { PushService } from '../services/push/pushService.js';
@@ -11,6 +11,9 @@ export class NotificationCronService {
   private emailService: EmailService;
   private pushService: PushService;
   private isStarted = false;
+  private tablesReady = false;
+  private lastTableCheck = 0;
+  private readonly TABLE_CHECK_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
   constructor() {
     // Configuración del servicio de email (usando variables de entorno)
@@ -25,6 +28,24 @@ export class NotificationCronService {
     });
 
     this.pushService = new PushService();
+  }
+
+  private async checkDatabaseReady(): Promise<boolean> {
+    const now = Date.now();
+    
+    // Only check tables every 5 minutes to avoid spam
+    if (this.tablesReady && (now - this.lastTableCheck) < this.TABLE_CHECK_INTERVAL) {
+      return true;
+    }
+    
+    this.lastTableCheck = now;
+    this.tablesReady = await areRequiredTablesReady();
+    
+    if (!this.tablesReady) {
+      console.warn('⚠️  Database tables not ready yet, skipping cron operation');
+    }
+    
+    return this.tablesReady;
   }
 
   start() {
@@ -68,9 +89,8 @@ export class NotificationCronService {
   // Verificar citas próximas y enviar recordatorios
   async checkUpcomingAppointments() {
     try {
-      // Check if appointments table exists before querying
-      if (!db) {
-        console.warn('⚠️  Database not available, skipping appointment check');
+      // Check if database and tables are ready
+      if (!await this.checkDatabaseReady()) {
         return;
       }
 
@@ -114,15 +134,22 @@ export class NotificationCronService {
 
       console.log(`✅ Checked ${upcomingAppointments.length} upcoming appointments`);
     } catch (error) {
-      // Check if error is due to missing table - check both message and cause
+      // More comprehensive error handling
       const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorCode = (error as any)?.code;
       const causeMessage = error instanceof Error && (error as any).cause instanceof Error ? (error as any).cause.message : '';
       
-      if (errorMessage.includes('relation "appointments" does not exist') || 
-          causeMessage.includes('relation "appointments" does not exist')) {
-        console.warn('⚠️  Appointments table does not exist yet, skipping appointment check. This is normal during initial deployment.');
+      // Check if error is due to missing tables or columns
+      if (errorCode === '42P01' || // relation does not exist
+          errorCode === '42703' || // column does not exist
+          errorMessage.includes('relation') && errorMessage.includes('does not exist') ||
+          causeMessage.includes('relation') && causeMessage.includes('does not exist')) {
+        console.warn('⚠️  Database schema not ready for appointment checks. This is normal during initial deployment.');
+        // Reset table readiness flag to force re-check
+        this.tablesReady = false;
         return;
       }
+      
       console.error('❌ Error checking upcoming appointments:', error);
     }
   }
@@ -130,9 +157,8 @@ export class NotificationCronService {
   // Verificar notificaciones de seguimiento post-servicio
   async checkFollowUpNotifications() {
     try {
-      // Check if database is available
-      if (!db) {
-        console.warn('⚠️  Database not available, skipping follow-up check');
+      // Check if database and tables are ready
+      if (!await this.checkDatabaseReady()) {
         return;
       }
 
@@ -163,19 +189,22 @@ export class NotificationCronService {
 
       console.log(`✅ Checked ${completedServices.length} completed services for follow-up`);
     } catch (error) {
-      // Check if error is due to missing tables - check both message and cause
+      // More comprehensive error handling
       const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorCode = (error as any)?.code;
       const causeMessage = error instanceof Error && (error as any).cause instanceof Error ? (error as any).cause.message : '';
       
-      if (errorMessage.includes('relation "service_requests" does not exist') ||
-          errorMessage.includes('relation "users" does not exist') ||
-          errorMessage.includes('relation "service_providers" does not exist') ||
-          causeMessage.includes('relation "service_requests" does not exist') ||
-          causeMessage.includes('relation "users" does not exist') ||
-          causeMessage.includes('relation "service_providers" does not exist')) {
-        console.warn('⚠️  Required tables do not exist yet, skipping follow-up check. This is normal during initial deployment.');
+      // Check if error is due to missing tables or columns
+      if (errorCode === '42P01' || // relation does not exist
+          errorCode === '42703' || // column does not exist
+          errorMessage.includes('relation') && errorMessage.includes('does not exist') ||
+          causeMessage.includes('relation') && causeMessage.includes('does not exist')) {
+        console.warn('⚠️  Database schema not ready for follow-up checks. This is normal during initial deployment.');
+        // Reset table readiness flag to force re-check
+        this.tablesReady = false;
         return;
       }
+      
       console.error('❌ Error checking follow-up notifications:', error);
     }
   }
@@ -183,9 +212,8 @@ export class NotificationCronService {
   // Limpiar notificaciones antiguas (más de 30 días)
   async cleanupOldNotifications() {
     try {
-      // Check if database is available
-      if (!db) {
-        console.warn('⚠️  Database not available, skipping notification cleanup');
+      // Check if database and tables are ready
+      if (!await this.checkDatabaseReady()) {
         return;
       }
 
@@ -197,15 +225,22 @@ export class NotificationCronService {
 
       console.log(`✅ Cleaned up old notifications: ${deletedCount} deleted`);
     } catch (error) {
-      // Check if error is due to missing notifications table - check both message and cause
+      // More comprehensive error handling
       const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorCode = (error as any)?.code;
       const causeMessage = error instanceof Error && (error as any).cause instanceof Error ? (error as any).cause.message : '';
       
-      if (errorMessage.includes('relation "notifications" does not exist') ||
-          causeMessage.includes('relation "notifications" does not exist')) {
-        console.warn('⚠️  Notifications table does not exist yet, skipping cleanup. This is normal during initial deployment.');
+      // Check if error is due to missing tables or columns
+      if (errorCode === '42P01' || // relation does not exist
+          errorCode === '42703' || // column does not exist
+          errorMessage.includes('relation') && errorMessage.includes('does not exist') ||
+          causeMessage.includes('relation') && causeMessage.includes('does not exist')) {
+        console.warn('⚠️  Database schema not ready for notification cleanup. This is normal during initial deployment.');
+        // Reset table readiness flag to force re-check
+        this.tablesReady = false;
         return;
       }
+      
       console.error('❌ Error cleaning up notifications:', error);
     }
   }
@@ -213,6 +248,11 @@ export class NotificationCronService {
   // Enviar recordatorio 24 horas antes
   private async send24HourReminder(appointment: any, client: any, provider: any) {
     try {
+      // Check if database and tables are ready
+      if (!await this.checkDatabaseReady()) {
+        return;
+      }
+
       // Verificar que no se haya enviado ya
       const existingNotification = await db
         .select()
@@ -266,6 +306,13 @@ export class NotificationCronService {
 
       console.log(`✅ Sent 24h reminder for appointment ${appointment.id}`);
     } catch (error) {
+      // Handle database errors gracefully
+      const errorCode = (error as any)?.code;
+      if (errorCode === '42P01' || errorCode === '42703') {
+        console.warn(`⚠️  Database not ready for sending 24h reminder for appointment ${appointment.id}`);
+        this.tablesReady = false;
+        return;
+      }
       console.error(`❌ Error sending 24h reminder for appointment ${appointment.id}:`, error);
     }
   }
@@ -273,6 +320,11 @@ export class NotificationCronService {
   // Enviar recordatorio 2 horas antes
   private async send2HourReminder(appointment: any, client: any, provider: any) {
     try {
+      // Check if database and tables are ready
+      if (!await this.checkDatabaseReady()) {
+        return;
+      }
+
       // Verificar que no se haya enviado ya
       const existingNotification = await db
         .select()
@@ -315,6 +367,13 @@ export class NotificationCronService {
 
       console.log(`✅ Sent 2h reminder for appointment ${appointment.id}`);
     } catch (error) {
+      // Handle database errors gracefully
+      const errorCode = (error as any)?.code;
+      if (errorCode === '42P01' || errorCode === '42703') {
+        console.warn(`⚠️  Database not ready for sending 2h reminder for appointment ${appointment.id}`);
+        this.tablesReady = false;
+        return;
+      }
       console.error(`❌ Error sending 2h reminder for appointment ${appointment.id}:`, error);
     }
   }
@@ -322,6 +381,11 @@ export class NotificationCronService {
   // Enviar notificación de seguimiento post-servicio
   private async sendFollowUpNotification(request: any, client: any, provider: any) {
     try {
+      // Check if database and tables are ready
+      if (!await this.checkDatabaseReady()) {
+        return;
+      }
+
       // Verificar que no se haya enviado ya
       const existingNotification = await db
         .select()
@@ -365,6 +429,13 @@ export class NotificationCronService {
 
       console.log(`✅ Sent follow-up notification for service ${request.id}`);
     } catch (error) {
+      // Handle database errors gracefully
+      const errorCode = (error as any)?.code;
+      if (errorCode === '42P01' || errorCode === '42703') {
+        console.warn(`⚠️  Database not ready for sending follow-up notification for service ${request.id}`);
+        this.tablesReady = false;
+        return;
+      }
       console.error(`❌ Error sending follow-up notification for service ${request.id}:`, error);
     }
   }

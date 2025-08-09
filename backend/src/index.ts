@@ -225,11 +225,13 @@ const PORT = process.env.PORT || 3000;
 
 // Async initialization function
 async function initializeApp() {
+  let migrationSuccess = false;
+  
   // Run database migrations first if database is available
   if (isDatabaseAvailable()) {
     console.log('🔄 Running database migrations...');
     try {
-      const migrationSuccess = await runMigrations();
+      migrationSuccess = await runMigrations();
       if (migrationSuccess) {
         console.log('✅ Database migrations completed successfully');
       } else {
@@ -260,7 +262,8 @@ async function initializeApp() {
     const sessionType = isDatabaseAvailable() && process.env.DATABASE_URL ? 'database' : 'memory';
     console.log(`🔐 Sesiones: ${sessionType === 'database' ? '✅' : '⚠️'} ${sessionType} store`);
     
-    // Start notification cron jobs only if database is available and migrations were successful
+    // Start notification cron jobs only if database is available
+    // Cron jobs now have their own table readiness checks, so we start them if DB is available
     if (isDatabaseAvailable()) {
       try {
         console.log('🚀 Starting notification cron jobs...');
