@@ -326,5 +326,40 @@ async function initializeApp() {
 // Initialize the application
 initializeApp().catch(error => {
   console.error('❌ Failed to initialize application:', error);
-  process.exit(1);
+  console.error('Stack trace:', error.stack);
+  
+  // In production, try to keep the server running for diagnostics
+  if (process.env.NODE_ENV === 'production') {
+    console.warn('⚠️ Production mode: attempting to continue with limited functionality');
+    
+    // Start a minimal server for health checks
+    app.listen(PORT, () => {
+      console.log(`🚀 Minimal server running on port ${PORT} for diagnostics`);
+      console.log(`🌐 Health check available at: http://localhost:${PORT}/api/health`);
+    });
+  } else {
+    process.exit(1);
+  }
+});
+
+// Handle uncaught exceptions gracefully in production
+process.on('uncaughtException', (error) => {
+  console.error('❌ Uncaught Exception:', error);
+  console.error('Stack trace:', error.stack);
+  
+  if (process.env.NODE_ENV === 'production') {
+    console.warn('⚠️ Production mode: continuing despite uncaught exception');
+  } else {
+    process.exit(1);
+  }
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+  
+  if (process.env.NODE_ENV === 'production') {
+    console.warn('⚠️ Production mode: continuing despite unhandled rejection');
+  } else {
+    process.exit(1);
+  }
 });
