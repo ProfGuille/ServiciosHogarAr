@@ -20,7 +20,11 @@ app.set('trust proxy', 1);
 // CORS configuration
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://servicioshogar.com.ar', 'https://www.servicioshogar.com.ar']
+    ? [
+        'https://servicioshogar.com.ar', 
+        'https://www.servicioshogar.com.ar',
+        'https://servicioshogar-backend-uje1.onrender.com' // Allow requests from render itself for testing
+      ]
     : ['http://localhost:5173', 'http://localhost:3000'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -67,6 +71,22 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   };
   
   next();
+});
+
+// Root endpoint - welcome message for API
+app.get('/', (req: Request, res: Response) => {
+  res.json({
+    message: 'Servicios Hogar API',
+    version: '1.0.0',
+    status: 'running',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    endpoints: {
+      health: '/api/health',
+      test: '/api/test',
+      documentation: 'API endpoints available under /api/*'
+    }
+  });
 });
 
 // Health check endpoint
