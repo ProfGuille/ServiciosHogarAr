@@ -73,6 +73,22 @@ function generateSessionId() {
   return Math.random().toString(36).substr(2, 9);
 }
 
+// Root endpoint - welcome message for API
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Servicios Hogar API',
+    version: '1.0.0',
+    status: 'running',
+    timestamp: new Date().toISOString(),
+    environment: 'development',
+    endpoints: {
+      health: '/api/health',
+      test: '/api/test',
+      documentation: 'API endpoints available under /api/*'
+    }
+  });
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
