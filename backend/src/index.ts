@@ -3,14 +3,21 @@ import cors from "cors";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
 import { registerRoutes } from "./routes/index.js";
-import { db } from "./db.js";
-import { notificationCron } from "./cron/notificationCron.js";
+import { db, isDatabaseAvailable } from "./db.js";
 import dotenv from "dotenv";
 import path from "path";
+import { fileURLToPath } from "url";
 import "./types/session.js"; // Import session type extensions
 
-// Load environment variables
-dotenv.config({ path: path.resolve(process.cwd(), 'backend/.env') });
+// Get current directory for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load environment variables (don't override existing ones)
+dotenv.config({ 
+  path: path.resolve(process.cwd(), 'backend/.env'),
+  override: false // Don't override existing environment variables
+});
 
 const app = express();
 
@@ -37,14 +44,9 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Session configuration
 const PgSession = connectPgSimple(session);
-app.use(session({
-  store: new PgSession({
-    conObject: {
-      connectionString: process.env.DATABASE_URL,
-    },
-    tableName: 'session',
-    createTableIfMissing: true,
-  }),
+
+// Only use database session store if database is available
+const sessionConfig: any = {
   secret: process.env.SESSION_SECRET || 'servicioshogar-default-secret-change-in-production',
   resave: false,
   saveUninitialized: false,
@@ -55,7 +57,31 @@ app.use(session({
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
   },
   name: 'servicioshogar.sid'
-}));
+};
+
+if (isDatabaseAvailable() && process.env.DATABASE_URL) {
+  try {
+    sessionConfig.store = new PgSession({
+      conObject: {
+        connectionString: process.env.DATABASE_URL,
+      },
+      tableName: 'session',
+      createTableIfMissing: true,
+    });
+    console.log('✅ Using database session store');
+  } catch (error) {
+    console.warn('⚠️  Failed to initialize database session store, using memory store:', error);
+  }
+} else {
+  console.warn('⚠️  Using memory session store (sessions will not persist)');
+}
+
+app.use(session(sessionConfig));
+
+// Serve static files from the frontend dist folder
+const frontendPath = path.resolve(__dirname, '../../frontend/dist');
+console.log('📁 Serving static files from:', frontendPath);
+app.use(express.static(frontendPath));
 
 // Request logging middleware
 app.use((req: Request, res: Response, next: NextFunction) => {
@@ -73,8 +99,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-// Root endpoint - welcome message for API
-app.get('/', (req: Request, res: Response) => {
+// API info endpoint - moved from root to /api/info
+app.get('/api/info', (req: Request, res: Response) => {
   res.json({
     message: 'Servicios Hogar API',
     version: '1.0.0',
@@ -91,11 +117,37 @@ app.get('/', (req: Request, res: Response) => {
 
 // Health check endpoint
 app.get('/api/health', (req: Request, res: Response) => {
-  res.json({ 
-    status: 'ok', 
+  const healthStatus = {
+    status: 'ok',
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
-  });
+    environment: process.env.NODE_ENV || 'development',
+    services: {
+      database: {
+        status: isDatabaseAvailable() ? 'connected' : 'disconnected',
+        url_configured: !!process.env.DATABASE_URL
+      },
+      session_store: {
+        type: isDatabaseAvailable() && process.env.DATABASE_URL ? 'database' : 'memory'
+      },
+      environment_variables: {
+        DATABASE_URL: !!process.env.DATABASE_URL,
+        SESSION_SECRET: !!process.env.SESSION_SECRET,
+        VAPID_PUBLIC_KEY: !!process.env.VAPID_PUBLIC_KEY,
+        VAPID_PRIVATE_KEY: !!process.env.VAPID_PRIVATE_KEY,
+        VAPID_EMAIL: !!process.env.VAPID_EMAIL
+      }
+    },
+    server: {
+      port: process.env.PORT || 3000,
+      uptime: process.uptime()
+    }
+  };
+  
+  // Return 503 if critical services are down, 200 if server is functional
+  const statusCode = healthStatus.services.database.status === 'disconnected' && 
+                     process.env.NODE_ENV === 'production' ? 503 : 200;
+  
+  res.status(statusCode).json(healthStatus);
 });
 
 // Test endpoint for frontend connection
@@ -103,12 +155,35 @@ app.get('/api/test', (req: Request, res: Response) => {
   res.json({ 
     message: 'Backend conectado correctamente',
     timestamp: new Date().toISOString(),
-    session: req.session.id
+    session: req.session?.id || 'no-session'
+  });
+});
+
+// Simple diagnostic endpoint that always works
+app.get('/api/ping', (req: Request, res: Response) => {
+  res.json({ 
+    pong: true,
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
   });
 });
 
 // Register all routes
-registerRoutes(app);
+try {
+  registerRoutes(app);
+} catch (error) {
+  console.error('❌ Error registering routes:', error);
+  console.warn('⚠️ Server will continue with limited route functionality');
+  
+  // Add basic fallback routes in case route registration fails
+  app.get('/api/fallback-status', (req: Request, res: Response) => {
+    res.json({ 
+      error: 'Some routes failed to load',
+      status: 'partial_functionality',
+      timestamp: new Date().toISOString()
+    });
+  });
+}
 
 // Error handling middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
@@ -131,14 +206,70 @@ app.use('/api/*', (req: Request, res: Response) => {
   res.status(404).json({ error: 'Endpoint no encontrado' });
 });
 
+// Catch-all handler: send back the frontend's index.html for any non-API routes
+// This enables client-side routing
+app.get('*', (req: Request, res: Response) => {
+  const indexPath = path.resolve(frontendPath, 'index.html');
+  res.sendFile(indexPath, (err) => {
+    if (err) {
+      console.error('Error serving index.html:', err);
+      res.status(500).json({ 
+        error: 'Error interno del servidor', 
+        message: 'No se pudo cargar la aplicación'
+      });
+    }
+  });
+});
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log(`🚀 Servidor ejecutándose en puerto ${PORT}`);
   console.log(`📝 Entorno: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🗄️ Base de datos: ${process.env.DATABASE_URL ? 'Conectada' : 'No configurada'}`);
   
-  // Start notification cron jobs
-  notificationCron.start();
-  console.log(`⏰ Notification cron jobs iniciados`);
+  // Database status
+  if (isDatabaseAvailable()) {
+    console.log(`🗄️ Base de datos: ✅ Conectada`);
+  } else {
+    console.log(`🗄️ Base de datos: ⚠️  No disponible (modo limitado)`);
+    if (!process.env.DATABASE_URL) {
+      console.log(`   Configura DATABASE_URL para funcionalidad completa`);
+    }
+  }
+  
+  // Session store status
+  const sessionType = isDatabaseAvailable() && process.env.DATABASE_URL ? 'database' : 'memory';
+  console.log(`🔐 Sesiones: ${sessionType === 'database' ? '✅' : '⚠️'} ${sessionType} store`);
+  
+  // Start notification cron jobs only if database is available
+  if (isDatabaseAvailable()) {
+    try {
+      // Import notification cron conditionally
+      import('./cron/notificationCron.js')
+        .then(cronModule => {
+          cronModule.notificationCron.start();
+          console.log(`⏰ Notification cron jobs: ✅ Iniciados`);
+        })
+        .catch(error => {
+          console.warn(`⏰ Notification cron jobs: ⚠️ Error al cargar:`, error);
+        });
+    } catch (error) {
+      console.warn(`⏰ Notification cron jobs: ⚠️ Error al iniciar:`, error);
+    }
+  } else {
+    console.log(`⏰ Notification cron jobs: ⚠️ Deshabilitados (sin base de datos)`);
+  }
+  
+  // Environment check
+  const requiredEnvVars = ['DATABASE_URL', 'SESSION_SECRET'];
+  const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+  
+  if (missingVars.length > 0) {
+    console.warn(`⚠️  Variables de entorno faltantes: ${missingVars.join(', ')}`);
+    console.warn(`   El servidor funciona en modo limitado. Verifica la configuración en Render.`);
+  } else {
+    console.log(`✅ Todas las variables de entorno configuradas`);
+  }
+  
+  console.log(`🌐 Health check disponible en: http://localhost:${PORT}/api/health`);
 });

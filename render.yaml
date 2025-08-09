@@ -4,8 +4,9 @@ services:
     env: node
     plan: free
     branch: main
-    buildCommand: cd backend && npm install && npm run build
+    buildCommand: cd frontend && npm install && npm run build && cd ../backend && npm install && npm run build
     startCommand: cd backend && npm start
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
         value: production
@@ -18,5 +19,7 @@ services:
       - key: VAPID_PRIVATE_KEY
         sync: false
       - key: VAPID_EMAIL
+        sync: false
+      - key: SESSION_SECRET
         sync: false
 
