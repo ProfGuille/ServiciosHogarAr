@@ -6,6 +6,7 @@ import { registerRoutes } from "./routes/index.js";
 import { db, isDatabaseAvailable, runMigrations } from "./db.js";
 import dotenv from "dotenv";
 import path from "path";
+import fs from "fs";
 import { fileURLToPath } from "url";
 import "./types/session.js"; // Import session type extensions
 
@@ -81,7 +82,25 @@ app.use(session(sessionConfig));
 // Serve static files from the frontend dist folder
 const frontendPath = path.resolve(__dirname, '../../frontend/dist');
 console.log('📁 Serving static files from:', frontendPath);
-app.use(express.static(frontendPath));
+
+// Check if frontend dist folder exists before serving
+if (fs.existsSync(frontendPath)) {
+  app.use(express.static(frontendPath));
+  console.log('✅ Frontend static files configured successfully');
+} else {
+  console.warn('⚠️  Frontend dist folder not found at:', frontendPath);
+  console.warn('   Static files will not be served. This is normal during development or if frontend build failed.');
+  
+  // Create a simple fallback route for missing frontend
+  app.get('/', (req: Request, res: Response) => {
+    res.status(503).json({
+      error: 'Frontend not available',
+      message: 'The frontend application is not built or deployed yet. Please build the frontend first.',
+      path: frontendPath,
+      instructions: 'Run: cd frontend && npm install && npm run build'
+    });
+  });
+}
 
 // Request logging middleware
 app.use((req: Request, res: Response, next: NextFunction) => {
@@ -210,6 +229,18 @@ app.use('/api/*', (req: Request, res: Response) => {
 // This enables client-side routing
 app.get('*', (req: Request, res: Response) => {
   const indexPath = path.resolve(frontendPath, 'index.html');
+  
+  // Check if index.html exists before trying to serve it
+  if (!fs.existsSync(indexPath)) {
+    console.error('Error serving index.html: File not found at', indexPath);
+    return res.status(503).json({ 
+      error: 'Frontend not available', 
+      message: 'The frontend application is not built yet. Please build the frontend first.',
+      path: indexPath,
+      instructions: 'Run: cd frontend && npm install && npm run build'
+    });
+  }
+  
   res.sendFile(indexPath, (err) => {
     if (err) {
       console.error('Error serving index.html:', err);

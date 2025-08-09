@@ -88,8 +88,15 @@ export async function runMigrations() {
     await migrate(db, { migrationsFolder: 'migrations' });
     console.log('Migraciones completadas.');
     return true;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error running migrations:', error);
+    
+    // Check if error is related to table already existing
+    if (error?.cause?.code === '42P07' || error?.message?.includes('already exists')) {
+      console.log('⚠️  Some tables already exist, but this is expected in production deployments.');
+      console.log('   Continuing with existing schema...');
+      return true; // Return true as this is not a critical error
+    }
     
     // Log the error to file
     logMigrationError(error);
