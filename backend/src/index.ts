@@ -79,52 +79,91 @@ if (isDatabaseAvailable() && process.env.DATABASE_URL) {
 
 app.use(session(sessionConfig));
 
-// Serve static files from the frontend dist folder
-const frontendPath = path.resolve(__dirname, '../frontend-dist');
-console.log('📁 Frontend path resolved to:', frontendPath);
-console.log('📁 Current working directory:', process.cwd());
-console.log('📁 __dirname:', __dirname);
+// Frontend serving with multiple fallback paths
+const possibleFrontendPaths = [
+  path.resolve(__dirname, '../frontend-dist'),
+  path.resolve(process.cwd(), 'backend/frontend-dist'),
+  path.resolve(process.cwd(), 'frontend-dist'),
+  path.resolve(__dirname, '../../frontend/dist')
+];
 
-// Provide detailed diagnostic information
-const diagnosticInfo = {
-  frontendPath,
-  exists: fs.existsSync(frontendPath),
+let frontendPath: string | null = null;
+let frontendDiagnostic: any = {};
+
+// Find the first valid frontend path
+for (const testPath of possibleFrontendPaths) {
+  if (fs.existsSync(testPath) && fs.existsSync(path.join(testPath, 'index.html'))) {
+    frontendPath = testPath;
+    console.log('✅ Frontend found at:', frontendPath);
+    break;
+  } else {
+    console.log('❌ Frontend not found at:', testPath);
+  }
+}
+
+// Create comprehensive diagnostic information
+frontendDiagnostic = {
+  searchedPaths: possibleFrontendPaths.map(p => ({
+    path: p,
+    exists: fs.existsSync(p),
+    hasIndex: fs.existsSync(path.join(p, 'index.html')),
+    fileCount: fs.existsSync(p) ? fs.readdirSync(p).length : 0
+  })),
+  selectedPath: frontendPath,
   workingDir: process.cwd(),
   __dirname,
   nodeEnv: process.env.NODE_ENV,
-  parentDir: path.resolve(__dirname, '..'),
-  parentDirExists: fs.existsSync(path.resolve(__dirname, '..')),
-  parentDirContents: fs.existsSync(path.resolve(__dirname, '..')) 
-    ? fs.readdirSync(path.resolve(__dirname, '..')) 
-    : []
+  deploymentSummary: null
 };
 
-console.log('📊 Frontend diagnostic info:', JSON.stringify(diagnosticInfo, null, 2));
+// Try to load deployment summary if it exists
+const summaryPath = path.resolve(process.cwd(), 'deployment-summary.json');
+if (fs.existsSync(summaryPath)) {
+  try {
+    const summaryContent = fs.readFileSync(summaryPath, 'utf8');
+    frontendDiagnostic.deploymentSummary = JSON.parse(summaryContent);
+    console.log('📋 Deployment summary loaded');
+  } catch (error) {
+    console.warn('⚠️ Failed to load deployment summary:', error);
+  }
+}
 
-// Check if frontend dist folder exists before serving
-if (fs.existsSync(frontendPath)) {
+console.log('📊 Frontend diagnostic info:', JSON.stringify(frontendDiagnostic, null, 2));
+
+// Check if frontend is available and serve it
+if (frontendPath) {
   app.use(express.static(frontendPath));
-  const indexExists = fs.existsSync(path.join(frontendPath, 'index.html'));
+  const indexPath = path.join(frontendPath, 'index.html');
   console.log('✅ Frontend static files configured successfully');
-  console.log(`📄 index.html exists: ${indexExists}`);
+  console.log(`📄 Frontend served from: ${frontendPath}`);
   
-  if (indexExists) {
+  // List some files for verification
+  try {
     const files = fs.readdirSync(frontendPath);
     console.log('📂 Frontend files:', files.slice(0, 10)); // Show first 10 files
+  } catch (error) {
+    console.warn('⚠️ Could not list frontend files:', error);
   }
 } else {
-  console.error('❌ Frontend dist folder not found at:', frontendPath);
-  console.error('📊 Diagnostic information:', diagnosticInfo);
+  console.error('❌ No valid frontend path found');
+  console.error('📊 Frontend diagnostic information:', frontendDiagnostic);
   
-  // Create a simple fallback route for missing frontend
+  // Create a comprehensive fallback route for missing frontend
   app.get('/', (req: Request, res: Response) => {
     res.status(503).json({
       error: 'Frontend not available',
-      message: 'The frontend application is not built or deployed yet. Please build the frontend first.',
-      path: frontendPath,
-      instructions: 'Run: cd frontend && npm install && npm run build',
-      diagnostic: diagnosticInfo,
-      buildCommand: 'cd frontend && npm ci && npm run build && cd ../backend && cp -r ../frontend/dist ./frontend-dist'
+      message: 'The frontend application is not built or deployed yet.',
+      diagnostic: frontendDiagnostic,
+      suggestions: [
+        'Check if the build process completed successfully',
+        'Verify deployment-summary.json for build details',
+        'Run the deployment diagnostic script',
+        'Check render deployment logs for build errors'
+      ],
+      buildCommands: {
+        manual: 'cd frontend && npm ci && npm run build && cd ../backend && cp -r ../frontend/dist ./frontend-dist',
+        script: './scripts/build-deployment.sh'
+      }
     });
   });
 }
@@ -253,9 +292,22 @@ app.use('/api/*', (req: Request, res: Response) => {
 });
 
 // Catch-all handler: send back the frontend's index.html for any non-API routes
-// This enables client-side routing
 app.get('*', (req: Request, res: Response) => {
-  const indexPath = path.resolve(frontendPath, 'index.html');
+  if (!frontendPath) {
+    return res.status(503).json({ 
+      error: 'Frontend not available', 
+      message: 'The frontend application is not built yet.',
+      requestedPath: req.path,
+      diagnostic: frontendDiagnostic,
+      suggestions: [
+        'Check deployment logs for build errors',
+        'Verify deployment-summary.json exists',
+        'Run diagnostic script: ./debug-frontend-deployment.sh'
+      ]
+    });
+  }
+  
+  const indexPath = path.join(frontendPath, 'index.html');
   
   // Check if index.html exists before trying to serve it
   if (!fs.existsSync(indexPath)) {
@@ -269,18 +321,12 @@ app.get('*', (req: Request, res: Response) => {
     });
     
     return res.status(503).json({ 
-      error: 'Frontend not available', 
-      message: 'The frontend application is not built yet. Please build the frontend first.',
+      error: 'Frontend index.html not available', 
+      message: 'The frontend application index file is missing.',
       path: indexPath,
       frontendPath,
       requestedPath: req.path,
-      instructions: 'Run: cd frontend && npm ci && npm run build && cd ../backend && cp -r ../frontend/dist ./frontend-dist',
-      diagnostic: {
-        frontendPathExists: fs.existsSync(frontendPath),
-        indexPathExists: fs.existsSync(indexPath),
-        workingDir: process.cwd(),
-        nodeEnv: process.env.NODE_ENV
-      }
+      diagnostic: frontendDiagnostic
     });
   }
   

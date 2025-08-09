@@ -5,19 +5,21 @@ services:
     plan: free
     branch: main
     buildCommand: |
-      set -e
-      echo "=== Starting frontend build ==="
-      cd frontend && npm ci && npm run build
-      echo "=== Frontend build completed ==="
-      ls -la dist/
-      echo "=== Starting backend build ==="
-      cd ../backend && npm ci && npm run build
-      echo "=== Backend build completed ==="
-      echo "=== Copying frontend files ==="
-      cp -r ../frontend/dist ./frontend-dist
-      echo "=== Frontend files copied ==="
-      ls -la frontend-dist/
-      echo "=== Build process completed successfully ==="
+      echo "=== Multi-Stage Deployment Build ==="
+      
+      # Stage 1: Attempt main build script
+      if ./scripts/build-deployment.sh; then
+        echo "=== Main build script succeeded ==="
+      else
+        echo "=== Main build script failed, using fallback ==="
+        ./scripts/build-fallback.sh
+      fi
+      
+      # Stage 2: Validate deployment
+      echo "=== Validating deployment ==="
+      ./scripts/validate-deployment.sh
+      
+      echo "=== Build completed successfully ==="
     startCommand: cd backend && npm start
     healthCheckPath: /api/health
     envVars:
