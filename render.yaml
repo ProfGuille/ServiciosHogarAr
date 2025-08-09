@@ -4,7 +4,20 @@ services:
     env: node
     plan: free
     branch: main
-    buildCommand: cd frontend && npm install && npm run build && cd ../backend && npm install && npm run build && cp -r ../frontend/dist ./frontend-dist
+    buildCommand: |
+      set -e
+      echo "=== Starting frontend build ==="
+      cd frontend && npm ci && npm run build
+      echo "=== Frontend build completed ==="
+      ls -la dist/
+      echo "=== Starting backend build ==="
+      cd ../backend && npm ci && npm run build
+      echo "=== Backend build completed ==="
+      echo "=== Copying frontend files ==="
+      cp -r ../frontend/dist ./frontend-dist
+      echo "=== Frontend files copied ==="
+      ls -la frontend-dist/
+      echo "=== Build process completed successfully ==="
     startCommand: cd backend && npm start
     healthCheckPath: /api/health
     envVars:

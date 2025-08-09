@@ -81,15 +81,40 @@ app.use(session(sessionConfig));
 
 // Serve static files from the frontend dist folder
 const frontendPath = path.resolve(__dirname, '../frontend-dist');
-console.log('📁 Serving static files from:', frontendPath);
+console.log('📁 Frontend path resolved to:', frontendPath);
+console.log('📁 Current working directory:', process.cwd());
+console.log('📁 __dirname:', __dirname);
+
+// Provide detailed diagnostic information
+const diagnosticInfo = {
+  frontendPath,
+  exists: fs.existsSync(frontendPath),
+  workingDir: process.cwd(),
+  __dirname,
+  nodeEnv: process.env.NODE_ENV,
+  parentDir: path.resolve(__dirname, '..'),
+  parentDirExists: fs.existsSync(path.resolve(__dirname, '..')),
+  parentDirContents: fs.existsSync(path.resolve(__dirname, '..')) 
+    ? fs.readdirSync(path.resolve(__dirname, '..')) 
+    : []
+};
+
+console.log('📊 Frontend diagnostic info:', JSON.stringify(diagnosticInfo, null, 2));
 
 // Check if frontend dist folder exists before serving
 if (fs.existsSync(frontendPath)) {
   app.use(express.static(frontendPath));
+  const indexExists = fs.existsSync(path.join(frontendPath, 'index.html'));
   console.log('✅ Frontend static files configured successfully');
+  console.log(`📄 index.html exists: ${indexExists}`);
+  
+  if (indexExists) {
+    const files = fs.readdirSync(frontendPath);
+    console.log('📂 Frontend files:', files.slice(0, 10)); // Show first 10 files
+  }
 } else {
-  console.warn('⚠️  Frontend dist folder not found at:', frontendPath);
-  console.warn('   Static files will not be served. This is normal during development or if frontend build failed.');
+  console.error('❌ Frontend dist folder not found at:', frontendPath);
+  console.error('📊 Diagnostic information:', diagnosticInfo);
   
   // Create a simple fallback route for missing frontend
   app.get('/', (req: Request, res: Response) => {
@@ -97,7 +122,9 @@ if (fs.existsSync(frontendPath)) {
       error: 'Frontend not available',
       message: 'The frontend application is not built or deployed yet. Please build the frontend first.',
       path: frontendPath,
-      instructions: 'Run: cd frontend && npm install && npm run build'
+      instructions: 'Run: cd frontend && npm install && npm run build',
+      diagnostic: diagnosticInfo,
+      buildCommand: 'cd frontend && npm ci && npm run build && cd ../backend && cp -r ../frontend/dist ./frontend-dist'
     });
   });
 }
@@ -232,21 +259,39 @@ app.get('*', (req: Request, res: Response) => {
   
   // Check if index.html exists before trying to serve it
   if (!fs.existsSync(indexPath)) {
-    console.error('Error serving index.html: File not found at', indexPath);
+    console.error('❌ Error serving index.html: File not found at', indexPath);
+    console.error('📊 Frontend diagnostic info:', {
+      frontendPath,
+      indexPath,
+      frontendExists: fs.existsSync(frontendPath),
+      frontendContents: fs.existsSync(frontendPath) ? fs.readdirSync(frontendPath) : [],
+      requestPath: req.path
+    });
+    
     return res.status(503).json({ 
       error: 'Frontend not available', 
       message: 'The frontend application is not built yet. Please build the frontend first.',
       path: indexPath,
-      instructions: 'Run: cd frontend && npm install && npm run build'
+      frontendPath,
+      requestedPath: req.path,
+      instructions: 'Run: cd frontend && npm ci && npm run build && cd ../backend && cp -r ../frontend/dist ./frontend-dist',
+      diagnostic: {
+        frontendPathExists: fs.existsSync(frontendPath),
+        indexPathExists: fs.existsSync(indexPath),
+        workingDir: process.cwd(),
+        nodeEnv: process.env.NODE_ENV
+      }
     });
   }
   
   res.sendFile(indexPath, (err) => {
     if (err) {
-      console.error('Error serving index.html:', err);
+      console.error('❌ Error serving index.html:', err);
       res.status(500).json({ 
         error: 'Error interno del servidor', 
-        message: 'No se pudo cargar la aplicación'
+        message: 'No se pudo cargar la aplicación',
+        path: indexPath,
+        details: err.message
       });
     }
   });
