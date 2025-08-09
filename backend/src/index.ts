@@ -6,7 +6,12 @@ import { registerRoutes } from "./routes/index.js";
 import { db, isDatabaseAvailable } from "./db.js";
 import dotenv from "dotenv";
 import path from "path";
+import { fileURLToPath } from "url";
 import "./types/session.js"; // Import session type extensions
+
+// Get current directory for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Load environment variables (don't override existing ones)
 dotenv.config({ 
@@ -73,6 +78,11 @@ if (isDatabaseAvailable() && process.env.DATABASE_URL) {
 
 app.use(session(sessionConfig));
 
+// Serve static files from the frontend dist folder
+const frontendPath = path.resolve(__dirname, '../../frontend/dist');
+console.log('📁 Serving static files from:', frontendPath);
+app.use(express.static(frontendPath));
+
 // Request logging middleware
 app.use((req: Request, res: Response, next: NextFunction) => {
   const start = Date.now();
@@ -89,8 +99,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-// Root endpoint - welcome message for API
-app.get('/', (req: Request, res: Response) => {
+// API info endpoint - moved from root to /api/info
+app.get('/api/info', (req: Request, res: Response) => {
   res.json({
     message: 'Servicios Hogar API',
     version: '1.0.0',
@@ -194,6 +204,21 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 // 404 handler for API routes
 app.use('/api/*', (req: Request, res: Response) => {
   res.status(404).json({ error: 'Endpoint no encontrado' });
+});
+
+// Catch-all handler: send back the frontend's index.html for any non-API routes
+// This enables client-side routing
+app.get('*', (req: Request, res: Response) => {
+  const indexPath = path.resolve(frontendPath, 'index.html');
+  res.sendFile(indexPath, (err) => {
+    if (err) {
+      console.error('Error serving index.html:', err);
+      res.status(500).json({ 
+        error: 'Error interno del servidor', 
+        message: 'No se pudo cargar la aplicación'
+      });
+    }
+  });
 });
 
 const PORT = process.env.PORT || 3000;
