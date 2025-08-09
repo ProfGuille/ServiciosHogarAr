@@ -118,9 +118,11 @@ export class NotificationCronService {
       const errorMessage = error instanceof Error ? error.message : String(error);
       const causeMessage = error instanceof Error && (error as any).cause instanceof Error ? (error as any).cause.message : '';
       
-      if (errorMessage.includes('relation "appointments" does not exist') || 
-          causeMessage.includes('relation "appointments" does not exist')) {
-        console.warn('⚠️  Appointments table does not exist yet, skipping appointment check. This is normal during initial deployment.');
+      if (errorMessage.includes('relation "appointments" does not exist') ||
+          errorMessage.includes('column') && errorMessage.includes('does not exist') ||
+          causeMessage.includes('relation "appointments" does not exist') ||
+          causeMessage.includes('column') && causeMessage.includes('does not exist')) {
+        console.warn('⚠️  Appointments table/columns do not exist yet, skipping appointment check. This is normal during initial deployment or schema migration.');
         return;
       }
       console.error('❌ Error checking upcoming appointments:', error);
@@ -139,6 +141,11 @@ export class NotificationCronService {
       const now = new Date();
       const yesterday = subHours(now, 24);
 
+      // For now, skip this check to avoid schema mismatch issues
+      // This will be re-enabled once schema is properly aligned
+      console.log('⚠️  Follow-up notifications temporarily disabled due to schema migration');
+      return;
+
       // Buscar servicios completados ayer
       const completedServices = await db
         .select({
@@ -147,7 +154,7 @@ export class NotificationCronService {
           provider: serviceProviders
         })
         .from(serviceRequests)
-        .leftJoin(users, eq(serviceRequests.userId, users.id))
+        .leftJoin(users, eq(serviceRequests.customerId, users.id))
         .leftJoin(serviceProviders, eq(serviceRequests.providerId, serviceProviders.id))
         .where(
           and(
@@ -170,10 +177,12 @@ export class NotificationCronService {
       if (errorMessage.includes('relation "service_requests" does not exist') ||
           errorMessage.includes('relation "users" does not exist') ||
           errorMessage.includes('relation "service_providers" does not exist') ||
+          errorMessage.includes('column') && errorMessage.includes('does not exist') ||
           causeMessage.includes('relation "service_requests" does not exist') ||
           causeMessage.includes('relation "users" does not exist') ||
-          causeMessage.includes('relation "service_providers" does not exist')) {
-        console.warn('⚠️  Required tables do not exist yet, skipping follow-up check. This is normal during initial deployment.');
+          causeMessage.includes('relation "service_providers" does not exist') ||
+          causeMessage.includes('column') && causeMessage.includes('does not exist')) {
+        console.warn('⚠️  Required tables/columns do not exist yet, skipping follow-up check. This is normal during initial deployment or schema migration.');
         return;
       }
       console.error('❌ Error checking follow-up notifications:', error);

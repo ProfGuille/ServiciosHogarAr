@@ -80,7 +80,7 @@ if (isDatabaseAvailable() && process.env.DATABASE_URL) {
 app.use(session(sessionConfig));
 
 // Serve static files from the frontend dist folder
-const frontendPath = path.resolve(__dirname, '../../frontend/dist');
+const frontendPath = path.resolve(__dirname, '../frontend-dist');
 console.log('📁 Serving static files from:', frontendPath);
 
 // Check if frontend dist folder exists before serving
