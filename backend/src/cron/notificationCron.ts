@@ -68,6 +68,12 @@ export class NotificationCronService {
   // Verificar citas próximas y enviar recordatorios
   async checkUpcomingAppointments() {
     try {
+      // Check if appointments table exists before querying
+      if (!db) {
+        console.warn('⚠️  Database not available, skipping appointment check');
+        return;
+      }
+
       const now = new Date();
       const in24Hours = addHours(now, 24);
       const in2Hours = addHours(now, 2);
@@ -108,6 +114,15 @@ export class NotificationCronService {
 
       console.log(`✅ Checked ${upcomingAppointments.length} upcoming appointments`);
     } catch (error) {
+      // Check if error is due to missing table - check both message and cause
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const causeMessage = error instanceof Error && (error as any).cause instanceof Error ? (error as any).cause.message : '';
+      
+      if (errorMessage.includes('relation "appointments" does not exist') || 
+          causeMessage.includes('relation "appointments" does not exist')) {
+        console.warn('⚠️  Appointments table does not exist yet, skipping appointment check. This is normal during initial deployment.');
+        return;
+      }
       console.error('❌ Error checking upcoming appointments:', error);
     }
   }
@@ -115,6 +130,12 @@ export class NotificationCronService {
   // Verificar notificaciones de seguimiento post-servicio
   async checkFollowUpNotifications() {
     try {
+      // Check if database is available
+      if (!db) {
+        console.warn('⚠️  Database not available, skipping follow-up check');
+        return;
+      }
+
       const now = new Date();
       const yesterday = subHours(now, 24);
 
@@ -142,6 +163,19 @@ export class NotificationCronService {
 
       console.log(`✅ Checked ${completedServices.length} completed services for follow-up`);
     } catch (error) {
+      // Check if error is due to missing tables - check both message and cause
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const causeMessage = error instanceof Error && (error as any).cause instanceof Error ? (error as any).cause.message : '';
+      
+      if (errorMessage.includes('relation "service_requests" does not exist') ||
+          errorMessage.includes('relation "users" does not exist') ||
+          errorMessage.includes('relation "service_providers" does not exist') ||
+          causeMessage.includes('relation "service_requests" does not exist') ||
+          causeMessage.includes('relation "users" does not exist') ||
+          causeMessage.includes('relation "service_providers" does not exist')) {
+        console.warn('⚠️  Required tables do not exist yet, skipping follow-up check. This is normal during initial deployment.');
+        return;
+      }
       console.error('❌ Error checking follow-up notifications:', error);
     }
   }
@@ -149,6 +183,12 @@ export class NotificationCronService {
   // Limpiar notificaciones antiguas (más de 30 días)
   async cleanupOldNotifications() {
     try {
+      // Check if database is available
+      if (!db) {
+        console.warn('⚠️  Database not available, skipping notification cleanup');
+        return;
+      }
+
       const thirtyDaysAgo = subHours(new Date(), 24 * 30);
       
       const deletedCount = await db
@@ -157,6 +197,15 @@ export class NotificationCronService {
 
       console.log(`✅ Cleaned up old notifications: ${deletedCount} deleted`);
     } catch (error) {
+      // Check if error is due to missing notifications table - check both message and cause
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const causeMessage = error instanceof Error && (error as any).cause instanceof Error ? (error as any).cause.message : '';
+      
+      if (errorMessage.includes('relation "notifications" does not exist') ||
+          causeMessage.includes('relation "notifications" does not exist')) {
+        console.warn('⚠️  Notifications table does not exist yet, skipping cleanup. This is normal during initial deployment.');
+        return;
+      }
       console.error('❌ Error cleaning up notifications:', error);
     }
   }

@@ -3,7 +3,7 @@ import cors from "cors";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
 import { registerRoutes } from "./routes/index.js";
-import { db, isDatabaseAvailable } from "./db.js";
+import { db, isDatabaseAvailable, runMigrations } from "./db.js";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -223,53 +223,77 @@ app.get('*', (req: Request, res: Response) => {
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor ejecutándose en puerto ${PORT}`);
-  console.log(`📝 Entorno: ${process.env.NODE_ENV || 'development'}`);
-  
-  // Database status
+// Async initialization function
+async function initializeApp() {
+  // Run database migrations first if database is available
   if (isDatabaseAvailable()) {
-    console.log(`🗄️ Base de datos: ✅ Conectada`);
-  } else {
-    console.log(`🗄️ Base de datos: ⚠️  No disponible (modo limitado)`);
-    if (!process.env.DATABASE_URL) {
-      console.log(`   Configura DATABASE_URL para funcionalidad completa`);
-    }
-  }
-  
-  // Session store status
-  const sessionType = isDatabaseAvailable() && process.env.DATABASE_URL ? 'database' : 'memory';
-  console.log(`🔐 Sesiones: ${sessionType === 'database' ? '✅' : '⚠️'} ${sessionType} store`);
-  
-  // Start notification cron jobs only if database is available
-  if (isDatabaseAvailable()) {
+    console.log('🔄 Running database migrations...');
     try {
-      // Import notification cron conditionally
-      import('./cron/notificationCron.js')
-        .then(cronModule => {
-          cronModule.notificationCron.start();
-          console.log(`⏰ Notification cron jobs: ✅ Iniciados`);
-        })
-        .catch(error => {
-          console.warn(`⏰ Notification cron jobs: ⚠️ Error al cargar:`, error);
-        });
+      const migrationSuccess = await runMigrations();
+      if (migrationSuccess) {
+        console.log('✅ Database migrations completed successfully');
+      } else {
+        console.warn('⚠️  Database migrations failed, continuing with existing schema');
+      }
     } catch (error) {
-      console.warn(`⏰ Notification cron jobs: ⚠️ Error al iniciar:`, error);
+      console.error('❌ Error running migrations:', error);
+      console.warn('⚠️  Continuing without migrations, some features may not work');
     }
-  } else {
-    console.log(`⏰ Notification cron jobs: ⚠️ Deshabilitados (sin base de datos)`);
   }
   
-  // Environment check
-  const requiredEnvVars = ['DATABASE_URL', 'SESSION_SECRET'];
-  const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
-  
-  if (missingVars.length > 0) {
-    console.warn(`⚠️  Variables de entorno faltantes: ${missingVars.join(', ')}`);
-    console.warn(`   El servidor funciona en modo limitado. Verifica la configuración en Render.`);
-  } else {
-    console.log(`✅ Todas las variables de entorno configuradas`);
-  }
-  
-  console.log(`🌐 Health check disponible en: http://localhost:${PORT}/api/health`);
+  // Start the server
+  app.listen(PORT, async () => {
+    console.log(`🚀 Servidor ejecutándose en puerto ${PORT}`);
+    console.log(`📝 Entorno: ${process.env.NODE_ENV || 'development'}`);
+    
+    // Database status
+    if (isDatabaseAvailable()) {
+      console.log(`🗄️ Base de datos: ✅ Conectada`);
+    } else {
+      console.log(`🗄️ Base de datos: ⚠️  No disponible (modo limitado)`);
+      if (!process.env.DATABASE_URL) {
+        console.log(`   Configura DATABASE_URL para funcionalidad completa`);
+      }
+    }
+    
+    // Session store status
+    const sessionType = isDatabaseAvailable() && process.env.DATABASE_URL ? 'database' : 'memory';
+    console.log(`🔐 Sesiones: ${sessionType === 'database' ? '✅' : '⚠️'} ${sessionType} store`);
+    
+    // Start notification cron jobs only if database is available and migrations were successful
+    if (isDatabaseAvailable()) {
+      try {
+        console.log('🚀 Starting notification cron jobs...');
+        // Import notification cron conditionally
+        const cronModule = await import('./cron/notificationCron.js');
+        cronModule.notificationCron.start();
+        console.log('✅ Notification cron jobs started successfully');
+        console.log(`⏰ Notification cron jobs iniciados`);
+      } catch (error) {
+        console.error('❌ Error starting notification cron jobs:', error);
+        console.warn('⏰ Notification cron jobs: ⚠️ Deshabilitados debido a errores');
+      }
+    } else {
+      console.log(`⏰ Notification cron jobs: ⚠️ Deshabilitados (sin base de datos)`);
+    }
+    
+    // Environment check
+    const requiredEnvVars = ['DATABASE_URL', 'SESSION_SECRET'];
+    const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+    
+    if (missingVars.length > 0) {
+      console.warn(`⚠️  Variables de entorno faltantes: ${missingVars.join(', ')}`);
+      console.warn(`   El servidor funciona en modo limitado. Verifica la configuración en Render.`);
+    } else {
+      console.log(`✅ Todas las variables de entorno configuradas`);
+    }
+    
+    console.log(`🌐 Health check disponible en: http://localhost:${PORT}/api/health`);
+  });
+}
+
+// Initialize the application
+initializeApp().catch(error => {
+  console.error('❌ Failed to initialize application:', error);
+  process.exit(1);
 });
