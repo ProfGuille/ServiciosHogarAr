@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
+    
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#2563eb" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="ServiciosHogar" />
+    <meta name="msapplication-TileColor" content="#2563eb" />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
+    
+    <!-- iOS Splash Screens -->
+    <link rel="apple-touch-startup-image" href="/icons/splash-2048x2732.png" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/icons/splash-1668x2388.png" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/icons/splash-1536x2048.png" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/icons/splash-1125x2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/icons/splash-1242x2208.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/icons/splash-750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/icons/splash-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="144x144" href="/icons/icon-144x144.png" />
+    <link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120x120.png" />
+    <link rel="apple-touch-icon" sizes="114x114" href="/icons/icon-114x114.png" />
+    <link rel="apple-touch-icon" sizes="76x76" href="/icons/icon-76x76.png" />
+    <link rel="apple-touch-icon" sizes="72x72" href="/icons/icon-72x72.png" />
+    <link rel="apple-touch-icon" sizes="60x60" href="/icons/icon-60x60.png" />
+    <link rel="apple-touch-icon" sizes="57x57" href="/icons/icon-57x57.png" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    
+    <!-- SEO Meta Tags -->
+    <title>Servicios Hogar - Conectamos clientes con proveedores de servicios</title>
+    <meta name="description" content="Plataforma que conecta clientes con proveedores de servicios para el hogar en Argentina. Encuentra profesionales confiables para tus necesidades." />
+    <meta name="keywords" content="servicios hogar, proveedores, profesionales, argentina, electricista, plomero, limpieza" />
+    <meta name="author" content="Servicios Hogar" />
+    
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="ServiciosHogar Argentina" />
+    <meta property="og:description" content="Tu plataforma de confianza para servicios del hogar en Argentina" />
+    <meta property="og:image" content="/icons/og-image.png" />
+    <meta property="og:url" content="https://servicioshogar.com.ar" />
+    <meta property="og:site_name" content="ServiciosHogar" />
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="ServiciosHogar Argentina" />
+    <meta name="twitter:description" content="Tu plataforma de confianza para servicios del hogar en Argentina" />
+    <meta name="twitter:image" content="/icons/twitter-card.png" />
+    
+    <!-- Preload Critical Resources -->
+    <link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('Service Worker registered successfully:', registration.scope);
+              
+              // Check for updates
+              registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                if (newWorker) {
+                  newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                      // New content is available, show update prompt
+                      if (confirm('Nueva versión disponible. ¿Recargar la página?')) {
+                        window.location.reload();
+                      }
+                    }
+                  });
+                }
+              });
+            })
+            .catch((error) => {
+              console.log('Service Worker registration failed:', error);
+            });
+        });
+      }
+    </script>
+    <script type="module" crossorigin src="/assets/index-C_INgQj8.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/vendor-B9NvjRZM.js">
+    <link rel="modulepreload" crossorigin href="/assets/ui-CXv2kl7J.js">
+    <link rel="modulepreload" crossorigin href="/assets/utils-DT4U5Ig_.js">
+    <link rel="modulepreload" crossorigin href="/assets/charts-Dc3KAzO1.js">
+    <link rel="modulepreload" crossorigin href="/assets/maps-BPEnT7a5.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-CzxBb3li.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
