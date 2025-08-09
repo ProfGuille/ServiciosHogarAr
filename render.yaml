@@ -3,8 +3,7 @@ services:
     name: servicioshogar-backend
     env: node
     plan: free
-    branch: main
-    buildCommand: cd frontend && npm install && npm run build && cd ../backend && npm install && npm run build && cp -r ../frontend/dist ./frontend-dist
+    buildCommand: cd frontend && npm ci && npm run build && cd ../backend && npm ci && npm run build && cp -r ../frontend/dist ./frontend-dist
     startCommand: cd backend && npm start
     healthCheckPath: /api/health
     envVars:
