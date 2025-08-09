@@ -8,8 +8,11 @@ import dotenv from "dotenv";
 import path from "path";
 import "./types/session.js"; // Import session type extensions
 
-// Load environment variables
-dotenv.config({ path: path.resolve(process.cwd(), 'backend/.env') });
+// Load environment variables (don't override existing ones)
+dotenv.config({ 
+  path: path.resolve(process.cwd(), 'backend/.env'),
+  override: false // Don't override existing environment variables
+});
 
 const app = express();
 
