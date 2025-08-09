@@ -2,6 +2,7 @@
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -48,6 +49,34 @@ if (process.env.DATABASE_URL) {
 
 export { db };
 
+// Function to log migration errors to file
+function logMigrationError(error: any) {
+  const timestamp = new Date().toISOString();
+  let logEntry = `[${timestamp}] MIGRATION ERROR: ${error.message || error}\n`;
+  
+  if (error.stack) {
+    logEntry += `Stack trace: ${error.stack}\n`;
+  }
+  
+  logEntry += `---\n`;
+  
+  try {
+    // Ensure logs directory exists
+    const logsDir = path.resolve(process.cwd(), 'logs');
+    if (!fs.existsSync(logsDir)) {
+      fs.mkdirSync(logsDir, { recursive: true });
+    }
+    
+    // Write to db migration errors log file
+    const logFile = path.join(logsDir, 'db_migration_errors.log');
+    fs.appendFileSync(logFile, logEntry);
+    
+    console.log(`Migration error logged to: ${logFile}`);
+  } catch (logError) {
+    console.error('Failed to write migration error to log file:', logError);
+  }
+}
+
 export async function runMigrations() {
   if (!db) {
     console.warn('Cannot run migrations: database connection not available');
@@ -61,6 +90,10 @@ export async function runMigrations() {
     return true;
   } catch (error) {
     console.error('Error running migrations:', error);
+    
+    // Log the error to file
+    logMigrationError(error);
+    
     return false;
   }
 }
