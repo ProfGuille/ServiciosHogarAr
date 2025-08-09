@@ -61,11 +61,68 @@ export async function runMigrations() {
     return true;
   } catch (error) {
     console.error('Error running migrations:', error);
+    
+    // Check if error is due to tables already existing
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const causeMessage = error instanceof Error && (error as any).cause instanceof Error ? (error as any).cause.message : '';
+    
+    if (errorMessage.includes('already exists') || 
+        causeMessage.includes('already exists') ||
+        (error as any)?.code === '42P07') {
+      console.warn('⚠️  Some tables already exist - this is normal for existing databases');
+      console.log('✅ Continuing with existing schema');
+      return true; // Consider this a success since schema exists
+    }
+    
     return false;
   }
 }
 
 export function isDatabaseAvailable(): boolean {
   return db !== null;
+}
+
+export async function checkTableExists(tableName: string): Promise<boolean> {
+  if (!db) {
+    return false;
+  }
+  
+  try {
+    // Query information_schema to check if table exists
+    const result = await db.execute(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = '${tableName}'
+      );
+    `);
+    
+    return result.rows?.[0]?.exists === true;
+  } catch (error) {
+    console.warn(`⚠️  Could not check if table '${tableName}' exists:`, error);
+    return false;
+  }
+}
+
+export async function areRequiredTablesReady(): Promise<boolean> {
+  if (!db) {
+    return false;
+  }
+  
+  const requiredTables = ['appointments', 'notifications', 'service_requests', 'users', 'service_providers'];
+  
+  try {
+    for (const table of requiredTables) {
+      const exists = await checkTableExists(table);
+      if (!exists) {
+        console.warn(`⚠️  Required table '${table}' does not exist yet`);
+        return false;
+      }
+    }
+    return true;
+  } catch (error) {
+    console.warn('⚠️  Could not verify required tables:', error);
+    return false;
+  }
 }
 
