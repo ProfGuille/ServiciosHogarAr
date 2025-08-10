@@ -79,25 +79,91 @@ if (isDatabaseAvailable() && process.env.DATABASE_URL) {
 
 app.use(session(sessionConfig));
 
-// Serve static files from the frontend dist folder
-const frontendPath = path.resolve(__dirname, '../frontend-dist');
-console.log('📁 Serving static files from:', frontendPath);
+// Frontend serving with multiple fallback paths
+const possibleFrontendPaths = [
+  path.resolve(__dirname, '../frontend-dist'),
+  path.resolve(process.cwd(), 'backend/frontend-dist'),
+  path.resolve(process.cwd(), 'frontend-dist'),
+  path.resolve(__dirname, '../../frontend/dist')
+];
 
-// Check if frontend dist folder exists before serving
-if (fs.existsSync(frontendPath)) {
+let frontendPath: string | null = null;
+let frontendDiagnostic: any = {};
+
+// Find the first valid frontend path
+for (const testPath of possibleFrontendPaths) {
+  if (fs.existsSync(testPath) && fs.existsSync(path.join(testPath, 'index.html'))) {
+    frontendPath = testPath;
+    console.log('✅ Frontend found at:', frontendPath);
+    break;
+  } else {
+    console.log('❌ Frontend not found at:', testPath);
+  }
+}
+
+// Create comprehensive diagnostic information
+frontendDiagnostic = {
+  searchedPaths: possibleFrontendPaths.map(p => ({
+    path: p,
+    exists: fs.existsSync(p),
+    hasIndex: fs.existsSync(path.join(p, 'index.html')),
+    fileCount: fs.existsSync(p) ? fs.readdirSync(p).length : 0
+  })),
+  selectedPath: frontendPath,
+  workingDir: process.cwd(),
+  __dirname,
+  nodeEnv: process.env.NODE_ENV,
+  deploymentSummary: null
+};
+
+// Try to load deployment summary if it exists
+const summaryPath = path.resolve(process.cwd(), 'deployment-summary.json');
+if (fs.existsSync(summaryPath)) {
+  try {
+    const summaryContent = fs.readFileSync(summaryPath, 'utf8');
+    frontendDiagnostic.deploymentSummary = JSON.parse(summaryContent);
+    console.log('📋 Deployment summary loaded');
+  } catch (error) {
+    console.warn('⚠️ Failed to load deployment summary:', error);
+  }
+}
+
+console.log('📊 Frontend diagnostic info:', JSON.stringify(frontendDiagnostic, null, 2));
+
+// Check if frontend is available and serve it
+if (frontendPath) {
   app.use(express.static(frontendPath));
+  const indexPath = path.join(frontendPath, 'index.html');
   console.log('✅ Frontend static files configured successfully');
-} else {
-  console.warn('⚠️  Frontend dist folder not found at:', frontendPath);
-  console.warn('   Static files will not be served. This is normal during development or if frontend build failed.');
+  console.log(`📄 Frontend served from: ${frontendPath}`);
   
-  // Create a simple fallback route for missing frontend
+  // List some files for verification
+  try {
+    const files = fs.readdirSync(frontendPath);
+    console.log('📂 Frontend files:', files.slice(0, 10)); // Show first 10 files
+  } catch (error) {
+    console.warn('⚠️ Could not list frontend files:', error);
+  }
+} else {
+  console.error('❌ No valid frontend path found');
+  console.error('📊 Frontend diagnostic information:', frontendDiagnostic);
+  
+  // Create a comprehensive fallback route for missing frontend
   app.get('/', (req: Request, res: Response) => {
     res.status(503).json({
       error: 'Frontend not available',
-      message: 'The frontend application is not built or deployed yet. Please build the frontend first.',
-      path: frontendPath,
-      instructions: 'Run: cd frontend && npm install && npm run build'
+      message: 'The frontend application is not built or deployed yet.',
+      diagnostic: frontendDiagnostic,
+      suggestions: [
+        'Check if the build process completed successfully',
+        'Verify deployment-summary.json for build details',
+        'Run the deployment diagnostic script',
+        'Check render deployment logs for build errors'
+      ],
+      buildCommands: {
+        manual: 'cd frontend && npm ci && npm run build && cd ../backend && cp -r ../frontend/dist ./frontend-dist',
+        script: './scripts/build-deployment.sh'
+      }
     });
   });
 }
@@ -226,27 +292,52 @@ app.use('/api/*', (req: Request, res: Response) => {
 });
 
 // Catch-all handler: send back the frontend's index.html for any non-API routes
-// This enables client-side routing
 app.get('*', (req: Request, res: Response) => {
-  const indexPath = path.resolve(frontendPath, 'index.html');
+  if (!frontendPath) {
+    return res.status(503).json({ 
+      error: 'Frontend not available', 
+      message: 'The frontend application is not built yet.',
+      requestedPath: req.path,
+      diagnostic: frontendDiagnostic,
+      suggestions: [
+        'Check deployment logs for build errors',
+        'Verify deployment-summary.json exists',
+        'Run diagnostic script: ./debug-frontend-deployment.sh'
+      ]
+    });
+  }
+  
+  const indexPath = path.join(frontendPath, 'index.html');
   
   // Check if index.html exists before trying to serve it
   if (!fs.existsSync(indexPath)) {
-    console.error('Error serving index.html: File not found at', indexPath);
+    console.error('❌ Error serving index.html: File not found at', indexPath);
+    console.error('📊 Frontend diagnostic info:', {
+      frontendPath,
+      indexPath,
+      frontendExists: fs.existsSync(frontendPath),
+      frontendContents: fs.existsSync(frontendPath) ? fs.readdirSync(frontendPath) : [],
+      requestPath: req.path
+    });
+    
     return res.status(503).json({ 
-      error: 'Frontend not available', 
-      message: 'The frontend application is not built yet. Please build the frontend first.',
+      error: 'Frontend index.html not available', 
+      message: 'The frontend application index file is missing.',
       path: indexPath,
-      instructions: 'Run: cd frontend && npm install && npm run build'
+      frontendPath,
+      requestedPath: req.path,
+      diagnostic: frontendDiagnostic
     });
   }
   
   res.sendFile(indexPath, (err) => {
     if (err) {
-      console.error('Error serving index.html:', err);
+      console.error('❌ Error serving index.html:', err);
       res.status(500).json({ 
         error: 'Error interno del servidor', 
-        message: 'No se pudo cargar la aplicación'
+        message: 'No se pudo cargar la aplicación',
+        path: indexPath,
+        details: err.message
       });
     }
   });

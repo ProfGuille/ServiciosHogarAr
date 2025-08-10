@@ -1,0 +1,20 @@
+{
+  "timestamp": "2025-08-10T03:12:55Z",
+  "build_success": true,
+  "frontend": {
+    "built": true,
+    "file_count": 13,
+    "index_exists": true
+  },
+  "backend": {
+    "built": true,
+    "frontend_copied": true,
+    "frontend_file_count": 13,
+    "frontend_index_exists": true
+  },
+  "environment": {
+    "node_version": "v20.19.4",
+    "npm_version": "10.8.2",
+    "working_directory": "/home/runner/work/ServiciosHogarAr/ServiciosHogarAr"
+  }
+}

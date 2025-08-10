@@ -4,7 +4,71 @@ services:
     env: node
     plan: free
     branch: main
-    buildCommand: cd frontend && npm install && npm run build && cd ../backend && npm install && npm run build && cp -r ../frontend/dist ./frontend-dist
+    buildCommand: |
+      set -e  # Exit on any error
+      
+      echo "=== Render Build Process ==="
+      BASE_DIR="$(pwd)"
+      echo "Base directory: $BASE_DIR"
+      echo "Contents: $(ls -la)"
+      
+      # Build frontend
+      echo "=== Building Frontend ==="
+      cd "$BASE_DIR/frontend"
+      echo "Frontend directory: $(pwd)"
+      npm ci
+      npm run build
+      echo "Frontend build complete. Checking dist..."
+      ls -la dist/ || echo "No dist directory found"
+      
+      # Build backend  
+      echo "=== Building Backend ==="
+      cd "$BASE_DIR/backend"
+      echo "Backend directory: $(pwd)"
+      npm ci
+      npm run build
+      
+      # Copy frontend files with absolute paths
+      echo "=== Copying Frontend Files ==="
+      FRONTEND_DIST_SRC="$BASE_DIR/frontend/dist"
+      FRONTEND_DIST_DST="$BASE_DIR/backend/frontend-dist"
+      
+      echo "Source path: $FRONTEND_DIST_SRC"
+      echo "Destination path: $FRONTEND_DIST_DST"
+      
+      echo "Creating destination directory..."
+      mkdir -p "$FRONTEND_DIST_DST"
+      
+      echo "Checking source directory..."
+      if [ ! -d "$FRONTEND_DIST_SRC" ]; then
+        echo "ERROR: Source directory does not exist: $FRONTEND_DIST_SRC"
+        exit 1
+      fi
+      
+      echo "Source directory contents:"
+      ls -la "$FRONTEND_DIST_SRC"
+      
+      echo "Copying files..."
+      # Use multiple copy methods for reliability
+      cp -r "$FRONTEND_DIST_SRC"/* "$FRONTEND_DIST_DST/" 2>&1
+      # Also copy hidden files explicitly
+      cp -r "$FRONTEND_DIST_SRC"/.[!.]* "$FRONTEND_DIST_DST/" 2>/dev/null || echo "No hidden files to copy"
+      
+      echo "Checking destination after copy..."
+      ls -la "$FRONTEND_DIST_DST"
+      
+      # Enhanced verification
+      if [ ! -f "$FRONTEND_DIST_DST/index.html" ]; then
+        echo "ERROR: Frontend copy verification failed - index.html not found"
+        echo "Destination directory contents:"
+        ls -la "$FRONTEND_DIST_DST" || echo "Destination directory doesn't exist"
+        exit 1
+      fi
+      
+      echo "=== Build Completed Successfully ==="
+      echo "Frontend files copied: $(ls "$FRONTEND_DIST_DST" | wc -l) files"
+      echo "Final contents of frontend-dist:"
+      ls -la "$FRONTEND_DIST_DST"
     startCommand: cd backend && npm start
     healthCheckPath: /api/health
     envVars:
