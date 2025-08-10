@@ -79,25 +79,73 @@ if (isDatabaseAvailable() && process.env.DATABASE_URL) {
 
 app.use(session(sessionConfig));
 
-// Frontend serving with multiple fallback paths
+// Frontend serving with multiple fallback paths optimized for Render deployment
 const possibleFrontendPaths = [
+  // Primary path for Render deployment (relative to compiled backend)
   path.resolve(__dirname, '../frontend-dist'),
-  path.resolve(process.cwd(), 'backend/frontend-dist'),
+  // Backup path for Render deployment (in case __dirname is different)
   path.resolve(process.cwd(), 'frontend-dist'),
-  path.resolve(__dirname, '../../frontend/dist')
+  // Development paths
+  path.resolve(process.cwd(), 'backend/frontend-dist'),
+  path.resolve(__dirname, '../../frontend/dist'),
+  path.resolve(process.cwd(), 'frontend/dist'),
+  // Additional Render-specific paths based on observed structure
+  path.resolve(__dirname, 'frontend-dist'),
+  path.resolve(process.cwd(), '../frontend/dist')
 ];
 
 let frontendPath: string | null = null;
 let frontendDiagnostic: any = {};
 
+console.log('📁 Environment diagnostic:');
+console.log('  Working directory:', process.cwd());
+console.log('  __dirname:', __dirname);
+console.log('  NODE_ENV:', process.env.NODE_ENV);
+console.log('  __filename:', __filename);
+
 // Find the first valid frontend path
 for (const testPath of possibleFrontendPaths) {
-  if (fs.existsSync(testPath) && fs.existsSync(path.join(testPath, 'index.html'))) {
+  const pathExists = fs.existsSync(testPath);
+  const indexExists = pathExists && fs.existsSync(path.join(testPath, 'index.html'));
+  
+  console.log(`🔍 Testing path: ${testPath}`);
+  console.log(`  - Directory exists: ${pathExists}`);
+  if (pathExists) {
+    try {
+      const files = fs.readdirSync(testPath);
+      console.log(`  - Files count: ${files.length}`);
+      console.log(`  - Files: ${files.slice(0, 5).join(', ')}${files.length > 5 ? '...' : ''}`);
+    } catch (err) {
+      console.log(`  - Cannot read directory: ${err}`);
+    }
+  }
+  console.log(`  - index.html exists: ${indexExists}`);
+  
+  if (pathExists && indexExists) {
     frontendPath = testPath;
     console.log('✅ Frontend found at:', frontendPath);
     break;
   } else {
     console.log('❌ Frontend not found at:', testPath);
+  }
+}
+
+if (!frontendPath) {
+  console.warn('⚠️  Frontend dist folder not found at any of the tested paths');
+  console.warn('   Static files will not be served. This is normal during development or if frontend build failed.');
+  
+  // Additional debugging for production
+  if (process.env.NODE_ENV === 'production') {
+    console.log('🔍 Production debugging - listing current directory structure:');
+    try {
+      console.log('Current directory contents:', fs.readdirSync(process.cwd()));
+      console.log('Parent directory contents:', fs.readdirSync(path.dirname(process.cwd())));
+      if (fs.existsSync(path.join(__dirname, '..'))) {
+        console.log('Backend parent directory contents:', fs.readdirSync(path.join(__dirname, '..')));
+      }
+    } catch (err) {
+      console.log('Cannot read directories for debugging:', err);
+    }
   }
 }
 
@@ -107,7 +155,7 @@ frontendDiagnostic = {
     path: p,
     exists: fs.existsSync(p),
     hasIndex: fs.existsSync(path.join(p, 'index.html')),
-    fileCount: fs.existsSync(p) ? fs.readdirSync(p).length : 0
+    fileCount: fs.existsSync(p) ? (fs.readdirSync(p).length || 0) : 0
   })),
   selectedPath: frontendPath,
   workingDir: process.cwd(),
@@ -116,15 +164,27 @@ frontendDiagnostic = {
   deploymentSummary: null
 };
 
-// Try to load deployment summary if it exists
+// Try to load deployment summary and diagnostic if they exist
 const summaryPath = path.resolve(process.cwd(), 'deployment-summary.json');
+const diagnosticPath = path.resolve(__dirname, '../deployment-diagnostic.json');
+
 if (fs.existsSync(summaryPath)) {
   try {
     const summaryContent = fs.readFileSync(summaryPath, 'utf8');
     frontendDiagnostic.deploymentSummary = JSON.parse(summaryContent);
-    console.log('📋 Deployment summary loaded');
+    console.log('📋 Deployment summary loaded from:', summaryPath);
   } catch (error) {
     console.warn('⚠️ Failed to load deployment summary:', error);
+  }
+}
+
+if (fs.existsSync(diagnosticPath)) {
+  try {
+    const diagnosticContent = fs.readFileSync(diagnosticPath, 'utf8');
+    frontendDiagnostic.buildDiagnostic = JSON.parse(diagnosticContent);
+    console.log('📋 Build diagnostic loaded from:', diagnosticPath);
+  } catch (error) {
+    console.warn('⚠️ Failed to load build diagnostic:', error);
   }
 }
 
@@ -386,14 +446,21 @@ async function initializeApp() {
     if (isDatabaseAvailable()) {
       try {
         console.log('🚀 Starting notification cron jobs...');
-        // Import notification cron conditionally
+        // Import notification cron conditionally to avoid module loading errors
         const cronModule = await import('./cron/notificationCron.js');
         cronModule.notificationCron.start();
         console.log('✅ Notification cron jobs started successfully');
         console.log(`⏰ Notification cron jobs iniciados`);
-      } catch (error) {
+      } catch (error: any) {
         console.error('❌ Error starting notification cron jobs:', error);
         console.warn('⏰ Notification cron jobs: ⚠️ Deshabilitados debido a errores');
+        
+        // Check if error is related to missing dependencies or schema issues
+        if (error?.message?.includes('Cannot find module') || 
+            error?.message?.includes('relation') && error?.message?.includes('does not exist')) {
+          console.warn('   This is likely due to missing dependencies or database schema misalignment.');
+          console.warn('   Cron jobs will be retried after the next deployment.');
+        }
       }
     } else {
       console.log(`⏰ Notification cron jobs: ⚠️ Deshabilitados (sin base de datos)`);

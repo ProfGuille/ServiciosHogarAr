@@ -1,5 +1,5 @@
 -- Add appointments table
-CREATE TABLE "appointments" (
+CREATE TABLE IF NOT EXISTS "appointments" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"provider_id" integer NOT NULL,
 	"client_id" integer NOT NULL,
@@ -10,7 +10,7 @@ CREATE TABLE "appointments" (
 );
 
 -- Add notifications table  
-CREATE TABLE "notifications" (
+CREATE TABLE IF NOT EXISTS "notifications" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"user_id" integer NOT NULL,
 	"title" varchar(256) NOT NULL,
@@ -29,7 +29,7 @@ CREATE TABLE "notifications" (
 );
 
 -- Add notification preferences table
-CREATE TABLE "notification_preferences" (
+CREATE TABLE IF NOT EXISTS "notification_preferences" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"user_id" integer NOT NULL,
 	"email_booking_confirmation" boolean DEFAULT true,
@@ -49,7 +49,7 @@ CREATE TABLE "notification_preferences" (
 );
 
 -- Add push subscriptions table
-CREATE TABLE "push_subscriptions" (
+CREATE TABLE IF NOT EXISTS "push_subscriptions" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"user_id" integer NOT NULL,
 	"endpoint" text NOT NULL,
