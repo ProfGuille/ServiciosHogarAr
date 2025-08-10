@@ -85,12 +85,16 @@ const possibleFrontendPaths = [
   path.resolve(__dirname, '../frontend-dist'),
   // Backup path for Render deployment (in case __dirname is different)
   path.resolve(process.cwd(), 'frontend-dist'),
+  // Additional Render-specific paths based on observed structure
+  path.resolve(__dirname, 'frontend-dist'),
+  // Render environment paths (working from /opt/render/project/src/backend)
+  path.resolve(__dirname, '../../frontend-dist'),
+  path.resolve(process.cwd(), '../frontend-dist'),
+  path.resolve(__dirname, '../../../frontend-dist'),
   // Development paths
   path.resolve(process.cwd(), 'backend/frontend-dist'),
   path.resolve(__dirname, '../../frontend/dist'),
   path.resolve(process.cwd(), 'frontend/dist'),
-  // Additional Render-specific paths based on observed structure
-  path.resolve(__dirname, 'frontend-dist'),
   path.resolve(process.cwd(), '../frontend/dist')
 ];
 
