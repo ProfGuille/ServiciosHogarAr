@@ -7,7 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { useAchievements } from "@/hooks/useAchievements";
 import { AchievementNotification } from "@/components/achievements/achievement-notification";
-import { PWAInstallPrompt, PWAUpdateNotification, MobileOptimizer, InlineCriticalCSS, ResourcePreloader, usePerformanceMonitoring } from "@/components/pwa";
+// import { PWAInstallPrompt, PWAUpdateNotification, MobileOptimizer, InlineCriticalCSS, ResourcePreloader, usePerformanceMonitoring } from "@/components/pwa";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
@@ -79,13 +79,16 @@ function Router() {
   const { currentAchievement, closeNotification } = useAchievements();
 
   return (
-    <MobileOptimizer>
+    <div>
       <AchievementNotification 
         achievement={currentAchievement} 
         onClose={closeNotification} 
       />
+      {/* Temporarily disabled PWA components for debugging
+      <MobileOptimizer>
       <PWAInstallPrompt />
       <PWAUpdateNotification />
+      */}
       <Switch>
       {/* Public routes available to all users */}
       <Route path="/login" component={Login} />
@@ -161,12 +164,12 @@ function Router() {
       )}
       <Route component={NotFound} />
       </Switch>
-    </MobileOptimizer>
+    </div>
   );
 }
 
 function App() {
-  usePerformanceMonitoring();
+  // usePerformanceMonitoring(); // Temporarily disabled
   
   useEffect(() => {
     fetch("/api/test")
@@ -188,8 +191,10 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
+        {/* Temporarily disabled PWA components
         <InlineCriticalCSS />
         <ResourcePreloader />
+        */}
         <Toaster />
         <Router />
       </TooltipProvider>
