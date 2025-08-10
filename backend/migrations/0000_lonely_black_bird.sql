@@ -1,4 +1,4 @@
-CREATE TABLE "credit_purchases" (
+CREATE TABLE IF NOT EXISTS "credit_purchases" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"provider_id" integer NOT NULL,
 	"credits" integer NOT NULL,
@@ -9,7 +9,7 @@ CREATE TABLE "credit_purchases" (
 	"created_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
-CREATE TABLE "lead_responses" (
+CREATE TABLE IF NOT EXISTS "lead_responses" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"service_request_id" integer NOT NULL,
 	"provider_id" integer NOT NULL,
@@ -19,7 +19,7 @@ CREATE TABLE "lead_responses" (
 	"responded_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
-CREATE TABLE "messages" (
+CREATE TABLE IF NOT EXISTS "messages" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"service_request_id" integer NOT NULL,
 	"sender_id" varchar NOT NULL,
@@ -29,7 +29,7 @@ CREATE TABLE "messages" (
 	"created_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
-CREATE TABLE "payments" (
+CREATE TABLE IF NOT EXISTS "payments" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"service_request_id" integer NOT NULL,
 	"customer_id" varchar NOT NULL,
@@ -57,7 +57,7 @@ CREATE TABLE "payments" (
 	"updated_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
-CREATE TABLE "provider_credits" (
+CREATE TABLE IF NOT EXISTS "provider_credits" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"provider_id" integer NOT NULL,
 	"current_credits" integer DEFAULT 0,
@@ -67,7 +67,7 @@ CREATE TABLE "provider_credits" (
 	"updated_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
-CREATE TABLE "provider_services" (
+CREATE TABLE IF NOT EXISTS "provider_services" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"provider_id" integer NOT NULL,
 	"category_id" integer NOT NULL,
@@ -78,7 +78,7 @@ CREATE TABLE "provider_services" (
 	"created_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
-CREATE TABLE "reviews" (
+CREATE TABLE IF NOT EXISTS "reviews" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"service_request_id" integer NOT NULL,
 	"reviewer_id" varchar NOT NULL,
@@ -89,7 +89,7 @@ CREATE TABLE "reviews" (
 	"created_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
-CREATE TABLE "service_categories" (
+CREATE TABLE IF NOT EXISTS "service_categories" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"name" varchar(100) NOT NULL,
 	"description" text,
@@ -98,7 +98,7 @@ CREATE TABLE "service_categories" (
 	"created_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
-CREATE TABLE "service_providers" (
+CREATE TABLE IF NOT EXISTS "service_providers" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"user_id" varchar NOT NULL,
 	"business_name" varchar(200),
@@ -120,7 +120,7 @@ CREATE TABLE "service_providers" (
 	"updated_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
-CREATE TABLE "service_requests" (
+CREATE TABLE IF NOT EXISTS "service_requests" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"customer_id" varchar NOT NULL,
 	"provider_id" integer,
@@ -146,13 +146,13 @@ CREATE TABLE "service_requests" (
 	"updated_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
-CREATE TABLE "sessions" (
+CREATE TABLE IF NOT EXISTS "sessions" (
 	"sid" varchar PRIMARY KEY NOT NULL,
 	"sess" jsonb NOT NULL,
 	"expire" timestamp NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "users" (
+CREATE TABLE IF NOT EXISTS "users" (
 	"id" varchar PRIMARY KEY NOT NULL,
 	"email" varchar,
 	"first_name" varchar,

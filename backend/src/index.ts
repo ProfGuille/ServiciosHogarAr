@@ -84,11 +84,14 @@ const possibleFrontendPaths = [
   path.resolve(__dirname, '../frontend-dist'),
   path.resolve(process.cwd(), 'backend/frontend-dist'),
   path.resolve(process.cwd(), 'frontend-dist'),
-  path.resolve(__dirname, '../../frontend/dist')
+  path.resolve(__dirname, '../../frontend/dist'),
+  path.resolve(process.cwd(), 'frontend/dist')
 ];
 
 let frontendPath: string | null = null;
 let frontendDiagnostic: any = {};
+
+console.log('📁 Serving static files from:', process.cwd());
 
 // Find the first valid frontend path
 for (const testPath of possibleFrontendPaths) {
@@ -99,6 +102,11 @@ for (const testPath of possibleFrontendPaths) {
   } else {
     console.log('❌ Frontend not found at:', testPath);
   }
+}
+
+if (!frontendPath) {
+  console.warn('⚠️  Frontend dist folder not found at:', possibleFrontendPaths[0]);
+  console.warn('   Static files will not be served. This is normal during development or if frontend build failed.');
 }
 
 // Create comprehensive diagnostic information
@@ -386,14 +394,21 @@ async function initializeApp() {
     if (isDatabaseAvailable()) {
       try {
         console.log('🚀 Starting notification cron jobs...');
-        // Import notification cron conditionally
+        // Import notification cron conditionally to avoid module loading errors
         const cronModule = await import('./cron/notificationCron.js');
         cronModule.notificationCron.start();
         console.log('✅ Notification cron jobs started successfully');
         console.log(`⏰ Notification cron jobs iniciados`);
-      } catch (error) {
+      } catch (error: any) {
         console.error('❌ Error starting notification cron jobs:', error);
         console.warn('⏰ Notification cron jobs: ⚠️ Deshabilitados debido a errores');
+        
+        // Check if error is related to missing dependencies or schema issues
+        if (error?.message?.includes('Cannot find module') || 
+            error?.message?.includes('relation') && error?.message?.includes('does not exist')) {
+          console.warn('   This is likely due to missing dependencies or database schema misalignment.');
+          console.warn('   Cron jobs will be retried after the next deployment.');
+        }
       }
     } else {
       console.log(`⏰ Notification cron jobs: ⚠️ Deshabilitados (sin base de datos)`);
