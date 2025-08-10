@@ -74,21 +74,6 @@ function generateSessionId() {
 }
 
 // Root endpoint - welcome message for API
-app.get('/', (req, res) => {
-  res.json({
-    message: 'Servicios Hogar API',
-    version: '1.0.0',
-    status: 'running',
-    timestamp: new Date().toISOString(),
-    environment: 'development',
-    endpoints: {
-      health: '/api/health',
-      test: '/api/test',
-      documentation: 'API endpoints available under /api/*'
-    }
-  });
-});
-
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
@@ -1084,7 +1069,27 @@ function calculateAIMatchScore(provider: any, request: any) {
 // END AI MATCHING SYSTEM
 // ============================================
 
-// 404 handler
+// Serve frontend static files
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Serve frontend build files
+app.use(express.static(path.join(__dirname, '../frontend-dist')));
+
+// Handle React Router (serve index.html for all non-API routes)
+app.get('*', (req, res) => {
+  // Don't handle API routes
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: 'Endpoint no encontrado' });
+  }
+  
+  res.sendFile(path.join(__dirname, '../frontend-dist/index.html'));
+});
+
+// 404 handler for API routes only
 app.use('/api/*', (req, res) => {
   res.status(404).json({ error: 'Endpoint no encontrado' });
 });
