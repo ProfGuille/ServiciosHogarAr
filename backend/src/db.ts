@@ -91,6 +91,13 @@ export async function runMigrations() {
   } catch (error: any) {
     console.error('Error running migrations:', error);
     
+    // Check if error is related to constraint already existing (specific handling for the issue mentioned)
+    if (error.code === '42710' && error.message.includes('already exists')) {
+      console.warn('⚠️  Constraint duplicada detectada, continuando sin interrumpir el arranque.');
+      console.warn(`   Constraint error: ${error.message}`);
+      return true; // Continue startup as this is not critical
+    }
+    
     // Check if error is related to table or constraint already existing
     if (error?.cause?.code === '42P07' || // relation already exists
         error?.cause?.code === '42P16' || // constraint already exists  
