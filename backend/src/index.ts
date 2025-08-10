@@ -494,13 +494,23 @@ async function initializeApp() {
     
     // Environment check
     const requiredEnvVars = ['DATABASE_URL', 'SESSION_SECRET'];
-    const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+    const optionalEnvVars = ['SMTP_HOST', 'SMTP_USER', 'VAPID_PUBLIC_KEY', 'VAPID_PRIVATE_KEY'];
     
-    if (missingVars.length > 0) {
-      console.warn(`⚠️  Variables de entorno faltantes: ${missingVars.join(', ')}`);
+    const missingRequired = requiredEnvVars.filter(varName => !process.env[varName]);
+    const missingOptional = optionalEnvVars.filter(varName => !process.env[varName]);
+    
+    if (missingRequired.length > 0) {
+      console.warn(`⚠️  Variables de entorno faltantes: ${missingRequired.join(', ')}`);
       console.warn(`   El servidor funciona en modo limitado. Verifica la configuración en Render.`);
     } else {
-      console.log(`✅ Todas las variables de entorno configuradas`);
+      console.log(`✅ Variables de entorno requeridas configuradas`);
+    }
+    
+    if (missingOptional.length > 0) {
+      console.log(`📧 Servicios opcionales no configurados: ${missingOptional.join(', ')}`);
+      console.log(`   Email y notificaciones push funcionan en modo limitado.`);
+    } else {
+      console.log(`✅ Todas las variables de entorno configuradas (funcionalidad completa)`);
     }
     
     console.log(`🌐 Health check disponible en: http://localhost:${PORT}/api/health`);

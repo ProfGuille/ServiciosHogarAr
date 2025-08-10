@@ -92,18 +92,17 @@ export async function runMigrations() {
     console.error('Error running migrations:', error);
     
     // Check if error is related to constraint already existing (specific handling for the issue mentioned)
-    if (error.code === '42710' && error.message.includes('already exists')) {
-      console.warn('⚠️  Constraint duplicada detectada, continuando sin interrumpir el arranque.');
-      console.warn(`   Constraint error: ${error.message}`);
+    if (error.code === '42710' || (error?.cause?.code === '42710')) {
+      console.log('✅ Database migrations: Constraints/objects already exist (expected in production)');
+      console.log(`   Detected code 42710 - continuing with existing schema`);
       return true; // Continue startup as this is not critical
     }
     
     // Check if error is related to table or constraint already existing
     if (error?.cause?.code === '42P07' || // relation already exists
         error?.cause?.code === '42P16' || // constraint already exists  
-        error?.cause?.code === '42710' || // object already exists
         error?.message?.includes('already exists')) {
-      console.log('⚠️  Some tables already exist, but this is expected in production deployments.');
+      console.log('✅ Database migrations: Schema objects already exist (expected in production)');
       console.log('   Continuing with existing schema...');
       return true; // Return true as this is not a critical error
     }

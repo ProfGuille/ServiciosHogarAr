@@ -26,6 +26,13 @@ export class EmailService {
   private isConfigured: boolean = false;
 
   constructor(config: EmailConfig) {
+    // Check if required email configuration is available
+    if (!config.auth.user || !config.auth.pass || !config.host) {
+      console.log('Email service not configured: Missing required SMTP configuration');
+      this.isConfigured = false;
+      return;
+    }
+
     try {
       this.transporter = nodemailer.createTransport(config);
       this.isConfigured = true;
