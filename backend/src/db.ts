@@ -1,5 +1,4 @@
 // backend/src/db.ts
-import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
@@ -7,19 +6,7 @@ import fs from 'fs';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Try different .env file locations
-const envPaths = [
-  path.resolve(process.cwd(), 'backend/.env'),
-  path.resolve(process.cwd(), '.env'),
-  path.resolve(__dirname, '../.env'),
-  path.resolve(__dirname, '../../.env')
-];
-
-for (const envPath of envPaths) {
-  dotenv.config({ path: envPath });
-  if (process.env.DATABASE_URL) break;
-}
-
+// Environment variables are now loaded from index.ts with 'dotenv/config'
 if (!process.env.DATABASE_URL) {
   console.warn('⚠️  DATABASE_URL no está definida. El servidor funcionará en modo limitado sin base de datos.');
   console.warn('   Para funcionalidad completa, configura DATABASE_URL en Render.');

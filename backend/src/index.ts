@@ -1,10 +1,11 @@
+// Cargar variables de entorno (local y producción)
+import 'dotenv/config';
 import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
 import { registerRoutes } from "./routes/index.js";
 import { db, isDatabaseAvailable, runMigrations } from "./db.js";
-import dotenv from "dotenv";
 import path from "path";
 // import fs from "fs";
 // import { fileURLToPath } from "url";
@@ -14,13 +15,24 @@ import "./types/session.js"; // Import session type extensions
 // const __filename = fileURLToPath(import.meta.url);
 // const __dirname = path.dirname(__filename);
 
-// Load environment variables (don't override existing ones)
-dotenv.config({ 
-  path: path.resolve(process.cwd(), 'backend/.env'),
-  override: false // Don't override existing environment variables
-});
-
 const app = express();
+
+// Verificación de variables críticas
+const requiredEnv = [
+  'SESSION_SECRET',
+  'SMTP_HOST',
+  'SMTP_USER',
+  'SMTP_PASS',
+  'VAPID_PUBLIC_KEY',
+  'VAPID_PRIVATE_KEY',
+  'DATABASE_URL'
+];
+
+const missing = requiredEnv.filter(v => !process.env[v]);
+if (missing.length) {
+  console.warn(`⚠️  Variables de entorno faltantes: ${missing.join(', ')}`);
+  console.warn('⏰ El servidor funcionará en modo limitado.');
+}
 
 // Trust proxy for correct IP addresses behind reverse proxy
 app.set('trust proxy', 1);
