@@ -13,6 +13,12 @@ export class NotificationCronService {
   private isStarted = false;
 
   constructor() {
+    // Check if email service can be configured
+    const hasEmailConfig = process.env.SMTP_HOST && process.env.SMTP_USER;
+    if (!hasEmailConfig) {
+      console.log('Email service not configured: Missing SMTP_HOST or SMTP_USER environment variables');
+    }
+    
     // Configuración del servicio de email (usando variables de entorno)
     this.emailService = new EmailService({
       host: process.env.SMTP_HOST || 'smtp.gmail.com',
