@@ -6,13 +6,13 @@ import { registerRoutes } from "./routes/index.js";
 import { db, isDatabaseAvailable, runMigrations } from "./db.js";
 import dotenv from "dotenv";
 import path from "path";
-import fs from "fs";
-import { fileURLToPath } from "url";
+// import fs from "fs";
+// import { fileURLToPath } from "url";
 import "./types/session.js"; // Import session type extensions
 
-// Get current directory for ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Get current directory for ES modules - not needed when not serving frontend
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
 
 // Load environment variables (don't override existing ones)
 dotenv.config({ 
@@ -79,6 +79,9 @@ if (isDatabaseAvailable() && process.env.DATABASE_URL) {
 
 app.use(session(sessionConfig));
 
+// Frontend serving disabled - frontend is deployed on Hostinger
+// The backend now serves only as API
+/*
 // Frontend serving with multiple fallback paths optimized for Render deployment
 const possibleFrontendPaths = [
   // Primary path for Render deployment (relative to compiled backend)
@@ -231,6 +234,10 @@ if (frontendPath) {
     });
   });
 }
+*/
+
+// Frontend is deployed separately on Hostinger - no need to serve it from backend
+console.log('✅ Backend running in API-only mode (frontend deployed separately on Hostinger)');
 
 // Request logging middleware
 app.use((req: Request, res: Response, next: NextFunction) => {
@@ -355,54 +362,69 @@ app.use('/api/*', (req: Request, res: Response) => {
   res.status(404).json({ error: 'Endpoint no encontrado' });
 });
 
-// Catch-all handler: send back the frontend's index.html for any non-API routes
+// Catch-all handler disabled - frontend is deployed separately on Hostinger
+// app.get('*', (req: Request, res: Response) => {
+//   if (!frontendPath) {
+//     return res.status(503).json({ 
+//       error: 'Frontend not available', 
+//       message: 'The frontend application is not built yet.',
+//       requestedPath: req.path,
+//       diagnostic: frontendDiagnostic,
+//       suggestions: [
+//         'Check deployment logs for build errors',
+//         'Verify deployment-summary.json exists',
+//         'Run diagnostic script: ./debug-frontend-deployment.sh'
+//       ]
+//     });
+//   }
+//   
+//   const indexPath = path.join(frontendPath, 'index.html');
+//   
+//   // Check if index.html exists before trying to serve it
+//   if (!fs.existsSync(indexPath)) {
+//     console.error('❌ Error serving index.html: File not found at', indexPath);
+//     console.error('📊 Frontend diagnostic info:', {
+//       frontendPath,
+//       indexPath,
+//       frontendExists: fs.existsSync(frontendPath),
+//       frontendContents: fs.existsSync(frontendPath) ? fs.readdirSync(frontendPath) : [],
+//       requestPath: req.path
+//     });
+//     
+//     return res.status(503).json({ 
+//       error: 'Frontend index.html not available', 
+//       message: 'The frontend application index file is missing.',
+//       path: indexPath,
+//       frontendPath,
+//       requestedPath: req.path,
+//       diagnostic: frontendDiagnostic
+//     });
+//   }
+//   
+//   res.sendFile(indexPath, (err) => {
+//     if (err) {
+//       console.error('❌ Error serving index.html:', err);
+//       res.status(500).json({ 
+//         error: 'Error interno del servidor', 
+//         message: 'No se pudo cargar la aplicación',
+//         path: indexPath,
+//         details: err.message
+//       });
+//     }
+//   });
+// });
+
+// Simple catch-all for non-API routes - return JSON response indicating backend is API-only
 app.get('*', (req: Request, res: Response) => {
-  if (!frontendPath) {
-    return res.status(503).json({ 
-      error: 'Frontend not available', 
-      message: 'The frontend application is not built yet.',
-      requestedPath: req.path,
-      diagnostic: frontendDiagnostic,
-      suggestions: [
-        'Check deployment logs for build errors',
-        'Verify deployment-summary.json exists',
-        'Run diagnostic script: ./debug-frontend-deployment.sh'
-      ]
-    });
-  }
-  
-  const indexPath = path.join(frontendPath, 'index.html');
-  
-  // Check if index.html exists before trying to serve it
-  if (!fs.existsSync(indexPath)) {
-    console.error('❌ Error serving index.html: File not found at', indexPath);
-    console.error('📊 Frontend diagnostic info:', {
-      frontendPath,
-      indexPath,
-      frontendExists: fs.existsSync(frontendPath),
-      frontendContents: fs.existsSync(frontendPath) ? fs.readdirSync(frontendPath) : [],
-      requestPath: req.path
-    });
-    
-    return res.status(503).json({ 
-      error: 'Frontend index.html not available', 
-      message: 'The frontend application index file is missing.',
-      path: indexPath,
-      frontendPath,
-      requestedPath: req.path,
-      diagnostic: frontendDiagnostic
-    });
-  }
-  
-  res.sendFile(indexPath, (err) => {
-    if (err) {
-      console.error('❌ Error serving index.html:', err);
-      res.status(500).json({ 
-        error: 'Error interno del servidor', 
-        message: 'No se pudo cargar la aplicación',
-        path: indexPath,
-        details: err.message
-      });
+  res.status(404).json({ 
+    error: 'Endpoint no encontrado',
+    message: 'Este backend solo sirve endpoints de API. El frontend está desplegado en Hostinger.',
+    requestedPath: req.path,
+    availableEndpoints: {
+      info: '/api/info',
+      health: '/api/health',
+      test: '/api/test',
+      ping: '/api/ping'
     }
   });
 });
