@@ -1,0 +1,20 @@
+{
+  "timestamp": "2025-08-10T16:56:45Z",
+  "build_directory": "/home/runner/work/ServiciosHogarAr/ServiciosHogarAr",
+  "initial_directory": "/home/runner/work/ServiciosHogarAr/ServiciosHogarAr",
+  "frontend_source": "/home/runner/work/ServiciosHogarAr/ServiciosHogarAr/frontend/dist",
+  "frontend_destination": "/home/runner/work/ServiciosHogarAr/ServiciosHogarAr/backend/frontend-dist",
+  "frontend_files_count": 13,
+  "index_exists": true,
+  "backend_dist_exists": true,
+  "environment": {
+    "pwd": "/home/runner/work/ServiciosHogarAr/ServiciosHogarAr/backend",
+    "user": "runner",
+    "home": "/home/runner",
+    "render_stage": "unknown"
+  },
+  "file_permissions": {
+    "frontend_dist_perms": "drwxr-xr-x 3 runner docker 4096 Aug 10 16:56 /home/runner/work/ServiciosHogarAr/ServiciosHogarAr/backend/frontend-dist",
+    "index_perms": "-rw-r--r-- 1 runner docker 6493 Aug 10 16:56 /home/runner/work/ServiciosHogarAr/ServiciosHogarAr/backend/frontend-dist/index.html"
+  }
+}
