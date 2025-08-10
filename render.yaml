@@ -5,35 +5,55 @@ services:
     plan: free
     branch: main
     buildCommand: |
-      echo "=== Frontend and Backend Build ==="
+      echo "=== Render Build Process ==="
+      echo "Working directory: $(pwd)"
+      echo "Contents: $(ls -la)"
       
       # Build frontend
-      echo "Building frontend..."
+      echo "=== Building Frontend ==="
       cd frontend
+      echo "Frontend directory: $(pwd)"
       npm ci
       npm run build
+      echo "Frontend build complete. Checking dist..."
+      ls -la dist/ || echo "No dist directory found"
       cd ..
       
       # Build backend
-      echo "Building backend..."
+      echo "=== Building Backend ==="
       cd backend
+      echo "Backend directory: $(pwd)"
       npm ci
       npm run build
       
-      # Copy frontend files with verification
-      echo "Copying frontend files..."
+      # Copy frontend files with enhanced verification
+      echo "=== Copying Frontend Files ==="
+      echo "Creating frontend-dist directory..."
       mkdir -p frontend-dist
-      cp -r ../frontend/dist/* ./frontend-dist/
+      echo "Checking source directory..."
+      ls -la ../frontend/dist/ || echo "Source directory not found"
+      echo "Copying files..."
+      cp -r ../frontend/dist/* ./frontend-dist/ 2>&1 || echo "Copy command failed"
+      echo "Checking destination..."
+      ls -la frontend-dist/ || echo "Destination directory not found"
       
-      # Verify copy worked
+      # Enhanced verification
       if [ ! -f "./frontend-dist/index.html" ]; then
         echo "ERROR: Frontend copy verification failed"
-        ls -la frontend-dist/ || echo "frontend-dist directory not found"
+        echo "Current directory: $(pwd)"
+        echo "Directory contents:"
+        ls -la
+        echo "Frontend dist source:"
+        ls -la ../frontend/dist/ || echo "Source not found"
+        echo "Frontend dist destination:"
+        ls -la frontend-dist/ || echo "Destination not found"
         exit 1
       fi
       
-      echo "Build completed successfully"
+      echo "=== Build Completed Successfully ==="
+      echo "Final verification:"
       ls -la frontend-dist/
+      echo "Frontend files copied: $(ls frontend-dist/ | wc -l) files"
     startCommand: cd backend && npm start
     healthCheckPath: /api/health
     envVars:
