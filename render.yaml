@@ -12,7 +12,7 @@ services:
       echo "Base directory: $BASE_DIR"
       echo "Contents: $(ls -la)"
       
-      # Build frontend
+      # Build frontend first
       echo "=== Building Frontend ==="
       cd "$BASE_DIR/frontend"
       echo "Frontend directory: $(pwd)"
@@ -28,16 +28,16 @@ services:
       npm ci
       npm run build
       
-      # Copy frontend files with absolute paths
-      echo "=== Copying Frontend Files ==="
+      # Copy frontend files to the backend directory for deployment
+      echo "=== Copying Frontend Files for Deployment ==="
       FRONTEND_DIST_SRC="$BASE_DIR/frontend/dist"
-      FRONTEND_DIST_DST="$BASE_DIR/backend/frontend-dist"
+      BACKEND_DIST_DST="$BASE_DIR/backend/frontend-dist"
       
       echo "Source path: $FRONTEND_DIST_SRC"
-      echo "Destination path: $FRONTEND_DIST_DST"
+      echo "Destination path: $BACKEND_DIST_DST"
       
-      echo "Creating destination directory..."
-      mkdir -p "$FRONTEND_DIST_DST"
+      # Ensure backend directory exists
+      mkdir -p "$BACKEND_DIST_DST"
       
       echo "Checking source directory..."
       if [ ! -d "$FRONTEND_DIST_SRC" ]; then
@@ -49,26 +49,44 @@ services:
       ls -la "$FRONTEND_DIST_SRC"
       
       echo "Copying files..."
-      # Use multiple copy methods for reliability
-      cp -r "$FRONTEND_DIST_SRC"/* "$FRONTEND_DIST_DST/" 2>&1
-      # Also copy hidden files explicitly
-      cp -r "$FRONTEND_DIST_SRC"/.[!.]* "$FRONTEND_DIST_DST/" 2>/dev/null || echo "No hidden files to copy"
+      # Copy all files from frontend/dist to backend/frontend-dist
+      cp -r "$FRONTEND_DIST_SRC"/* "$BACKEND_DIST_DST/" 2>&1
+      # Also copy hidden files if they exist
+      cp -r "$FRONTEND_DIST_SRC"/.[!.]* "$BACKEND_DIST_DST/" 2>/dev/null || echo "No hidden files to copy"
       
       echo "Checking destination after copy..."
-      ls -la "$FRONTEND_DIST_DST"
+      ls -la "$BACKEND_DIST_DST"
       
       # Enhanced verification
-      if [ ! -f "$FRONTEND_DIST_DST/index.html" ]; then
+      if [ ! -f "$BACKEND_DIST_DST/index.html" ]; then
         echo "ERROR: Frontend copy verification failed - index.html not found"
         echo "Destination directory contents:"
-        ls -la "$FRONTEND_DIST_DST" || echo "Destination directory doesn't exist"
+        ls -la "$BACKEND_DIST_DST" || echo "Destination directory doesn't exist"
         exit 1
       fi
       
+      # Create deployment diagnostic file
+      echo "=== Creating Deployment Diagnostic ==="
+      cat > "$BASE_DIR/backend/deployment-diagnostic.json" << EOF
+      {
+        "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+        "build_directory": "$BASE_DIR",
+        "frontend_source": "$FRONTEND_DIST_SRC",
+        "frontend_destination": "$BACKEND_DIST_DST",
+        "frontend_files_count": $(find "$BACKEND_DIST_DST" -type f 2>/dev/null | wc -l),
+        "index_exists": $(test -f "$BACKEND_DIST_DST/index.html" && echo "true" || echo "false"),
+        "backend_dist_exists": $(test -d "$BASE_DIR/backend/dist" && echo "true" || echo "false")
+      }
+      EOF
+      
+      echo "=== Final Verification ==="
+      echo "Backend directory contents:"
+      ls -la "$BASE_DIR/backend/"
+      echo "Frontend-dist contents:"
+      ls -la "$BACKEND_DIST_DST/" || echo "frontend-dist directory not found"
+      
       echo "=== Build Completed Successfully ==="
-      echo "Frontend files copied: $(ls "$FRONTEND_DIST_DST" | wc -l) files"
-      echo "Final contents of frontend-dist:"
-      ls -la "$FRONTEND_DIST_DST"
+      echo "Frontend files copied: $(find "$BACKEND_DIST_DST" -type f 2>/dev/null | wc -l) files"
     startCommand: cd backend && npm start
     healthCheckPath: /api/health
     envVars:
