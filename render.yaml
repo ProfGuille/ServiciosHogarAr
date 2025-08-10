@@ -5,21 +5,35 @@ services:
     plan: free
     branch: main
     buildCommand: |
-      echo "=== Multi-Stage Deployment Build ==="
+      echo "=== Frontend and Backend Build ==="
       
-      # Stage 1: Attempt main build script
-      if ./scripts/build-deployment.sh; then
-        echo "=== Main build script succeeded ==="
-      else
-        echo "=== Main build script failed, using fallback ==="
-        ./scripts/build-fallback.sh
+      # Build frontend
+      echo "Building frontend..."
+      cd frontend
+      npm ci
+      npm run build
+      cd ..
+      
+      # Build backend
+      echo "Building backend..."
+      cd backend
+      npm ci
+      npm run build
+      
+      # Copy frontend files with verification
+      echo "Copying frontend files..."
+      mkdir -p frontend-dist
+      cp -r ../frontend/dist/* ./frontend-dist/
+      
+      # Verify copy worked
+      if [ ! -f "./frontend-dist/index.html" ]; then
+        echo "ERROR: Frontend copy verification failed"
+        ls -la frontend-dist/ || echo "frontend-dist directory not found"
+        exit 1
       fi
       
-      # Stage 2: Validate deployment
-      echo "=== Validating deployment ==="
-      ./scripts/validate-deployment.sh
-      
-      echo "=== Build completed successfully ==="
+      echo "Build completed successfully"
+      ls -la frontend-dist/
     startCommand: cd backend && npm start
     healthCheckPath: /api/health
     envVars:
