@@ -97,8 +97,8 @@ check_env_files
 
 echo "🌐 Probando conectividad (puede fallar en entornos restringidos)..."
 test_url "Frontend" "https://servicioshogar.com.ar"
-test_url "Backend Health" "https://servicioshogar-backend.onrender.com/api/health"
-test_url "Backend Ping" "https://servicioshogar-backend.onrender.com/api/ping"
+test_url "Backend Health" "https://servicioshogar-backend-uje1.onrender.com/api/health"
+test_url "Backend Ping" "https://servicioshogar-backend-uje1.onrender.com/api/ping"
 
 echo ""
 echo "📋 Próximos pasos recomendados:"

@@ -15,10 +15,10 @@ const fetch = globalThis.fetch || (await import('node-fetch')).default;
 
 const URLS = {
   frontend: 'https://servicioshogar.com.ar',
-  backend: 'https://servicioshogar-backend.onrender.com',
-  backendHealth: 'https://servicioshogar-backend.onrender.com/api/health',
-  backendPing: 'https://servicioshogar-backend.onrender.com/api/ping',
-  backendServices: 'https://servicioshogar-backend.onrender.com/api/services'
+  backend: 'https://servicioshogar-backend-uje1.onrender.com',
+  backendHealth: 'https://servicioshogar-backend-uje1.onrender.com/api/health',
+  backendPing: 'https://servicioshogar-backend-uje1.onrender.com/api/ping',
+  backendServices: 'https://servicioshogar-backend-uje1.onrender.com/api/services'
 };
 
 const results = {
