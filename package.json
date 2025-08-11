@@ -2,6 +2,10 @@
   "name": "servicioshogar",
   "version": "1.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
   "scripts": {
     "build": "cd frontend && npm run build && cd ../backend && npm run build",
     "start": "cd backend && npm start",

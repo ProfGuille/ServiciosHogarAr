@@ -35,7 +35,7 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
 const bookingFormSchema = z.object({
-  providerId: z.number(),
+  providerId: z.string(),
   categoryId: z.number(),
   title: z.string().min(1, "Describe el servicio que necesitas"),
   description: z.string().min(10, "Proporciona más detalles sobre el servicio"),

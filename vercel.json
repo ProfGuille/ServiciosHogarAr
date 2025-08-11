@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
   "name": "servicioshogar",
-  "buildCommand": "cd frontend && npm run build",
+  "buildCommand": "cd frontend && npm install && npm run build",
   "outputDirectory": "frontend/dist",
   "framework": "vite",
   "rewrites": [
@@ -56,6 +56,10 @@
     }
   ],
   "env": {
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "VITE_API_URL": "https://servicioshogar-backend-uje1.onrender.com",
+    "VITE_APP_ENV": "production",
+    "VITE_ANALYTICS_ENABLED": "true",
+    "VITE_PLATFORM": "vercel"
   }
 }
