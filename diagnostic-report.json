@@ -1,0 +1,83 @@
+{
+  "timestamp": "2025-08-11T00:38:34.015Z",
+  "tests": {
+    "Frontend Principal": {
+      "url": "https://servicioshogar.com.ar",
+      "startTime": 1754872714021,
+      "status": "unknown",
+      "error": "fetch failed",
+      "response": null,
+      "headers": null,
+      "responseTime": 40
+    },
+    "Backend Principal": {
+      "url": "https://servicioshogar-backend.onrender.com",
+      "startTime": 1754872714061,
+      "status": "unknown",
+      "error": "fetch failed",
+      "response": null,
+      "headers": null,
+      "responseTime": 7
+    },
+    "Backend Health": {
+      "url": "https://servicioshogar-backend.onrender.com/api/health",
+      "startTime": 1754872714068,
+      "status": "unknown",
+      "error": "fetch failed",
+      "response": null,
+      "headers": null,
+      "responseTime": 13
+    },
+    "Backend Ping": {
+      "url": "https://servicioshogar-backend.onrender.com/api/ping",
+      "startTime": 1754872714081,
+      "status": "unknown",
+      "error": "fetch failed",
+      "response": null,
+      "headers": null,
+      "responseTime": 16
+    },
+    "Backend Services API": {
+      "url": "https://servicioshogar-backend.onrender.com/api/services",
+      "startTime": 1754872714099,
+      "status": "unknown",
+      "error": "fetch failed",
+      "response": null,
+      "headers": null,
+      "responseTime": 12
+    }
+  },
+  "summary": {
+    "workingServices": [],
+    "failingServices": [
+      "Frontend Principal",
+      "Backend Principal",
+      "Backend Health",
+      "Backend Ping",
+      "Backend Services API"
+    ],
+    "unknownServices": []
+  },
+  "recommendations": [
+    "🖥️  Frontend no accesible. Verificar:\n   - Panel de Hostinger: ¿están subidos los archivos?\n   - ¿Está el dominio apuntando correctamente?\n   - ¿Está el .htaccess configurado?",
+    "⚙️  Backend no accesible. Verificar:\n   - Dashboard de Render: ¿está el servicio activo?\n   - ¿Hay errores en los logs de Render?\n   - ¿Están configuradas las variables de entorno?",
+    "📋 Información específica necesaria:\n   1. Acceso al panel de Hostinger para verificar archivos\n   2. Acceso al dashboard de Render para ver logs\n   3. Acceso a Neon para verificar la base de datos\n   4. Configuración actual de DNS del dominio"
+  ],
+  "buildStatus": [
+    {
+      "name": "Frontend Build",
+      "status": "OK",
+      "details": "dist/ exists: true, index.html exists: true"
+    },
+    {
+      "name": "Backend Build",
+      "status": "OK",
+      "details": "dist/ exists: true, index.js exists: true"
+    },
+    {
+      "name": "Package.json Files",
+      "status": "OK",
+      "details": "root: true, frontend: true, backend: true"
+    }
+  ]
+}
