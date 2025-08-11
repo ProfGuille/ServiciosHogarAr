@@ -4,7 +4,7 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 const API_BASE_URL = import.meta.env.VITE_API_URL || (
   import.meta.env.DEV 
     ? 'http://localhost:3000'
-    : 'https://servicioshogar-backend.onrender.com'
+    : 'https://servicioshogar-backend-uje1.onrender.com'
 );
 
 async function throwIfResNotOk(res: Response) {

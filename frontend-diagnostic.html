@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico ServiciosHogar - Conexión Frontend-Backend</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 20px auto; 
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-result { 
+            padding: 10px; 
+            margin: 10px 0; 
+            border-radius: 5px; 
+            border-left: 4px solid;
+        }
+        .success { 
+            background: #d4edda; 
+            border-color: #28a745; 
+            color: #155724; 
+        }
+        .error { 
+            background: #f8d7da; 
+            border-color: #dc3545; 
+            color: #721c24; 
+        }
+        .warning { 
+            background: #fff3cd; 
+            border-color: #ffc107; 
+            color: #856404; 
+        }
+        .info { 
+            background: #d1ecf1; 
+            border-color: #17a2b8; 
+            color: #0c5460; 
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover { background: #0056b3; }
+        .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Diagnóstico ServiciosHogar.com.ar</h1>
+        <p>Esta herramienta verifica la conexión entre el frontend y el backend.</p>
+        
+        <button onclick="runDiagnostic()">🚀 Ejecutar Diagnóstico Completo</button>
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const BACKEND_URL = 'https://servicioshogar-backend-uje1.onrender.com';
+        
+        function addResult(type, title, message, details = '') {
+            const resultsDiv = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${type}`;
+            resultDiv.innerHTML = `
+                <strong>${title}</strong><br>
+                ${message}
+                ${details ? `<pre>${details}</pre>` : ''}
+            `;
+            resultsDiv.appendChild(resultDiv);
+        }
+
+        async function testBackendHealth() {
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/health`, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addResult('success', '✅ Backend Health Check', 
+                        'El backend está respondiendo correctamente',
+                        JSON.stringify(data, null, 2));
+                    return true;
+                } else {
+                    addResult('error', '❌ Backend Health Check', 
+                        `Error HTTP ${response.status}: ${response.statusText}`);
+                    return false;
+                }
+            } catch (error) {
+                addResult('error', '❌ Backend Health Check', 
+                    'No se puede conectar con el backend',
+                    error.message);
+                return false;
+            }
+        }
+
+        async function testCORS() {
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/health`, {
+                    method: 'OPTIONS',
+                    mode: 'cors'
+                });
+                
+                addResult('success', '✅ CORS Configuration', 
+                    'Las cabeceras CORS están configuradas correctamente');
+                return true;
+            } catch (error) {
+                addResult('error', '❌ CORS Configuration', 
+                    'Problema con la configuración CORS',
+                    error.message);
+                return false;
+            }
+        }
+
+        async function testEnvironmentConfig() {
+            const currentDomain = window.location.hostname;
+            const isProduction = currentDomain === 'servicioshogar.com.ar';
+            
+            addResult('info', '🌐 Configuración del Entorno', `
+                Dominio actual: ${currentDomain}<br>
+                Entorno: ${isProduction ? 'Producción' : 'Desarrollo/Test'}<br>
+                Backend URL: ${BACKEND_URL}<br>
+                Protocolo: ${window.location.protocol}
+            `);
+            
+            if (!isProduction && currentDomain !== 'localhost') {
+                addResult('warning', '⚠️ Dominio No Reconocido', 
+                    'Este diagnóstico está optimizado para servicioshogar.com.ar');
+            }
+        }
+
+        async function testAuthentication() {
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/auth/me`, {
+                    method: 'GET',
+                    credentials: 'include',
+                    mode: 'cors'
+                });
+                
+                if (response.status === 401) {
+                    addResult('success', '✅ Sistema de Autenticación', 
+                        'El endpoint de autenticación responde correctamente (401 esperado sin login)');
+                } else if (response.ok) {
+                    const data = await response.json();
+                    addResult('success', '✅ Usuario Autenticado', 
+                        'Hay una sesión activa',
+                        JSON.stringify(data, null, 2));
+                } else {
+                    addResult('warning', '⚠️ Sistema de Autenticación', 
+                        `Respuesta inesperada: ${response.status}`);
+                }
+            } catch (error) {
+                addResult('error', '❌ Sistema de Autenticación', 
+                    'Error al conectar con el sistema de auth',
+                    error.message);
+            }
+        }
+
+        async function runDiagnostic() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+            
+            addResult('info', '🔍 Iniciando Diagnóstico', 
+                'Verificando conexión frontend-backend...');
+
+            // Test 1: Environment Configuration
+            await testEnvironmentConfig();
+            
+            // Test 2: Backend Health
+            const backendHealthy = await testBackendHealth();
+            
+            // Test 3: CORS
+            if (backendHealthy) {
+                await testCORS();
+            }
+            
+            // Test 4: Authentication System
+            if (backendHealthy) {
+                await testAuthentication();
+            }
+            
+            // Summary
+            if (backendHealthy) {
+                addResult('success', '🎉 Diagnóstico Completado', 
+                    'El backend está funcionando correctamente. Si el sitio muestra página blanca, verifica la consola del navegador (F12) para errores específicos del frontend.');
+            } else {
+                addResult('error', '🚨 Problema Detectado', 
+                    'El frontend no puede conectar con el backend. Verifica la configuración de red y las variables de entorno.');
+            }
+        }
+
+        // Auto-run diagnostic when page loads
+        window.addEventListener('load', () => {
+            setTimeout(runDiagnostic, 1000);
+        });
+    </script>
+</body>
+</html>
