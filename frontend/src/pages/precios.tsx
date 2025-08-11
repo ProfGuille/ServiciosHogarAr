@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "wouter";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -175,18 +176,18 @@ export default function Precios() {
             Publica tu solicitud y recibe presupuestos personalizados de profesionales verificados.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a 
+            <Link 
               href="/servicios"
               className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-primary/90 transition-colors"
             >
               Ver Profesionales
-            </a>
-            <a 
+            </Link>
+            <Link 
               href="/contacto"
               className="inline-flex items-center justify-center px-6 py-3 border border-slate-300 text-base font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 transition-colors"
             >
               Contactar Soporte
-            </a>
+            </Link>
           </div>
         </div>
       </div>

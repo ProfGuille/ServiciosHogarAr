@@ -24,7 +24,7 @@ export default function Messages() {
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      window.location.href = '/api/login';
+      window.location.href = '/login';
     }
   }, [isAuthenticated, isLoading]);
 
