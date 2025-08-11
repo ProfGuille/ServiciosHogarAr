@@ -5,7 +5,7 @@ RewriteBase /
 
 # Handle API routes - proxy to backend
 RewriteCond %{REQUEST_URI} ^/api/(.*)$ [NC]
-RewriteRule ^api/(.*)$ https://servicioshogar-backend.onrender.com/api/$1 [P,L]
+RewriteRule ^api/(.*)$ https://servicioshogar-backend-uje1.onrender.com/api/$1 [P,L]
 
 # Handle client-side routing for SPA
 RewriteCond %{REQUEST_FILENAME} !-f
