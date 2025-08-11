@@ -176,8 +176,10 @@ export function Navbar() {
                 </>
               ) : (
                 <div className="flex items-center space-x-2">
-                  <Button variant="ghost" onClick={() => window.location.href = "/api/login"}>
-                    {t('nav.login')}
+                  <Button variant="ghost" asChild>
+                    <Link href="/login">
+                      {t('nav.login')}
+                    </Link>
                   </Button>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -257,9 +259,11 @@ export function Navbar() {
                   <Button 
                     variant="ghost" 
                     className="w-full justify-start"
-                    onClick={() => window.location.href = "/api/login"}
+                    asChild
                   >
-                    Iniciar sesión
+                    <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                      Iniciar sesión
+                    </Link>
                   </Button>
                   <Link href="/register">
                     <Button 

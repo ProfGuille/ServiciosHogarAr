@@ -94,7 +94,7 @@ export default function Landing() {
   };
 
   const handleProviderSignup = () => {
-    window.location.href = "/api/login";
+    window.location.href = "/register-provider";
   };
 
   return (

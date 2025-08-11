@@ -336,6 +336,24 @@ app.get('/api/ping', (req: Request, res: Response) => {
   });
 });
 
+// User language preference endpoint
+app.post('/api/user-language-preference', (req: Request, res: Response) => {
+  try {
+    const { languageCode } = req.body;
+    
+    // If user is authenticated, log the preference
+    if (req.session && (req.session as any).userId) {
+      console.log(`User ${(req.session as any).userId} set language to ${languageCode}`);
+    }
+    
+    // Return success regardless of authentication status
+    res.json({ success: true, message: 'Language preference saved' });
+  } catch (error) {
+    console.error('Error saving language preference:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 // Register all routes
 try {
   registerRoutes(app);

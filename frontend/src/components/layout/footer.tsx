@@ -28,7 +28,7 @@ export function Footer() {
     {
       title: "Para Profesionales",
       links: [
-        { label: "Registrarse como Profesional", href: "/api/login" },
+        { label: "Registrarse como Profesional", href: "/register-provider" },
         { label: "Cómo funciona", href: "/como-funciona" },
         { label: "Guía de precios", href: "/precios" },
       ]
@@ -138,7 +138,7 @@ export function Footer() {
               <div className="w-12 h-12 bg-blue-600/20 rounded-full flex items-center justify-center mb-3">
                 <Phone className="h-6 w-6 text-blue-400" />
               </div>
-              <h4 className="font-semibold text-white mb-1">Soporte 24/7</h4>
+              <h4 className="font-semibold text-white mb-1">Soporte</h4>
               <p className="text-slate-400 text-sm">Estamos aquí para ayudarte en cada paso del proceso</p>
             </div>
             <div className="flex flex-col items-center">

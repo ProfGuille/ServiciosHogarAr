@@ -121,7 +121,7 @@ export default function ReferralApply() {
               <div className="text-center">
                 <p className="text-sm text-muted-foreground">
                   ¿No tienes código?{" "}
-                  <a href="/api/login" className="text-primary hover:underline">
+                  <a href="/register" className="text-primary hover:underline">
                     Regístrate sin código
                   </a>
                 </p>

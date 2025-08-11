@@ -103,7 +103,7 @@ const resources = {
             description: "Pago directo al profesional con máxima seguridad"
           },
           support: {
-            title: "Soporte 24/7",
+            title: "Soporte",
             description: "Estamos aquí para ayudarte cuando lo necesites"
           }
         },
@@ -393,7 +393,7 @@ const resources = {
             description: "Direct payment to professional with maximum security"
           },
           support: {
-            title: "24/7 Support",
+            title: "Support",
             description: "We're here to help you when you need it"
           }
         },

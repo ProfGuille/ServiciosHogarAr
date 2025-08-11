@@ -14,10 +14,9 @@ export default function Seguridad() {
     {
       icon: UserCheck,
       title: "Verificación de Profesionales",
-      description: "Todos los profesionales pasan por verificación de identidad, antecedentes penales y validación de certificaciones profesionales.",
+      description: "Todos los profesionales pasan por verificación de identidad y validación de certificaciones profesionales.",
       features: [
         "Verificación de identidad con DNI",
-        "Chequeo de antecedentes penales",
         "Validación de certificaciones",
         "Referencias comerciales"
       ]

@@ -46,7 +46,7 @@ export default function AnalyticsDashboard() {
   // Redirect to login if not authenticated or not admin
   useEffect(() => {
     if (!isLoading && (!isAuthenticated || user?.userType !== 'admin')) {
-      window.location.href = '/api/login';
+      window.location.href = '/login';
     }
   }, [isAuthenticated, isLoading, user]);
 
