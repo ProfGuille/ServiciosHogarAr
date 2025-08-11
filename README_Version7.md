@@ -1,25 +1,33 @@
 # Proyecto: Plataforma de Vinculación de Clientes y Proveedores
 
-## 🚀 Estado del Despliegue
+# Proyecto: Plataforma de Vinculación de Clientes y Proveedores
 
-✅ **Backend**: Desplegado en Render (https://servicioshogar-backend.onrender.com)  
-✅ **Base de Datos**: Desplegada en Neon PostgreSQL  
-✅ **Frontend**: Listo para despliegue en Hostinger
+## 🚀 Nueva Arquitectura (2025)
 
-## 📦 Despliegue en Hostinger
+✅ **Frontend**: Vercel (vercel.com)  
+✅ **Backend**: Render (https://servicioshogar-backend-uje1.onrender.com)  
+✅ **Base de Datos**: Neon PostgreSQL  
+✅ **Email**: Zoho Mail  
+✅ **DNS/CDN**: Cloudflare  
 
-### Comando Rápido
+> **Migración completada**: Hostinger → Vercel + Cloudflare + Zoho
+
+## 📦 Despliegue
+
+### Frontend (Vercel)
 ```bash
-./deploy-hostinger.sh
+# Instalar Vercel CLI
+npm install -g vercel
+
+# Deploy
+vercel --prod
 ```
 
-### Verificación
-```bash
-./verify-deployment.sh
-```
+### Configuración Completa
+Ver [VERCEL_DEPLOYMENT_GUIDE.md](VERCEL_DEPLOYMENT_GUIDE.md) para instrucciones detalladas.
 
-### Documentación Completa
-Ver [HOSTINGER_DEPLOYMENT_GUIDE.md](HOSTINGER_DEPLOYMENT_GUIDE.md) para instrucciones detalladas.
+### Configuración Legacy (Hostinger)
+Ver [HOSTINGER_DEPLOYMENT_GUIDE.md](HOSTINGER_DEPLOYMENT_GUIDE.md) para referencia histórica.
 
 ## 🔧 Configuración Técnica
 
@@ -28,13 +36,15 @@ Ver [HOSTINGER_DEPLOYMENT_GUIDE.md](HOSTINGER_DEPLOYMENT_GUIDE.md) para instrucc
 - **UI**: Tailwind CSS + shadcn/ui
 - **Estado**: TanStack Query
 - **Routing**: Wouter
-- **Build**: Optimizado para Apache/Hostinger
+- **Deploy**: Vercel (Serverless)
+- **CDN**: Cloudflare
 
 ### Backend
 - **Runtime**: Node.js + Express + TypeScript (ES Modules)
 - **Base de Datos**: PostgreSQL (Neon)
 - **ORM**: Drizzle
-- **Despliegue**: Render
+- **Deploy**: Render
+- **Email**: Zoho SMTP
 - **Build**: Automatizado con corrección de imports ES Module
 
 ## IDs y relaciones
