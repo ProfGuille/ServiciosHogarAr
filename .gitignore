@@ -6,6 +6,7 @@ dist/
 build/
 .out/
 .vite/
+.vercel/
 
 # Logs
 npm-debug.log*
@@ -44,6 +45,9 @@ Thumbs.db
 .expo/
 .expo-shared/
 
+# Vercel
+.vercel/
+
 # Otros
 *.tgz
 
@@ -51,4 +55,7 @@ Thumbs.db
 logs/
 *.log
 db_migration_errors.log
+
+# Legacy backup files
+*.backup
 

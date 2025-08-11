@@ -1,0 +1,17 @@
+# Migration Note: .htaccess File
+
+This file was removed during the migration from Hostinger to Vercel.
+The .htaccess configuration has been replaced by vercel.json configuration.
+
+## Original .htaccess functionality now handled by:
+- **API Proxying**: `vercel.json` rewrites section
+- **SPA Routing**: `vercel.json` rewrites for client-side routing
+- **Security Headers**: `vercel.json` headers section
+- **Compression**: Handled automatically by Vercel
+- **Caching**: Handled by Cloudflare CDN
+
+## Backup location:
+The original .htaccess file is backed up as `.htaccess.backup` for reference.
+
+## Migration date:
+$(date)
