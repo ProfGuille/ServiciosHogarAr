@@ -99,6 +99,27 @@ function Router() {
       <Route path="/register-provider" component={RegisterProvider} />
       <Route path="/legal-compliance" component={LegalCompliance} />
       <Route path="/referral" component={ReferralApply} />
+      {/* Specific service routes MUST come BEFORE the generic /servicios/:id route */}
+      <Route path="/servicios/plomeria" component={ServiciosPlomeria} />
+      <Route path="/servicios/electricidad" component={ServiciosElectricidad} />
+      <Route path="/servicios/pintura" component={ServiciosPintura} />
+      <Route path="/servicios/limpieza" component={ServiciosLimpieza} />
+      <Route path="/servicios/carpinteria" component={ServiciosCarpinteria} />
+      <Route path="/servicios/gasista" component={ServiciosGasista} />
+      <Route path="/servicios/albanil" component={ServiciosAlbanil} />
+      <Route path="/servicios/tecnico-aire" component={ServiciosTecnicoAire} />
+      <Route path="/servicios/jardineria" component={ServiciosJardineria} />
+      <Route path="/servicios/cerrajero" component={ServiciosCerrajero} />
+      <Route path="/servicios/mudanzas" component={ServiciosMudanzas} />
+      <Route path="/servicios/herrero" component={ServiciosHerrero} />
+      <Route path="/servicios/techista" component={ServiciosTechista} />
+      <Route path="/servicios/fumigador" component={ServiciosFumigador} />
+      <Route path="/servicios/tecnico-pc" component={ServiciosTecnicoPc} />
+      <Route path="/servicios/pequenos-arreglos" component={ServiciosPequenosArreglos} />
+      <Route path="/servicios/tapicero" component={ServiciosTapicero} />
+      <Route path="/servicios/vidriero" component={ServiciosVidriero} />
+      <Route path="/servicios/instalador-solar" component={ServiciosInstaladorSolar} />
+      {/* Generic routes AFTER specific ones */}
       <Route path="/servicios/:id" component={ServiceDetail} />
       <Route path="/profesional/:id" component={ProviderProfile} />
       <Route path="/test-payments" component={TestPayments} />
@@ -119,25 +140,6 @@ function Router() {
       <Route path="/carreras" component={Carreras} />
       <Route path="/prensa" component={Prensa} />
       <Route path="/precios" component={Precios} />
-      <Route path="/servicios/plomeria" component={ServiciosPlomeria} />
-      <Route path="/servicios/electricidad" component={ServiciosElectricidad} />
-      <Route path="/servicios/pintura" component={ServiciosPintura} />
-      <Route path="/servicios/limpieza" component={ServiciosLimpieza} />
-      <Route path="/servicios/carpinteria" component={ServiciosCarpinteria} />
-      <Route path="/servicios/gasista" component={ServiciosGasista} />
-      <Route path="/servicios/albanil" component={ServiciosAlbanil} />
-      <Route path="/servicios/tecnico-aire" component={ServiciosTecnicoAire} />
-      <Route path="/servicios/jardineria" component={ServiciosJardineria} />
-      <Route path="/servicios/cerrajero" component={ServiciosCerrajero} />
-      <Route path="/servicios/mudanzas" component={ServiciosMudanzas} />
-      <Route path="/servicios/herrero" component={ServiciosHerrero} />
-      <Route path="/servicios/techista" component={ServiciosTechista} />
-      <Route path="/servicios/fumigador" component={ServiciosFumigador} />
-      <Route path="/servicios/tecnico-pc" component={ServiciosTecnicoPc} />
-      <Route path="/servicios/pequenos-arreglos" component={ServiciosPequenosArreglos} />
-      <Route path="/servicios/tapicero" component={ServiciosTapicero} />
-      <Route path="/servicios/vidriero" component={ServiciosVidriero} />
-      <Route path="/servicios/instalador-solar" component={ServiciosInstaladorSolar} />
 
       {/* Authentication-dependent routes */}
       {isLoading || !isAuthenticated ? (
