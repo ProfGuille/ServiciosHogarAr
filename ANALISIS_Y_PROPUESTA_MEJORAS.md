@@ -50,19 +50,29 @@
 
 ## 2. ANÁLISIS DEL PROYECTO DE REFERENCIA
 
-### Insights del Proyecto LiquidadordesueldosArg
+### 🔍 Insights del Proyecto Recomendame-proyectoCursoFullstack
 
-**Fortalezas arquitecturales del proyecto de referencia:**
-- Estructura fullstack clara con separación frontend/backend
-- Configuración simplificada con archivos .env bien documentados
-- Scripts npm para desarrollo concurrente (backend + frontend)
-- Documentación clara en README con instrucciones paso a paso
+**Análisis del proyecto de @ProfGuille: Plataforma de intercambio para búsqueda y ofrecimiento de oficios y profesiones**
 
-**Patrones de desarrollo aplicables:**
-- Gestión de empleados con CRUD completo
-- Formularios complejos con validación
-- Generación de reportes y recibos detallados
-- Lógica de negocio argentina específica (convenios, cálculos legales)
+**Fortalezas arquitecturales y UX identificadas:**
+- **Dualidad clara**: Separación visual entre "BUSCO A ALGUIEN RECOMENDADO" vs "OFREZCO MIS SERVICIOS"
+- **Selección visual intuitiva**: Grid de servicios con imágenes representativas por categoría
+- **Navegación directa**: Flujo simple sin pasos intermedios innecesarios
+- **Filtrado efectivo**: Sistema de categorías con filtrado JavaScript en tiempo real
+- **Enfoque local**: Terminología y servicios adaptados al mercado argentino
+
+**Categorías de servicios analizadas (20+ rubros):**
+- Electricistas, Pintores, Plomeros, Gasistas, Albañiles, Cerrajeros
+- Aire Acondicionado, Reparación de Electrodomésticos, Heladeras
+- Herrero, Carpintero, Techista, Destapacañerías
+- Limpieza General, Mudanzas y Fletes, Seguridad y Alarmas
+- Jardinero y Paisajista, Plastificador, Limpieza de Alfombras, Cuidado de Adultos
+
+**Patrones UX aplicables a ServiciosHogarAr:**
+- **Claridad en propósito de usuario**: Distinción inmediata entre buscar vs ofrecer
+- **Selección visual de servicios**: Imágenes como elemento principal de navegación
+- **Categorización efectiva**: Nombres de servicios claros y reconocibles localmente
+- **Simplicidad en la experiencia**: Menos pasos, más acción directa
 
 ## 3. PROPUESTA CONCRETA DE MEJORAS
 
@@ -79,16 +89,17 @@
 **Justificación**: Aumenta confianza y localización del contenido
 
 #### 3.2 Mejora de Componentes Visuales
-**Inspirado en**: Patrones de UI modernos y LiquidadordesueldosArg
+**Inspirado en**: Patrones UX del proyecto Recomendame y mejores prácticas modernas
 - **Cards de Servicio Mejoradas**: Añadir badges de "Más Solicitado", "Urgente", "Disponible 24/7"
 - **Testimonios Visuales**: Sección con fotos de clientes reales y casos de éxito
 - **Mapa Interactivo**: Visualización de proveedores disponibles por zona
-- **Calculadora de Presupuestos**: Tool interactivo para estimación de costos
+- **Calculadora de Presupuestos**: Tool interactivo para estimación de costos (inspirada en la simplicidad de navegación de Recomendame)
 
 ### 🚀 Mejoras Funcionales Prioritarias
 
 #### 3.3 Sistema de Registro y Autenticación Mejorado
-**Inspirado en**: Flujo simplificado de LiquidadordesueldosArg
+**Inspirado en**: Simplicidad del flujo de Recomendame (Busco/Ofrezco)
+- **Diferenciación Clara**: "¿Buscas un servicio?" vs "¿Ofreces servicios?" como primer paso
 - **Registro Social**: Integración con Google/Facebook para onboarding rápido
 - **Verificación por SMS**: Validación de teléfono para mayor confianza
 - **Onboarding Progresivo**: Wizard de 3 pasos para proveedores nuevos
@@ -230,6 +241,28 @@
   - Actividad reciente con estados y timestamps
   - Recomendaciones personalizadas basadas en rendimiento
 - **Valor agregado**: Mejor gestión y engagement de usuarios
+
+#### 6.5 Selector de Tipo de Usuario (`UserTypeSelector`)
+**Archivo**: `/frontend/src/components/ui/UserTypeSelector.tsx`
+**Inspirado en**: Patrón "Busco/Ofrezco" del proyecto Recomendame
+- **Funcionalidad**: Diferenciación clara entre tipos de usuarios
+- **Características**:
+  - "BUSCO A ALGUIEN RECOMENDADO" vs "OFREZCO MIS SERVICIOS"
+  - Iconografía distintiva (Search vs Briefcase)
+  - Colores diferenciados (azul vs verde)
+  - Descripciones claras del propósito
+- **Valor agregado**: Elimina confusión sobre el objetivo del usuario
+
+#### 6.6 Selector Visual de Servicios (`ServiceSelector`)
+**Archivo**: `/frontend/src/components/ui/ServiceSelector.tsx`
+**Inspirado en**: Grid visual de servicios del proyecto Recomendame
+- **Funcionalidad**: Selección intuitiva de servicios con imágenes
+- **Características**:
+  - Grid responsive con imágenes por servicio
+  - Estados hover y selección visual
+  - Categorización clara y reconocible
+  - Navegación directa sin pasos intermedios
+- **Valor agregado**: UX más intuitiva para selección de servicios
 
 ### 🚀 Integración en Landing Page
 
