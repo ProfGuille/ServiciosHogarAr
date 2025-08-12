@@ -24,10 +24,10 @@ const ServiceDemo: React.FC = () => {
             Demo: Componentes UX inspirados en Recomendame
           </h1>
           <p className="text-xl text-center text-gray-600 mb-2">
-            Implementación del patrón "Busco/Ofrezco" y selección visual de servicios
+            Implementación completa con TODOS los 20 servicios del proyecto Recomendame
           </p>
           <p className="text-sm text-center text-gray-500">
-            Imágenes tomadas del proyecto Recomendame de @ProfGuille
+            Todas las imágenes reales tomadas del proyecto Recomendame de @ProfGuille
           </p>
         </div>
 

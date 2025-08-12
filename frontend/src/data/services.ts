@@ -1,5 +1,6 @@
-// Service data with images from Recomendame project
+// Service data with ALL images from Recomendame project
 // Images sourced from ProfGuille/Recomendame-proyectoCursoFullstack
+// Complete implementation with all 20 services from original project
 
 interface Service {
   id: string;
@@ -10,6 +11,7 @@ interface Service {
 }
 
 export const servicesList: Service[] = [
+  // Construcción y Reparaciones
   {
     id: 'electricista',
     name: 'Electricista',
@@ -50,8 +52,31 @@ export const servicesList: Service[] = [
     name: 'Gasista',
     image: '/images/services/gasista.jpg',
     description: 'Instalación y reparación de gas',
-    category: 'hogar'
+    category: 'construccion'
   },
+  {
+    id: 'herrero',
+    name: 'Herrero',
+    image: '/images/services/herrero.jpg',
+    description: 'Trabajos en metal y soldadura',
+    category: 'construccion'
+  },
+  {
+    id: 'techista',
+    name: 'Techista',
+    image: '/images/services/techista.jpg',
+    description: 'Reparación y mantenimiento de techos',
+    category: 'construccion'
+  },
+  {
+    id: 'plastificador',
+    name: 'Plastificador',
+    image: '/images/services/plastificador.jpg',
+    description: 'Plastificado y pulido de pisos',
+    category: 'construccion'
+  },
+  
+  // Hogar y Electrodomésticos
   {
     id: 'aire_acondicionado',
     name: 'Aire Acondicionado',
@@ -60,11 +85,78 @@ export const servicesList: Service[] = [
     category: 'hogar'
   },
   {
+    id: 'heladeras',
+    name: 'Reparación de Heladeras',
+    image: '/images/services/heladeras.jpg',
+    description: 'Reparación de heladeras y freezers',
+    category: 'hogar'
+  },
+  {
+    id: 'reparacion_electrodomesticos',
+    name: 'Reparación de Electrodomésticos',
+    image: '/images/services/reparacion_electrodomesticos.jpg',
+    description: 'Reparación de lavarropas, microondas y más',
+    category: 'hogar'
+  },
+  {
+    id: 'destapacanerias',
+    name: 'Destapacañerías',
+    image: '/images/services/destapacanerias.jpg',
+    description: 'Destapado de cañerías y desagües',
+    category: 'hogar'
+  },
+  
+  // Limpieza y Mantenimiento
+  {
+    id: 'limpieza_general',
+    name: 'Limpieza General',
+    image: '/images/services/limpieza_general.jpg',
+    description: 'Limpieza profunda de hogares y oficinas',
+    category: 'limpieza'
+  },
+  {
+    id: 'limpieza_alfombras',
+    name: 'Limpieza de Alfombras',
+    image: '/images/services/limpieza_alfombras.jpg',
+    description: 'Limpieza de alfombras y tapizados',
+    category: 'limpieza'
+  },
+  {
+    id: 'jardinero',
+    name: 'Jardinero y Paisajista',
+    image: '/images/services/jardinero.jpg',
+    description: 'Mantenimiento de jardines y paisajismo',
+    category: 'jardin'
+  },
+  
+  // Seguridad y Servicios
+  {
     id: 'cerrajero',
     name: 'Cerrajero',
     image: '/images/services/cerrajero.jpg',
     description: 'Cerraduras y seguridad',
     category: 'seguridad'
+  },
+  {
+    id: 'seguridad_alarmas',
+    name: 'Seguridad y Alarmas',
+    image: '/images/services/seguridad_alarmas.jpg',
+    description: 'Instalación de sistemas de seguridad',
+    category: 'seguridad'
+  },
+  {
+    id: 'mudanzas_fletes',
+    name: 'Mudanzas y Fletes',
+    image: '/images/services/mudanzas_fletes.jpg',
+    description: 'Servicios de mudanza y transporte',
+    category: 'transporte'
+  },
+  {
+    id: 'cuidado_adultos',
+    name: 'Cuidado de Adultos',
+    image: '/images/services/cuidado_adultos.jpg',
+    description: 'Cuidado y asistencia de adultos mayores',
+    category: 'cuidados'
   }
 ];
 

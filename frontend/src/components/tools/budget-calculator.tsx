@@ -8,14 +8,33 @@ import { Slider } from '@/components/ui/slider';
 import { Calculator, Home, Zap, Wrench, MapPin } from 'lucide-react';
 
 const serviceBaseRates = {
+  // Construcción y Reparaciones
   plomeria: { min: 3000, max: 8000, unit: 'por servicio' },
   electricidad: { min: 2500, max: 6000, unit: 'por servicio' },
-  limpieza: { min: 1500, max: 3500, unit: 'por hora' },
-  carpinteria: { min: 4000, max: 12000, unit: 'por proyecto' },
   pintura: { min: 2000, max: 5000, unit: 'por m²' },
   albanil: { min: 5000, max: 15000, unit: 'por día' },
+  carpinteria: { min: 4000, max: 12000, unit: 'por proyecto' },
   gasista: { min: 3500, max: 9000, unit: 'por servicio' },
+  herrero: { min: 6000, max: 18000, unit: 'por proyecto' },
+  techista: { min: 8000, max: 25000, unit: 'por proyecto' },
+  plastificador: { min: 1500, max: 3000, unit: 'por m²' },
+  
+  // Hogar y Electrodomésticos
+  aire_acondicionado: { min: 4000, max: 12000, unit: 'por equipo' },
+  heladeras: { min: 2500, max: 8000, unit: 'por reparación' },
+  reparacion_electrodomesticos: { min: 2000, max: 7000, unit: 'por equipo' },
+  destapacanerias: { min: 2000, max: 5000, unit: 'por servicio' },
+  
+  // Limpieza y Mantenimiento
+  limpieza_general: { min: 1500, max: 3500, unit: 'por hora' },
+  limpieza_alfombras: { min: 3000, max: 8000, unit: 'por m²' },
   jardineria: { min: 2000, max: 4500, unit: 'por sesión' },
+  
+  // Seguridad y Servicios
+  cerrajero: { min: 2500, max: 7000, unit: 'por servicio' },
+  seguridad_alarmas: { min: 8000, max: 30000, unit: 'por sistema' },
+  mudanzas_fletes: { min: 5000, max: 20000, unit: 'por viaje' },
+  cuidado_adultos: { min: 1200, max: 2500, unit: 'por hora' },
 };
 
 const zoneMultipliers = {
@@ -86,17 +105,29 @@ export function BudgetCalculator() {
                   Electricidad
                 </div>
               </SelectItem>
-              <SelectItem value="limpieza">
-                <div className="flex items-center gap-2">
-                  <Home className="h-4 w-4" />
-                  Limpieza
-                </div>
-              </SelectItem>
-              <SelectItem value="carpinteria">Carpintería</SelectItem>
               <SelectItem value="pintura">Pintura</SelectItem>
               <SelectItem value="albanil">Albañilería</SelectItem>
+              <SelectItem value="carpinteria">Carpintería</SelectItem>
               <SelectItem value="gasista">Gasista</SelectItem>
+              <SelectItem value="herrero">Herrero</SelectItem>
+              <SelectItem value="techista">Techista</SelectItem>
+              <SelectItem value="plastificador">Plastificador</SelectItem>
+              <SelectItem value="aire_acondicionado">Aire Acondicionado</SelectItem>
+              <SelectItem value="heladeras">Reparación de Heladeras</SelectItem>
+              <SelectItem value="reparacion_electrodomesticos">Reparación de Electrodomésticos</SelectItem>
+              <SelectItem value="destapacanerias">Destapacañerías</SelectItem>
+              <SelectItem value="limpieza_general">
+                <div className="flex items-center gap-2">
+                  <Home className="h-4 w-4" />
+                  Limpieza General
+                </div>
+              </SelectItem>
+              <SelectItem value="limpieza_alfombras">Limpieza de Alfombras</SelectItem>
               <SelectItem value="jardineria">Jardinería</SelectItem>
+              <SelectItem value="cerrajero">Cerrajero</SelectItem>
+              <SelectItem value="seguridad_alarmas">Seguridad y Alarmas</SelectItem>
+              <SelectItem value="mudanzas_fletes">Mudanzas y Fletes</SelectItem>
+              <SelectItem value="cuidado_adultos">Cuidado de Adultos</SelectItem>
             </SelectContent>
           </Select>
         </div>
