@@ -7,6 +7,7 @@ import messagesRoutes from './messages.js';
 import searchRoutes from './search.js';
 import geolocationRoutes from './geolocation.js';
 import searchSuggestionsRoutes from './search-suggestions.js';
+import categoriesRoutes from './categories.js';
 
 export function registerRoutes(app: express.Express) {
   console.log('Registrando rutas de la API...');
@@ -19,6 +20,9 @@ export function registerRoutes(app: express.Express) {
   app.use('/api/clients', clientsRoutes);
   app.use('/api/conversations', conversationsRoutes);
   app.use('/api/messages', messagesRoutes);
+  
+  // Categories routes - ensure it's loaded early
+  app.use('/api/categories', categoriesRoutes);
   
   // MVP3 Phase 3: Search and Geolocation routes
   app.use('/api/search', searchRoutes);
@@ -112,12 +116,6 @@ export function registerRoutes(app: express.Express) {
       app.use('/api/payments', module.default);
     }).catch(() => {
       console.log('⚠️ payments routes not available yet');
-    });
-    
-    import('./categories.js').then(module => {
-      app.use('/api/categories', module.default);
-    }).catch(() => {
-      console.log('⚠️ categories routes not available yet');
     });
 
   } catch (error) {

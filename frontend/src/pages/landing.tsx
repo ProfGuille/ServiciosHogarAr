@@ -74,7 +74,14 @@ export default function Landing() {
 
   const { data: featuredProviders } = useQuery({
     queryKey: ["/api/providers"],
-    queryFn: () => fetch("/api/providers?limit=4&isVerified=true").then(res => res.json()),
+    queryFn: () => fetch("/api/providers?limit=4&isVerified=true").then(res => {
+      if (!res.ok) {
+        throw new Error('Providers API not available');
+      }
+      return res.json();
+    }),
+    retry: false,
+    enabled: false, // Disable this query for now since providers API is not implemented
   });
 
   const handleSearch = () => {
@@ -118,37 +125,39 @@ export default function Landing() {
                 <CardContent className="p-0">
                   <div className="grid md:grid-cols-3 gap-4">
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-slate-700">¿Qué servicio necesitas?</label>
+                      <label className="text-sm font-medium text-slate-700 block">{t('forms.serviceRequest.serviceType')}</label>
                       <div className="relative">
-                        <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
                         <Input
                           type="text"
-                          placeholder="Ej: Plomería, Electricidad..."
-                          className="pl-10"
+                          placeholder={t('services.searchPlaceholder')}
+                          className="pl-10 h-12"
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                         />
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-slate-700">Ubicación</label>
+                      <label className="text-sm font-medium text-slate-700 block">{t('common.city')}</label>
                       <div className="relative">
-                        <MapPin className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                        <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
                         <Input
                           type="text"
-                          placeholder="Ciudad o código postal"
-                          className="pl-10"
+                          placeholder={t('forms.serviceRequest.location')}
+                          className="pl-10 h-12"
                           value={location}
                           onChange={(e) => setLocation(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                         />
                       </div>
                     </div>
                     <div className="flex items-end">
                       <Button 
-                        className="w-full bg-secondary text-white hover:bg-green-700"
+                        className="w-full bg-secondary text-white hover:bg-green-700 h-12 text-base font-medium"
                         onClick={handleSearch}
                       >
-                        Buscar Servicios
+                        {t('common.search')} {t('services.title')}
                       </Button>
                     </div>
                   </div>
@@ -247,52 +256,54 @@ export default function Landing() {
       </section>
 
       {/* Featured Providers */}
-      <section className="py-16 bg-slate-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">Profesionales destacados</h2>
-            <p className="text-lg text-slate-600">Conocé a algunos de nuestros mejores profesionales verificados</p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredProviders?.map((provider) => (
-              <Link key={provider.id} href={`/profesional/${provider.id}`}>
-                <Card className="shadow-sm hover:shadow-md transition-shadow cursor-pointer h-full">
-                  <CardContent className="p-6 text-center">
-                  <img 
-                    src={provider.profileImageUrl || "https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300"} 
-                    alt={`${provider.businessName} - Profesional`} 
-                    className="w-20 h-20 rounded-full mx-auto mb-4 object-cover"
-                  />
-                  <h3 className="font-semibold text-slate-900 mb-1">{provider.businessName}</h3>
-                  <p className="text-sm text-slate-600 mb-3">{provider.city}</p>
-                  <div className="flex items-center justify-center mb-3">
-                    <div className="flex text-yellow-400">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="h-4 w-4 fill-current" />
-                      ))}
-                    </div>
-                    <span className="text-sm text-slate-600 ml-2">{provider.rating} ({provider.totalReviews} reseñas)</span>
-                  </div>
-                  <div className="text-sm text-slate-500 space-y-1">
-                    {provider.isVerified && (
-                      <div className="flex items-center justify-center">
-                        <UserCheck className="h-4 w-4 text-secondary mr-2" />
-                        <span>Verificado</span>
+      {featuredProviders && featuredProviders.length > 0 && (
+        <section className="py-16 bg-slate-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-slate-900 mb-4">Profesionales destacados</h2>
+              <p className="text-lg text-slate-600">Conocé a algunos de nuestros mejores profesionales verificados</p>
+            </div>
+            
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featuredProviders?.map((provider) => (
+                <Link key={provider.id} href={`/profesional/${provider.id}`}>
+                  <Card className="shadow-sm hover:shadow-md transition-shadow cursor-pointer h-full">
+                    <CardContent className="p-6 text-center">
+                    <img 
+                      src={provider.profileImageUrl || "https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300"} 
+                      alt={`${provider.businessName} - Profesional`} 
+                      className="w-20 h-20 rounded-full mx-auto mb-4 object-cover"
+                    />
+                    <h3 className="font-semibold text-slate-900 mb-1">{provider.businessName}</h3>
+                    <p className="text-sm text-slate-600 mb-3">{provider.city}</p>
+                    <div className="flex items-center justify-center mb-3">
+                      <div className="flex text-yellow-400">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="h-4 w-4 fill-current" />
+                        ))}
                       </div>
-                    )}
-                    <div className="flex items-center justify-center">
-                      <Shield className="h-4 w-4 text-primary mr-2" />
-                      <span>Asegurado</span>
+                      <span className="text-sm text-slate-600 ml-2">{provider.rating} ({provider.totalReviews} reseñas)</span>
                     </div>
-                  </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+                    <div className="text-sm text-slate-500 space-y-1">
+                      {provider.isVerified && (
+                        <div className="flex items-center justify-center">
+                          <UserCheck className="h-4 w-4 text-secondary mr-2" />
+                          <span>Verificado</span>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-center">
+                        <Shield className="h-4 w-4 text-primary mr-2" />
+                        <span>Asegurado</span>
+                      </div>
+                    </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Trust Indicators */}
       <section className="py-16 bg-white">
