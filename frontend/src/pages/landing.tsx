@@ -35,6 +35,8 @@ import {
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { TestimonialSection } from "@/components/sections/testimonial-section";
+import { BudgetCalculator } from "@/components/tools/budget-calculator";
 
 const serviceIcons = {
   plomeria: Wrench,
@@ -304,6 +306,22 @@ export default function Landing() {
           </div>
         </section>
       )}
+
+      {/* Budget Calculator Section */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">¿Cuánto podría costar tu proyecto?</h2>
+            <p className="text-lg text-slate-600">Obtén una estimación inmediata de tu presupuesto</p>
+          </div>
+          <div className="flex justify-center">
+            <BudgetCalculator />
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonial Section */}
+      <TestimonialSection />
 
       {/* Trust Indicators */}
       <section className="py-16 bg-white">
