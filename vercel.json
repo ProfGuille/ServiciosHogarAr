@@ -4,7 +4,7 @@
   "outputDirectory": "frontend/dist",
   "installCommand": "npm ci",
   "framework": null,
-  "ignoreCommand": "git rev-parse --abbrev-ref HEAD | grep -E '^(main|copilot/.*)$' -q; [ $? -ne 0 ]",
+  "ignoreCommand": "git rev-parse --abbrev-ref HEAD | grep -E '^(master|main|copilot/.*)$' -q; [ $? -ne 0 ]",
   "rewrites": [
     {
       "source": "/api/(.*)",
