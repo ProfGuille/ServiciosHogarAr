@@ -92,7 +92,7 @@ export default function ComoFunciona() {
               <a href="/servicios">Buscar servicios</a>
             </Button>
             <Button variant="outline" size="lg" asChild>
-              <a href="/api/login">Registrarse como profesional</a>
+              <a href="/register-provider">Registrarse como profesional</a>
             </Button>
           </div>
         </div>

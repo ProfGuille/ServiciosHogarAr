@@ -192,4 +192,10 @@ router.get('/token', requireAuth, async (req: any, res: Response) => {
   }
 });
 
+// Redirect route for legacy /api/login links
+router.get('/login', (req: Request, res: Response) => {
+  // Redirect to the register-provider page
+  res.redirect('/register-provider');
+});
+
 export default router;

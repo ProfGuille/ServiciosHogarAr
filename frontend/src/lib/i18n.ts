@@ -103,7 +103,7 @@ const resources = {
             description: "Pago directo al profesional con máxima seguridad"
           },
           support: {
-            title: "Soporte 24/7",
+            title: "Soporte",
             description: "Estamos aquí para ayudarte cuando lo necesites"
           }
         },
@@ -209,7 +209,7 @@ const resources = {
             description: "Servicios de mudanza y transporte"
           }
         },
-        searchPlaceholder: "Buscar servicios...",
+        searchPlaceholder: "Ej: Plomería, Electricidad...",
         noResults: "No se encontraron servicios",
         viewDetails: "Ver Detalles",
         requestService: "Solicitar Servicio"
@@ -218,7 +218,7 @@ const resources = {
       forms: {
         serviceRequest: {
           title: "Solicitar Servicio",
-          serviceType: "Tipo de Servicio",
+          serviceType: "¿Qué servicio necesitas?",
           title_field: "Título del Trabajo",
           description_field: "Descripción Detallada",
           budget: "Presupuesto Estimado",
@@ -227,7 +227,7 @@ const resources = {
           normal: "Normal",
           flexible: "Flexible",
           scheduledDate: "Fecha Programada",
-          location: "Ubicación",
+          location: "Ciudad o código postal",
           contact: "Información de Contacto",
           submit: "Enviar Solicitud",
           success: "¡Solicitud enviada exitosamente!",
@@ -393,7 +393,7 @@ const resources = {
             description: "Direct payment to professional with maximum security"
           },
           support: {
-            title: "24/7 Support",
+            title: "Support",
             description: "We're here to help you when you need it"
           }
         },
@@ -499,7 +499,7 @@ const resources = {
             description: "Moving and transportation services"
           }
         },
-        searchPlaceholder: "Search services...",
+        searchPlaceholder: "E.g.: Plumbing, Electrical...",
         noResults: "No services found",
         viewDetails: "View Details",
         requestService: "Request Service"
@@ -508,7 +508,7 @@ const resources = {
       forms: {
         serviceRequest: {
           title: "Request Service",
-          serviceType: "Service Type",
+          serviceType: "What service do you need?",
           title_field: "Job Title",
           description_field: "Detailed Description",
           budget: "Estimated Budget",
@@ -517,7 +517,7 @@ const resources = {
           normal: "Normal",
           flexible: "Flexible",
           scheduledDate: "Scheduled Date",
-          location: "Location",
+          location: "City or postal code",
           contact: "Contact Information",
           submit: "Submit Request",
           success: "Request submitted successfully!",
@@ -592,11 +592,14 @@ i18n
   .init({
     resources,
     fallbackLng: 'es',
+    lng: 'es', // Force Spanish as default language
     debug: process.env.NODE_ENV === 'development',
     
     detection: {
-      order: ['localStorage', 'navigator', 'htmlTag'],
+      order: ['localStorage', 'htmlTag', 'navigator'], // Prioritize localStorage and htmlTag over navigator
+      lookupLocalStorage: 'i18nextLng',
       caches: ['localStorage'],
+      excludeCacheFor: ['cimode'], // Language detection will always overwrite the cache, exclude cimode
     },
 
     interpolation: {

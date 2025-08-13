@@ -1,10 +1,15 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
-  "name": "servicioshogar",
-  "buildCommand": "cd frontend && npm run build",
+  "builds": [
+    {
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "dist" }
+    }
+  ],
+  "buildCommand": "cd frontend && npm install && npm run build",
   "outputDirectory": "frontend/dist",
-  "framework": "vite",
+  "ignoreCommand": "git rev-parse --abbrev-ref HEAD | grep -v '^main$'",
   "rewrites": [
     {
       "source": "/api/(.*)",
