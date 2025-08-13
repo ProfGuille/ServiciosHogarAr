@@ -1,15 +1,10 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "frontend/package.json",
-      "use": "@vercel/static-build",
-      "config": { "distDir": "dist" }
-    }
-  ],
-  "buildCommand": "cd frontend && npm install && npm run build",
+  "buildCommand": "cd frontend && npm ci && npm run build",
   "outputDirectory": "frontend/dist",
-  "ignoreCommand": "git rev-parse --abbrev-ref HEAD | grep -v '^main$'",
+  "installCommand": "npm ci",
+  "framework": null,
+  "ignoreCommand": "git rev-parse --abbrev-ref HEAD | grep -E '^(main|copilot/.*)$' -q; [ $? -ne 0 ]",
   "rewrites": [
     {
       "source": "/api/(.*)",

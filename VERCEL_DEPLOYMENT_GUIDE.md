@@ -8,6 +8,20 @@
 ✅ **Email**: Zoho (reemplaza SMTP genérico)  
 ✅ **DNS/CDN**: Cloudflare (nuevo)  
 
+## 🔧 Configuración de Ramas
+
+### Despliegue Automático
+Vercel está configurado para desplegar automáticamente desde:
+- ✅ **main** - Producción principal
+- ✅ **copilot/*** - Ramas de Copilot para testing
+
+### Ramas Ignoradas
+- ❌ **feature/*** - Ramas de desarrollo
+- ❌ **dev** - Rama de desarrollo
+- ❌ **test/*** - Ramas de testing manual
+
+> **Nota**: La configuración de ramas se maneja en `vercel.json` mediante el `ignoreCommand`
+
 ## 🚀 Instrucciones de Despliegue
 
 ### 1. Configuración de Vercel
