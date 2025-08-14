@@ -3,6 +3,10 @@
 # Test script to validate Vercel configuration
 echo "🧪 Testing Vercel configuration..."
 echo "==============================================="
+echo "⚠️  IMPORTANT: For Vercel deployment, ensure Root Directory"
+echo "   setting is EMPTY in Vercel dashboard settings!"
+echo "==============================================="
+echo ""
 
 # Test install command
 echo "📦 Testing install command..."
