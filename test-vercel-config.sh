@@ -11,18 +11,16 @@ echo "📝 Test 1: Branch Detection"
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 echo "Current branch: $CURRENT_BRANCH"
 
-# Test 2: Test ignore command logic
+# Test 2: Dashboard Configuration Status
 echo ""
-echo "📝 Test 2: Ignore Command Logic"
-git rev-parse --abbrev-ref HEAD | grep -E '^(main|copilot/.*)$' -q
-MATCH_RESULT=$?
-echo "Branch matches pattern (main|copilot/*): $([[ $MATCH_RESULT -eq 0 ]] && echo "YES" || echo "NO")"
-
-# Test ignore command (should return 1 for deploy, 0 for ignore)
-git rev-parse --abbrev-ref HEAD | grep -v -E '^(main|copilot/)'
-IGNORE_RESULT=$?
-echo "Vercel ignore command result: $IGNORE_RESULT (0=ignore, 1=deploy)"
-echo "Will Vercel deploy? $([[ $IGNORE_RESULT -eq 0 ]] && echo "NO ❌" || echo "YES ✅")"
+echo "📝 Test 2: Deployment Configuration"
+echo "⚠️  Important: This project uses Vercel Dashboard settings for deployment control."
+echo "Vercel Dashboard Settings:"
+echo "  - Ignored Build Step: Custom Command"
+echo "  - Command: echo \"No ignored build step\"; exit 1"
+echo "  - Result: ALL branches will deploy (exit 1 = always deploy)"
+echo ""
+echo "Current branch '$CURRENT_BRANCH' will deploy: ✅ YES"
 
 # Test 3: Validate vercel.json syntax
 echo ""
@@ -105,8 +103,11 @@ echo "🎉 All tests completed!"
 echo ""
 echo "📋 Summary:"
 echo "- Branch: $CURRENT_BRANCH"
-echo "- Will deploy: $([[ $IGNORE_RESULT -eq 0 ]] && echo "NO" || echo "YES")"
+echo "- Will deploy: YES (Dashboard setting: always deploy)"
 echo "- Build: Working"
 echo "- Configuration: Valid"
 echo ""
 echo "✅ Ready for Vercel deployment!"
+echo ""
+echo "📌 Note: Deployment behavior is controlled by Vercel Dashboard settings,"
+echo "   not by ignoreCommand in vercel.json (which has been removed)."
