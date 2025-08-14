@@ -3,6 +3,11 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import bcrypt from "bcrypt";
 
+// Import route modules for search functionality
+import searchRoutes from './routes/search.js';
+import searchSuggestionsRoutes from './routes/search-suggestions.js';
+import categoriesRoutes from './routes/categories.js';
+
 const app = express();
 
 // Basic middleware
@@ -83,6 +88,11 @@ app.get('/api/health', (req, res) => {
 app.get('/api/test', (req, res) => {
   res.json({ message: 'Backend conectado correctamente', timestamp: new Date().toISOString() });
 });
+
+// Mount search and category routes for core functionality
+app.use('/api/search', searchRoutes);
+app.use('/api/search-suggestions', searchSuggestionsRoutes);
+app.use('/api/categories', categoriesRoutes);
 
 // Auth endpoints
 app.post('/api/auth/login', async (req, res) => {

@@ -96,6 +96,123 @@ async function searchProviders(query: any) {
   const limitNum = parseInt(limit as string);
   const offsetNum = parseInt(offset as string);
 
+  // If database is not available, return mock search results
+  if (!db) {
+    const mockProviders = [
+      {
+        id: 1,
+        businessName: "Plomería Buenos Aires",
+        businessDescription: "Servicio profesional de plomería con más de 10 años de experiencia",
+        averageRating: "4.8",
+        totalReviews: 45,
+        isVerified: true,
+        credits: 25,
+        city: "Buenos Aires",
+        province: "Buenos Aires",
+        phone: "+54 11 1234-5678",
+        email: "plomeria@servicioshogar.com.ar",
+        lastActive: new Date()
+      },
+      {
+        id: 2,
+        businessName: "Electricidad Rápida",
+        businessDescription: "Electricista matriculado, servicios urgentes 24hs",
+        averageRating: "4.6",
+        totalReviews: 32,
+        isVerified: true,
+        credits: 18,
+        city: "Buenos Aires",
+        province: "Buenos Aires", 
+        phone: "+54 11 2345-6789",
+        email: "electricidad@servicioshogar.com.ar",
+        lastActive: new Date()
+      },
+      {
+        id: 3,
+        businessName: "Limpieza Integral",
+        businessDescription: "Servicios de limpieza residencial y comercial",
+        averageRating: "4.9",
+        totalReviews: 67,
+        isVerified: false,
+        credits: 12,
+        city: "Buenos Aires",
+        province: "Buenos Aires",
+        phone: "+54 11 3456-7890", 
+        email: "limpieza@servicioshogar.com.ar",
+        lastActive: new Date()
+      },
+      {
+        id: 4,
+        businessName: "Carpintería Moderna",
+        businessDescription: "Muebles a medida y reparaciones en madera",
+        averageRating: "4.7",
+        totalReviews: 28,
+        isVerified: true,
+        credits: 30,
+        city: "Córdoba",
+        province: "Córdoba",
+        phone: "+54 351 4567-8901",
+        email: "carpinteria@servicioshogar.com.ar", 
+        lastActive: new Date()
+      },
+      {
+        id: 5,
+        businessName: "Pintura Profesional",
+        businessDescription: "Pintura interior y exterior, trabajos garantizados",
+        averageRating: "4.5",
+        totalReviews: 19,
+        isVerified: false,
+        credits: 8,
+        city: "Rosario",
+        province: "Santa Fe",
+        phone: "+54 341 5678-9012",
+        email: "pintura@servicioshogar.com.ar",
+        lastActive: new Date()
+      }
+    ];
+
+    // Filter mock results based on search query
+    let filteredProviders = mockProviders;
+    
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filteredProviders = mockProviders.filter(provider => 
+        provider.businessName.toLowerCase().includes(query) ||
+        provider.businessDescription.toLowerCase().includes(query)
+      );
+    }
+
+    if (city) {
+      filteredProviders = filteredProviders.filter(provider =>
+        provider.city.toLowerCase().includes(city.toLowerCase())
+      );
+    }
+
+    if (verified === 'true') {
+      filteredProviders = filteredProviders.filter(provider => provider.isVerified);
+    }
+
+    if (minRating) {
+      const rating = parseFloat(minRating);
+      filteredProviders = filteredProviders.filter(provider => 
+        parseFloat(provider.averageRating) >= rating
+      );
+    }
+
+    // Apply pagination
+    const total = filteredProviders.length;
+    const paginatedResults = filteredProviders.slice(offsetNum, offsetNum + limitNum);
+
+    return {
+      data: paginatedResults,
+      total,
+      page: Math.floor(offsetNum / limitNum) + 1,
+      totalPages: Math.ceil(total / limitNum),
+      hasLocation: false,
+      mock: true
+    };
+  }
+
   // Build base query conditions
   const conditions = [eq(serviceProviders.isActive, true)];
 
