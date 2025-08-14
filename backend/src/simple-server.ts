@@ -7,6 +7,7 @@ import bcrypt from "bcrypt";
 import searchRoutes from './routes/search.js';
 import searchSuggestionsRoutes from './routes/search-suggestions.js';
 import categoriesRoutes from './routes/categories.js';
+import serviceProvidersRoutes from './routes/serviceProviders.js';
 
 const app = express();
 
@@ -93,6 +94,7 @@ app.get('/api/test', (req, res) => {
 app.use('/api/search', searchRoutes);
 app.use('/api/search-suggestions', searchSuggestionsRoutes);
 app.use('/api/categories', categoriesRoutes);
+app.use('/api/providers', serviceProvidersRoutes);
 
 // Auth endpoints
 app.post('/api/auth/login', async (req, res) => {

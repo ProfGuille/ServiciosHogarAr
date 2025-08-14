@@ -190,10 +190,122 @@ router.get("/location-search", async (req, res) => {
 // Ejemplo de endpoint para obtener proveedores de servicios con categorías y usuario relacionado
 router.get("/", async (req, res) => {
   try {
+    // If database is not available, return mock provider data
+    if (!db) {
+      const mockProviders = [
+        {
+          id: 1,
+          businessName: "Plomería Buenos Aires",
+          businessDescription: "Servicio profesional de plomería con más de 10 años de experiencia",
+          averageRating: "4.8",
+          totalReviews: 45,
+          isVerified: true,
+          credits: 25,
+          city: "Buenos Aires",
+          province: "Buenos Aires",
+          phone: "+54 11 1234-5678",
+          email: "plomeria@servicioshogar.com.ar",
+          lastActive: new Date(),
+          categoryId: 1,
+          isActive: true
+        },
+        {
+          id: 2,
+          businessName: "Electricidad Rápida",
+          businessDescription: "Electricista matriculado, servicios urgentes 24hs",
+          averageRating: "4.6",
+          totalReviews: 32,
+          isVerified: true,
+          credits: 18,
+          city: "Buenos Aires",
+          province: "Buenos Aires", 
+          phone: "+54 11 2345-6789",
+          email: "electricidad@servicioshogar.com.ar",
+          lastActive: new Date(),
+          categoryId: 2,
+          isActive: true
+        },
+        {
+          id: 3,
+          businessName: "Limpieza Integral",
+          businessDescription: "Servicios de limpieza residencial y comercial",
+          averageRating: "4.9",
+          totalReviews: 67,
+          isVerified: false,
+          credits: 12,
+          city: "Buenos Aires",
+          province: "Buenos Aires",
+          phone: "+54 11 3456-7890", 
+          email: "limpieza@servicioshogar.com.ar",
+          lastActive: new Date(),
+          categoryId: 3,
+          isActive: true
+        },
+        {
+          id: 4,
+          businessName: "Carpintería Moderna",
+          businessDescription: "Muebles a medida y reparaciones en madera",
+          averageRating: "4.7",
+          totalReviews: 28,
+          isVerified: true,
+          credits: 30,
+          city: "Córdoba",
+          province: "Córdoba",
+          phone: "+54 351 4567-8901",
+          email: "carpinteria@servicioshogar.com.ar", 
+          lastActive: new Date(),
+          categoryId: 5,
+          isActive: true
+        },
+        {
+          id: 5,
+          businessName: "Pintura Profesional",
+          businessDescription: "Pintura interior y exterior, trabajos garantizados",
+          averageRating: "4.5",
+          totalReviews: 19,
+          isVerified: false,
+          credits: 8,
+          city: "Rosario",
+          province: "Santa Fe",
+          phone: "+54 341 5678-9012",
+          email: "pintura@servicioshogar.com.ar",
+          lastActive: new Date(),
+          categoryId: 4,
+          isActive: true
+        }
+      ];
+
+      // Apply filters based on query parameters
+      const { city, categoryId, limit = 20 } = req.query;
+      let filteredProviders = [...mockProviders];
+
+      if (city && city !== 'all') {
+        filteredProviders = filteredProviders.filter(provider =>
+          provider.city.toLowerCase().includes((city as string).toLowerCase())
+        );
+      }
+
+      if (categoryId && categoryId !== 'all') {
+        const catId = parseInt(categoryId as string);
+        if (!isNaN(catId)) {
+          filteredProviders = filteredProviders.filter(provider =>
+            provider.categoryId === catId
+          );
+        }
+      }
+
+      // Apply limit
+      const limitNum = parseInt(limit as string) || 20;
+      filteredProviders = filteredProviders.slice(0, limitNum);
+
+      return res.json(filteredProviders);
+    }
+
     // Aquí podrías hacer joins si tu ORM lo soporta, o varias consultas si no
     const providers = await db.select().from(serviceProviders);
     res.json(providers);
   } catch (error) {
+    console.error('Error fetching providers:', error);
     res.status(500).json({ error: "Error al obtener proveedores de servicios" });
   }
 });
