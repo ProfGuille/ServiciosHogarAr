@@ -19,7 +19,7 @@ MATCH_RESULT=$?
 echo "Branch matches pattern (main|copilot/*): $([[ $MATCH_RESULT -eq 0 ]] && echo "YES" || echo "NO")"
 
 # Test ignore command (should return 1 for deploy, 0 for ignore)
-git rev-parse --abbrev-ref HEAD | grep -E '^(main|copilot/.*)$' -q; [ $? -ne 0 ]
+git rev-parse --abbrev-ref HEAD | grep -v -E '^(main|copilot/)'
 IGNORE_RESULT=$?
 echo "Vercel ignore command result: $IGNORE_RESULT (0=ignore, 1=deploy)"
 echo "Will Vercel deploy? $([[ $IGNORE_RESULT -eq 0 ]] && echo "NO ❌" || echo "YES ✅")"

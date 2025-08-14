@@ -12,15 +12,15 @@ The original `ignoreCommand` was:
 This command would ignore (skip deployment) for ANY branch that wasn't exactly `main`, including Copilot branches like `copilot/fix-*`.
 
 ## Solution
-Updated the `ignoreCommand` to allow both `main` and `copilot/*` branches:
+Updated the `ignoreCommand` to use a simpler, more reliable approach that allows both `main` and `copilot/*` branches:
 ```json
-"ignoreCommand": "git rev-parse --abbrev-ref HEAD | grep -E '^(main|copilot/.*)$' -q; [ $? -ne 0 ]"
+"ignoreCommand": "git rev-parse --abbrev-ref HEAD | grep -v -E '^(main|copilot/)'"
 ```
 
 ### How it works:
 1. `git rev-parse --abbrev-ref HEAD` - Gets current branch name
-2. `grep -E '^(main|copilot/.*)$' -q` - Matches main OR copilot/* branches
-3. `[ $? -ne 0 ]` - Returns 0 (ignore) if branch doesn't match, 1 (deploy) if it matches
+2. `grep -v -E '^(main|copilot/)'` - Uses inverted match (-v) to find branches that DON'T start with main or copilot/
+3. Returns 0 (ignore) if branch doesn't match main/copilot pattern, 1 (deploy) if it does match
 
 ### Vercel Logic:
 - Exit code 0 = Ignore deployment (skip)
