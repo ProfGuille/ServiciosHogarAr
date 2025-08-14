@@ -1,8 +1,9 @@
 {
   "version": 2,
-  "buildCommand": "cd frontend && npm run build",
+  "name": "servicioshogar",
+  "buildCommand": "npm run build --prefix frontend",
   "outputDirectory": "frontend/dist",
-  "installCommand": "cd frontend && npm ci",
+  "installCommand": "npm ci --prefix frontend",
   "framework": null,
 
   "rewrites": [
