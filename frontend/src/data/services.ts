@@ -157,6 +157,36 @@ export const servicesList: Service[] = [
     image: '/images/services/cuidado_adultos.jpg',
     description: 'Cuidado y asistencia de adultos mayores',
     category: 'cuidados'
+  },
+  
+  // Additional services mentioned by users
+  {
+    id: 'fumigador',
+    name: 'Fumigador',
+    image: '/images/services/fumigador.jpg',
+    description: 'Control de plagas y fumigación',
+    category: 'hogar'
+  },
+  {
+    id: 'tecnico_pc',
+    name: 'Técnico PC',
+    image: '/images/services/tecnico_pc.jpg',
+    description: 'Reparación y soporte de computadoras',
+    category: 'tecnologia'
+  },
+  {
+    id: 'tapicero',
+    name: 'Tapicero',
+    image: '/images/services/tapicero.jpg',
+    description: 'Retapizado y restauración de muebles',
+    category: 'hogar'
+  },
+  {
+    id: 'pequenos_arreglos',
+    name: 'Pequeños Arreglos',
+    image: '/images/services/pequenos_arreglos.jpg',
+    description: 'Arreglos menores y mantenimiento general del hogar',
+    category: 'construccion'
   }
 ];
 

@@ -14,7 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Filter, X, MapPin, List, Navigation, Loader2, Bookmark, TrendingUp, AlertCircle } from 'lucide-react';
+import { Filter, X, MapPin, List, Navigation, Loader2, Bookmark, TrendingUp, AlertCircle, Search as SearchIcon } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useToast } from '@/hooks/use-toast';
@@ -518,7 +518,7 @@ export default function Search() {
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
                     <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <Search className="w-4 h-4 text-blue-600" />
+                      <SearchIcon className="w-4 h-4 text-blue-600" />
                     </div>
                     <div>
                       <h3 className="font-medium text-blue-900 mb-2">Buscaremos profesionales en tu área</h3>
