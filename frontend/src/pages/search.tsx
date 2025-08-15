@@ -14,10 +14,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Filter, X, MapPin, List, Navigation, Loader2, Bookmark, TrendingUp } from 'lucide-react';
+import { Filter, X, MapPin, List, Navigation, Loader2, Bookmark, TrendingUp, AlertCircle } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useToast } from '@/hooks/use-toast';
+import { Link } from 'wouter';
 
 interface SearchFilters {
   query?: string;
@@ -123,6 +124,25 @@ export default function Search() {
     queryFn: () => apiRequest('GET', '/api/categories'),
   });
 
+  // Fallback categories when API is not available
+  const fallbackCategories = [
+    { id: 1, name: "Plomería" },
+    { id: 2, name: "Electricidad" },
+    { id: 3, name: "Pintura" },
+    { id: 4, name: "Limpieza" },
+    { id: 5, name: "Carpintería" },
+    { id: 6, name: "Gasista" },
+    { id: 7, name: "Albañil" },
+    { id: 8, name: "Técnico de aire" },
+    { id: 9, name: "Jardinería" },
+    { id: 10, name: "Cerrajero" },
+    { id: 11, name: "Mudanzas" },
+    { id: 12, name: "Herrero" }
+  ];
+
+  // Use fallback if categories API fails
+  const displayCategories = categories || fallbackCategories;
+
   // Build search query params
   const buildSearchParams = () => {
     const params = new URLSearchParams();
@@ -151,10 +171,14 @@ export default function Search() {
   };
 
   // Fetch search results
-  const { data: searchResults, isLoading } = useQuery({
+  const { data: searchResults, isLoading, error } = useQuery({
     queryKey: ['/api/search/providers', filters, currentPage],
     queryFn: () => apiRequest('GET', `/api/search/providers?${buildSearchParams()}`),
+    retry: false, // Don't retry failed requests
   });
+
+  // Handle backend unavailable state
+  const isBackendUnavailable = error && (error.message.includes('500') || error.message.includes('408'));
 
   // Process results to add distance if location is available
   const processedResults = React.useMemo(() => {
@@ -315,7 +339,7 @@ export default function Search() {
             <AdvancedSearchFilters
               filters={filters}
               onFiltersChange={handleFiltersChange}
-              categories={categories || []}
+              categories={displayCategories || []}
               facets={processedResults?.facets}
             />
           </aside>
@@ -445,6 +469,42 @@ export default function Search() {
               )}
             </div>
 
+            {/* Backend unavailable message */}
+            {isBackendUnavailable && (
+              <Card className="mb-6 border-orange-200 bg-orange-50">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <AlertCircle className="w-4 h-4 text-orange-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-orange-900 mb-2">Sistema de búsqueda temporalmente no disponible</h3>
+                      <p className="text-orange-700 text-sm mb-4">
+                        Los servicios de búsqueda están en mantenimiento. Por el momento, puedes navegar directamente a los servicios específicos desde el menú principal.
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        <Link href="/servicios/plomeria">
+                          <Button variant="outline" size="sm" className="text-orange-700 border-orange-300 hover:bg-orange-100">
+                            Ver Plomería
+                          </Button>
+                        </Link>
+                        <Link href="/servicios/electricidad">
+                          <Button variant="outline" size="sm" className="text-orange-700 border-orange-300 hover:bg-orange-100">
+                            Ver Electricidad
+                          </Button>
+                        </Link>
+                        <Link href="/servicios">
+                          <Button variant="outline" size="sm" className="text-orange-700 border-orange-300 hover:bg-orange-100">
+                            Ver Todos los Servicios
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Results display */}
             {viewMode === 'list' ? (
               <SearchResults
@@ -495,7 +555,7 @@ export default function Search() {
         <AdvancedSearchFilters
           filters={filters}
           onFiltersChange={handleFiltersChange}
-          categories={categories || []}
+          categories={displayCategories || []}
           facets={processedResults?.facets}
           showMobileFilters={showMobileFilters}
           onCloseMobileFilters={() => setShowMobileFilters(false)}

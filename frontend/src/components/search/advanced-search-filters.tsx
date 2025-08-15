@@ -179,7 +179,7 @@ export function AdvancedSearchFilters({
                     <SelectValue placeholder="Todas las provincias" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todas las provincias</SelectItem>
+                    <SelectItem value="all">Todas las provincias</SelectItem>
                     {argentineProvinces.map(province => (
                       <SelectItem key={province} value={province}>
                         {province}
@@ -199,7 +199,7 @@ export function AdvancedSearchFilters({
                     <SelectValue placeholder="Todas las ciudades" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todas las ciudades</SelectItem>
+                    <SelectItem value="all">Todas las ciudades</SelectItem>
                     {(facets?.cities || cities).map(city => (
                       <SelectItem key={city.name} value={city.name}>
                         {city.name} {city.count && `(${city.count})`}
@@ -422,7 +422,7 @@ export function AdvancedSearchFilters({
                     <SelectValue placeholder="Cualquier experiencia" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Cualquier experiencia</SelectItem>
+                    <SelectItem value="all">Cualquier experiencia</SelectItem>
                     <SelectItem value="1">1+ años</SelectItem>
                     <SelectItem value="3">3+ años</SelectItem>
                     <SelectItem value="5">5+ años</SelectItem>
@@ -476,7 +476,7 @@ export function AdvancedSearchFilters({
                     <SelectValue placeholder="Cualquier momento" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Cualquier momento</SelectItem>
+                    <SelectItem value="all">Cualquier momento</SelectItem>
                     <SelectItem value="today">Hoy</SelectItem>
                     <SelectItem value="tomorrow">Mañana</SelectItem>
                     <SelectItem value="week">Esta semana</SelectItem>

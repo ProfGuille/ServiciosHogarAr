@@ -37,7 +37,6 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { TestimonialSection } from "@/components/sections/testimonial-section";
-import { BudgetCalculator } from "@/components/tools/budget-calculator";
 import UserTypeSelector from "@/components/ui/UserTypeSelector";
 import ServiceSelector from "@/components/ui/ServiceSelector";
 
@@ -336,15 +335,90 @@ export default function Landing() {
         </section>
       )}
 
-      {/* Budget Calculator Section */}
+      {/* Simple Pricing Table Section */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">¿Cuánto podría costar tu proyecto?</h2>
-            <p className="text-lg text-slate-600">Obtén una estimación inmediata de tu presupuesto</p>
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">Precios estimados por servicio</h2>
+            <p className="text-lg text-slate-600">Rangos de precios referenciales para que tengas una idea del costo</p>
+            <p className="text-sm text-slate-500 mt-2">*Los precios finales varían según la complejidad del trabajo y la zona</p>
           </div>
-          <div className="flex justify-center">
-            <BudgetCalculator />
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="bg-slate-50 rounded-lg p-6">
+              <h3 className="font-semibold text-slate-900 mb-4">Servicios básicos</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Plomería (consulta)</span>
+                  <span className="font-medium">$8,000 - $15,000</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Electricidad (punto)</span>
+                  <span className="font-medium">$5,000 - $12,000</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Cerrajería básica</span>
+                  <span className="font-medium">$6,000 - $18,000</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Pequeños arreglos</span>
+                  <span className="font-medium">$4,000 - $10,000</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-slate-50 rounded-lg p-6">
+              <h3 className="font-semibold text-slate-900 mb-4">Servicios de hogar</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Limpieza (4 horas)</span>
+                  <span className="font-medium">$12,000 - $20,000</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Pintura (m²)</span>
+                  <span className="font-medium">$800 - $1,500</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Jardinería (hora)</span>
+                  <span className="font-medium">$2,500 - $4,000</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Fumigación</span>
+                  <span className="font-medium">$15,000 - $35,000</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-slate-50 rounded-lg p-6">
+              <h3 className="font-semibold text-slate-900 mb-4">Servicios especializados</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Técnico de aire (service)</span>
+                  <span className="font-medium">$18,000 - $35,000</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Técnico PC (diagnóstico)</span>
+                  <span className="font-medium">$8,000 - $15,000</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Gasista (certificación)</span>
+                  <span className="font-medium">$25,000 - $50,000</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Carpintería (hora)</span>
+                  <span className="font-medium">$4,000 - $8,000</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-8 text-center">
+            <p className="text-slate-600 mb-4">¿Necesitas un presupuesto más preciso?</p>
+            <Link href="/crear-solicitud">
+              <Button className="bg-secondary text-white hover:bg-green-700">
+                Solicitar Presupuestos Gratis
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
