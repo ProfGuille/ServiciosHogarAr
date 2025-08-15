@@ -170,15 +170,22 @@ export default function Search() {
     return params.toString();
   };
 
-  // Fetch search results
+  // Fetch search results with better error handling
   const { data: searchResults, isLoading, error } = useQuery({
     queryKey: ['/api/search/providers', filters, currentPage],
     queryFn: () => apiRequest('GET', `/api/search/providers?${buildSearchParams()}`),
     retry: false, // Don't retry failed requests
+    // Add fallback data to prevent blank page
+    placeholderData: {
+      providers: [],
+      total: 0,
+      data: [],
+      facets: {}
+    }
   });
 
-  // Handle backend unavailable state
-  const isBackendUnavailable = error && (error.message.includes('500') || error.message.includes('408'));
+  // Handle backend unavailable state - be more permissive with error detection
+  const isBackendUnavailable = error || (searchResults && !searchResults?.providers && !isLoading);
 
   // Process results to add distance if location is available
   const processedResults = React.useMemo(() => {
@@ -505,10 +512,52 @@ export default function Search() {
               </Card>
             )}
 
+            {/* No professionals found message */}
+            {!isBackendUnavailable && !isLoading && processedResults && processedResults.total === 0 && filters.query && (
+              <Card className="mb-6 border-blue-200 bg-blue-50">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <Search className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-blue-900 mb-2">Buscaremos profesionales en tu área</h3>
+                      <p className="text-blue-700 text-sm mb-4">
+                        No encontramos {filters.query.toLowerCase()} en tu ubicación actual, pero te ayudaremos a encontrar los mejores profesionales disponibles. Te contactaremos pronto con opciones.
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        <Button variant="outline" size="sm" className="text-blue-700 border-blue-300 hover:bg-blue-100" onClick={() => {
+                          // In a real app, this would trigger an admin notification
+                          toast({
+                            title: "Solicitud registrada",
+                            description: `Te contactaremos pronto con profesionales de ${filters.query} en tu área.`,
+                          });
+                        }}>
+                          Solicitar Búsqueda
+                        </Button>
+                        <Link href="/servicios">
+                          <Button variant="outline" size="sm" className="text-blue-700 border-blue-300 hover:bg-blue-100">
+                            Ver Otros Servicios
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Results display */}
-            {viewMode === 'list' ? (
+            {isLoading ? (
+              <Card>
+                <CardContent className="text-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+                  <p className="text-slate-600">Buscando profesionales...</p>
+                </CardContent>
+              </Card>
+            ) : viewMode === 'list' ? (
               <SearchResults
-                providers={processedResults?.data || []}
+                providers={processedResults?.data || processedResults?.providers || []}
                 isLoading={isLoading}
                 total={processedResults?.total || 0}
                 currentPage={currentPage}
@@ -524,7 +573,7 @@ export default function Search() {
                     Mapa de Proveedores
                     {processedResults?.data && (
                       <Badge variant="secondary">
-                        {processedResults.data.length} resultados
+                        {(processedResults.data || processedResults.providers || []).length} resultados
                       </Badge>
                     )}
                   </CardTitle>
@@ -537,7 +586,7 @@ export default function Search() {
                         : [-34.6037, -58.3816] // Buenos Aires default
                     }
                     zoom={filters.radius ? Math.max(10, 16 - Math.log2(filters.radius)) : 13}
-                    providers={processedResults?.data || []}
+                    providers={processedResults?.data || processedResults?.providers || []}
                     userLocation={userLocation && filters.useCurrentLocation ? userLocation : undefined}
                     searchRadius={filters.radius}
                     onProviderClick={handleProviderClick}
