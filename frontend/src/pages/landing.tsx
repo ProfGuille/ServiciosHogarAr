@@ -37,6 +37,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { TestimonialSection } from "@/components/sections/testimonial-section";
 import { BudgetCalculator } from "@/components/tools/budget-calculator";
+import UserTypeSelector from "@/components/ui/UserTypeSelector";
+import ServiceSelector from "@/components/ui/ServiceSelector";
 
 const serviceIcons = {
   plomeria: Wrench,
@@ -64,6 +66,8 @@ const serviceIcons = {
 export default function Landing() {
   const [searchQuery, setSearchQuery] = useState("");
   const [location, setLocation] = useState("");
+  const [userType, setUserType] = useState<'client' | 'provider' | ''>('');
+  const [showServiceSelector, setShowServiceSelector] = useState(false);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -106,75 +110,102 @@ export default function Landing() {
     window.location.href = "/register-provider";
   };
 
+  const handleUserTypeSelect = (type: 'client' | 'provider') => {
+    setUserType(type);
+    if (type === 'client') {
+      setShowServiceSelector(true);
+    } else {
+      // Redirect to provider registration
+      window.location.href = "/register-provider";
+    }
+  };
+
+  const handleServiceSelect = (service: any) => {
+    // Navigate to search page with the selected service
+    const servicePath = service.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-");
+    window.location.href = `/servicios/${servicePath}`;
+  };
+
+  const prepareServicesForSelector = () => {
+    if (!categories) return [];
+    return categories.map((category: any) => ({
+      id: category.id.toString(),
+      name: category.name,
+      description: "150+ profesionales disponibles",
+      category: category.name,
+      image: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200"
+    }));
+  };
+
   return (
     <div className="min-h-screen bg-slate-50">
       <Navbar />
       
-      {/* Hero Section */}
+      {/* Hero Section with User Type Selection */}
       <section className="bg-gradient-to-br from-primary to-blue-700 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h1 className="text-4xl lg:text-6xl font-bold mb-6">
-                {t('landing.hero.title')}
-              </h1>
-              <p className="text-xl mb-8 text-blue-100">
-                {t('landing.hero.subtitle')}
-              </p>
-              
-              {/* Search Bar */}
-              <Card className="p-6 shadow-2xl">
-                <CardContent className="p-0">
-                  <div className="grid md:grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-slate-700 block">{t('forms.serviceRequest.serviceType')}</label>
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-                        <Input
-                          type="text"
-                          placeholder={t('services.searchPlaceholder')}
-                          className="pl-10 h-12"
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-slate-700 block">{t('common.city')}</label>
-                      <div className="relative">
-                        <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-                        <Input
-                          type="text"
-                          placeholder={t('forms.serviceRequest.location')}
-                          className="pl-10 h-12"
-                          value={location}
-                          onChange={(e) => setLocation(e.target.value)}
-                          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                        />
-                      </div>
-                    </div>
-                    <div className="flex items-end">
-                      <Button 
-                        className="w-full bg-secondary text-white hover:bg-green-700 h-12 text-base font-medium"
-                        onClick={handleSearch}
-                      >
-                        {t('common.search')} {t('services.title')}
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-            
-            <div className="hidden lg:block">
-              <img 
-                src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600" 
-                alt="Profesional de servicios para el hogar con herramientas" 
-                className="rounded-2xl shadow-2xl w-full h-auto"
+          <div className="text-center mb-12">
+            <h1 className="text-4xl lg:text-6xl font-bold mb-6">
+              {t('landing.hero.title')}
+            </h1>
+            <p className="text-xl mb-8 text-blue-100">
+              {t('landing.hero.subtitle')}
+            </p>
+          </div>
+
+          {/* User Type Selection - Primary Interaction */}
+          {!userType && (
+            <UserTypeSelector 
+              onSelect={handleUserTypeSelect}
+              selectedType={userType}
+              className="mb-8"
+            />
+          )}
+
+          {/* Service Selection for Clients */}
+          {userType === 'client' && showServiceSelector && (
+            <div className="bg-white rounded-lg p-8 shadow-2xl">
+              <ServiceSelector
+                title="¿Qué servicio necesitas?"
+                subtitle="Elegí el tipo de profesional que buscas"
+                services={prepareServicesForSelector()}
+                onServiceSelect={handleServiceSelect}
+                className="text-gray-900"
               />
             </div>
-          </div>
+          )}
+
+          {/* Fallback Traditional Search */}
+          {!userType && (
+            <Card className="p-6 shadow-2xl mt-8">
+              <CardContent className="p-0">
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-slate-700 block">{t('forms.serviceRequest.serviceType')}</label>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                      <Input
+                        type="text"
+                        placeholder={t('services.searchPlaceholder')}
+                        className="pl-10 h-12"
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-end">
+                    <Button 
+                      className="w-full bg-secondary text-white hover:bg-green-700 h-12 text-base font-medium"
+                      onClick={handleSearch}
+                    >
+                      {t('common.search')} {t('services.title')}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </section>
 

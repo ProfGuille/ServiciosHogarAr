@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { z } from "zod";
@@ -75,7 +75,7 @@ export function BookingForm({ provider, isOpen, onClose }: BookingFormProps) {
   const form = useForm<BookingFormData>({
     resolver: zodResolver(bookingFormSchema),
     defaultValues: {
-      providerId: provider.id,
+      providerId: Number(provider.id),
       categoryId: 1, // Default to Plomería
       title: "",
       description: "",
@@ -85,6 +85,8 @@ export function BookingForm({ provider, isOpen, onClose }: BookingFormProps) {
       estimatedBudget: 0,
       isUrgent: false,
       customerNotes: "",
+      preferredDate: new Date(),
+      preferredTime: "09:00",
     },
   });
 
@@ -132,7 +134,7 @@ export function BookingForm({ provider, isOpen, onClose }: BookingFormProps) {
     },
   });
 
-  const onSubmit = (data: BookingFormData) => {
+  const onSubmit: SubmitHandler<BookingFormData> = (data) => {
     bookingMutation.mutate(data);
   };
 
