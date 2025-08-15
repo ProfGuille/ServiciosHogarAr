@@ -162,9 +162,33 @@ export default function Landing() {
     }
   };
 
+  // Service name to route mapping to ensure correct navigation
+  const serviceRouteMap: Record<string, string> = {
+    'plomería': 'plomeria',
+    'electricidad': 'electricidad', 
+    'pintura': 'pintura',
+    'limpieza': 'limpieza',
+    'carpintería': 'carpinteria',
+    'gasista': 'gasista',
+    'albañil': 'albanil',
+    'técnico de aire': 'tecnico-aire',
+    'jardinería': 'jardineria',
+    'cerrajero': 'cerrajero',
+    'mudanzas': 'mudanzas',
+    'herrero': 'herrero',
+    'techista': 'techista',
+    'fumigador': 'fumigador',
+    'técnico pc': 'tecnico-pc',
+    'pequeños arreglos': 'pequenos-arreglos',
+    'tapicero': 'tapicero',
+    'vidriero': 'vidriero',
+    'instalador solar': 'instalador-solar'
+  };
+
   const handleServiceSelect = (service: any, location?: string) => {
-    // Navigate to search page with the selected service and location
-    const servicePath = service.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-");
+    // Navigate to specific service page using correct route mapping
+    const serviceName = service.name.toLowerCase();
+    const servicePath = serviceRouteMap[serviceName] || serviceName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-");
     let url = `/servicios/${servicePath}`;
     
     // Add location as query parameter if provided
@@ -178,6 +202,29 @@ export default function Landing() {
   };
 
   const prepareServicesForSelector = () => {
+    // Service category to servicesList mapping for proper image handling
+    const categoryToServiceMap: Record<string, string> = {
+      'plomería': 'plomero',
+      'electricidad': 'electricista', 
+      'pintura': 'pintor',
+      'limpieza': 'limpieza_general',
+      'carpintería': 'carpintero',
+      'gasista': 'gasista',
+      'albañil': 'albanil',
+      'técnico de aire': 'aire_acondicionado',
+      'jardinería': 'jardinero',
+      'cerrajero': 'cerrajero',
+      'mudanzas': 'mudanzas_fletes',
+      'herrero': 'herrero',
+      'techista': 'techista',
+      'fumigador': 'fumigador',
+      'técnico pc': 'tecnico_pc',
+      'pequeños arreglos': 'pequenos_arreglos',
+      'tapicero': 'tapicero',
+      'vidriero': 'vidriero',
+      'instalador solar': 'instalador_solar'
+    };
+
     // Use servicesList from data/services.ts as fallback to ensure all services always show
     const fallbackServices = servicesList.slice(0, 18).map((service, index) => ({
       id: (index + 1).toString(),
@@ -191,22 +238,23 @@ export default function Landing() {
       return fallbackServices;
     }
     
-    // Create a mapping from category names to services
+    // Create a mapping from service IDs to services for better lookup
     const serviceMap = servicesList.reduce((acc, service) => {
-      acc[service.name.toLowerCase()] = service;
+      acc[service.id] = service;
       return acc;
     }, {} as Record<string, any>);
 
     return displayCategories.map((category: any) => {
-      // Find matching service by name
-      const matchingService = serviceMap[category.name.toLowerCase()];
+      const categoryName = category.name.toLowerCase();
+      const serviceId = categoryToServiceMap[categoryName];
+      const matchingService = serviceId ? serviceMap[serviceId] : null;
       
       return {
         id: category.id.toString(),
         name: category.name,
         description: "150+ profesionales disponibles",
         category: category.name,
-        image: matchingService?.image || `/images/services/${category.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "_")}.jpg`
+        image: matchingService?.image || `/images/services/${categoryName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "_")}.jpg`
       };
     });
   };
@@ -270,7 +318,9 @@ export default function Landing() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
             {displayCategories?.slice(0, 17).map((category) => {
               const IconComponent = serviceIcons[category.name.toLowerCase() as keyof typeof serviceIcons] || Wrench;
-              const categoryPath = category.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-");
+              // Use the same route mapping as ServiceSelector
+              const serviceName = category.name.toLowerCase();
+              const categoryPath = serviceRouteMap[serviceName] || serviceName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-");
               return (
                 <Link key={category.id} href={`/servicios/${categoryPath}`}>
                   <Card className="text-center shadow-sm hover:shadow-md transition-shadow cursor-pointer group h-full">
