@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useAuth } from '@/hooks/useAuth';
-import { useWebSocket } from '@/hooks/useWebSocket';
+import { useSocketIO } from '@/hooks/useSocketIO';
 import { Send, User, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,8 +30,41 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
   const otherUser = user?.id === conversation.customerId ? conversation.provider : conversation.customer;
   const isCustomer = user?.id === conversation.customerId;
 
-  // WebSocket connection for real-time messaging
-  const { socket, sendMessage: sendWebSocketMessage, isConnected } = useWebSocket();
+  // Socket.io connection for real-time messaging with enhanced error handling
+  const socketIO = useSocketIO({
+    onNewMessage: (message, conversationId) => {
+      if (conversationId === conversation.id) {
+        // Update local messages cache
+        queryClient.setQueryData(['messages', conversation.id], (oldMessages: Message[] = []) => [
+          ...oldMessages,
+          message,
+        ]);
+      }
+    },
+    onUserTyping: (data) => {
+      if (data.userId !== user?.id) {
+        setIsTyping(data.isTyping);
+        
+        if (data.isTyping) {
+          // Clear typing after 3 seconds if no update
+          if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current);
+          }
+          typingTimeoutRef.current = setTimeout(() => {
+            setIsTyping(false);
+          }, 3000);
+        }
+      }
+    },
+    onError: (error) => {
+      console.error('Chat error:', error);
+      toast({
+        title: "Error de conexión",
+        description: "Problema con el chat en tiempo real. Los mensajes se enviarán normalmente.",
+        variant: "destructive",
+      });
+    }
+  });
 
   // Fetch messages for this conversation
   const { data: messages = [], isLoading } = useQuery({
@@ -42,33 +75,33 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
     },
   });
 
-  // Send message mutation
+  // Send message with enhanced real-time integration
   const sendMessageMutation = useMutation({
     mutationFn: async (content: string) => {
+      // First try Socket.io for real-time delivery
+      if (socketIO.isConnected) {
+        socketIO.sendMessage({
+          conversationId: conversation.id,
+          content,
+          messageType: 'text'
+        });
+      }
+      
+      // Also send via HTTP API as fallback
       const response = await apiRequest('POST', `/api/conversations/${conversation.id}/messages`, {
         content,
       });
       return response.json();
     },
     onSuccess: (newMessage) => {
-      // Update local messages cache
-      queryClient.setQueryData(['messages', conversation.id], (oldMessages: Message[] = []) => [
-        ...oldMessages,
-        newMessage,
-      ]);
+      // Update local messages cache (if not already updated by Socket.io)
+      queryClient.setQueryData(['messages', conversation.id], (oldMessages: Message[] = []) => {
+        const exists = oldMessages.some(msg => msg.id === newMessage.id);
+        return exists ? oldMessages : [...oldMessages, newMessage];
+      });
 
       // Update conversations cache to reflect new message
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
-
-      // Send via WebSocket for real-time updates
-      if (socket && isConnected) {
-        sendWebSocketMessage({
-          type: 'message',
-          conversationId: conversation.id,
-          message: newMessage,
-        });
-      }
-
       setMessage('');
     },
     onError: (error) => {
@@ -90,42 +123,22 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
         })
         .catch(console.error);
     }
-  }, [conversation.id, queryClient]);
+  // Join conversation when component mounts
+  useEffect(() => {
+    if (socketIO.isConnected && conversation.id) {
+      socketIO.joinConversation(conversation.id);
+    }
+  }, [socketIO.isConnected, conversation.id, socketIO]);
 
   // Scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Handle WebSocket messages
+  // Auto-mark messages as read when conversation is opened
   useEffect(() => {
-    if (!socket) return;
-
-    const handleMessage = (data: any) => {
-      if (data.type === 'message' && data.conversationId === conversation.id) {
-        // Update messages cache with new message
-        queryClient.setQueryData(['messages', conversation.id], (oldMessages: Message[] = []) => [
-          ...oldMessages,
-          data.message,
-        ]);
-      } else if (data.type === 'typing' && data.conversationId === conversation.id && data.userId !== user?.id) {
-        setIsTyping(data.isTyping);
-      }
-    };
-
-    socket.addEventListener('message', (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        handleMessage(data);
-      } catch (error) {
-        console.error('Failed to parse WebSocket message:', error);
-      }
-    });
-
-    return () => {
-      socket.removeEventListener('message', handleMessage);
-    };
-  }, [socket, conversation.id, user?.id, queryClient]);
+    markAsRead();
+  }, [conversation.id]);
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -137,26 +150,18 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
   const handleTyping = (value: string) => {
     setMessage(value);
 
-    // Send typing indicator via WebSocket
-    if (socket && isConnected) {
-      sendWebSocketMessage({
-        type: 'typing',
-        conversationId: conversation.id,
-        userId: user?.id,
-        isTyping: value.length > 0,
-      });
+    // Send typing indicator via Socket.io
+    if (socketIO.isConnected && conversation.id) {
+      if (value.length > 0) {
+        socketIO.startTyping(conversation.id);
+      }
 
       // Clear typing indicator after 2 seconds of inactivity
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
       typingTimeoutRef.current = setTimeout(() => {
-        sendWebSocketMessage({
-          type: 'typing',
-          conversationId: conversation.id,
-          userId: user?.id,
-          isTyping: false,
-        });
+        socketIO.stopTyping(conversation.id);
       }, 2000);
     }
   };
@@ -189,13 +194,18 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
             </h3>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               {isCustomer ? 'Profesional' : 'Cliente'}
-              {!isConnected && (
+              {!socketIO.isConnected && (
                 <span className="ml-2 text-yellow-600 dark:text-yellow-400">
-                  • Sin conexión
+                  • Sin conexión en tiempo real
                 </span>
               )}
-              {isConnected && isTyping && (
+              {socketIO.isConnected && (
                 <span className="ml-2 text-green-600 dark:text-green-400">
+                  • En línea
+                </span>
+              )}
+              {isTyping && (
+                <span className="ml-2 text-blue-600 dark:text-blue-400">
                   • Escribiendo...
                 </span>
               )}

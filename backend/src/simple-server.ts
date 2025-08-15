@@ -1108,8 +1108,19 @@ app.use('/api/*', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`🚀 Servidor ejecutándose en puerto ${PORT}`);
   console.log(`📝 Entorno: development (simple version)`);
   console.log(`👤 Usuario demo: demo@servicioshogar.com.ar / password123`);
 });
+
+// Add WebSocket support for real-time chat
+import { setupWebSocket } from './websockets/chat.js';
+
+// Only setup WebSocket if database is available
+if (process.env.DATABASE_URL) {
+  setupWebSocket(server);
+  console.log(`💬 WebSocket chat habilitado en puerto ${PORT}`);
+} else {
+  console.log(`⚠️  Chat en tiempo real deshabilitado (requiere DATABASE_URL)`);
+}
