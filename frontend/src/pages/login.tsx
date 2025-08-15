@@ -9,6 +9,10 @@ import { Toaster } from "@/components/ui/toaster";
 export default function Login() {
   const [, setLocation] = useLocation();
   const { isAuthenticated, isLoading, error } = useAuth();
+  
+  // Get redirect parameter from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const redirectTo = urlParams.get('redirect');
 
   useEffect(() => {
     document.title = "Iniciar Sesión - ServiciosHogar.com.ar";
@@ -18,9 +22,13 @@ export default function Login() {
   // Redirect if already authenticated
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      setLocation('/');
+      if (redirectTo === 'buscar') {
+        setLocation('/?busco=true');
+      } else {
+        setLocation('/');
+      }
     }
-  }, [isAuthenticated, isLoading, setLocation]);
+  }, [isAuthenticated, isLoading, setLocation, redirectTo]);
 
   // Show loading only for a reasonable time
   if (isLoading) {
