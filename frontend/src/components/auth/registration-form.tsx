@@ -29,7 +29,6 @@ interface RegistrationFormProps {
 interface RegistrationData {
   name: string;
   email: string;
-  phone?: string;
   password: string;
   termsAccepted: boolean;
   privacyAccepted: boolean;
@@ -42,7 +41,6 @@ export function RegistrationForm({ onRegister, isLoading = false }: Registration
   const [formData, setFormData] = useState<RegistrationData>({
     name: "",
     email: "",
-    phone: "",
     password: "",
     termsAccepted: false,
     privacyAccepted: false,
@@ -147,20 +145,6 @@ export function RegistrationForm({ onRegister, isLoading = false }: Registration
               className={errors.email ? "border-red-500" : ""}
             />
             {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="phone">Teléfono (Opcional)</Label>
-            <Input
-              id="phone"
-              type="tel"
-              value={formData.phone || ""}
-              onChange={(e) => updateField("phone", e.target.value)}
-              placeholder="+54 11 1234-5678"
-            />
-            <p className="text-xs text-slate-500">
-              Formato sugerido: +54 11 1234-5678
-            </p>
           </div>
 
           <div className="space-y-2">

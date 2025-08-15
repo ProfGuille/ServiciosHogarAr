@@ -178,18 +178,7 @@ export default function Landing() {
   };
 
   const prepareServicesForSelector = () => {
-    // Use servicesList from data/services.ts as fallback to ensure all services always show
-    const fallbackServices = servicesList.slice(0, 18).map((service, index) => ({
-      id: (index + 1).toString(),
-      name: service.name,
-      description: "150+ profesionales disponibles",
-      category: service.category,
-      image: service.image
-    }));
-
-    if (!displayCategories || displayCategories.length === 0) {
-      return fallbackServices;
-    }
+    if (!displayCategories) return [];
     
     // Create a mapping from category names to services
     const serviceMap = servicesList.reduce((acc, service) => {
@@ -216,13 +205,13 @@ export default function Landing() {
       <Navbar />
       
       {/* Hero Section with User Type Selection */}
-      <section className="bg-gradient-to-br from-primary to-blue-700 text-white min-h-[85vh] flex items-center">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full">
-          <div className="text-center mb-12">
-            <h1 className="text-3xl lg:text-5xl font-bold mb-6">
+      <section className="bg-gradient-to-br from-primary to-blue-700 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl lg:text-5xl font-bold mb-4">
               {t('landing.hero.title')}
             </h1>
-            <p className="text-lg mb-8 text-blue-100 max-w-3xl mx-auto">
+            <p className="text-lg mb-6 text-blue-100">
               {t('landing.hero.subtitle')}
             </p>
           </div>
@@ -232,13 +221,13 @@ export default function Landing() {
             <UserTypeSelector 
               onSelect={handleUserTypeSelect}
               selectedType={userType}
-              className="mb-8"
+              className="mb-6"
             />
           )}
 
           {/* Service Selection for Clients */}
           {userType === 'client' && showServiceSelector && (
-            <div className="bg-white rounded-lg p-8 shadow-2xl max-w-5xl mx-auto">
+            <div className="bg-white rounded-lg p-8 shadow-2xl">
               <ServiceSelector
                 title="¿Qué servicio necesitas?"
                 subtitle="Elegí el tipo de profesional que buscas"
@@ -251,9 +240,7 @@ export default function Landing() {
 
           {/* Fallback Traditional Search */}
           {!userType && (
-            <div className="max-w-4xl mx-auto">
-              <ServiceSearch />
-            </div>
+            <ServiceSearch />
           )}
         </div>
       </section>
@@ -481,12 +468,12 @@ export default function Landing() {
       </section>
 
       {/* Provider CTA */}
-      <section className="py-20 bg-gradient-to-r from-secondary to-green-700 text-white">
+      <section className="py-16 bg-gradient-to-r from-secondary to-green-700 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold mb-6">¿Eres un profesional de servicios?</h2>
-          <p className="text-xl mb-12 text-green-100 max-w-3xl mx-auto">Únete a nuestra plataforma y conecta con miles de clientes potenciales</p>
+          <h2 className="text-3xl font-bold mb-4">¿Eres un profesional de servicios?</h2>
+          <p className="text-xl mb-8 text-green-100">Únete a nuestra plataforma y conecta con miles de clientes potenciales</p>
           
-          <div className="grid md:grid-cols-3 gap-8 mb-16">
+          <div className="grid md:grid-cols-3 gap-8 mb-12">
             <div className="text-center">
               <UserCheck className="h-16 w-16 mx-auto mb-4 text-green-200" />
               <h3 className="text-lg font-semibold mb-2">Más clientes</h3>
@@ -504,9 +491,9 @@ export default function Landing() {
             </div>
           </div>
           
-          <div className="space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center max-w-md mx-auto">
+          <div className="space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center">
             <Button 
-              className="w-full sm:w-auto bg-white text-secondary hover:bg-slate-50 px-8 py-3 text-lg font-medium"
+              className="w-full sm:w-auto bg-white text-secondary hover:bg-slate-50"
               onClick={handleProviderSignup}
             >
               Registrarme como Profesional
@@ -514,7 +501,7 @@ export default function Landing() {
             <Link href="/precios">
               <Button 
                 variant="outline" 
-                className="w-full sm:w-auto border-white text-white bg-white/10 hover:bg-white hover:text-secondary px-8 py-3 text-lg font-medium"
+                className="w-full sm:w-auto border-white text-white bg-white/10 hover:bg-white hover:text-secondary"
               >
                 Ver Planes y Precios
               </Button>

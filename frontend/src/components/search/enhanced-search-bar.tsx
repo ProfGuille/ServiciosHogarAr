@@ -19,17 +19,6 @@ import { useGeolocation } from '@/hooks/useGeolocation';
 import { apiRequest } from '@/lib/queryClient';
 import { useDebounce } from '@/hooks/useDebounce';
 
-// Common Argentine cities for location suggestions
-const argentineCities = [
-  'Buenos Aires', 'Córdoba', 'Rosario', 'Mendoza', 'La Plata', 'San Miguel de Tucumán',
-  'Mar del Plata', 'Salta', 'Santa Fe', 'San Juan', 'Resistencia', 'Neuquén',
-  'Santiago del Estero', 'Corrientes', 'Posadas', 'Bahía Blanca', 'Paraná',
-  'Formosa', 'San Luis', 'Catamarca', 'La Rioja', 'Río Gallegos', 'Ushuaia',
-  'San Fernando del Valle de Catamarca', 'San Salvador de Jujuy', 'Santa Rosa',
-  'Rawson', 'Viedma', 'Villa Mercedes', 'Concepción del Uruguay', 'Tandil',
-  'Olavarría', 'Pergamino', 'Azul', 'Junín', 'San Nicolás', 'Campana'
-];
-
 interface SearchSuggestion {
   type: 'business' | 'service' | 'category' | 'city' | 'term';
   text: string;
@@ -54,11 +43,8 @@ export function EnhancedSearchBar({
   className
 }: EnhancedSearchBarProps) {
   const [query, setQuery] = useState(initialQuery);
-  const [location, setLocation] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
-  const [locationSuggestions, setLocationSuggestions] = useState<string[]>([]);
   const [popularSearches, setPopularSearches] = useState<SearchSuggestion[]>([]);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -66,24 +52,10 @@ export function EnhancedSearchBar({
   
   const { getCurrentLocation, loading: geoLoading } = useGeolocation();
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const locationInputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
   
   // Debounce search query for autocomplete
   const debouncedQuery = useDebounce(query, 300);
-  const debouncedLocation = useDebounce(location, 300);
-
-  // Update location suggestions
-  useEffect(() => {
-    if (debouncedLocation.length >= 2) {
-      const filtered = argentineCities.filter(city => 
-        city.toLowerCase().includes(debouncedLocation.toLowerCase())
-      ).slice(0, 8);
-      setLocationSuggestions(filtered);
-    } else {
-      setLocationSuggestions([]);
-    }
-  }, [debouncedLocation]);
 
   // Load popular searches on mount
   useEffect(() => {
@@ -200,24 +172,9 @@ export function EnhancedSearchBar({
   const handleSearch = () => {
     if (query.trim()) {
       addToRecentSearches(query.trim());
-      onSearch(query.trim(), { city: location.trim() || undefined });
+      onSearch(query.trim());
     }
     setShowSuggestions(false);
-    setShowLocationSuggestions(false);
-  };
-
-  // Handle location input change
-  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setLocation(value);
-    setShowLocationSuggestions(value.length >= 1);
-  };
-
-  // Handle location suggestion selection
-  const handleLocationSelect = (selectedLocation: string) => {
-    setLocation(selectedLocation);
-    setShowLocationSuggestions(false);
-    locationInputRef.current?.blur();
   };
 
   // Add search to recent searches
@@ -271,8 +228,7 @@ export function EnhancedSearchBar({
   return (
     <div className={cn("relative w-full", className)}>
       <div className="relative">
-        <div className="relative flex items-center gap-2">
-          {/* Main search input */}
+        <div className="relative flex items-center">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <Input
@@ -295,34 +251,7 @@ export function EnhancedSearchBar({
             )}
           </div>
           
-          {/* Location input */}
-          {showLocation && (
-            <div className="relative w-64">
-              <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <Input
-                ref={locationInputRef}
-                type="text"
-                placeholder="Ciudad"
-                value={location}
-                onChange={handleLocationChange}
-                onFocus={() => setShowLocationSuggestions(location.length >= 1)}
-                className="pl-10 pr-10 py-3 text-lg border-2 focus:border-primary"
-              />
-              {location && (
-                <button
-                  onClick={() => {
-                    setLocation('');
-                    setShowLocationSuggestions(false);
-                  }}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              )}
-            </div>
-          )}
-          
-          <div className="flex gap-2">
+          <div className="flex gap-2 ml-2">
             {showLocation && (
               <Button
                 variant="outline"
@@ -330,7 +259,6 @@ export function EnhancedSearchBar({
                 onClick={handleLocationSearch}
                 disabled={geoLoading}
                 className="px-4"
-                title="Usar mi ubicación actual"
               >
                 {geoLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
@@ -455,30 +383,6 @@ export function EnhancedSearchBar({
                   ))}
                 </div>
               )}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Location Suggestions Dropdown */}
-        {showLocationSuggestions && showLocation && locationSuggestions.length > 0 && (
-          <Card className="absolute top-full right-0 w-64 z-50 mt-1 max-h-60 overflow-y-auto shadow-lg">
-            <CardContent className="p-0">
-              <div className="py-2">
-                <div className="px-4 py-2 text-sm font-medium text-gray-500 flex items-center gap-2">
-                  <MapPin className="w-4 h-4" />
-                  Ciudades sugeridas
-                </div>
-                {locationSuggestions.map((city, index) => (
-                  <button
-                    key={`location-${city}`}
-                    onClick={() => handleLocationSelect(city)}
-                    className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
-                  >
-                    <MapPin className="w-4 h-4 text-gray-400" />
-                    <span>{city}</span>
-                  </button>
-                ))}
-              </div>
             </CardContent>
           </Card>
         )}
