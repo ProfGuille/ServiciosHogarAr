@@ -1,4 +1,5 @@
-export const argentineCities = [
+// Create an array with all cities and remove duplicates
+const allArgentineCities = [
   // Buenos Aires Province
   "Buenos Aires",
   "La Plata", 
@@ -30,12 +31,10 @@ export const argentineCities = [
   "San Miguel",
   "Hurlingham",
   "Ituzaingó",
-  "Merlo",
   "Moreno",
   "Marcos Paz",
   "General Rodríguez",
   "Luján",
-  "Mercedes",
   "Chivilcoy",
   "Chacabuco",
   "Junín",
@@ -55,7 +54,6 @@ export const argentineCities = [
   "General Paz",
   "Roque Pérez",
   "Saladillo",
-  "General Alvear",
   "Tapalqué",
   "Azul",
   "Benito Juárez",
@@ -68,7 +66,6 @@ export const argentineCities = [
   "General Alvarado",
   "General Pueyrredón",
   "General Guido",
-  "Maipú",
   "Chascomús",
   "Dolores",
   "Tordillo",
@@ -81,8 +78,6 @@ export const argentineCities = [
   "Magdalena",
   "Punta Indio",
   "Brandsen",
-  "Monte",
-  "Cañuelas",
   "San Vicente",
   "Presidente Perón",
 
@@ -141,7 +136,6 @@ export const argentineCities = [
   "Maipú",
   "Luján de Cuyo",
   "Rivadavia",
-  "San Martín",
   "Tunuyán",
   "Tupungato",
   "General Alvear",
@@ -196,9 +190,7 @@ export const argentineCities = [
   "Paso de los Libres",
   "Monte Caseros",
   "Esquina",
-  "Santo Tomé",
   "Sauce",
-  "Bella Vista",
 
   // Misiones Province
   "Posadas",
@@ -210,7 +202,6 @@ export const argentineCities = [
   "Aristóbulo del Valle",
   "Puerto Rico",
   "Montecarlo",
-  "San Vicente",
   "Jardín América",
   "Wanda",
 
@@ -250,7 +241,6 @@ export const argentineCities = [
   "San Salvador de Jujuy",
   "Palpalá",
   "Perico",
-  "San Pedro",
   "Libertador General San Martín",
   "Humahuaca",
   "Tilcara",
@@ -276,14 +266,12 @@ export const argentineCities = [
 
   // San Juan Province
   "San Juan",
-  "Rivadavia",
   "Chimbas",
   "Rawson",
   "Pocito",
   "Santa Lucía",
   "Caucete",
   "Albardón",
-  "San Martín",
   "Angaco",
   "Jáchal",
   "Valle Fértil",
@@ -318,7 +306,6 @@ export const argentineCities = [
   "Viedma",
   "San Carlos de Bariloche",
   "General Roca", 
-  "Cipolletti",
   "Villa Regina",
   "Río Colorado",
   "Choele Choel",
@@ -330,7 +317,6 @@ export const argentineCities = [
   "Luis Beltrán",
 
   // Chubut Province
-  "Rawson",
   "Comodoro Rivadavia",
   "Puerto Madryn",
   "Trelew",
@@ -347,9 +333,6 @@ export const argentineCities = [
   "Pico Truncado",
   "Puerto Deseado",
   "Puerto San Julián",
-  "El Calafate",
-  "El Chaltén",
-  "Las Heras",
   "Comandante Luis Piedra Buena",
 
   // Tierra del Fuego Province
@@ -369,6 +352,9 @@ export const argentineCities = [
   "General Acha",
   "Catriló"
 ];
+
+// Remove duplicates and sort alphabetically
+export const argentineCities = [...new Set(allArgentineCities)].sort();
 
 export const popularCities = [
   "Buenos Aires",
@@ -392,7 +378,7 @@ export const popularCities = [
   "Río Cuarto",
   "Concordia",
   "San Luis",
-  "Catamarca",
+  "San Fernando del Valle de Catamarca",
   "La Rioja",
   "Formosa",
   "Viedma",
