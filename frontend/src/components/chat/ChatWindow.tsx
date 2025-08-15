@@ -123,6 +123,8 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
         })
         .catch(console.error);
     }
+  }, [conversation.id, queryClient]);
+
   // Join conversation when component mounts
   useEffect(() => {
     if (socketIO.isConnected && conversation.id) {
