@@ -280,7 +280,7 @@ export default function AISmartSearch() {
                     <h4 className="font-semibold text-sm">Análisis IA:</h4>
                     <div className="space-y-2">
                       {Object.entries(match.breakdown).map(([key, value]) => {
-                        const labels = {
+                        const labels: Record<string, string> = {
                           categoryMatch: 'Coincidencia',
                           locationScore: 'Ubicación',
                           qualityScore: 'Calidad',
@@ -291,7 +291,7 @@ export default function AISmartSearch() {
                         
                         return (
                           <div key={key} className="flex items-center justify-between text-xs">
-                            <span className="text-gray-600">{labels[key]}:</span>
+                            <span className="text-gray-600">{labels[key] || key}:</span>
                             <div className="flex items-center space-x-2">
                               <div className="w-16 bg-gray-200 rounded-full h-1.5">
                                 <div 
