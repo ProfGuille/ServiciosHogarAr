@@ -66,12 +66,8 @@ const ServiceSelector: React.FC<ServiceSelectorProps> = ({
   ).slice(0, 5);
 
   const handleServiceClick = (service: Service) => {
-    if (!location.trim()) {
-      // If no location, prompt for location
-      alert("Por favor, indica tu ubicación para encontrar profesionales en tu zona");
-      return;
-    }
-    onServiceSelect(service, location);
+    // Allow service selection without location - user can add location later
+    onServiceSelect(service, location.trim() || undefined);
   };
 
   const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,7 +90,7 @@ const ServiceSelector: React.FC<ServiceSelectorProps> = ({
       {/* Location Input */}
       <div className="max-w-md mx-auto mb-8">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          ¿En qué zona necesitas el servicio?
+          ¿En qué zona necesitas el servicio? (opcional)
         </label>
         <div className="relative">
           <MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
@@ -125,6 +121,9 @@ const ServiceSelector: React.FC<ServiceSelectorProps> = ({
             </div>
           )}
         </div>
+        <p className="text-xs text-gray-500 mt-1">
+          Indicar tu ubicación nos ayuda a mostrarte profesionales más cercanos
+        </p>
       </div>
       
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -153,10 +152,16 @@ const ServiceSelector: React.FC<ServiceSelectorProps> = ({
         ))}
       </div>
 
-      {location && (
+      {location ? (
         <div className="text-center mt-6">
           <p className="text-sm text-gray-600">
             Buscando profesionales en: <span className="font-medium text-blue-600">{location}</span>
+          </p>
+        </div>
+      ) : (
+        <div className="text-center mt-6">
+          <p className="text-sm text-gray-500">
+            Los profesionales de toda Argentina están disponibles. ¡Añade tu ubicación para ver los más cercanos!
           </p>
         </div>
       )}
