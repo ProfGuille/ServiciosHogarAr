@@ -217,10 +217,10 @@ export default function Landing() {
       'mudanzas': 'mudanzas_fletes',
       'herrero': 'herrero',
       'techista': 'techista',
-      'fumigador': 'fumigador',
-      'técnico pc': 'tecnico_pc',
-      'pequeños arreglos': 'pequenos_arreglos',
-      'tapicero': 'tapicero',
+      'fumigador': 'limpieza_general', // Use cleaning image for pest control
+      'técnico pc': 'reparacion_electrodomesticos', // Use electronics repair image
+      'pequeños arreglos': 'herrero', // Use tools/metalwork image for general repairs
+      'tapicero': 'carpintero', // Use woodwork image for furniture work
       'vidriero': 'vidriero',
       'instalador solar': 'instalador_solar'
     };
