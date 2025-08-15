@@ -162,10 +162,19 @@ export default function Landing() {
     }
   };
 
-  const handleServiceSelect = (service: any) => {
-    // Navigate to search page with the selected service
+  const handleServiceSelect = (service: any, location?: string) => {
+    // Navigate to search page with the selected service and location
     const servicePath = service.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-");
-    window.location.href = `/servicios/${servicePath}`;
+    let url = `/servicios/${servicePath}`;
+    
+    // Add location as query parameter if provided
+    if (location) {
+      const params = new URLSearchParams();
+      params.set('ubicacion', location);
+      url += `?${params.toString()}`;
+    }
+    
+    window.location.href = url;
   };
 
   const prepareServicesForSelector = () => {
@@ -367,90 +376,33 @@ export default function Landing() {
         </section>
       )}
 
-      {/* Simple Pricing Table Section */}
+      {/* Pricing Information CTA */}
       <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">Precios estimados por servicio</h2>
-            <p className="text-lg text-slate-600">Rangos de precios referenciales para que tengas una idea del costo</p>
-            <p className="text-sm text-slate-500 mt-2">*Los precios finales varían según la complejidad del trabajo y la zona</p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-slate-50 rounded-lg p-6">
-              <h3 className="font-semibold text-slate-900 mb-4">Servicios básicos</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Plomería (consulta)</span>
-                  <span className="font-medium">$8,000 - $15,000</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Electricidad (punto)</span>
-                  <span className="font-medium">$5,000 - $12,000</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Cerrajería básica</span>
-                  <span className="font-medium">$6,000 - $18,000</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Pequeños arreglos</span>
-                  <span className="font-medium">$4,000 - $10,000</span>
-                </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8">
+            <div className="max-w-3xl mx-auto">
+              <h2 className="text-3xl font-bold text-slate-900 mb-4">
+                ¿Necesitas conocer los precios?
+              </h2>
+              <p className="text-lg text-slate-600 mb-6">
+                Consulta nuestra guía completa de precios referenciales para todos los servicios del hogar
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <Link href="/precios">
+                  <Button className="bg-primary text-white hover:bg-primary/90 px-8 py-3">
+                    Ver Guía de Precios
+                  </Button>
+                </Link>
+                <Link href="/crear-solicitud">
+                  <Button variant="outline" className="px-8 py-3">
+                    Solicitar Presupuestos Gratis
+                  </Button>
+                </Link>
               </div>
+              <p className="text-sm text-slate-500 mt-4">
+                Los precios finales varían según la complejidad del trabajo y la zona
+              </p>
             </div>
-
-            <div className="bg-slate-50 rounded-lg p-6">
-              <h3 className="font-semibold text-slate-900 mb-4">Servicios de hogar</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Limpieza (4 horas)</span>
-                  <span className="font-medium">$12,000 - $20,000</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Pintura (m²)</span>
-                  <span className="font-medium">$800 - $1,500</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Jardinería (hora)</span>
-                  <span className="font-medium">$2,500 - $4,000</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Fumigación</span>
-                  <span className="font-medium">$15,000 - $35,000</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-slate-50 rounded-lg p-6">
-              <h3 className="font-semibold text-slate-900 mb-4">Servicios especializados</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Técnico de aire (service)</span>
-                  <span className="font-medium">$18,000 - $35,000</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Técnico PC (diagnóstico)</span>
-                  <span className="font-medium">$8,000 - $15,000</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Gasista (certificación)</span>
-                  <span className="font-medium">$25,000 - $50,000</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Carpintería (hora)</span>
-                  <span className="font-medium">$4,000 - $8,000</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-8 text-center">
-            <p className="text-slate-600 mb-4">¿Necesitas un presupuesto más preciso?</p>
-            <Link href="/crear-solicitud">
-              <Button className="bg-secondary text-white hover:bg-green-700">
-                Solicitar Presupuestos Gratis
-              </Button>
-            </Link>
           </div>
         </div>
       </section>
