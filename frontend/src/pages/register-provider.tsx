@@ -11,7 +11,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { argentineCities, popularCities } from "@/data/argentine-cities";
 import { Loader2, CheckCircle, User, Building, MapPin, Phone, Briefcase } from "lucide-react";
 
 interface ProviderRegistrationData {
@@ -20,9 +19,7 @@ interface ProviderRegistrationData {
   password: string;
   businessName: string;
   city: string;
-  customCity?: string;
   phone: string;
-  cuilCuit?: string;
   serviceCategories: string[];
   termsAccepted: boolean;
   privacyAccepted: boolean;
@@ -64,7 +61,7 @@ const serviceCategories = [
   { id: "30", name: "Asesoría Legal" }
 ];
 
-const argentineCitiesOld = [
+const argentineCities = [
   "Buenos Aires", "Córdoba", "Rosario", "Mendoza", "San Miguel de Tucumán",
   "La Plata", "Mar del Plata", "Salta", "Santa Fe", "San Juan",
   "Resistencia", "Neuquén", "Santiago del Estero", "Corrientes", "Avellaneda"
@@ -81,9 +78,7 @@ export default function RegisterProvider() {
     password: "",
     businessName: "",
     city: "",
-    customCity: "",
     phone: "",
-    cuilCuit: "",
     serviceCategories: [],
     termsAccepted: false,
     privacyAccepted: false,
@@ -127,7 +122,7 @@ export default function RegisterProvider() {
       toast({ title: "Error", description: "El nombre del negocio es obligatorio", variant: "destructive" });
       return false;
     }
-    if (!formData.city.trim() && !formData.customCity?.trim()) {
+    if (!formData.city.trim()) {
       toast({ title: "Error", description: "La ciudad es obligatoria", variant: "destructive" });
       return false;
     }
@@ -154,18 +149,13 @@ export default function RegisterProvider() {
     setIsLoading(true);
     
     try {
-      const submissionData = {
-        ...formData,
-        city: formData.city || formData.customCity || "",
-      };
-
       const response = await fetch('/api/auth/register-provider', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify(submissionData),
+        body: JSON.stringify(formData),
       });
 
       if (!response.ok) {
@@ -174,17 +164,15 @@ export default function RegisterProvider() {
           const result = await response.json();
           throw new Error(result.error || `Error ${response.status}: ${response.statusText}`);
         } catch (jsonError) {
-          // Handle non-JSON error responses with better messages
+          // Handle non-JSON error responses
           if (response.status === 503 || response.status === 502) {
-            throw new Error('El servicio de registro está temporalmente no disponible. El servidor se está actualizando. Por favor, inténtalo en unos minutos.');
+            throw new Error('El servicio de registro está temporalmente no disponible. Por favor, inténtalo más tarde.');
           } else if (response.status === 404) {
-            throw new Error('Servicio de registro no encontrado. El backend está en mantenimiento o experimentando problemas. Por favor, inténtalo más tarde o contacta soporte.');
+            throw new Error('Servicio de registro no encontrado. El backend podría estar desconectado.');
           } else if (response.status === 409) {
-            throw new Error('Ya existe una cuenta de proveedor con este email. Intenta iniciar sesión o recuperar tu contraseña.');
-          } else if (response.status === 500) {
-            throw new Error('Error interno del servidor. Nuestro equipo técnico ha sido notificado. Por favor, inténtalo más tarde.');
+            throw new Error('Ya existe una cuenta con este email. Intenta iniciar sesión.');
           } else {
-            throw new Error(`Error de conexión (${response.status}). Verifica tu conexión a internet e inténtalo nuevamente.`);
+            throw new Error(`Error interno del servidor (${response.status}). Por favor, inténtalo más tarde.`);
           }
         }
       }
@@ -204,10 +192,10 @@ export default function RegisterProvider() {
     } catch (error) {
       console.error('Error al registrar proveedor:', error);
       
-      let errorMessage = "Hubo un problema al procesar tu registro. Por favor, inténtalo de nuevo más tarde.";
+      let errorMessage = "Por favor, inténtalo de nuevo más tarde.";
       
       if (error instanceof TypeError && error.message.includes('fetch')) {
-        errorMessage = "No se puede conectar con el servidor. Verifica tu conexión a internet y que no tengas bloqueadores de contenido activos.";
+        errorMessage = "No se puede conectar con el servidor. Verifica tu conexión a internet.";
       } else if (error instanceof Error) {
         errorMessage = error.message;
       }
@@ -216,7 +204,7 @@ export default function RegisterProvider() {
         title: "Error en el registro",
         description: errorMessage,
         variant: "destructive",
-        duration: 10000,
+        duration: 8000,
       });
     } finally {
       setIsLoading(false);
@@ -283,32 +271,6 @@ export default function RegisterProvider() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="phone">Teléfono de Contacto</Label>
-                      <Input
-                        id="phone"
-                        value={formData.phone}
-                        onChange={(e) => handleInputChange('phone', e.target.value)}
-                        placeholder="+54 11 1234-5678"
-                        required
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="cuilCuit">CUIL/CUIT (Opcional)</Label>
-                      <Input
-                        id="cuilCuit"
-                        value={formData.cuilCuit || ""}
-                        onChange={(e) => handleInputChange('cuilCuit', e.target.value)}
-                        placeholder="20-12345678-9"
-                      />
-                      <p className="text-xs text-slate-500">
-                        Formato: 20-12345678-9
-                      </p>
-                    </div>
-                  </div>
-
                   <div>
                     <Label htmlFor="password">Contraseña</Label>
                     <Input
@@ -330,58 +292,6 @@ export default function RegisterProvider() {
                   </h3>
                   
                   <div>
-                    <Label htmlFor="city">Ciudad Principal de Trabajo</Label>
-                    <Select 
-                      value={formData.city || ""} 
-                      onValueChange={(value) => {
-                        if (value === "custom") {
-                          handleInputChange('city', "");
-                        } else {
-                          handleInputChange('city', value);
-                          handleInputChange('customCity', "");
-                        }
-                      }}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecciona tu ciudad" />
-                      </SelectTrigger>
-                      <SelectContent className="max-h-[200px] overflow-y-auto">
-                        <div className="font-semibold text-xs text-gray-500 px-2 py-1">
-                          CIUDADES POPULARES
-                        </div>
-                        {popularCities.map((city) => (
-                          <SelectItem key={city} value={city}>
-                            {city}
-                          </SelectItem>
-                        ))}
-                        <div className="font-semibold text-xs text-gray-500 px-2 py-1 border-t mt-1 pt-2">
-                          TODAS LAS CIUDADES
-                        </div>
-                        {argentineCities.filter(city => !popularCities.includes(city)).map((city) => (
-                          <SelectItem key={city} value={city}>
-                            {city}
-                          </SelectItem>
-                        ))}
-                        <div className="border-t mt-1 pt-1">
-                          <SelectItem value="custom">
-                            <span className="font-medium text-blue-600">+ Escribir otra ciudad</span>
-                          </SelectItem>
-                        </div>
-                      </SelectContent>
-                    </Select>
-                    
-                    {formData.city === "" && (
-                      <div className="mt-2">
-                        <Input
-                          placeholder="Escribe el nombre de tu ciudad"
-                          value={formData.customCity || ""}
-                          onChange={(e) => handleInputChange('customCity', e.target.value)}
-                        />
-                      </div>
-                    )}
-                  </div>
-
-                  <div>
                     <Label htmlFor="businessName">Nombre del Negocio/Empresa</Label>
                     <Input
                       id="businessName"
@@ -390,6 +300,38 @@ export default function RegisterProvider() {
                       placeholder="Ej: Plomería Buenos Aires"
                       required
                     />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="city">Ciudad Principal de Trabajo</Label>
+                      <Select 
+                        value={formData.city || ""} 
+                        onValueChange={(value) => handleInputChange('city', value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona tu ciudad" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {argentineCities.map((city) => (
+                            <SelectItem key={city} value={city}>
+                              {city}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="phone">Teléfono de Contacto</Label>
+                      <Input
+                        id="phone"
+                        value={formData.phone}
+                        onChange={(e) => handleInputChange('phone', e.target.value)}
+                        placeholder="+54 11 1234-5678"
+                        required
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -411,34 +353,15 @@ export default function RegisterProvider() {
                             ? 'border-blue-500 bg-blue-50'
                             : 'border-gray-200 hover:border-gray-300'
                         }`}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleCategoryToggle(category.id);
-                        }}
+                        onClick={() => handleCategoryToggle(category.id)}
                       >
                         <div className="flex items-center space-x-2">
                           <Checkbox
                             checked={formData.serviceCategories.includes(category.id)}
-                            onCheckedChange={(checked) => {
-                              if (checked !== formData.serviceCategories.includes(category.id)) {
-                                handleCategoryToggle(category.id);
-                              }
-                            }}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                            }}
+                            onCheckedChange={() => handleCategoryToggle(category.id)}
+                            onClick={(e) => e.stopPropagation()} // Prevent double-clicking
                           />
-                          <span 
-                            className="text-sm font-medium select-none"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                            }}
-                          >
-                            {category.name}
-                          </span>
+                          <span className="text-sm font-medium select-none">{category.name}</span>
                         </div>
                       </div>
                     ))}

@@ -8,7 +8,6 @@ import { Toaster } from "@/components/ui/toaster";
 interface RegistrationData {
   name: string;
   email: string;
-  phone?: string;
   password: string;
   termsAccepted: boolean;
   privacyAccepted: boolean;
@@ -38,7 +37,6 @@ export default function Register() {
         body: JSON.stringify({
           name: data.name,
           email: data.email,
-          phone: data.phone,
           password: data.password,
           termsAccepted: data.termsAccepted,
           privacyAccepted: data.privacyAccepted,
@@ -54,17 +52,15 @@ export default function Register() {
           const result = await response.json();
           throw new Error(result.error || `Error ${response.status}: ${response.statusText}`);
         } catch (jsonError) {
-          // Handle non-JSON error responses with better messages
+          // Handle non-JSON error responses
           if (response.status === 503 || response.status === 502) {
-            throw new Error('El servicio de registro está temporalmente no disponible. El servidor se está actualizando. Por favor, inténtalo en unos minutos.');
+            throw new Error('El servicio de registro está temporalmente no disponible. Por favor, inténtalo más tarde.');
           } else if (response.status === 404) {
-            throw new Error('Servicio de registro no encontrado. El backend está en mantenimiento o experimentando problemas. Por favor, inténtalo más tarde o contacta soporte.');
+            throw new Error('Servicio de registro no encontrado. El backend podría estar desconectado.');
           } else if (response.status === 409) {
-            throw new Error('Ya existe una cuenta con este email. Intenta iniciar sesión o recuperar tu contraseña.');
-          } else if (response.status === 500) {
-            throw new Error('Error interno del servidor. Nuestro equipo técnico ha sido notificado. Por favor, inténtalo más tarde.');
+            throw new Error('Ya existe una cuenta con este email. Intenta iniciar sesión.');
           } else {
-            throw new Error(`Error de conexión (${response.status}). Verifica tu conexión a internet e inténtalo nuevamente.`);
+            throw new Error(`Error interno del servidor (${response.status}). Por favor, inténtalo más tarde.`);
           }
         }
       }
@@ -99,10 +95,10 @@ export default function Register() {
     } catch (error) {
       console.error("Registration error:", error);
       
-      let errorMessage = "Hubo un problema al crear tu cuenta. Por favor, inténtalo de nuevo más tarde.";
+      let errorMessage = "Por favor, inténtalo de nuevo más tarde.";
       
       if (error instanceof TypeError && error.message.includes('fetch')) {
-        errorMessage = "No se puede conectar con el servidor. Verifica tu conexión a internet y que no tengas bloqueadores de contenido activos.";
+        errorMessage = "No se puede conectar con el servidor. Verifica tu conexión a internet.";
       } else if (error instanceof Error) {
         errorMessage = error.message;
       }
@@ -111,7 +107,7 @@ export default function Register() {
         title: "Error al crear la cuenta",
         description: errorMessage,
         variant: "destructive",
-        duration: 10000,
+        duration: 8000,
       });
     } finally {
       setIsLoading(false);
