@@ -108,23 +108,12 @@ export default function Precios() {
           </div>
         </div>
 
-        {/* Important Notice */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
-          <div className="flex items-start space-x-3">
-            <div className="flex-shrink-0">
-              <Info className="h-6 w-6 text-blue-600 mt-0.5" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-blue-900 mb-2">
-                Información importante sobre precios
-              </h3>
-              <ul className="text-blue-800 space-y-1 text-sm">
-                <li>• Los precios son estimaciones basadas en el mercado argentino actual</li>
-                <li>• Los costos pueden variar según la complejidad, ubicación y urgencia</li>
-                <li>• Materiales generalmente no incluidos en las tarifas mostradas</li>
-                <li>• Se recomienda solicitar múltiples presupuestos para comparar</li>
-                <li>• Precios sujetos a inflación y variaciones del mercado</li>
-              </ul>
+        {/* Important Notice - Compact Version */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <div className="flex items-center space-x-2">
+            <Info className="h-5 w-5 text-blue-600 flex-shrink-0" />
+            <div className="text-sm text-blue-800">
+              <strong>Importante:</strong> Precios estimativos del mercado argentino. Los costos pueden variar según complejidad, ubicación y urgencia. Materiales no incluidos.
             </div>
           </div>
         </div>
@@ -195,7 +184,7 @@ export default function Precios() {
             Conecta con profesionales verificados para obtener cotizaciones exactas.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/buscar">
+            <Link href="/crear-solicitud">
               <Button size="lg" className="bg-white text-primary hover:bg-blue-50">
                 <Calculator className="h-5 w-5 mr-2" />
                 Solicitar Presupuestos Gratis

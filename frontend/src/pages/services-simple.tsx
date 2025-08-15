@@ -20,18 +20,74 @@ export default function ServicesSimple() {
       try {
         setLoading(true);
         
-        // Fetch providers
-        const providersResponse = await fetch('http://localhost:3000/api/providers');
-        if (providersResponse.ok) {
-          const providersData = await providersResponse.json();
-          setProviders(providersData || []);
-        }
-        
-        // Fetch categories
-        const categoriesResponse = await fetch('http://localhost:3000/api/categories');
-        if (categoriesResponse.ok) {
-          const categoriesData = await categoriesResponse.json();
-          setCategories(categoriesData || []);
+        // Try to fetch from backend first
+        try {
+          const providersResponse = await fetch('/api/providers');
+          if (providersResponse.ok) {
+            const providersData = await providersResponse.json();
+            setProviders(providersData || []);
+          } else {
+            throw new Error('Backend not available');
+          }
+          
+          const categoriesResponse = await fetch('/api/categories');
+          if (categoriesResponse.ok) {
+            const categoriesData = await categoriesResponse.json();
+            setCategories(categoriesData || []);
+          }
+        } catch (backendError) {
+          // If backend is not available, use mock data
+          console.log('Using mock data (backend not available)');
+          
+          // Mock categories
+          setCategories([
+            { id: 1, name: "Plomería", description: "Servicios de plomería" },
+            { id: 2, name: "Electricidad", description: "Servicios eléctricos" },
+            { id: 3, name: "Pintura", description: "Servicios de pintura" },
+            { id: 4, name: "Limpieza", description: "Servicios de limpieza" },
+            { id: 5, name: "Jardinería", description: "Servicios de jardinería" },
+            { id: 6, name: "Carpintería", description: "Servicios de carpintería" }
+          ]);
+          
+          // Mock providers
+          setProviders([
+            {
+              id: 1,
+              name: "Juan Pérez",
+              businessName: "Plomería Buenos Aires",
+              city: "Buenos Aires",
+              categoryId: 1,
+              rating: 4.8,
+              totalReviews: 156,
+              hourlyRate: 4500,
+              phone: "11-2345-6789",
+              description: "Especialista en reparaciones de plomería con más de 10 años de experiencia."
+            },
+            {
+              id: 2,
+              name: "María González",
+              businessName: "Electricidad Profesional",
+              city: "Córdoba",
+              categoryId: 2,
+              rating: 4.9,
+              totalReviews: 89,
+              hourlyRate: 5000,
+              phone: "351-234-5678",
+              description: "Electricista matriculada especializada en instalaciones residenciales."
+            },
+            {
+              id: 3,
+              name: "Carlos López",
+              businessName: "Pintura y Decoración",
+              city: "Rosario",
+              categoryId: 3,
+              rating: 4.7,
+              totalReviews: 124,
+              hourlyRate: 3800,
+              phone: "341-345-6789",
+              description: "Pintor profesional con experiencia en interiores y exteriores."
+            }
+          ]);
         }
 
         setLoading(false);
