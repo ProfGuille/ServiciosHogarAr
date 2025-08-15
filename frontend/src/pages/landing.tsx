@@ -178,7 +178,18 @@ export default function Landing() {
   };
 
   const prepareServicesForSelector = () => {
-    if (!displayCategories) return [];
+    // Use servicesList from data/services.ts as fallback to ensure all services always show
+    const fallbackServices = servicesList.slice(0, 18).map((service, index) => ({
+      id: (index + 1).toString(),
+      name: service.name,
+      description: "150+ profesionales disponibles",
+      category: service.category,
+      image: service.image
+    }));
+
+    if (!displayCategories || displayCategories.length === 0) {
+      return fallbackServices;
+    }
     
     // Create a mapping from category names to services
     const serviceMap = servicesList.reduce((acc, service) => {
