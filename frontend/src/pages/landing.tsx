@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ServiceSearch } from "@/components/services/service-search";
 import { 
   Wrench, 
   Zap, 
@@ -78,6 +79,30 @@ export default function Landing() {
     queryKey: ["/api/categories"],
   });
 
+  // Fallback categories when API is not available
+  const fallbackCategories = [
+    { id: 1, name: "Plomería" },
+    { id: 2, name: "Electricidad" },
+    { id: 3, name: "Pintura" },
+    { id: 4, name: "Limpieza" },
+    { id: 5, name: "Carpintería" },
+    { id: 6, name: "Gasista" },
+    { id: 7, name: "Albañil" },
+    { id: 8, name: "Técnico de aire" },
+    { id: 9, name: "Jardinería" },
+    { id: 10, name: "Cerrajero" },
+    { id: 11, name: "Mudanzas" },
+    { id: 12, name: "Herrero" },
+    { id: 13, name: "Techista" },
+    { id: 14, name: "Fumigador" },
+    { id: 15, name: "Técnico PC" },
+    { id: 16, name: "Pequeños arreglos" },
+    { id: 17, name: "Tapicero" }
+  ];
+
+  // Use fallback if categories API fails
+  const displayCategories = categories || fallbackCategories;
+
   const { data: featuredProviders } = useQuery({
     queryKey: ["/api/providers"],
     queryFn: () => fetch("/api/providers?limit=4&isVerified=true").then(res => {
@@ -127,8 +152,8 @@ export default function Landing() {
   };
 
   const prepareServicesForSelector = () => {
-    if (!categories) return [];
-    return categories.map((category: any) => ({
+    if (!displayCategories) return [];
+    return displayCategories.map((category: any) => ({
       id: category.id.toString(),
       name: category.name,
       description: "150+ profesionales disponibles",
@@ -143,12 +168,12 @@ export default function Landing() {
       
       {/* Hero Section with User Type Selection */}
       <section className="bg-gradient-to-br from-primary to-blue-700 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl lg:text-6xl font-bold mb-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl lg:text-5xl font-bold mb-4">
               {t('landing.hero.title')}
             </h1>
-            <p className="text-xl mb-8 text-blue-100">
+            <p className="text-lg mb-6 text-blue-100">
               {t('landing.hero.subtitle')}
             </p>
           </div>
@@ -158,7 +183,7 @@ export default function Landing() {
             <UserTypeSelector 
               onSelect={handleUserTypeSelect}
               selectedType={userType}
-              className="mb-8"
+              className="mb-6"
             />
           )}
 
@@ -177,34 +202,7 @@ export default function Landing() {
 
           {/* Fallback Traditional Search */}
           {!userType && (
-            <Card className="p-6 shadow-2xl mt-8">
-              <CardContent className="p-0">
-                <div className="grid md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700 block">{t('forms.serviceRequest.serviceType')}</label>
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-                      <Input
-                        type="text"
-                        placeholder={t('services.searchPlaceholder')}
-                        className="pl-10 h-12"
-                        value={location}
-                        onChange={(e) => setLocation(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                      />
-                    </div>
-                  </div>
-                  <div className="flex items-end">
-                    <Button 
-                      className="w-full bg-secondary text-white hover:bg-green-700 h-12 text-base font-medium"
-                      onClick={handleSearch}
-                    >
-                      {t('common.search')} {t('services.title')}
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <ServiceSearch />
           )}
         </div>
       </section>
@@ -218,7 +216,7 @@ export default function Landing() {
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-            {categories?.slice(0, 17).map((category) => {
+            {displayCategories?.slice(0, 17).map((category) => {
               const IconComponent = serviceIcons[category.name.toLowerCase() as keyof typeof serviceIcons] || Wrench;
               const categoryPath = category.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-");
               return (
@@ -368,7 +366,7 @@ export default function Landing() {
                 <UserCheck className="h-8 w-8 text-white" />
               </div>
               <h3 className="text-xl font-semibold text-slate-900 mb-4">Profesionales verificados</h3>
-              <p className="text-slate-600">Todos nuestros profesionales pasan por un riguroso proceso de verificación de identidad y antecedentes.</p>
+              <p className="text-slate-600">Nuestros profesionales completan un proceso de verificación de identidad para mayor seguridad.</p>
             </div>
             
             <div className="text-center">

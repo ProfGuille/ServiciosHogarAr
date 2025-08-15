@@ -15,6 +15,25 @@ export function ServiceSearch() {
     queryKey: ["/api/categories"],
   });
 
+  // Fallback categories when API is not available
+  const fallbackCategories = [
+    { id: 1, name: "Plomería" },
+    { id: 2, name: "Electricidad" },
+    { id: 3, name: "Pintura" },
+    { id: 4, name: "Limpieza" },
+    { id: 5, name: "Carpintería" },
+    { id: 6, name: "Gasista" },
+    { id: 7, name: "Albañil" },
+    { id: 8, name: "Técnico de aire" },
+    { id: 9, name: "Jardinería" },
+    { id: 10, name: "Cerrajero" },
+    { id: 11, name: "Mudanzas" },
+    { id: 12, name: "Herrero" }
+  ];
+
+  // Use fallback if categories API fails
+  const displayCategories = categories || fallbackCategories;
+
   const handleSearch = () => {
     // Build search params
     const params = new URLSearchParams();
@@ -51,9 +70,9 @@ export function ServiceSearch() {
             </div>
             
             {/* Quick suggestions */}
-            {categories && searchQuery.length > 0 && (
+            {displayCategories && searchQuery.length > 0 && (
               <div className="absolute z-10 w-full bg-white border border-slate-200 rounded-lg shadow-lg mt-1">
-                {categories
+                {displayCategories
                   .filter(cat => 
                     cat.name.toLowerCase().includes(searchQuery.toLowerCase())
                   )
@@ -103,11 +122,11 @@ export function ServiceSearch() {
         </div>
 
         {/* Popular Services */}
-        {categories && (
+        {displayCategories && (
           <div className="mt-6 pt-4 border-t border-slate-100">
             <p className="text-sm text-slate-600 mb-3">Servicios populares:</p>
             <div className="flex flex-wrap gap-2">
-              {categories.slice(0, 6).map((category) => (
+              {displayCategories.slice(0, 6).map((category) => (
                 <Button
                   key={category.id}
                   variant="outline"
