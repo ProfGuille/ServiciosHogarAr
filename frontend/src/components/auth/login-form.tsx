@@ -45,11 +45,24 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         body: JSON.stringify(formData),
       });
 
-      const result = await response.json();
-
       if (!response.ok) {
-        throw new Error(result.error || 'Error al iniciar sesión');
+        // Try to get error message from response
+        try {
+          const result = await response.json();
+          throw new Error(result.error || `Error ${response.status}: ${response.statusText}`);
+        } catch (jsonError) {
+          // If response is not JSON, use status text
+          if (response.status === 503 || response.status === 502) {
+            throw new Error('El servicio está temporalmente no disponible. Por favor, inténtalo más tarde.');
+          } else if (response.status === 404) {
+            throw new Error('Servicio de autenticación no encontrado. El backend podría estar desconectado.');
+          } else {
+            throw new Error(`Error ${response.status}: Servicio no disponible`);
+          }
+        }
       }
+
+      const result = await response.json();
 
       // Success
       console.log('Login successful:', result);
@@ -63,7 +76,11 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
 
     } catch (error) {
       console.error("Login error:", error);
-      setError(error instanceof Error ? error.message : "Error al iniciar sesión");
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        setError("No se puede conectar con el servidor. Por favor, verifica tu conexión a internet.");
+      } else {
+        setError(error instanceof Error ? error.message : "Error al iniciar sesión. Por favor, inténtalo más tarde.");
+      }
     } finally {
       setIsLoading(false);
     }

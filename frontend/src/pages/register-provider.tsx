@@ -38,7 +38,27 @@ const serviceCategories = [
   { id: "7", name: "Techado" },
   { id: "8", name: "Aire Acondicionado" },
   { id: "9", name: "Cerrajería" },
-  { id: "10", name: "Albañilería" }
+  { id: "10", name: "Albañilería" },
+  { id: "11", name: "Gasista" },
+  { id: "12", name: "Herrería" },
+  { id: "13", name: "Fumigación" },
+  { id: "14", name: "Mudanzas" },
+  { id: "15", name: "Vidriero" },
+  { id: "16", name: "Tapicería" },
+  { id: "17", name: "Técnico en PC" },
+  { id: "18", name: "Pequeños Arreglos" },
+  { id: "19", name: "Instalador Solar" },
+  { id: "20", name: "Lavado de Alfombras" },
+  { id: "21", name: "Instalación de Pisos" },
+  { id: "22", name: "Pintor de Casas" },
+  { id: "23", name: "Cuidado de Mascotas" },
+  { id: "24", name: "Niñera/Cuidado Infantil" },
+  { id: "25", name: "Enfermería Domiciliaria" },
+  { id: "26", name: "Masajes Terapéuticos" },
+  { id: "27", name: "Clases Particulares" },
+  { id: "28", name: "Traducción" },
+  { id: "29", name: "Consultoría Contable" },
+  { id: "30", name: "Asesoría Legal" }
 ];
 
 const argentineCities = [
@@ -138,11 +158,26 @@ export default function RegisterProvider() {
         body: JSON.stringify(formData),
       });
 
-      const result = await response.json();
-
       if (!response.ok) {
-        throw new Error(result.error || 'Error al registrar proveedor');
+        // Try to parse error response
+        try {
+          const result = await response.json();
+          throw new Error(result.error || `Error ${response.status}: ${response.statusText}`);
+        } catch (jsonError) {
+          // Handle non-JSON error responses
+          if (response.status === 503 || response.status === 502) {
+            throw new Error('El servicio de registro está temporalmente no disponible. Por favor, inténtalo más tarde.');
+          } else if (response.status === 404) {
+            throw new Error('Servicio de registro no encontrado. El backend podría estar desconectado.');
+          } else if (response.status === 409) {
+            throw new Error('Ya existe una cuenta con este email. Intenta iniciar sesión.');
+          } else {
+            throw new Error(`Error interno del servidor (${response.status}). Por favor, inténtalo más tarde.`);
+          }
+        }
       }
+
+      const result = await response.json();
 
       toast({
         title: "¡Registro exitoso!",
@@ -156,10 +191,20 @@ export default function RegisterProvider() {
 
     } catch (error) {
       console.error('Error al registrar proveedor:', error);
+      
+      let errorMessage = "Por favor, inténtalo de nuevo más tarde.";
+      
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        errorMessage = "No se puede conectar con el servidor. Verifica tu conexión a internet.";
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Error en el registro",
-        description: error instanceof Error ? error.message : "Error interno del servidor",
+        description: errorMessage,
         variant: "destructive",
+        duration: 8000,
       });
     } finally {
       setIsLoading(false);
@@ -260,7 +305,10 @@ export default function RegisterProvider() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="city">Ciudad Principal de Trabajo</Label>
-                      <Select onValueChange={(value) => handleInputChange('city', value)}>
+                      <Select 
+                        value={formData.city || ""} 
+                        onValueChange={(value) => handleInputChange('city', value)}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="Selecciona tu ciudad" />
                         </SelectTrigger>
@@ -310,9 +358,10 @@ export default function RegisterProvider() {
                         <div className="flex items-center space-x-2">
                           <Checkbox
                             checked={formData.serviceCategories.includes(category.id)}
-                            onChange={() => handleCategoryToggle(category.id)}
+                            onCheckedChange={() => handleCategoryToggle(category.id)}
+                            onClick={(e) => e.stopPropagation()} // Prevent double-clicking
                           />
-                          <span className="text-sm font-medium">{category.name}</span>
+                          <span className="text-sm font-medium select-none">{category.name}</span>
                         </div>
                       </div>
                     ))}

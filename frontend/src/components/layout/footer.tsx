@@ -132,7 +132,7 @@ export function Footer() {
                 <Heart className="h-6 w-6 text-green-400" />
               </div>
               <h4 className="font-semibold text-white mb-1">Profesionales Verificados</h4>
-              <p className="text-slate-400 text-sm">Todos nuestros profesionales pasan por un riguroso proceso de verificación</p>
+              <p className="text-slate-400 text-sm">Nuestros profesionales completan verificación de identidad para mayor seguridad</p>
             </div>
             <div className="flex flex-col items-center">
               <div className="w-12 h-12 bg-blue-600/20 rounded-full flex items-center justify-center mb-3">
