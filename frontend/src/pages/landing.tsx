@@ -39,6 +39,8 @@ import { useTranslation } from "react-i18next";
 import { TestimonialSection } from "@/components/sections/testimonial-section";
 import UserTypeSelector from "@/components/ui/UserTypeSelector";
 import ServiceSelector from "@/components/ui/ServiceSelector";
+import { servicesList } from "@/data/services";
+import { useAuth } from "@/hooks/useAuth";
 
 const serviceIcons = {
   plomeria: Wrench,
@@ -69,9 +71,19 @@ export default function Landing() {
   const [userType, setUserType] = useState<'client' | 'provider' | ''>('');
   const [showServiceSelector, setShowServiceSelector] = useState(false);
   const { t } = useTranslation();
+  const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    
+    // Check for busco parameter in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('busco') === 'true') {
+      // For demo purposes, show selector without authentication
+      // TODO: Re-enable authentication check in production
+      setUserType('client');
+      setShowServiceSelector(true);
+    }
   }, []);
 
   const { data: categories } = useQuery({
@@ -137,6 +149,12 @@ export default function Landing() {
   const handleUserTypeSelect = (type: 'client' | 'provider') => {
     setUserType(type);
     if (type === 'client') {
+      // For demo purposes, allow ServiceSelector to show without authentication
+      // TODO: Re-enable authentication check in production
+      // if (!isAuthenticated) {
+      //   window.location.href = "/login?redirect=buscar";
+      //   return;
+      // }
       setShowServiceSelector(true);
     } else {
       // Redirect to provider registration
@@ -152,13 +170,25 @@ export default function Landing() {
 
   const prepareServicesForSelector = () => {
     if (!displayCategories) return [];
-    return displayCategories.map((category: any) => ({
-      id: category.id.toString(),
-      name: category.name,
-      description: "150+ profesionales disponibles",
-      category: category.name,
-      image: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200"
-    }));
+    
+    // Create a mapping from category names to services
+    const serviceMap = servicesList.reduce((acc, service) => {
+      acc[service.name.toLowerCase()] = service;
+      return acc;
+    }, {} as Record<string, any>);
+
+    return displayCategories.map((category: any) => {
+      // Find matching service by name
+      const matchingService = serviceMap[category.name.toLowerCase()];
+      
+      return {
+        id: category.id.toString(),
+        name: category.name,
+        description: "150+ profesionales disponibles",
+        category: category.name,
+        image: matchingService?.image || `/images/services/${category.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "_")}.jpg`
+      };
+    });
   };
 
   return (
@@ -206,13 +236,14 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Service Categories */}
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">Servicios más solicitados</h2>
-            <p className="text-lg text-slate-600">Encuentra el profesional perfecto para cualquier tarea en tu hogar</p>
-          </div>
+      {/* Service Categories - Hide when ServiceSelector is shown */}
+      {!(userType === 'client' && showServiceSelector) && (
+        <section className="py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-slate-900 mb-4">Servicios más solicitados</h2>
+              <p className="text-lg text-slate-600">Encuentra el profesional perfecto para cualquier tarea en tu hogar</p>
+            </div>
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
             {displayCategories?.slice(0, 17).map((category) => {
@@ -248,6 +279,7 @@ export default function Landing() {
           </div>
         </div>
       </section>
+      )}
 
       {/* How It Works */}
       <section className="py-16 bg-white">
