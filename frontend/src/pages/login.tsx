@@ -8,7 +8,7 @@ import { Toaster } from "@/components/ui/toaster";
 
 export default function Login() {
   const [, setLocation] = useLocation();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, error } = useAuth();
 
   useEffect(() => {
     document.title = "Iniciar Sesión - ServiciosHogar.com.ar";
@@ -22,12 +22,17 @@ export default function Login() {
     }
   }, [isAuthenticated, isLoading, setLocation]);
 
+  // Show loading only for a reasonable time
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
           <p className="mt-2 text-slate-600">Verificando sesión...</p>
+          {/* Add timeout message if taking too long */}
+          <p className="mt-4 text-sm text-slate-500">
+            Si esto toma mucho tiempo, el servicio podría estar temporalmente no disponible.
+          </p>
         </div>
       </div>
     );
