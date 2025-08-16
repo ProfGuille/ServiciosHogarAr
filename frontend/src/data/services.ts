@@ -163,28 +163,28 @@ export const servicesList: Service[] = [
   {
     id: 'fumigador',
     name: 'Fumigador',
-    image: '/images/services/fumigador.jpg',
+    image: '/images/services/limpieza_alfombras.jpg',
     description: 'Control de plagas y fumigación',
     category: 'hogar'
   },
   {
     id: 'tecnico_pc',
     name: 'Técnico PC',
-    image: '/images/services/tecnico_pc.jpg',
+    image: '/images/services/aire_acondicionado.jpg',
     description: 'Reparación y soporte de computadoras',
     category: 'tecnologia'
   },
   {
     id: 'tapicero',
     name: 'Tapicero',
-    image: '/images/services/tapicero.jpg',
+    image: '/images/services/cuidado_adultos.jpg',
     description: 'Retapizado y restauración de muebles',
     category: 'hogar'
   },
   {
     id: 'pequenos_arreglos',
     name: 'Pequeños Arreglos',
-    image: '/images/services/pequenos_arreglos.jpg',
+    image: '/images/services/plastificador.jpg',
     description: 'Arreglos menores y mantenimiento general del hogar',
     category: 'construccion'
   }

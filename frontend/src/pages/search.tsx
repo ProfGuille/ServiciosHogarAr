@@ -41,7 +41,7 @@ interface SearchFilters {
   useCurrentLocation?: boolean;
 }
 
-export default function Search() {
+export default function SearchPage() {
   const { toast } = useToast();
   const urlSearchParams = new URLSearchParams(useWouterSearch());
   const [showMobileFilters, setShowMobileFilters] = useState(false);
