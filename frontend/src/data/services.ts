@@ -158,8 +158,6 @@ export const servicesList: Service[] = [
     description: 'Cuidado y asistencia de adultos mayores',
     category: 'cuidados'
   },
-  
-  // Additional services that were previously working
   {
     id: 'fumigador',
     name: 'Fumigador',
