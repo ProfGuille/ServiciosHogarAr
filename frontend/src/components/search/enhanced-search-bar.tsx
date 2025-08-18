@@ -93,6 +93,17 @@ export function EnhancedSearchBar({
         setPopularSearches(response.popular || []);
       } catch (error) {
         console.error('Error loading popular searches:', error);
+        // Fallback popular searches when API is not available
+        setPopularSearches([
+          'Plomería',
+          'Electricidad',
+          'Pintura',
+          'Limpieza',
+          'Jardinería',
+          'Carpintería',
+          'Aire acondicionado',
+          'Cerrajería'
+        ]);
       }
     };
 
@@ -117,7 +128,19 @@ export function EnhancedSearchBar({
         setSuggestions(response.suggestions || []);
       } catch (error) {
         console.error('Error fetching suggestions:', error);
-        setSuggestions([]);
+        // Fallback suggestions when API is not available
+        const fallbackSuggestions = [
+          'Plomería', 'Electricidad', 'Pintura', 'Limpieza', 'Jardinería', 
+          'Carpintería', 'Aire acondicionado', 'Cerrajería', 'Albañilería',
+          'Gasista', 'Herrería', 'Fumigación', 'Mudanzas', 'Vidriero', 'Tapicería'
+        ].filter(service => 
+          service.toLowerCase().includes(debouncedQuery.toLowerCase())
+        ).map(service => ({
+          type: 'service' as const,
+          text: service,
+          category: 'Servicios'
+        }));
+        setSuggestions(fallbackSuggestions);
       } finally {
         setIsLoading(false);
       }

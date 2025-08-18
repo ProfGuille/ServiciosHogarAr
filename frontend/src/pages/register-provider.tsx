@@ -127,7 +127,7 @@ export default function RegisterProvider() {
       toast({ title: "Error", description: "El nombre del negocio es obligatorio", variant: "destructive" });
       return false;
     }
-    if (!formData.city.trim() && !formData.customCity?.trim()) {
+    if (!formData.city.trim() || (formData.city === "otra" && !formData.customCity?.trim())) {
       toast({ title: "Error", description: "La ciudad es obligatoria", variant: "destructive" });
       return false;
     }
@@ -156,7 +156,7 @@ export default function RegisterProvider() {
     try {
       const submissionData = {
         ...formData,
-        city: formData.city || formData.customCity || "",
+        city: formData.city === "otra" ? formData.customCity || "" : formData.city,
       };
 
       const response = await fetch('/api/auth/register-provider', {
@@ -334,8 +334,8 @@ export default function RegisterProvider() {
                     <Select 
                       value={formData.city || ""} 
                       onValueChange={(value) => {
-                        if (value === "custom") {
-                          handleInputChange('city', "");
+                        if (value === "otra") {
+                          handleInputChange('city', "otra");
                         } else {
                           handleInputChange('city', value);
                           handleInputChange('customCity', "");
@@ -363,14 +363,14 @@ export default function RegisterProvider() {
                           </SelectItem>
                         ))}
                         <div className="border-t mt-1 pt-1">
-                          <SelectItem value="custom">
-                            <span className="font-medium text-blue-600">+ Escribir otra ciudad</span>
+                          <SelectItem value="otra">
+                            <span className="font-medium text-blue-600">+ Otra ciudad</span>
                           </SelectItem>
                         </div>
                       </SelectContent>
                     </Select>
                     
-                    {formData.city === "" && (
+                    {formData.city === "otra" && (
                       <div className="mt-2">
                         <Input
                           placeholder="Escribe el nombre de tu ciudad"
@@ -411,32 +411,21 @@ export default function RegisterProvider() {
                             ? 'border-blue-500 bg-blue-50'
                             : 'border-gray-200 hover:border-gray-300'
                         }`}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleCategoryToggle(category.id);
+                        onClick={() => {
+                          setFormData(prev => ({
+                            ...prev,
+                            serviceCategories: prev.serviceCategories.includes(category.id)
+                              ? prev.serviceCategories.filter(id => id !== category.id)
+                              : [...prev.serviceCategories, category.id]
+                          }));
                         }}
                       >
                         <div className="flex items-center space-x-2">
                           <Checkbox
                             checked={formData.serviceCategories.includes(category.id)}
-                            onCheckedChange={(checked) => {
-                              if (checked !== formData.serviceCategories.includes(category.id)) {
-                                handleCategoryToggle(category.id);
-                              }
-                            }}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                            }}
+                            readOnly
                           />
-                          <span 
-                            className="text-sm font-medium select-none"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                            }}
-                          >
+                          <span className="text-sm font-medium select-none">
                             {category.name}
                           </span>
                         </div>

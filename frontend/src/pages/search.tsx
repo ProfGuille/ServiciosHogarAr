@@ -14,7 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Filter, X, MapPin, List, Navigation, Loader2, Bookmark, TrendingUp, AlertCircle } from 'lucide-react';
+import { Filter, X, MapPin, List, Navigation, Loader2, Bookmark, TrendingUp, AlertCircle, Search as SearchIcon } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useToast } from '@/hooks/use-toast';
@@ -48,6 +48,18 @@ export default function Search() {
   const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const itemsPerPage = 20;
+
+  // Close mobile filters on screen size change to desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) { // lg breakpoint
+        setShowMobileFilters(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Geolocation hook
   const { 
@@ -128,16 +140,21 @@ export default function Search() {
   const fallbackCategories = [
     { id: 1, name: "Plomería" },
     { id: 2, name: "Electricidad" },
-    { id: 3, name: "Pintura" },
-    { id: 4, name: "Limpieza" },
+    { id: 3, name: "Limpieza" },
+    { id: 4, name: "Pintura" },
     { id: 5, name: "Carpintería" },
     { id: 6, name: "Gasista" },
-    { id: 7, name: "Albañil" },
-    { id: 8, name: "Técnico de aire" },
+    { id: 7, name: "Albañilería" },
+    { id: 8, name: "Aire Acondicionado" },
     { id: 9, name: "Jardinería" },
-    { id: 10, name: "Cerrajero" },
+    { id: 10, name: "Cerrajería" },
     { id: 11, name: "Mudanzas" },
-    { id: 12, name: "Herrero" }
+    { id: 12, name: "Herrero" },
+    { id: 13, name: "Techista" },
+    { id: 14, name: "Fumigador" },
+    { id: 15, name: "Técnico PC" },
+    { id: 16, name: "Pequeños Arreglos" },
+    { id: 17, name: "Tapicero" }
   ];
 
   // Use fallback if categories API fails
@@ -518,7 +535,7 @@ export default function Search() {
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
                     <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <Search className="w-4 h-4 text-blue-600" />
+                      <SearchIcon className="w-4 h-4 text-blue-600" />
                     </div>
                     <div>
                       <h3 className="font-medium text-blue-900 mb-2">Buscaremos profesionales en tu área</h3>
@@ -601,14 +618,16 @@ export default function Search() {
 
       {/* Mobile filters modal */}
       {showMobileFilters && (
-        <AdvancedSearchFilters
-          filters={filters}
-          onFiltersChange={handleFiltersChange}
-          categories={displayCategories || []}
-          facets={processedResults?.facets}
-          showMobileFilters={showMobileFilters}
-          onCloseMobileFilters={() => setShowMobileFilters(false)}
-        />
+        <div className="block md:hidden">
+          <AdvancedSearchFilters
+            filters={filters}
+            onFiltersChange={handleFiltersChange}
+            categories={displayCategories || []}
+            facets={processedResults?.facets}
+            showMobileFilters={showMobileFilters}
+            onCloseMobileFilters={() => setShowMobileFilters(false)}
+          />
+        </div>
       )}
 
       <Footer />
