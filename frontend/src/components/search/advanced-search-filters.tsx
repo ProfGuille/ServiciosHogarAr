@@ -538,17 +538,17 @@ export function AdvancedSearchFilters({
     </ScrollArea>
   );
 
-  // Mobile filters in a modal/drawer
+  // Mobile filters in a modal/drawer - only render on mobile screens
   if (showMobileFilters) {
     return (
-      <div className="fixed inset-0 z-50 bg-background md:hidden">
-        <div className="flex items-center justify-between p-4 border-b">
+      <div className="fixed inset-0 z-50 bg-white md:hidden">
+        <div className="flex items-center justify-between p-4 border-b bg-white">
           <h2 className="text-lg font-semibold">Filtros</h2>
           <Button variant="ghost" size="icon" onClick={onCloseMobileFilters}>
             <X className="h-5 w-5" />
           </Button>
         </div>
-        <div className="h-[calc(100vh-60px)] overflow-hidden p-4">
+        <div className="h-[calc(100vh-60px)] overflow-y-auto p-4 bg-white">
           {filterContent}
         </div>
       </div>

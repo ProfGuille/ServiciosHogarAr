@@ -49,6 +49,18 @@ export default function Search() {
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const itemsPerPage = 20;
 
+  // Close mobile filters on screen size change to desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) { // lg breakpoint
+        setShowMobileFilters(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Geolocation hook
   const { 
     location: userLocation, 
@@ -606,14 +618,16 @@ export default function Search() {
 
       {/* Mobile filters modal */}
       {showMobileFilters && (
-        <AdvancedSearchFilters
-          filters={filters}
-          onFiltersChange={handleFiltersChange}
-          categories={displayCategories || []}
-          facets={processedResults?.facets}
-          showMobileFilters={showMobileFilters}
-          onCloseMobileFilters={() => setShowMobileFilters(false)}
-        />
+        <div className="block md:hidden">
+          <AdvancedSearchFilters
+            filters={filters}
+            onFiltersChange={handleFiltersChange}
+            categories={displayCategories || []}
+            facets={processedResults?.facets}
+            showMobileFilters={showMobileFilters}
+            onCloseMobileFilters={() => setShowMobileFilters(false)}
+          />
+        </div>
       )}
 
       <Footer />
