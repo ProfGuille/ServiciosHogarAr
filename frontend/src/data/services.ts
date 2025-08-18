@@ -11,54 +11,54 @@ interface Service {
 }
 
 export const servicesList: Service[] = [
-  // Construcción y Reparaciones
+  // Construcción y Reparaciones  
   {
-    id: 'electricista',
-    name: 'Electricista',
+    id: 'electricidad',
+    name: 'Electricidad',
     image: '/images/services/electricista.jpg',
-    description: 'Instalación y reparación eléctrica',
+    description: 'Instalaciones eléctricas, reparaciones y mantenimiento',
     category: 'construccion'
   },
   {
-    id: 'plomero',
-    name: 'Plomero',
+    id: 'plomeria',
+    name: 'Plomería',
     image: '/images/services/plomero.jpg',
-    description: 'Plomería y sanitarios',
+    description: 'Reparaciones, instalaciones y mantenimiento de plomería',
     category: 'construccion'
   },
   {
-    id: 'pintor',
-    name: 'Pintor',
+    id: 'pintura',
+    name: 'Pintura',
     image: '/images/services/pintor.jpg',
-    description: 'Pintura de interiores y exteriores',
+    description: 'Pintura interior, exterior y trabajos especializados',
     category: 'construccion'
   },
   {
-    id: 'albanil',
-    name: 'Albañil',
+    id: 'albanileria',
+    name: 'Albañilería',
     image: '/images/services/albanil.jpg',
-    description: 'Construcción y refacciones',
+    description: 'Construcción, reparaciones y trabajos en mampostería',
     category: 'construccion'
   },
   {
-    id: 'carpintero',
-    name: 'Carpintero',
+    id: 'carpinteria',
+    name: 'Carpintería',
     image: '/images/services/carpintero.jpg',
-    description: 'Trabajos en madera y muebles',
+    description: 'Muebles a medida, reparaciones y trabajos en madera',
     category: 'construccion'
   },
   {
     id: 'gasista',
     name: 'Gasista',
     image: '/images/services/gasista.jpg',
-    description: 'Instalación y reparación de gas',
+    description: 'Instalación y reparación de gas natural y envasado',
     category: 'construccion'
   },
   {
     id: 'herrero',
     name: 'Herrero',
     image: '/images/services/herrero.jpg',
-    description: 'Trabajos en metal y soldadura',
+    description: 'Trabajos en hierro y metal',
     category: 'construccion'
   },
   {
@@ -81,7 +81,7 @@ export const servicesList: Service[] = [
     id: 'aire_acondicionado',
     name: 'Aire Acondicionado',
     image: '/images/services/aire_acondicionado.jpg',
-    description: 'Instalación y service de AA',
+    description: 'Instalación, reparación y mantenimiento de AC',
     category: 'hogar'
   },
   {
@@ -108,10 +108,10 @@ export const servicesList: Service[] = [
   
   // Limpieza y Mantenimiento
   {
-    id: 'limpieza_general',
-    name: 'Limpieza General',
+    id: 'limpieza',
+    name: 'Limpieza',
     image: '/images/services/limpieza_general.jpg',
-    description: 'Limpieza profunda de hogares y oficinas',
+    description: 'Servicios de limpieza residencial y comercial',
     category: 'limpieza'
   },
   {
@@ -122,19 +122,19 @@ export const servicesList: Service[] = [
     category: 'limpieza'
   },
   {
-    id: 'jardinero',
-    name: 'Jardinero y Paisajista',
+    id: 'jardineria',
+    name: 'Jardinería',
     image: '/images/services/jardinero.jpg',
-    description: 'Mantenimiento de jardines y paisajismo',
+    description: 'Mantenimiento de jardines y espacios verdes',
     category: 'jardin'
   },
   
   // Seguridad y Servicios
   {
-    id: 'cerrajero',
-    name: 'Cerrajero',
+    id: 'cerrajeria',
+    name: 'Cerrajería',
     image: '/images/services/cerrajero.jpg',
-    description: 'Cerraduras y seguridad',
+    description: 'Cerraduras, llaves y sistemas de seguridad',
     category: 'seguridad'
   },
   {
@@ -145,8 +145,8 @@ export const servicesList: Service[] = [
     category: 'seguridad'
   },
   {
-    id: 'mudanzas_fletes',
-    name: 'Mudanzas y Fletes',
+    id: 'mudanzas',
+    name: 'Mudanzas',
     image: '/images/services/mudanzas_fletes.jpg',
     description: 'Servicios de mudanza y transporte',
     category: 'transporte'
@@ -169,21 +169,21 @@ export const servicesList: Service[] = [
     id: 'tecnico_pc',
     name: 'Técnico PC',
     image: '/images/services/tecnico_pc.jpg',
-    description: 'Reparación y soporte de computadoras',
+    description: 'Reparación y mantenimiento de computadoras',
     category: 'tecnologia'
   },
   {
     id: 'tapicero',
     name: 'Tapicero',
     image: '/images/services/tapicero.jpg',
-    description: 'Retapizado y restauración de muebles',
+    description: 'Tapicería y reparación de muebles',
     category: 'hogar'
   },
   {
     id: 'pequenos_arreglos',
     name: 'Pequeños Arreglos',
     image: '/images/services/pequenos_arreglos.jpg',
-    description: 'Arreglos menores y mantenimiento general del hogar',
+    description: 'Arreglos menores del hogar',
     category: 'construccion'
   }
 ];

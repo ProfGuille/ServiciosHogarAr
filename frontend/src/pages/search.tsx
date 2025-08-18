@@ -128,16 +128,21 @@ export default function Search() {
   const fallbackCategories = [
     { id: 1, name: "Plomería" },
     { id: 2, name: "Electricidad" },
-    { id: 3, name: "Pintura" },
-    { id: 4, name: "Limpieza" },
+    { id: 3, name: "Limpieza" },
+    { id: 4, name: "Pintura" },
     { id: 5, name: "Carpintería" },
     { id: 6, name: "Gasista" },
-    { id: 7, name: "Albañil" },
-    { id: 8, name: "Técnico de aire" },
+    { id: 7, name: "Albañilería" },
+    { id: 8, name: "Aire Acondicionado" },
     { id: 9, name: "Jardinería" },
-    { id: 10, name: "Cerrajero" },
+    { id: 10, name: "Cerrajería" },
     { id: 11, name: "Mudanzas" },
-    { id: 12, name: "Herrero" }
+    { id: 12, name: "Herrero" },
+    { id: 13, name: "Techista" },
+    { id: 14, name: "Fumigador" },
+    { id: 15, name: "Técnico PC" },
+    { id: 16, name: "Pequeños Arreglos" },
+    { id: 17, name: "Tapicero" }
   ];
 
   // Use fallback if categories API fails
