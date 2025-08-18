@@ -1,6 +1,6 @@
 // Service data with ALL images from Recomendame project
 // Images sourced from ProfGuille/Recomendame-proyectoCursoFullstack
-// Complete implementation with all 20 services from original project
+// Complete implementation with all services
 
 interface Service {
   id: string;
@@ -158,6 +158,8 @@ export const servicesList: Service[] = [
     description: 'Cuidado y asistencia de adultos mayores',
     category: 'cuidados'
   },
+
+  // Servicios adicionales
   {
     id: 'fumigador',
     name: 'Fumigador',
