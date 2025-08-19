@@ -143,6 +143,11 @@ const ServiceSelector: React.FC<ServiceSelectorProps> = ({
                   src={service.image}
                   alt={service.name}
                   className="w-full h-24 object-cover rounded-md"
+                  onError={(e) => {
+                    // Fallback to a default service image if the specific image fails to load
+                    const target = e.target as HTMLImageElement;
+                    target.src = '/images/services/pequenos_arreglos.jpg';
+                  }}
                 />
               </div>
               <h3 className="font-semibold text-gray-900 mb-1">{service.name}</h3>
