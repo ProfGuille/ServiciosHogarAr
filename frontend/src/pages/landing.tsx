@@ -202,27 +202,27 @@ export default function Landing() {
   };
 
   const prepareServicesForSelector = () => {
-    // Service category to servicesList mapping for proper image handling
+    // Create a mapping from category names to services for proper image handling
     const categoryToServiceMap: Record<string, string> = {
-      'plomería': 'plomero',
-      'electricidad': 'electricista', 
-      'pintura': 'pintor',
-      'limpieza': 'limpieza_general',
-      'carpintería': 'carpintero',
+      'plomería': 'plomeria',
+      'electricidad': 'electricidad', 
+      'pintura': 'pintura',
+      'limpieza': 'limpieza',
+      'carpintería': 'carpinteria',
       'gasista': 'gasista',
-      'albañil': 'albanil',
+      'albañil': 'albanileria',
       'técnico de aire': 'aire_acondicionado',
-      'jardinería': 'jardinero',
-      'cerrajero': 'cerrajero',
-      'mudanzas': 'mudanzas_fletes',
+      'jardinería': 'jardineria',
+      'cerrajero': 'cerrajeria',
+      'mudanzas': 'mudanzas',
       'herrero': 'herrero',
       'techista': 'techista',
-      'fumigador': 'limpieza_general', // Use cleaning image for pest control
-      'técnico pc': 'reparacion_electrodomesticos', // Use electronics repair image
-      'pequeños arreglos': 'herrero', // Use tools/metalwork image for general repairs
-      'tapicero': 'carpintero', // Use woodwork image for furniture work
-      'vidriero': 'vidriero',
-      'instalador solar': 'instalador_solar'
+      'fumigador': 'fumigador',
+      'técnico pc': 'tecnico_pc',
+      'pequeños arreglos': 'pequenos_arreglos',
+      'tapicero': 'tapicero',
+      'vidriero': 'vidriero', // fallback, not in servicesList
+      'instalador solar': 'instalador_solar' // fallback, not in servicesList
     };
 
     // Use servicesList from data/services.ts as fallback to ensure all services always show
@@ -249,12 +249,29 @@ export default function Landing() {
       const serviceId = categoryToServiceMap[categoryName];
       const matchingService = serviceId ? serviceMap[serviceId] : null;
       
+      // If we have a matching service from servicesList, use it
+      if (matchingService) {
+        return {
+          id: category.id.toString(),
+          name: category.name,
+          description: "150+ profesionales disponibles",
+          category: category.name,
+          image: matchingService.image
+        };
+      }
+      
+      // Fallback for services not in servicesList (like vidriero, instalador solar)
+      const fallbackImageName = categoryName
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/\s+/g, "_");
+      
       return {
         id: category.id.toString(),
         name: category.name,
         description: "150+ profesionales disponibles",
         category: category.name,
-        image: matchingService?.image || `/images/services/${categoryName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "_")}.jpg`
+        image: `/images/services/${fallbackImageName}.jpg`
       };
     });
   };
