@@ -40,6 +40,7 @@ interface SearchResultsProps {
   currentPage: number;
   itemsPerPage: number;
   onPageChange: (page: number) => void;
+  showDistance?: boolean;
 }
 
 export function SearchResults({
@@ -48,7 +49,8 @@ export function SearchResults({
   total,
   currentPage,
   itemsPerPage,
-  onPageChange
+  onPageChange,
+  showDistance = false
 }: SearchResultsProps) {
   const totalPages = Math.ceil(total / itemsPerPage);
 
