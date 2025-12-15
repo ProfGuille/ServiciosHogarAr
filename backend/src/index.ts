@@ -392,97 +392,16 @@ app.use('/api/*', (req: Request, res: Response) => {
   res.status(404).json({ error: 'Endpoint no encontrado' });
 });
 
-// Frontend serving configuration
-const possibleFrontendPaths = [
-  // Development paths (when running from repo root)
-  path.resolve(process.cwd(), 'frontend/dist'),
-  path.resolve(__dirname, '../../frontend/dist'),
-  // Production paths (compiled backend)
-  path.resolve(__dirname, '../frontend-dist'),
-  path.resolve(process.cwd(), 'frontend-dist'),
-  // Render deployment paths
-  path.resolve(__dirname, 'frontend-dist'),
-  path.resolve(__dirname, '../../../frontend/dist'),
-  path.resolve(process.cwd(), '../frontend/dist')
-];
-
-let frontendPath: string | null = null;
-
-console.log('🔍 Searching for frontend build...');
-console.log('  Working directory:', process.cwd());
-console.log('  Backend __dirname:', __dirname);
-
-// Find the first valid frontend path
-for (const testPath of possibleFrontendPaths) {
-  const pathExists = fs.existsSync(testPath);
-  const indexExists = pathExists && fs.existsSync(path.join(testPath, 'index.html'));
-  
-  console.log(`  Testing: ${testPath}`);
-  console.log(`    Directory exists: ${pathExists}`);
-  console.log(`    index.html exists: ${indexExists}`);
-  
-  if (pathExists && indexExists) {
-    frontendPath = testPath;
-    console.log('✅ Frontend found at:', frontendPath);
-    break;
-  }
-}
-
-if (frontendPath) {
-  // Serve static files from frontend build
-  app.use(express.static(frontendPath));
-  console.log('✅ Frontend static files served from:', frontendPath);
-  
-  // List some files for verification
-  try {
-    const files = fs.readdirSync(frontendPath);
-    console.log('📂 Frontend files:', files.slice(0, 5).join(', ') + (files.length > 5 ? '...' : ''));
-  } catch (error) {
-    console.warn('⚠️ Could not list frontend files:', error);
-  }
-} else {
-  console.warn('⚠️ Frontend build not found in any of the tested paths');
-}
-
-// Catch-all handler for non-API routes
-app.get('*', (req: Request, res: Response) => {
-  if (!frontendPath) {
-    return res.status(503).json({ 
-      error: 'Frontend not available',
-      message: 'The frontend application is not built or deployed yet.',
-      requestedPath: req.path,
-      searchedPaths: possibleFrontendPaths,
-      suggestions: [
-        'Run: cd frontend && npm run build',
-        'Check if frontend/dist/ directory exists',
-        'Verify frontend build completed successfully'
-      ]
-    });
-  }
-  
-  const indexPath = path.join(frontendPath, 'index.html');
-  
-  // Check if index.html exists before trying to serve it
-  if (!fs.existsSync(indexPath)) {
-    console.error('❌ index.html not found at:', indexPath);
-    return res.status(503).json({ 
-      error: 'Frontend index.html not available', 
-      message: 'The frontend application index file is missing.',
-      path: indexPath,
-      requestedPath: req.path
-    });
-  }
-  
-  res.sendFile(indexPath, (err) => {
-    if (err) {
-      console.error('❌ Error serving index.html:', err);
-      res.status(500).json({ 
-        error: 'Error interno del servidor', 
-        message: 'No se pudo cargar la aplicación',
-        path: indexPath,
-        details: err.message
-      });
-    }
+// Root endpoint (clean, API-only)
+app.get('/', (req: Request, res: Response) => {
+  res.json({
+    message: 'Servicios Hogar API',
+    status: 'running',
+    version: '1.0.0',
+    environment: process.env.NODE_ENV || 'development',
+    timestamp: new Date().toISOString(),
+    docs: '/api/info',
+    health: '/api/health'
   });
 });
 
