@@ -43,7 +43,6 @@ app.use(cors({
     ? [
         'https://servicioshogar.com.ar', 
         'https://www.servicioshogar.com.ar',
-        'https://servicioshogar-backend-uje1.onrender.com' // Allow requests from render itself for testing
       ]
     : ['http://localhost:5173', 'http://localhost:3000'],
   credentials: true,
