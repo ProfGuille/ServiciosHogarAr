@@ -12,43 +12,37 @@ import categoriesRoutes from './categories.js';
 export function registerRoutes(app: express.Express) {
   console.log('Registrando rutas de la API...');
   
-  // Authentication routes
+  // Authentication
   app.use('/api/auth', authRoutes);
-  
-  // Core routes
+
+  // Core
   app.use('/api/users', usersRoutes);
   app.use('/api/clients', clientsRoutes);
   app.use('/api/conversations', conversationsRoutes);
   app.use('/api/messages', messagesRoutes);
-  
-  // Categories routes - ensure it's loaded early
+
+  // Categories
   app.use('/api/categories', categoriesRoutes);
-  
-  // MVP3 Phase 3: Search and Geolocation routes
+
+  // Search & Geolocation
   app.use('/api/search', searchRoutes);
   app.use('/api/search-suggestions', searchSuggestionsRoutes);
   app.use('/api/geolocation', geolocationRoutes);
-  
-  // MVP3 Phase 5: Enhanced Provider Dashboard routes
+
+  // Provider Dashboard (dynamic imports)
   try {
-    import('./provider-services.js').then(module => {
-      app.use('/api/provider/services', module.default);
-    }).catch(() => {
-      console.log('⚠️ provider-services routes not available yet');
-    });
-    
     import('./provider-availability.js').then(module => {
       app.use('/api/provider/availability', module.default);
     }).catch(() => {
       console.log('⚠️ provider-availability routes not available yet');
     });
-    
+
     import('./provider-analytics.js').then(module => {
       app.use('/api/provider/analytics', module.default);
     }).catch(() => {
       console.log('⚠️ provider-analytics routes not available yet');
     });
-    
+
     import('./provider-clients.js').then(module => {
       app.use('/api/provider/clients', module.default);
     }).catch(() => {
@@ -57,8 +51,8 @@ export function registerRoutes(app: express.Express) {
   } catch (error) {
     console.log('⚠️ Provider dashboard routes not loaded:', (error as Error).message);
   }
-  
-  // MVP3 Phase 6: Notifications routes
+
+  // Notifications
   try {
     import('./mvp3/notifications.js').then(module => {
       app.use('/api/notifications', module.default);
@@ -68,8 +62,8 @@ export function registerRoutes(app: express.Express) {
   } catch (error) {
     console.log('⚠️ Notifications routes not loaded:', (error as Error).message);
   }
-  
-  // Analytics routes
+
+  // Analytics
   try {
     import('./analytics.js').then(module => {
       app.use('/api/analytics', module.default);
@@ -79,8 +73,8 @@ export function registerRoutes(app: express.Express) {
   } catch (error) {
     console.log('⚠️ Analytics routes not loaded:', (error as Error).message);
   }
-  
-  // Upload routes
+
+  // Upload
   try {
     import('./upload.js').then(module => {
       app.use('/api/upload', module.default);
@@ -90,28 +84,27 @@ export function registerRoutes(app: express.Express) {
   } catch (error) {
     console.log('⚠️ Upload routes not loaded:', (error as Error).message);
   }
-  
-  // Service-related routes
+
+  // Services & Providers
   try {
-    // Dynamically import optional routes
     import('./serviceRequests.js').then(module => {
       app.use('/api/service-requests', module.default);
     }).catch(() => {
       console.log('⚠️ serviceRequests routes not available yet');
     });
-    
+
     import('./services.js').then(module => {
       app.use('/api/services', module.default);
     }).catch(() => {
       console.log('⚠️ services routes not available yet');
     });
-    
+
     import('./serviceProviders.js').then(module => {
       app.use('/api/providers', module.default);
     }).catch(() => {
       console.log('⚠️ serviceProviders routes not available yet');
     });
-    
+
     import('./payments.js').then(module => {
       app.use('/api/payments', module.default);
     }).catch(() => {
