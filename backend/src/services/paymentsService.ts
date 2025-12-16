@@ -1,53 +1,46 @@
 import { db } from "../db.js";
-import { payments } from "../shared/schema/payments.js";
-import { conversations } from "../shared/schema/conversations.js";
-import { serviceRequests } from "../shared/schema/serviceRequests.js";
-import { eq, and, desc } from "drizzle-orm";
+import { creditPurchases } from "../shared/schema/creditPurchases.js";
+import { providerCreditsService } from "./providerCreditsService.js";
+import { eq } from "drizzle-orm";
 
 export const paymentsService = {
-  async listForUser(userId: number, role: "customer" | "provider") {
-    const field =
-      role === "customer"
-        ? serviceRequests.clientId
-        : serviceRequests.providerId;
-
-    return db
-      .select({
-        id: payments.id,
-        serviceRequestId: payments.serviceRequestId,
-        status: payments.status,
-        intentId: payments.intentId,
-        amount: payments.amount,
-        createdAt: payments.createdAt,
+  async registerPurchase(providerId: number, amount: number, method: string) {
+    const [purchase] = await db
+      .insert(creditPurchases)
+      .values({
+        providerId,
+        userId: providerId,
+        amount,
+        status: "pending",
+        method,
       })
-      .from(payments)
-      .innerJoin(serviceRequests, eq(payments.serviceRequestId, serviceRequests.id))
-      .where(eq(field, userId))
-      .orderBy(desc(payments.createdAt));
+      .returning();
+
+    return purchase;
   },
 
-  async getByServiceRequest(serviceRequestId: number, userId: number) {
-    const payment = await db
+  async confirmPurchase(purchaseId: number) {
+    const [purchase] = await db
       .select()
-      .from(payments)
-      .where(eq(payments.serviceRequestId, serviceRequestId))
-      .then(rows => rows[0]);
+      .from(creditPurchases)
+      .where(eq(creditPurchases.id, purchaseId));
 
-    if (!payment) return null;
+    if (!purchase) throw new Error("Compra no encontrada");
 
-    const request = await db
-      .select()
-      .from(serviceRequests)
-      .where(eq(serviceRequests.id, serviceRequestId))
-      .then(rows => rows[0]);
+    await providerCreditsService.addCredits(
+      purchase.providerId,
+      purchase.amount,
+      purchase.id
+    );
 
-    if (!request) return null;
+    return true;
+  },
 
-    if (request.clientId !== userId && request.providerId !== userId) {
-      return "forbidden";
-    }
-
-    return payment;
-  }
+  async failPurchase(purchaseId: number) {
+    await db
+      .update(creditPurchases)
+      .set({ status: "failed" })
+      .where(eq(creditPurchases.id, purchaseId));
+  },
 };
 

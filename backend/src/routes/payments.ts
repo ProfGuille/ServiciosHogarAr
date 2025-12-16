@@ -4,45 +4,48 @@ import { paymentsService } from "../services/paymentsService.js";
 
 const router = Router();
 
-// Obtener pagos del usuario autenticado
-router.get("/", requireAuth, async (req, res) => {
+// Registrar compra (pendiente)
+router.post("/purchase", requireAuth, async (req, res) => {
   try {
-    const userId = req.user.id;
-    const role = req.user.role; // "customer" o "provider"
+    if (req.user.role !== "provider") {
+      return res.status(403).json({ error: "Solo proveedores pueden comprar créditos" });
+    }
 
-    const result = await paymentsService.listForUser(userId, role);
-    res.json(result);
-  } catch (error) {
-    console.error("Error al obtener pagos:", error);
-    res.status(500).json({ error: "Error interno del servidor" });
+    const providerId = req.user.providerId;
+    const { amount, method } = req.body;
+
+    if (!amount || !method) {
+      return res.status(400).json({ error: "Faltan parámetros" });
+    }
+
+    const purchase = await paymentsService.registerPurchase(
+      providerId,
+      amount,
+      method
+    );
+
+    res.json(purchase);
+  } catch (err) {
+    console.error("Error en /payments/purchase:", err);
+    res.status(400).json({ error: err.message });
   }
 });
 
-// Obtener pago por serviceRequestId
-router.get("/request/:serviceRequestId", requireAuth, async (req, res) => {
-  const serviceRequestId = Number(req.params.serviceRequestId);
-  if (isNaN(serviceRequestId)) {
-    return res.status(400).json({ error: "ID inválido" });
-  }
-
+// Confirmar compra (sumar créditos)
+router.post("/confirm", requireAuth, async (req, res) => {
   try {
-    const result = await paymentsService.getByServiceRequest(
-      serviceRequestId,
-      req.user.id
-    );
+    const { purchaseId } = req.body;
 
-    if (result === null) {
-      return res.status(404).json({ error: "Pago no encontrado" });
+    if (!purchaseId) {
+      return res.status(400).json({ error: "Falta purchaseId" });
     }
 
-    if (result === "forbidden") {
-      return res.status(403).json({ error: "No tienes acceso a este pago" });
-    }
+    await paymentsService.confirmPurchase(purchaseId);
 
-    res.json(result);
-  } catch (error) {
-    console.error("Error al obtener pago:", error);
-    res.status(500).json({ error: "Error interno del servidor" });
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Error en /payments/confirm:", err);
+    res.status(400).json({ error: err.message });
   }
 });
 

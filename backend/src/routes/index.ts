@@ -28,11 +28,32 @@ import messagesRoutes from "./messages.js";
 import conversationsRoutes from "./conversations.js";
 
 // -----------------------------
-// Payments
+// Conversations Start (nuevo)
+// -----------------------------
+import conversationsStartRoutes from "./conversations-start.js";
+
+// -----------------------------
+// Payments (nuevo)
 // -----------------------------
 import paymentsRoutes from "./payments.js";
 
 const router = Router();
+
+// -----------------------------
+// Payments
+// -----------------------------
+router.use("/payments", paymentsRoutes);
+
+// -----------------------------
+// Payments - MercadoPago (nuevo)
+// -----------------------------
+import paymentsMpRoutes from "./payments-mp.js";
+router.use("/payments/mp", paymentsMpRoutes);
+
+// -----------------------------
+// Conversations Start
+// -----------------------------
+router.use("/conversations/start", conversationsStartRoutes);
 
 // -----------------------------
 // Auth & Users
@@ -60,11 +81,6 @@ router.use("/search", searchRoutes);
 // -----------------------------
 router.use("/messages", messagesRoutes);
 router.use("/conversations", conversationsRoutes);
-
-// -----------------------------
-// Payments
-// -----------------------------
-router.use("/payments", paymentsRoutes);
 
 export default router;
 

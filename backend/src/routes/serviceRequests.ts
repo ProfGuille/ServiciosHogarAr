@@ -1,154 +1,175 @@
-import { Router } from "express";
-import { serviceRequestsService } from "../services/serviceRequestsService.js";
+import express from "express";
 import { requireAuth } from "../middleware/auth.js";
+import { serviceRequestsService } from "../services/serviceRequestsService.js";
 
-const router = Router();
-
-// -----------------------------
-// Rutas específicas primero
-// -----------------------------
-
-// Solicitudes del cliente
-router.get("/client/:customerId", requireAuth, async (req, res) => {
-  const customerId = Number(req.params.customerId);
-  if (isNaN(customerId)) {
-    return res.status(400).json({ error: "ID de cliente inválido" });
-  }
-
-  try {
-    const result = await serviceRequestsService.getByCustomer(customerId);
-    res.json(result);
-  } catch (err) {
-    res.status(500).json({ error: "Error interno del servidor" });
-  }
-});
-
-// Solicitudes del proveedor
-router.get("/provider/:providerId", requireAuth, async (req, res) => {
-  const providerId = Number(req.params.providerId);
-  if (isNaN(providerId)) {
-    return res.status(400).json({ error: "ID de proveedor inválido" });
-  }
-
-  try {
-    const result = await serviceRequestsService.getByProvider(providerId);
-    res.json(result);
-  } catch (err) {
-    res.status(500).json({ error: "Error interno del servidor" });
-  }
-});
-
-// Proveedor envía presupuesto
-router.patch("/:id/quote", requireAuth, async (req, res) => {
-  const id = Number(req.params.id);
-  if (isNaN(id)) return res.status(400).json({ error: "ID inválido" });
-
-  try {
-    const updated = await serviceRequestsService.quote(id, req.body.price);
-    res.json(updated);
-  } catch (err) {
-    res.status(500).json({ error: "Error interno del servidor" });
-  }
-});
-
-// Cliente acepta presupuesto
-router.patch("/:id/accept", requireAuth, async (req, res) => {
-  const id = Number(req.params.id);
-  if (isNaN(id)) return res.status(400).json({ error: "ID inválido" });
-
-  try {
-    const updated = await serviceRequestsService.accept(id);
-    res.json(updated);
-  } catch (err) {
-    res.status(500).json({ error: "Error interno del servidor" });
-  }
-});
-
-// Completar trabajo
-router.patch("/:id/complete", requireAuth, async (req, res) => {
-  const id = Number(req.params.id);
-  if (isNaN(id)) return res.status(400).json({ error: "ID inválido" });
-
-  try {
-    const updated = await serviceRequestsService.complete(id);
-    res.json(updated);
-  } catch (err) {
-    res.status(500).json({ error: "Error interno del servidor" });
-  }
-});
-
-// Cancelar solicitud
-router.patch("/:id/cancel", requireAuth, async (req, res) => {
-  const id = Number(req.params.id);
-  if (isNaN(id)) return res.status(400).json({ error: "ID inválido" });
-
-  try {
-    const updated = await serviceRequestsService.cancel(id);
-    res.json(updated);
-  } catch (err) {
-    res.status(500).json({ error: "Error interno del servidor" });
-  }
-});
-
-// Registrar pago
-router.post("/:id/pay", requireAuth, async (req, res) => {
-  const id = Number(req.params.id);
-  if (isNaN(id)) return res.status(400).json({ error: "ID inválido" });
-
-  try {
-    const updated = await serviceRequestsService.updatePaymentStatus(
-      id,
-      req.body.status,
-      req.body.intentId
-    );
-    res.json(updated);
-  } catch (err) {
-    res.status(500).json({ error: "Error interno del servidor" });
-  }
-});
-
-// Registrar reseña
-router.post("/:id/review", requireAuth, async (req, res) => {
-  const id = Number(req.params.id);
-  if (isNaN(id)) return res.status(400).json({ error: "ID inválido" });
-
-  try {
-    const updated = await serviceRequestsService.addReview(
-      id,
-      req.body.review
-    );
-    res.json(updated);
-  } catch (err) {
-    res.status(500).json({ error: "Error interno del servidor" });
-  }
-});
+const router = express.Router();
 
 // -----------------------------
-// Rutas genéricas
+// Helpers
 // -----------------------------
+function ensureCustomer(req) {
+  if (req.user.role !== "customer") {
+    throw { status: 403, message: "Solo clientes pueden realizar esta acción" };
+  }
+}
 
-// Crear solicitud
+function ensureProvider(req) {
+  if (req.user.role !== "provider") {
+    throw { status: 403, message: "Solo proveedores pueden realizar esta acción" };
+  }
+}
+
+// -----------------------------
+// Crear solicitud (cliente)
+// -----------------------------
 router.post("/", requireAuth, async (req, res) => {
   try {
-    const created = await serviceRequestsService.create(req.body);
+    ensureCustomer(req);
+
+    const created = await serviceRequestsService.create(req.user.uid, req.body);
     res.status(201).json(created);
   } catch (err) {
-    console.error("Error creating request:", err);
-    res.status(500).json({ error: "Error interno del servidor" });
+    console.error("POST /service-requests:", err);
+    res.status(400).json({ error: err.message });
   }
 });
 
-// Obtener solicitud por ID
-router.get("/:id", requireAuth, async (req, res) => {
-  const id = Number(req.params.id);
-  if (isNaN(id)) return res.status(400).json({ error: "ID inválido" });
-
+// -----------------------------
+// Obtener solicitudes del cliente
+// -----------------------------
+router.get("/customer", requireAuth, async (req, res) => {
   try {
-    const result = await serviceRequestsService.getById(id);
-    if (!result) return res.status(404).json({ error: "Solicitud no encontrada" });
-    res.json(result);
+    ensureCustomer(req);
+
+    const list = await serviceRequestsService.getByCustomer(req.user.uid);
+    res.json(list);
   } catch (err) {
-    res.status(500).json({ error: "Error interno del servidor" });
+    console.error("GET /service-requests/customer:", err);
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// -----------------------------
+// Obtener solicitudes del proveedor
+// -----------------------------
+router.get("/provider", requireAuth, async (req, res) => {
+  try {
+    ensureProvider(req);
+
+    const list = await serviceRequestsService.getByProvider(req.user.providerId);
+    res.json(list);
+  } catch (err) {
+    console.error("GET /service-requests/provider:", err);
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// -----------------------------
+// Cotizar (provider)
+// -----------------------------
+router.post("/:id/quote", requireAuth, async (req, res) => {
+  try {
+    ensureProvider(req);
+
+    const requestId = Number(req.params.id);
+    const price = Number(req.body.price);
+
+    const updated = await serviceRequestsService.quote(
+      requestId,
+      req.user.providerId,
+      price
+    );
+
+    res.json(updated);
+  } catch (err) {
+    console.error("POST /service-requests/:id/quote:", err);
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// -----------------------------
+// Aceptar cotización (customer)
+// -----------------------------
+router.post("/:id/accept", requireAuth, async (req, res) => {
+  try {
+    ensureCustomer(req);
+
+    const requestId = Number(req.params.id);
+
+    const updated = await serviceRequestsService.accept(
+      requestId,
+      req.user.uid
+    );
+
+    res.json(updated);
+  } catch (err) {
+    console.error("POST /service-requests/:id/accept:", err);
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// -----------------------------
+// Iniciar trabajo (provider)
+// -----------------------------
+router.post("/:id/start", requireAuth, async (req, res) => {
+  try {
+    ensureProvider(req);
+
+    const requestId = Number(req.params.id);
+
+    const updated = await serviceRequestsService.start(
+      requestId,
+      req.user.providerId
+    );
+
+    res.json(updated);
+  } catch (err) {
+    console.error("POST /service-requests/:id/start:", err);
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// -----------------------------
+// Completar trabajo (provider)
+// -----------------------------
+router.post("/:id/complete", requireAuth, async (req, res) => {
+  try {
+    ensureProvider(req);
+
+    const requestId = Number(req.params.id);
+
+    const updated = await serviceRequestsService.complete(
+      requestId,
+      req.user.providerId
+    );
+
+    res.json(updated);
+  } catch (err) {
+    console.error("POST /service-requests/:id/complete:", err);
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// -----------------------------
+// Cancelar (customer o provider)
+// -----------------------------
+router.post("/:id/cancel", requireAuth, async (req, res) => {
+  try {
+    const requestId = Number(req.params.id);
+
+    const actor = req.user.role === "customer" ? "customer" : "provider";
+    const actorId = req.user.role === "customer" ? req.user.uid : req.user.providerId;
+
+    const updated = await serviceRequestsService.cancel(
+      requestId,
+      actor,
+      actorId
+    );
+
+    res.json(updated);
+  } catch (err) {
+    console.error("POST /service-requests/:id/cancel:", err);
+    res.status(400).json({ error: err.message });
   }
 });
 

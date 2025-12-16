@@ -1,10 +1,11 @@
-import { pgTable, serial, integer, doublePrecision } from "drizzle-orm/pg-core";
+import { pgTable, integer, timestamp } from "drizzle-orm/pg-core";
 import { InferSelectModel } from "drizzle-orm";
 
-export const providerCredits = pgTable('provider_credits', {
-  id: serial('id').primaryKey(),
-  providerId: integer('provider_id').notNull(),
-  credits: doublePrecision('credits').notNull().default(0),
+export const providerCredits = pgTable("provider_credits", {
+  providerId: integer("provider_id").primaryKey(),
+  credits: integer("credits").notNull().default(0),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export type ProviderCredit = InferSelectModel<typeof providerCredits>;
+export type ProviderCredits = InferSelectModel<typeof providerCredits>;
+
