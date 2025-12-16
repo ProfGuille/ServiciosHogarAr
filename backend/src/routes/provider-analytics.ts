@@ -11,7 +11,7 @@ function ensureProvider(req) {
   if (req.user.role !== "provider") {
     throw { status: 403, message: "Solo los proveedores pueden acceder a esta información" };
   }
-  if (!req.user.providerId) {
+  if (!req.user.providerId || req.user.providerId <= 0) {
     throw { status: 403, message: "Proveedor no autenticado" };
   }
 }
@@ -36,7 +36,8 @@ router.get("/summary", requireAuth, async (req, res) => {
     });
   } catch (err) {
     console.error("Error en /provider/analytics/summary:", err);
-    res.status(err.status || 500).json({ error: err.message || "Error interno del servidor" });
+    const status = err.status || (err.message?.includes("inválido") ? 400 : 500);
+    res.status(status).json({ error: err.message || "Error interno del servidor" });
   }
 });
 
@@ -50,6 +51,10 @@ router.get("/", requireAuth, async (req, res) => {
     const providerId = req.user.providerId;
 
     const rawDays = Number(req.query.timeRange);
+    if (req.query.timeRange !== undefined && (isNaN(rawDays) || rawDays <= 0)) {
+      return res.status(400).json({ error: "timeRange debe ser un número mayor a 0" });
+    }
+
     const days = !isNaN(rawDays) && rawDays > 0 ? rawDays : 30;
 
     const overview = await providersAnalyticsService.getOverview(providerId, days);
@@ -69,7 +74,8 @@ router.get("/", requireAuth, async (req, res) => {
     });
   } catch (err) {
     console.error("Error en /provider/analytics:", err);
-    res.status(err.status || 500).json({ error: err.message || "Error interno del servidor" });
+    const status = err.status || (err.message?.includes("inválido") ? 400 : 500);
+    res.status(status).json({ error: err.message || "Error interno del servidor" });
   }
 });
 
