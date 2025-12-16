@@ -1,6 +1,6 @@
 /**
- * Temporary shim for payments schema.
- * Replace with the real generated schema implementation later.
+ * Temporary shim for payments schema to allow startup.
+ * Replace with the real implementation later.
  */
 export const payments = {};
 export default payments;
