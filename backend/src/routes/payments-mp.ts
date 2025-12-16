@@ -10,7 +10,9 @@ const router = Router();
 router.post("/create", requireAuth, async (req, res) => {
   try {
     if (req.user.role !== "provider") {
-      return res.status(403).json({ error: "Solo proveedores pueden comprar créditos" });
+      return res
+        .status(403)
+        .json({ error: "Solo proveedores pueden comprar créditos" });
     }
 
     const providerId = req.user.providerId;
@@ -30,12 +32,15 @@ router.post("/create", requireAuth, async (req, res) => {
 });
 
 // -----------------------------
-// Webhook de MercadoPago
+// Webhook de MercadoPago - GET (validación de URL)
 // -----------------------------
 router.get("/webhook", (req, res) => {
   res.sendStatus(200);
 });
 
+// -----------------------------
+// Webhook de MercadoPago - POST (evento real)
+// -----------------------------
 router.post("/webhook", async (req, res) => {
   try {
     await mercadoPagoService.processWebhook(req.body);
