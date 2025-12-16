@@ -3,7 +3,7 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import compression from "compression";
-import { registerRoutes } from "./routes/index.js";
+import registerRoutes from "./routes/index.js";
 import { runMigrations, isDatabaseAvailable } from "./db.js";
 
 const app = express();

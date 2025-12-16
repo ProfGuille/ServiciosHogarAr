@@ -3,7 +3,7 @@ import express from 'express';
 import { db } from '../../db.js';
 import { messages, conversations, users, serviceProviders } from '../../shared/schema/index.js';
 import { eq, and, desc, sql, or } from 'drizzle-orm';
-import { requireJWTAuth } from '../../middleware/auth.js';
+import { requireAuth } from '../../middleware/auth.js';
 
 const router = express.Router();
 
