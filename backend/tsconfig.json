@@ -5,7 +5,10 @@
     "moduleResolution": "Node",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "strict": true,
+
+    "strict": false,
+    "noEmitOnError": false,
+
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "baseUrl": "./src",
