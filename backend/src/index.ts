@@ -95,7 +95,7 @@ app.get("/api/health", (req, res) => {
 // -----------------------------
 // 7. REGISTER ROUTES
 // -----------------------------
-registerRoutes(app);
+app.use("/api", registerRoutes);
 
 // -----------------------------
 // 8. 404 HANDLER
