@@ -32,6 +32,10 @@ router.post("/create", requireAuth, async (req, res) => {
 // -----------------------------
 // Webhook de MercadoPago
 // -----------------------------
+router.get("/webhook", (req, res) => {
+  res.sendStatus(200);
+});
+
 router.post("/webhook", async (req, res) => {
   try {
     await mercadoPagoService.processWebhook(req.body);
