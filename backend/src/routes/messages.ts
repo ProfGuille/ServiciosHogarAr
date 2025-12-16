@@ -1,22 +1,41 @@
 import { Router } from "express";
-import { db } from "../db.js"; // Corrige el import
-import { messages } from "../shared/schema/messages.js"; // Asegúrate de tener el schema
+import { requireAuth } from "../middleware/auth.js";
+import { messagesService } from "../services/messagesService.js";
 
 const router = Router();
 
-// Obtener mensajes por conversationId
-router.get("/:conversationId", async (req, res) => {
+// Obtener mensajes de una conversación
+router.get("/:conversationId", requireAuth, async (req, res) => {
   const conversationId = Number(req.params.conversationId);
+  if (isNaN(conversationId)) {
+    return res.status(400).json({ error: "ID de conversación inválido" });
+  }
+
+  const limit = Number(req.query.limit) || 50;
+  const offset = Number(req.query.offset) || 0;
+
   try {
-    // Usa el nombre del campo tal cual está en tu schema: conversationId (camelCase)
-    const msgs = await db
-      .select()
-      .from(messages)
-      .where({ conversationId });
-    res.json(msgs);
+    const result = await messagesService.getMessages(
+      conversationId,
+      req.user.id,
+      limit,
+      offset
+    );
+
+    if (result === null) {
+      return res.status(404).json({ error: "Conversación no encontrada" });
+    }
+
+    if (result === "forbidden") {
+      return res.status(403).json({ error: "No tienes acceso a esta conversación" });
+    }
+
+    res.json(result);
   } catch (error) {
-    res.status(500).json({ error: "Error al obtener mensajes" });
+    console.error("Error al obtener mensajes:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
   }
 });
 
 export default router;
+

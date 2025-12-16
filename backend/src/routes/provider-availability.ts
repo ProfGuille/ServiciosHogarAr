@@ -1,101 +1,188 @@
-import express from 'express';
-import { db } from "../db.js";
-import { serviceProviders } from "../shared/schema/index.js";
+import express from "express";
+import { providersAvailabilityService } from "../services/providersAvailabilityService.js";
 import { requireAuth } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// GET /api/provider/availability - Get availability slots (mock)
-router.get('/', requireAuth, async (req, res) => {
+// -----------------------------
+// Helpers
+// -----------------------------
+function ensureProvider(req) {
+  if (req.user.role !== "provider") {
+    throw { status: 403, message: "Solo los proveedores pueden realizar esta acción" };
+  }
+  if (!req.user.providerId) {
+    throw { status: 403, message: "Proveedor no autenticado" };
+  }
+}
+
+function ensureOwnership(req, providerId) {
+  if (req.user.providerId !== providerId) {
+    throw { status: 403, message: "No autorizado para modificar esta disponibilidad" };
+  }
+}
+
+// -----------------------------
+// Verificar disponibilidad
+// -----------------------------
+router.get("/check", requireAuth, async (req, res) => {
   try {
-    const user = req.user;
-    if (!user) {
-      return res.status(403).json({ error: 'Acceso denegado' });
+    ensureProvider(req);
+
+    const providerId = req.user.providerId;
+    const { date, time } = req.query;
+
+    if (!date || !time) {
+      return res.status(400).json({ error: "Parámetros 'date' y 'time' son requeridos" });
     }
 
-    // Mock availability data
-    const mockAvailability = [
-      {
-        id: 1,
-        dayOfWeek: 1, // Monday
-        startTime: "09:00",
-        endTime: "17:00",
-        isRecurring: true,
-        maxBookings: 1,
-        isActive: true
-      },
-      {
-        id: 2,
-        dayOfWeek: 2, // Tuesday
-        startTime: "09:00",
-        endTime: "17:00",
-        isRecurring: true,
-        maxBookings: 1,
-        isActive: true
-      }
-    ];
+    const result = await providersAvailabilityService.checkAvailability(
+      providerId,
+      String(date),
+      String(time)
+    );
 
-    res.json(mockAvailability);
-  } catch (error) {
-    console.error('Error fetching availability:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    res.json(result);
+  } catch (err) {
+    console.error("Error:", err);
+    res.status(err.status || 500).json({ error: err.message || "Error interno del servidor" });
   }
 });
 
-// POST /api/provider/availability - Create availability slot (mock)
-router.post('/', requireAuth, async (req, res) => {
+// -----------------------------
+// Editar bloque
+// -----------------------------
+router.put("/:id", requireAuth, async (req, res) => {
   try {
-    const user = req.user;
-    if (!user) {
-      return res.status(403).json({ error: 'Acceso denegado' });
+    ensureProvider(req);
+
+    const blockId = Number(req.params.id);
+    if (isNaN(blockId)) {
+      return res.status(400).json({ error: "ID inválido" });
     }
 
-    const newSlot = {
-      id: Date.now(),
-      ...req.body,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
+    const providerId = req.user.providerId;
 
-    res.status(201).json(newSlot);
-  } catch (error) {
-    console.error('Error creating availability:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    // Validación mínima del body
+    const { startTime, endTime, dayOfWeek, specificDate, isRecurring } = req.body;
+
+    if (startTime && typeof startTime !== "string") {
+      return res.status(400).json({ error: "startTime debe ser string" });
+    }
+    if (endTime && typeof endTime !== "string") {
+      return res.status(400).json({ error: "endTime debe ser string" });
+    }
+    if (dayOfWeek !== undefined && typeof dayOfWeek !== "number") {
+      return res.status(400).json({ error: "dayOfWeek debe ser número" });
+    }
+    if (specificDate && typeof specificDate !== "string") {
+      return res.status(400).json({ error: "specificDate debe ser string (YYYY-MM-DD)" });
+    }
+    if (isRecurring !== undefined && typeof isRecurring !== "boolean") {
+      return res.status(400).json({ error: "isRecurring debe ser boolean" });
+    }
+
+    const updated = await providersAvailabilityService.update(
+      blockId,
+      providerId,
+      req.body
+    );
+
+    // Ownership real: el service devuelve null si no pertenece
+    if (!updated) {
+      return res.status(403).json({ error: "No autorizado para modificar este bloque" });
+    }
+
+    res.json(updated);
+  } catch (err) {
+    console.error("Error:", err);
+    res.status(err.status || 500).json({ error: err.message || "Error interno del servidor" });
   }
 });
 
-// Mock endpoints for other operations
-router.put('/:id', requireAuth, async (req, res) => {
-  res.json({ message: 'Availability updated (mock)' });
-});
+// -----------------------------
+// Eliminar bloque
+// -----------------------------
+router.delete("/:id", requireAuth, async (req, res) => {
+  try {
+    ensureProvider(req);
 
-router.delete('/:id', requireAuth, async (req, res) => {
-  res.json({ message: 'Availability deleted (mock)' });
-});
-
-router.get('/bookings', requireAuth, async (req, res) => {
-  // Mock bookings data
-  const mockBookings = [
-    {
-      id: 1,
-      date: "2024-01-15",
-      time: "10:00",
-      clientName: "Juan Pérez",
-      serviceName: "Plomería",
-      status: "confirmed",
-      price: 5000
+    const blockId = Number(req.params.id);
+    if (isNaN(blockId)) {
+      return res.status(400).json({ error: "ID inválido" });
     }
-  ];
-  res.json(mockBookings);
+
+    const providerId = req.user.providerId;
+
+    const deleted = await providersAvailabilityService.delete(blockId, providerId);
+
+    if (!deleted) {
+      return res.status(403).json({ error: "No autorizado para eliminar este bloque" });
+    }
+
+    res.json(deleted);
+  } catch (err) {
+    console.error("Error:", err);
+    res.status(err.status || 500).json({ error: err.message || "Error interno del servidor" });
+  }
 });
 
-router.get('/check', requireAuth, async (req, res) => {
-  res.json({
-    available: true,
-    capacity: 1,
-    currentBookings: 0,
-    remainingSlots: 1
-  });
+// -----------------------------
+// Obtener disponibilidad del proveedor autenticado
+// -----------------------------
+router.get("/", requireAuth, async (req, res) => {
+  try {
+    ensureProvider(req);
+
+    const providerId = req.user.providerId;
+    const slots = await providersAvailabilityService.getByProvider(providerId);
+
+    res.json(slots);
+  } catch (err) {
+    console.error("Error:", err);
+    res.status(err.status || 500).json({ error: err.message || "Error interno del servidor" });
+  }
+});
+
+// -----------------------------
+// Crear bloque de disponibilidad
+// -----------------------------
+router.post("/", requireAuth, async (req, res) => {
+  try {
+    ensureProvider(req);
+
+    const providerId = req.user.providerId;
+
+    const { startTime, endTime, dayOfWeek, specificDate, isRecurring } = req.body;
+
+    if (!startTime || !endTime) {
+      return res.status(400).json({ error: "startTime y endTime son requeridos" });
+    }
+
+    if (typeof startTime !== "string" || typeof endTime !== "string") {
+      return res.status(400).json({ error: "startTime y endTime deben ser strings" });
+    }
+
+    if (dayOfWeek !== undefined && typeof dayOfWeek !== "number") {
+      return res.status(400).json({ error: "dayOfWeek debe ser número" });
+    }
+
+    if (specificDate && typeof specificDate !== "string") {
+      return res.status(400).json({ error: "specificDate debe ser string (YYYY-MM-DD)" });
+    }
+
+    if (isRecurring !== undefined && typeof isRecurring !== "boolean") {
+      return res.status(400).json({ error: "isRecurring debe ser boolean" });
+    }
+
+    const created = await providersAvailabilityService.create(providerId, req.body);
+
+    res.status(201).json(created);
+  } catch (err) {
+    console.error("Error:", err);
+    res.status(err.status || 500).json({ error: err.message || "Error interno del servidor" });
+  }
 });
 
 export default router;
+

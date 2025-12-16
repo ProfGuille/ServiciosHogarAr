@@ -20,3 +20,5 @@ export * from "./translations.js";
 // MVP 3: New schemas
 export * from "./notifications.js";
 export * from "./pushSubscriptions.js";
+export * from "./providerAvailability.js";
+

@@ -1,224 +1,122 @@
-import express from 'express';
-import { db } from "../db.js";
-import { serviceProviders } from "../shared/schema/index.js";
+import express from "express";
 import { requireAuth } from "../middleware/auth.js";
+import { providersClientsService } from "../services/providersClientsService.js";
 
 const router = express.Router();
 
-// GET /api/provider/clients - Get all clients for the provider (mock)
-router.get('/', requireAuth, async (req, res) => {
+// -----------------------------
+// Helpers
+// -----------------------------
+function ensureProvider(req) {
+  if (req.user.role !== "provider") {
+    throw { status: 403, message: "Solo los proveedores pueden acceder a esta información" };
+  }
+  if (!req.user.providerId) {
+    throw { status: 403, message: "Proveedor no autenticado" };
+  }
+}
+
+// -----------------------------
+// Estadísticas
+// -----------------------------
+router.get("/stats", requireAuth, async (req, res) => {
   try {
-    const user = req.user;
-    if (!user) {
-      return res.status(403).json({ error: 'Acceso denegado' });
-    }
+    ensureProvider(req);
 
-    const { search, status } = req.query;
+    const providerId = req.user.providerId;
+    const stats = await providersClientsService.getStats(providerId);
 
-    // Mock clients data
-    const mockClients = [
-      {
-        id: 1,
-        name: "María González",
-        email: "maria@email.com",
-        phone: "+54911234567",
-        city: "Buenos Aires",
-        totalBookings: 3,
-        totalSpent: 15000,
-        averageRating: 4.8,
-        lastBooking: "2024-01-10",
-        firstBooking: "2023-11-15",
-        isVip: true,
-        notes: "Cliente muy puntual y responsable",
-        preferredServices: ["Plomería"],
-        loyaltyPoints: 150,
-        status: "vip" as const
-      },
-      {
-        id: 2,
-        name: "Carlos Rodríguez",
-        email: "carlos@email.com",
-        phone: "+54911234568",
-        city: "Córdoba",
-        totalBookings: 2,
-        totalSpent: 8000,
-        averageRating: 4.5,
-        lastBooking: "2024-01-05",
-        firstBooking: "2023-12-01",
-        isVip: false,
-        notes: "",
-        preferredServices: ["Electricidad"],
-        loyaltyPoints: 80,
-        status: "active" as const
-      },
-      {
-        id: 3,
-        name: "Ana Martínez",
-        email: "ana@email.com",
-        phone: "+54911234569",
-        city: "Rosario",
-        totalBookings: 1,
-        totalSpent: 3500,
-        averageRating: 5.0,
-        lastBooking: "2023-12-20",
-        firstBooking: "2023-12-20",
-        isVip: false,
-        notes: "",
-        preferredServices: ["Limpieza"],
-        loyaltyPoints: 35,
-        status: "inactive" as const
-      }
-    ];
-
-    // Apply basic filters
-    let filteredClients = mockClients;
-
-    if (search) {
-      const searchTerm = (search as string).toLowerCase();
-      filteredClients = filteredClients.filter(client =>
-        client.name.toLowerCase().includes(searchTerm) ||
-        client.email.toLowerCase().includes(searchTerm)
-      );
-    }
-
-    if (status && status !== 'all') {
-      filteredClients = filteredClients.filter(client => client.status === status);
-    }
-
-    res.json(filteredClients);
-  } catch (error) {
-    console.error('Error fetching clients:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    res.json(stats);
+  } catch (err) {
+    console.error("Error en /provider/clients/stats:", err);
+    res.status(err.status || 500).json({ error: err.message || "Error interno del servidor" });
   }
 });
 
-// GET /api/provider/clients/:id - Get detailed client information (mock)
-router.get('/:id', requireAuth, async (req, res) => {
+// -----------------------------
+// Detalle de cliente
+// -----------------------------
+router.get("/:id", requireAuth, async (req, res) => {
   try {
-    const user = req.user;
-    if (!user) {
-      return res.status(403).json({ error: 'Acceso denegado' });
-    }
+    ensureProvider(req);
 
-    const clientId = parseInt(req.params.id);
+    const clientId = Number(req.params.id);
     if (isNaN(clientId)) {
-      return res.status(400).json({ error: 'ID de cliente inválido' });
+      return res.status(400).json({ error: "ID de cliente inválido" });
     }
 
-    // Mock detailed client data
-    const mockClientDetails = {
-      client: {
-        id: clientId,
-        name: "María González",
-        email: "maria@email.com",
-        phone: "+54911234567",
-        city: "Buenos Aires",
-        totalBookings: 3,
-        totalSpent: 15000,
-        averageRating: 4.8,
-        lastBooking: "2024-01-10",
-        firstBooking: "2023-11-15",
-        isVip: true,
-        notes: "Cliente muy puntual y responsable",
-        preferredServices: ["Plomería"],
-        loyaltyPoints: 150,
-        status: "vip" as const
-      },
-      bookingHistory: [
-        {
-          id: 1,
-          date: "2024-01-10",
-          serviceName: "Reparación de grifo",
-          price: 5000,
-          status: "completed" as const,
-          rating: 5,
-          review: "Excelente trabajo, muy profesional"
-        },
-        {
-          id: 2,
-          date: "2023-12-15",
-          serviceName: "Instalación de cañería",
-          price: 8000,
-          status: "completed" as const,
-          rating: 4.5,
-          review: "Muy buen trabajo"
-        },
-        {
-          id: 3,
-          date: "2023-11-15",
-          serviceName: "Revisión general",
-          price: 2000,
-          status: "completed" as const,
-          rating: 5,
-          review: "Perfecto"
-        }
-      ],
-      totalRevenue: 15000,
-      averageBookingValue: 5000,
-      bookingFrequency: "1 por mes"
-    };
+    const providerId = req.user.providerId;
 
-    res.json(mockClientDetails);
-  } catch (error) {
-    console.error('Error fetching client details:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    const details = await providersClientsService.getDetails(providerId, clientId);
+
+    if (!details) {
+      return res.status(404).json({ error: "Cliente no encontrado" });
+    }
+
+    res.json(details);
+  } catch (err) {
+    console.error("Error en /provider/clients/:id:", err);
+    res.status(err.status || 500).json({ error: err.message || "Error interno del servidor" });
   }
 });
 
-// PATCH /api/provider/clients/:id - Update client notes and VIP status (mock)
-router.patch('/:id', requireAuth, async (req, res) => {
+// -----------------------------
+// Actualizar notas y VIP
+// -----------------------------
+router.patch("/:id", requireAuth, async (req, res) => {
   try {
-    const user = req.user;
-    if (!user) {
-      return res.status(403).json({ error: 'Acceso denegado' });
-    }
+    ensureProvider(req);
 
-    const clientId = parseInt(req.params.id);
+    const clientId = Number(req.params.id);
     if (isNaN(clientId)) {
-      return res.status(400).json({ error: 'ID de cliente inválido' });
+      return res.status(400).json({ error: "ID de cliente inválido" });
     }
 
     const { notes, isVip } = req.body;
 
-    // Mock response
-    const result = {
-      id: Date.now(),
-      providerId: 1,
-      clientId,
-      notes: notes || '',
-      isVip: isVip || false,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
+    if (notes !== undefined && typeof notes !== "string") {
+      return res.status(400).json({ error: "notes debe ser un string" });
+    }
 
-    res.json(result);
-  } catch (error) {
-    console.error('Error updating client:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    if (isVip !== undefined && typeof isVip !== "boolean") {
+      return res.status(400).json({ error: "isVip debe ser boolean" });
+    }
+
+    const providerId = req.user.providerId;
+
+    const updated = await providersClientsService.updateNotes(
+      providerId,
+      clientId,
+      notes,
+      isVip
+    );
+
+    res.json(updated);
+  } catch (err) {
+    console.error("Error en PATCH /provider/clients/:id:", err);
+    res.status(err.status || 500).json({ error: err.message || "Error interno del servidor" });
   }
 });
 
-// GET /api/provider/clients/stats - Get client statistics (mock)
-router.get('/stats', requireAuth, async (req, res) => {
+// -----------------------------
+// Listado de clientes
+// -----------------------------
+router.get("/", requireAuth, async (req, res) => {
   try {
-    const user = req.user;
-    if (!user) {
-      return res.status(403).json({ error: 'Acceso denegado' });
-    }
+    ensureProvider(req);
 
-    // Mock stats
-    const mockStats = {
-      total: 25,
-      vip: 5,
-      recent: 12,
-      frequent: 8
-    };
+    const providerId = req.user.providerId;
+    const search = typeof req.query.search === "string" ? req.query.search : undefined;
+    const status = typeof req.query.status === "string" ? req.query.status : undefined;
 
-    res.json(mockStats);
-  } catch (error) {
-    console.error('Error fetching client stats:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    const clients = await providersClientsService.list(providerId, search, status);
+
+    res.json(clients);
+  } catch (err) {
+    console.error("Error en GET /provider/clients:", err);
+    res.status(err.status || 500).json({ error: err.message || "Error interno del servidor" });
   }
 });
 
 export default router;
+

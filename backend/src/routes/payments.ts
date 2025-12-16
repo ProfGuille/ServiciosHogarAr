@@ -1,16 +1,50 @@
 import { Router } from "express";
-import { db } from "../db.js";
-import { payments } from "../shared/schema/payments.js";
+import { requireAuth } from "../middleware/auth.js";
+import { paymentsService } from "../services/paymentsService.js";
 
 const router = Router();
 
-router.get("/", async (req, res) => {
+// Obtener pagos del usuario autenticado
+router.get("/", requireAuth, async (req, res) => {
   try {
-    const pagos = await db.select().from(payments);
-    res.json(pagos);
+    const userId = req.user.id;
+    const role = req.user.role; // "customer" o "provider"
+
+    const result = await paymentsService.listForUser(userId, role);
+    res.json(result);
   } catch (error) {
-    res.status(500).json({ error: "Error al obtener pagos" });
+    console.error("Error al obtener pagos:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+});
+
+// Obtener pago por serviceRequestId
+router.get("/request/:serviceRequestId", requireAuth, async (req, res) => {
+  const serviceRequestId = Number(req.params.serviceRequestId);
+  if (isNaN(serviceRequestId)) {
+    return res.status(400).json({ error: "ID inválido" });
+  }
+
+  try {
+    const result = await paymentsService.getByServiceRequest(
+      serviceRequestId,
+      req.user.id
+    );
+
+    if (result === null) {
+      return res.status(404).json({ error: "Pago no encontrado" });
+    }
+
+    if (result === "forbidden") {
+      return res.status(403).json({ error: "No tienes acceso a este pago" });
+    }
+
+    res.json(result);
+  } catch (error) {
+    console.error("Error al obtener pago:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
   }
 });
 
 export default router;
+
