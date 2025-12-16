@@ -1,0 +1,10 @@
+node_modules
+.env
+dist
+frontend-dist
+
+# Log files
+logs/
+*.log
+# Migration error log
+db_migration_errors.log
