@@ -50,3 +50,7 @@ github.com/ProfGuille/ServiciosHogarAr (público)
 ## PROBLEMA ACTUAL
 Agregué endpoint register-provider a auth.ts localmente pero Render no lo deployó.
 Necesito forzar redeploy de Render o verificar por qué no detecta cambios.
+
+## PROBLEMA CONOCIDO
+Backend necesita archivo backend/src/shared/schema/payments.ts (aunque esté vacío)
+Si falta, Render crashea con ERR_MODULE_NOT_FOUND
