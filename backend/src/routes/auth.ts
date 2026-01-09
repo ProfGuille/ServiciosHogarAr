@@ -160,3 +160,36 @@ router.post("/logout", (req: Request, res: Response) => {
 
 export default router;
 
+
+router.post("/register-provider", async (req: Request, res: Response) => {
+  try {
+    const { name, email, password, businessName, city, phone, serviceCategories } = req.body;
+    
+    // Crear usuario
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const [user] = await db.insert(users).values({
+      name,
+      email,
+      password: hashedPassword,
+      userType: 'provider'
+    }).returning();
+    
+    // Crear proveedor
+    await db.insert(providers).values({
+      userId: user.id,
+      businessName,
+      city,
+      phone,
+      credits: 10 // Créditos de bienvenida
+    });
+    
+    // Asociar categorías (si tienes tabla provider_services)
+    // for (const catId of serviceCategories) {
+    //   await db.insert(providerServices).values({ providerId: user.id, categoryId: catId });
+    // }
+    
+    res.status(201).json({ message: 'Proveedor registrado', user: { id: user.id, email: user.email } });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
