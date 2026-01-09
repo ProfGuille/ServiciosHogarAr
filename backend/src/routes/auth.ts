@@ -165,30 +165,38 @@ router.post("/register-provider", async (req: Request, res: Response) => {
   try {
     const { name, email, password, businessName, city, phone, serviceCategories } = req.body;
     
-    // Crear usuario
     const hashedPassword = await bcrypt.hash(password, 10);
+    const userId = crypto.randomUUID(); // ID único
+    
+    // 1. Crear user
     const [user] = await db.insert(users).values({
-      name,
+      id: userId,
       email,
+      first_name: name.split(' ')[0] || name,
+      last_name: name.split(' ').slice(1).join(' ') || '',
       password: hashedPassword,
-      userType: 'provider'
+      user_type: 'provider'
     }).returning();
     
-    // Crear proveedor
-    await db.insert(providers).values({
+    // 2. Crear service_provider
+    await db.insert(serviceProviders).values({
       userId: user.id,
       businessName,
       city,
-      phone,
-      credits: 10 // Créditos de bienvenida
+      phoneNumber: phone
     });
     
-    // Asociar categorías (si tienes tabla provider_services)
-    // for (const catId of serviceCategories) {
-    //   await db.insert(providerServices).values({ providerId: user.id, categoryId: catId });
-    // }
+    // 3. Dar créditos
+    await db.insert(providerCredits).values({
+      userId: user.id,
+      balance: 10
+    });
     
-    res.status(201).json({ message: 'Proveedor registrado', user: { id: user.id, email: user.email } });
+    res.status(201).json({ 
+      message: 'Proveedor registrado',
+      user: { id: user.id, email: user.email }
+    });
+    
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
