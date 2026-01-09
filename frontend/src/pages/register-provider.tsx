@@ -346,6 +346,7 @@ export default function RegisterProvider() {
                         <SelectValue placeholder="Selecciona tu ciudad" />
                       </SelectTrigger>
                       
+                      <SelectContent>
                         <SelectGroup>
                           <SelectLabel>Ciudades Principales</SelectLabel>
                           {popularCities.map((city) => (
@@ -355,7 +356,6 @@ export default function RegisterProvider() {
                           ))}
                         </SelectGroup>
                         <SelectSeparator />
-                        <SelectItem value="otra">+ Otra ciudad</SelectItem>
                         <SelectItem value="otra">+ Otra ciudad</SelectItem>
                       </SelectContent>
                     </Select>
