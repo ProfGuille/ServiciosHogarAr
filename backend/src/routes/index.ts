@@ -1,8 +1,10 @@
-import { Express } from "express";
+import { Router } from "express";
 import authRoutes from "./auth.js";
 import creditsRoutes from "./credits.js";
 
-export default function registerRoutes(app: Express) {
-  app.use("/auth", authRoutes);
-  app.use("/credits", creditsRoutes);
-}
+const router = Router();
+
+router.use("/auth", authRoutes);
+router.use("/credits", creditsRoutes);
+
+export default router;
