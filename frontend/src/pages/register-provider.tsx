@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectLabel, SelectSeparator } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel, SelectSeparator } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { argentineCities, popularCities } from "@/data/argentine-cities";
@@ -345,7 +345,9 @@ export default function RegisterProvider() {
                       <SelectTrigger>
                         <SelectValue placeholder="Selecciona tu ciudad" />
                       </SelectTrigger>
-                      <SelectContent>
+                      
+
+			<SelectContent>
                         <SelectLabel>Ciudades Principales</SelectLabel>
                         {popularCities.map((city) => (
                           <SelectItem key={city} value={city}>
