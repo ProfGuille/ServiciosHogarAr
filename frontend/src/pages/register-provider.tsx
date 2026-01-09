@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectLabel, SelectSeparator } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { argentineCities, popularCities } from "@/data/argentine-cities";
@@ -345,28 +345,15 @@ export default function RegisterProvider() {
                       <SelectTrigger>
                         <SelectValue placeholder="Selecciona tu ciudad" />
                       </SelectTrigger>
-                      <SelectContent className="max-h-[200px] overflow-y-auto">
-                        <div className="font-semibold text-xs text-gray-500 px-2 py-1">
-                          CIUDADES POPULARES
-                        </div>
+                      <SelectContent>
+                        <SelectLabel>Ciudades Principales</SelectLabel>
                         {popularCities.map((city) => (
                           <SelectItem key={city} value={city}>
                             {city}
                           </SelectItem>
                         ))}
-                        <div className="font-semibold text-xs text-gray-500 px-2 py-1 border-t mt-1 pt-2">
-                          TODAS LAS CIUDADES
-                        </div>
-                        {argentineCities.filter(city => !popularCities.includes(city)).map((city) => (
-                          <SelectItem key={city} value={city}>
-                            {city}
-                          </SelectItem>
-                        ))}
-                        <div className="border-t mt-1 pt-1">
-                          <SelectItem value="otra">
-                            <span className="font-medium text-blue-600">+ Otra ciudad</span>
-                          </SelectItem>
-                        </div>
+                        <SelectSeparator />
+                        <SelectItem value="otra">+ Otra ciudad</SelectItem>
                       </SelectContent>
                     </Select>
                     
