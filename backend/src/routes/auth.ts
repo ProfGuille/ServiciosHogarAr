@@ -65,9 +65,16 @@ router.post("/register-provider", async (req: Request, res: Response) => {
   try {
     const { name, email, password, businessName, city, phone } = req.body;
     
+    console.log("=== REGISTER PROVIDER START ===");
+    console.log("Input:", { name, email, businessName, city, phone });
+    
     const hashedPassword = await bcrypt.hash(password, 10);
     const userId = crypto.randomUUID();
     
+    console.log("Generated userId:", userId);
+    
+    // PASO 1: Crear user
+    console.log("Insertando user...");
     const [user] = await db.insert(users).values({
       id: userId,
       email,
@@ -80,6 +87,10 @@ router.post("/register-provider", async (req: Request, res: Response) => {
       updatedAt: new Date()
     }).returning();
     
+    console.log("User creado:", user.id);
+    
+    // PASO 2: Crear service_provider
+    console.log("Insertando service_provider...");
     const [provider] = await db.insert(serviceProviders).values({
       userId: user.id,
       businessName,
@@ -89,17 +100,26 @@ router.post("/register-provider", async (req: Request, res: Response) => {
       updatedAt: new Date()
     }).returning();
     
+    console.log("Provider creado:", provider.id);
+    
+    // PASO 3: Crear créditos
+    console.log("Insertando provider_credits...");
     await db.insert(providerCredits).values({
       providerId: provider.id,
       currentCredits: 10
     });
+    
+    console.log("=== REGISTER PROVIDER SUCCESS ===");
     
     res.status(201).json({ 
       message: 'Proveedor registrado',
       user: { id: user.id, email: user.email }
     });
   } catch (error: any) {
-    console.error("Error register-provider:", error);
+    console.error("=== REGISTER PROVIDER ERROR ===");
+    console.error("Error completo:", error);
+    console.error("Error message:", error.message);
+    console.error("Error stack:", error.stack);
     res.status(500).json({ error: error.message });
   }
 });
