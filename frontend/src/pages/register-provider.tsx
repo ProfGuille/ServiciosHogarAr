@@ -346,15 +346,16 @@ export default function RegisterProvider() {
                         <SelectValue placeholder="Selecciona tu ciudad" />
                       </SelectTrigger>
                       
-
-			<SelectContent>
-                        <SelectLabel>Ciudades Principales</SelectLabel>
-                        {popularCities.map((city) => (
-                          <SelectItem key={city} value={city}>
-                            {city}
-                          </SelectItem>
-                        ))}
+                        <SelectGroup>
+                          <SelectLabel>Ciudades Principales</SelectLabel>
+                          {popularCities.map((city) => (
+                            <SelectItem key={city} value={city}>
+                              {city}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
                         <SelectSeparator />
+                        <SelectItem value="otra">+ Otra ciudad</SelectItem>
                         <SelectItem value="otra">+ Otra ciudad</SelectItem>
                       </SelectContent>
                     </Select>
