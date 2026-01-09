@@ -86,7 +86,7 @@ export default function RegisterProvider() {
       }
 
       setSuccess(true);
-      setTimeout(() => setLocation('/login'), 2000);
+      setTimeout(() => setLocation('/login'), 5000);
 
     } catch (err: any) {
       setError(err.message || 'Error al procesar el registro');
