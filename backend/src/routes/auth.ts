@@ -73,6 +73,7 @@ router.post("/register-provider", async (req: Request, res: Response) => {
       email,
       firstName: name.split(' ')[0] || name,
       lastName: name.split(' ').slice(1).join(' ') || '',
+      profileImageUrl: null,
       password: hashedPassword,
       userType: 'provider',
       createdAt: new Date(),
