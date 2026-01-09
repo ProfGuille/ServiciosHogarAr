@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle, Loader2, AlertCircle } from "lucide-react";
+import { getApiUrl } from "@/lib/api";
 
 const serviceCategories = [
   { id: "1", name: "Plomería" },
@@ -49,7 +50,6 @@ export default function RegisterProvider() {
   const handleSubmit = async () => {
     setError('');
 
-    // Validaciones
     if (!formData.name || !formData.email || !formData.password) {
       setError('Por favor completa todos los campos obligatorios');
       return;
@@ -73,7 +73,7 @@ export default function RegisterProvider() {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/auth/register-provider', {
+      const response = await fetch(getApiUrl('/api/auth/register-provider'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -155,7 +155,6 @@ export default function RegisterProvider() {
                 </Alert>
               )}
 
-              {/* Datos Personales */}
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -204,7 +203,6 @@ export default function RegisterProvider() {
                 </div>
               </div>
 
-              {/* Datos del Negocio */}
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -229,7 +227,6 @@ export default function RegisterProvider() {
                 </div>
               </div>
 
-              {/* Servicios - SIN LOOP INFINITO */}
               <div className="space-y-3">
                 <Label>Servicios que Ofreces *</Label>
                 <p className="text-sm text-gray-600">
@@ -267,7 +264,6 @@ export default function RegisterProvider() {
                 </div>
               </div>
 
-              {/* Términos */}
               <div className="flex items-start space-x-2">
                 <Checkbox
                   checked={formData.termsAccepted}
@@ -310,7 +306,6 @@ export default function RegisterProvider() {
             </CardContent>
           </Card>
 
-          {/* Beneficios */}
           <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card className="text-center p-4">
               <div className="text-3xl mb-2">🎁</div>
