@@ -71,6 +71,7 @@ import Messages from "@/pages/messages";
 import ReferralApply from "@/pages/referral-apply";
 import Register from "@/pages/register";
 import RegisterProvider from "@/pages/register-provider";
+import ComprarCreditos from "@/pages/comprar-creditos";
 import LegalCompliance from "@/pages/legal-compliance";
 import CreateRequest from "@/pages/create-request";
 
@@ -96,6 +97,7 @@ function Router() {
       <Route path="/ai-search" component={SmartSearch} />
       <Route path="/servicios" component={ServicesSimple} />
       <Route path="/register" component={Register} />
+      <Route path="/comprar-creditos" component={ComprarCreditos} />
       <Route path="/register-provider" component={RegisterProvider} />
       <Route path="/legal-compliance" component={LegalCompliance} />
       <Route path="/referral" component={ReferralApply} />
