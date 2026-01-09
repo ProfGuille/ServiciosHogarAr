@@ -1,0 +1,11 @@
+PROBLEMA: backend/src/routes/auth.ts está usando schema VIEJO
+Tabla users real tiene: id, email, first_name, last_name, user_type
+Backend intenta insertar: name, password, terms_accepted_at (NO EXISTEN)
+
+SOLUCIÓN:
+1. Ver tabla "service_providers" - probablemente ahí va la info del proveedor
+2. O migrar schema users para agregar columnas faltantes
+3. O ajustar INSERT para usar solo columnas que existen
+
+Verificar en Neon:
+SELECT column_name FROM information_schema.columns WHERE table_name = 'service_providers';
