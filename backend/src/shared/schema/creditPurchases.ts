@@ -1,14 +1,15 @@
-import { pgTable, serial, integer, varchar, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, serial, integer, decimal, varchar, timestamp } from "drizzle-orm/pg-core";
 import { InferSelectModel } from "drizzle-orm";
 
 export const creditPurchases = pgTable('credit_purchases', {
   id: serial('id').primaryKey(),
-  userId: integer('user_id').notNull(),
   providerId: integer('provider_id').notNull(),
-  amount: integer('amount').notNull(), // Campo agregado
-  status: varchar('status', { length: 32 }), // Campo agregado
-  createdAt: timestamp('created_at').defaultNow(),
-  // ...otros campos que tengas...
+  credits: integer('credits').notNull(),
+  amount: decimal('amount', { precision: 10, scale: 2 }).notNull(),
+  paymentMethod: varchar('payment_method', { length: 50 }),
+  mercadopagoPaymentId: varchar('mercadopago_payment_id', { length: 255 }),
+  status: varchar('status', { length: 32 }).default('pending'),
+  createdAt: timestamp('created_at').defaultNow()
 });
 
 export type CreditPurchase = InferSelectModel<typeof creditPurchases>;
