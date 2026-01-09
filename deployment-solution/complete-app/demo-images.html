@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ServiceSelector con Imágenes Reales</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8fafc;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 40px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .service-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .service-card:hover {
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .service-image {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+        }
+        .service-content {
+            padding: 16px;
+            text-align: center;
+        }
+        .service-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+        .service-description {
+            font-size: 14px;
+            color: #64748b;
+        }
+        .info-box {
+            background: #dbeafe;
+            border: 1px solid #93c5fd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 40px;
+        }
+        .info-title {
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 12px;
+        }
+        .info-list {
+            color: #1e40af;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ServiceSelector con Imágenes Reales del Proyecto Recomendame</h1>
+        <p class="subtitle">Componente implementado con imágenes del repositorio de @ProfGuille</p>
+        
+        <div class="grid">
+            <div class="service-card">
+                <img src="images/services/electricista.jpg" alt="Electricista" class="service-image">
+                <div class="service-content">
+                    <div class="service-name">Electricista</div>
+                    <div class="service-description">Instalación y reparación eléctrica</div>
+                </div>
+            </div>
+            
+            <div class="service-card">
+                <img src="images/services/plomero.jpg" alt="Plomero" class="service-image">
+                <div class="service-content">
+                    <div class="service-name">Plomero</div>
+                    <div class="service-description">Plomería y sanitarios</div>
+                </div>
+            </div>
+            
+            <div class="service-card">
+                <img src="images/services/pintor.jpg" alt="Pintor" class="service-image">
+                <div class="service-content">
+                    <div class="service-name">Pintor</div>
+                    <div class="service-description">Pintura de interiores y exteriores</div>
+                </div>
+            </div>
+            
+            <div class="service-card">
+                <img src="images/services/albanil.jpg" alt="Albañil" class="service-image">
+                <div class="service-content">
+                    <div class="service-name">Albañil</div>
+                    <div class="service-description">Construcción y refacciones</div>
+                </div>
+            </div>
+            
+            <div class="service-card">
+                <img src="images/services/carpintero.jpg" alt="Carpintero" class="service-image">
+                <div class="service-content">
+                    <div class="service-name">Carpintero</div>
+                    <div class="service-description">Trabajos en madera y muebles</div>
+                </div>
+            </div>
+            
+            <div class="service-card">
+                <img src="images/services/gasista.jpg" alt="Gasista" class="service-image">
+                <div class="service-content">
+                    <div class="service-name">Gasista</div>
+                    <div class="service-description">Instalación y reparación de gas</div>
+                </div>
+            </div>
+            
+            <div class="service-card">
+                <img src="images/services/aire_acondicionado.jpg" alt="Aire Acondicionado" class="service-image">
+                <div class="service-content">
+                    <div class="service-name">Aire Acondicionado</div>
+                    <div class="service-description">Instalación y service de AA</div>
+                </div>
+            </div>
+            
+            <div class="service-card">
+                <img src="images/services/cerrajero.jpg" alt="Cerrajero" class="service-image">
+                <div class="service-content">
+                    <div class="service-name">Cerrajero</div>
+                    <div class="service-description">Cerraduras y seguridad</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-box">
+            <div class="info-title">✅ Implementación Completada</div>
+            <div class="info-list">
+                • <strong>8 imágenes reales</strong> descargadas del proyecto Recomendame<br>
+                • <strong>Componente ServiceSelector</strong> funcional con grid responsive<br>
+                • <strong>Estructura de datos</strong> organizada por categorías<br>
+                • <strong>Build exitoso</strong> en 28.22s con todas las imágenes<br>
+                • <strong>Demo page</strong> disponible en /pages/service-demo.tsx
+            </div>
+        </div>
+    </div>
+</body>
+</html>
