@@ -9,6 +9,9 @@ import { generateJWTToken, requireAuth } from "../middleware/auth.js";
 
 const router = Router();
 
+// -----------------------------
+// REGISTER
+// -----------------------------
 router.post("/register", async (req: Request, res: Response) => {
   try {
     const { name, email, password, role = "customer" } = req.body;
@@ -55,6 +58,9 @@ router.post("/register", async (req: Request, res: Response) => {
   }
 });
 
+// -----------------------------
+// REGISTER PROVIDER
+// -----------------------------
 router.post("/register-provider", async (req: Request, res: Response) => {
   try {
     const { name, email, password, businessName, city, phone } = req.body;
@@ -68,20 +74,24 @@ router.post("/register-provider", async (req: Request, res: Response) => {
       firstName: name.split(' ')[0] || name,
       lastName: name.split(' ').slice(1).join(' ') || '',
       password: hashedPassword,
-      userType: 'provider'
+      userType: 'provider',
+      createdAt: new Date(),
+      updatedAt: new Date()
     }).returning();
     
-   const [provider] = await db.insert(serviceProviders).values({
-  userId: user.id,
-  businessName,
-  city,
-  phoneNumber: phone
-}).returning();
-
-await db.insert(providerCredits).values({
-  providerId: provider.id,
-  currentCredits: 10
-});
+    const [provider] = await db.insert(serviceProviders).values({
+      userId: user.id,
+      businessName,
+      city,
+      phoneNumber: phone,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }).returning();
+    
+    await db.insert(providerCredits).values({
+      providerId: provider.id,
+      currentCredits: 10
+    });
     
     res.status(201).json({ 
       message: 'Proveedor registrado',
@@ -93,6 +103,9 @@ await db.insert(providerCredits).values({
   }
 });
 
+// -----------------------------
+// LOGIN
+// -----------------------------
 router.post("/login", async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
@@ -127,6 +140,9 @@ router.post("/login", async (req: Request, res: Response) => {
   }
 });
 
+// -----------------------------
+// GET CURRENT USER
+// -----------------------------
 router.get("/me", requireAuth, async (req: any, res: Response) => {
   try {
     const user = await db.select().from(users).where(eq(users.id, req.user.id)).limit(1);
@@ -149,11 +165,17 @@ router.get("/me", requireAuth, async (req: any, res: Response) => {
   }
 });
 
+// -----------------------------
+// REFRESH TOKEN
+// -----------------------------
 router.post("/refresh", requireAuth, (req: any, res: Response) => {
   const token = generateJWTToken(req.user.id, req.user.email, req.user.role);
   res.json({ token });
 });
 
+// -----------------------------
+// LOGOUT (JWT)
+// -----------------------------
 router.post("/logout", (req: Request, res: Response) => {
   res.json({ message: "Logout exitoso (JWT invalidado en cliente)" });
 });
