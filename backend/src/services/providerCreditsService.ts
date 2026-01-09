@@ -9,25 +9,36 @@ export const providerCreditsService = {
       .select()
       .from(providerCredits)
       .where(eq(providerCredits.providerId, providerId));
-
-    return row?.credits ?? 0;
+    return row?.currentCredits ?? 0;
   },
 
   async addCredits(providerId: number, amount: number, purchaseId?: number) {
-    const current = await this.getCredits(providerId);
+    const [existing] = await db
+      .select()
+      .from(providerCredits)
+      .where(eq(providerCredits.providerId, providerId));
 
-    const newAmount = current + amount;
-
-    await db
-      .insert(providerCredits)
-      .values({
+    if (existing) {
+      const newAmount = existing.currentCredits + amount;
+      const newTotal = existing.totalPurchased + amount;
+      
+      await db
+        .update(providerCredits)
+        .set({ 
+          currentCredits: newAmount,
+          totalPurchased: newTotal,
+          lastPurchaseAt: new Date(),
+          updatedAt: new Date()
+        })
+        .where(eq(providerCredits.providerId, providerId));
+    } else {
+      await db.insert(providerCredits).values({
         providerId,
-        credits: newAmount,
-      })
-      .onConflictDoUpdate({
-        target: providerCredits.providerId,
-        set: { credits: newAmount, updatedAt: new Date() },
+        currentCredits: amount,
+        totalPurchased: amount,
+        totalUsed: 0
       });
+    }
 
     if (purchaseId) {
       await db
@@ -36,24 +47,31 @@ export const providerCreditsService = {
         .where(eq(creditPurchases.id, purchaseId));
     }
 
-    return newAmount;
+    return existing ? existing.currentCredits + amount : amount;
   },
 
   async consumeCredit(providerId: number, amount = 1) {
-    const current = await this.getCredits(providerId);
+    const [existing] = await db
+      .select()
+      .from(providerCredits)
+      .where(eq(providerCredits.providerId, providerId));
 
-    if (current < amount) {
+    if (!existing || existing.currentCredits < amount) {
       throw new Error("Créditos insuficientes");
     }
 
-    const newAmount = current - amount;
+    const newAmount = existing.currentCredits - amount;
+    const newUsed = existing.totalUsed + amount;
 
     await db
       .update(providerCredits)
-      .set({ credits: newAmount, updatedAt: new Date() })
+      .set({ 
+        currentCredits: newAmount,
+        totalUsed: newUsed,
+        updatedAt: new Date()
+      })
       .where(eq(providerCredits.providerId, providerId));
 
     return newAmount;
   },
 };
-
