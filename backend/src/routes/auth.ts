@@ -71,17 +71,17 @@ router.post("/register-provider", async (req: Request, res: Response) => {
       userType: 'provider'
     }).returning();
     
-    await db.insert(serviceProviders).values({
-      userId: user.id,
-      businessName,
-      city,
-      phoneNumber: phone
-    });
-    
-    await db.insert(providerCredits).values({
-      userId: user.id,
-      balance: 10
-    });
+   const [provider] = await db.insert(serviceProviders).values({
+  userId: user.id,
+  businessName,
+  city,
+  phoneNumber: phone
+}).returning();
+
+await db.insert(providerCredits).values({
+  providerId: provider.id,
+  currentCredits: 10
+});
     
     res.status(201).json({ 
       message: 'Proveedor registrado',
