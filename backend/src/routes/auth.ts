@@ -130,29 +130,35 @@ router.post("/register-provider", async (req: Request, res: Response) => {
 router.post("/login", async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
-
+    
     if (!email || !password)
       return res.status(400).json({ error: "Email y contraseña son obligatorios" });
-
+    
     const userResult = await db.select().from(users).where(eq(users.email, email));
-
+    
     if (userResult.length === 0)
       return res.status(401).json({ error: "Credenciales inválidas" });
-
+    
     const user = userResult[0];
-
-    if (!user.isActive)
-      return res.status(403).json({ error: "Usuario desactivado" });
-
+    
+    if (!user.password)
+      return res.status(401).json({ error: "Credenciales inválidas" });
+    
     const valid = await bcrypt.compare(password, user.password);
     if (!valid)
       return res.status(401).json({ error: "Credenciales inválidas" });
-
-    const token = generateJWTToken(user.id, user.email, user.role);
-
+    
+    const token = generateJWTToken(user.id, user.email, user.userType);
+    
     res.json({
       message: "Inicio de sesión exitoso",
-      user: { id: user.id, name: user.name, email: user.email, role: user.role },
+      user: { 
+        id: user.id, 
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email, 
+        userType: user.userType 
+      },
       token,
     });
   } catch (err) {
@@ -160,10 +166,6 @@ router.post("/login", async (req: Request, res: Response) => {
     res.status(500).json({ error: "Error interno del servidor" });
   }
 });
-
-// -----------------------------
-// GET CURRENT USER
-// -----------------------------
 router.get("/me", requireAuth, async (req: any, res: Response) => {
   try {
     const user = await db.select().from(users).where(eq(users.id, req.user.id)).limit(1);
