@@ -54,3 +54,7 @@ Necesito forzar redeploy de Render o verificar por qué no detecta cambios.
 ## PROBLEMA CONOCIDO
 Backend necesita archivo backend/src/shared/schema/payments.ts (aunque esté vacío)
 Si falta, Render crashea con ERR_MODULE_NOT_FOUND
+
+## IMPORTANTE: Schema BD
+- users.id es VARCHAR (no INTEGER)
+- Todas las FK a users deben ser VARCHAR, no INTEGER
