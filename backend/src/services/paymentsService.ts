@@ -4,18 +4,17 @@ import { providerCreditsService } from "./providerCreditsService.js";
 import { eq } from "drizzle-orm";
 
 export const paymentsService = {
-  async registerPurchase(providerId: number, amount: number, method: string) {
+  async registerPurchase(providerId: number, credits: number, amount: number, method: string) {
     const [purchase] = await db
       .insert(creditPurchases)
       .values({
         providerId,
-        userId: providerId,
-        amount,
-        status: "pending",
-        method,
+        credits,
+        amount: amount.toString(),
+        paymentMethod: method,
+        status: "pending"
       })
       .returning();
-
     return purchase;
   },
 
@@ -29,7 +28,7 @@ export const paymentsService = {
 
     await providerCreditsService.addCredits(
       purchase.providerId,
-      purchase.amount,
+      purchase.credits,
       purchase.id
     );
 
@@ -43,4 +42,3 @@ export const paymentsService = {
       .where(eq(creditPurchases.id, purchaseId));
   },
 };
-
