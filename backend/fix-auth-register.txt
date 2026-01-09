@@ -1,0 +1,46 @@
+REEMPLAZAR en backend/src/routes/auth.ts el endpoint register-provider (línea ~130):
+
+router.post("/register-provider", async (req: Request, res: Response) => {
+  try {
+    const { name, email, password, businessName, city, phone, serviceCategories } = req.body;
+    
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const userId = nanoid(); // Necesitas importar nanoid
+    
+    // 1. Crear user
+    const [user] = await db.insert(users).values({
+      id: userId,
+      email,
+      first_name: name.split(' ')[0] || name,
+      last_name: name.split(' ').slice(1).join(' ') || '',
+      password: hashedPassword,
+      user_type: 'provider'
+    }).returning();
+    
+    // 2. Crear service_provider
+    await db.insert(service_providers).values({
+      user_id: user.id,
+      business_name: businessName,
+      city,
+      phone_number: phone
+    });
+    
+    // 3. Dar créditos de bienvenida
+    await db.insert(provider_credits).values({
+      user_id: user.id,
+      balance: 10
+    });
+    
+    res.status(201).json({ 
+      message: 'Proveedor registrado',
+      user: { id: user.id, email: user.email }
+    });
+    
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+IMPORTS necesarios al inicio del archivo:
+import { nanoid } from 'nanoid';
+import bcrypt from 'bcrypt';
