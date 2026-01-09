@@ -7,10 +7,10 @@ export const users = pgTable('users', {
   firstName: varchar('first_name', { length: 255 }),
   lastName: varchar('last_name', { length: 255 }),
   profileImageUrl: varchar('profile_image_url', { length: 512 }),
-  userType: varchar('user_type', { length: 50 }).default('customer'),
-  password: varchar('password', { length: 255 }), // Agregamos esta columna que ya existe
+  userType: varchar('user_type', { length: 50 }).notNull().default('customer'),
   createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow()
+  updatedAt: timestamp('updated_at').defaultNow(),
+  password: varchar('password', { length: 255 })
 });
 
 export type User = InferSelectModel<typeof users>;
