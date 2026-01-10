@@ -104,7 +104,15 @@ router.post("/webhook", async (req, res) => {
 router.post("/create", async (req, res) => {
   try {
     const { providerId, packageType } = req.body;
-    const preference = await mercadoPagoService.createPreference(providerId, packageType);
+    
+    console.log("📦 Crear preferencia - Datos recibidos:", { providerId, packageType, tipo: typeof packageType });
+    
+    // Convertir packageType a número si viene como string
+    const credits = typeof packageType === 'string' ? parseInt(packageType) : packageType;
+    
+    console.log("📦 Credits procesados:", credits);
+    
+    const preference = await mercadoPagoService.createPreference(providerId, credits);
     res.json(preference);
   } catch (error: any) {
     console.error("Error creating preference:", error);
