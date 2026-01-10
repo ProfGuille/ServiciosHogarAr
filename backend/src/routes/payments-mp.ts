@@ -1,9 +1,23 @@
 import { Router } from "express";
-import { mercadoPagoService } from "../services/mercadoPagoService";
+import { requireAuth } from "../middleware/auth.js";
+import { mercadoPagoService } from "../services/mercadoPagoService.js";
 import { validateMercadoPagoWebhook } from "../utils/webhookValidator";
 import { webhookService } from "../services/webhookService";
+import { db } from "../db.js";
+import { serviceProviders } from "../shared/schema/serviceProviders.js";
+import { eq } from "drizzle-orm";
 
 const router = Router();
+
+// Mapeo de packageId a créditos (RESTAURADO DEL ORIGINAL)
+const PACKAGE_TO_CREDITS: any = {
+  "basico": 10,
+  "popular": 50,
+  "premium": 100,
+  "1": 10,
+  "2": 50,
+  "3": 100
+};
 
 // GET para que MP verifique el endpoint
 router.get("/webhook", (req, res) => {
@@ -39,7 +53,7 @@ router.post("/webhook", async (req, res) => {
 
     console.log(`📝 Webhook registrado con ID: ${webhookId}`);
 
-    // ⚠️ CAMBIO CRÍTICO: Validar HMAC solo si MP_WEBHOOK_SECRET existe
+    // ⚠️ CAMBIO: Validar HMAC solo si MP_WEBHOOK_SECRET existe
     const MP_WEBHOOK_SECRET = process.env.MP_WEBHOOK_SECRET;
     
     if (MP_WEBHOOK_SECRET) {
@@ -100,19 +114,35 @@ router.post("/webhook", async (req, res) => {
   }
 });
 
-// Otros endpoints existentes...
-router.post("/create", async (req, res) => {
+// ENDPOINT ORIGINAL RESTAURADO
+router.post("/create", requireAuth, async (req: any, res) => {
   try {
-    const { providerId, packageType } = req.body;
+    const { packageId } = req.body;
+    const userId = req.user.id;
+
+    // Obtener proveedor
+    const [provider] = await db
+      .select()
+      .from(serviceProviders)
+      .where(eq(serviceProviders.userId, userId));
+
+    if (!provider) {
+      return res.status(404).json({ error: "Proveedor no encontrado" });
+    }
+
+    // Convertir packageId a créditos
+    const credits = PACKAGE_TO_CREDITS[packageId];
     
-    console.log("📦 Crear preferencia - Datos recibidos:", { providerId, packageType, tipo: typeof packageType });
-    
-    // Convertir packageType a número si viene como string
-    const credits = typeof packageType === 'string' ? parseInt(packageType) : packageType;
-    
-    console.log("📦 Credits procesados:", credits);
-    
-    const preference = await mercadoPagoService.createPreference(providerId, credits);
+    if (!credits) {
+      return res.status(400).json({ error: "Paquete inválido" });
+    }
+
+    // Crear preferencia
+    const preference = await mercadoPagoService.createPreference(
+      provider.id,
+      credits
+    );
+
     res.json(preference);
   } catch (error: any) {
     console.error("Error creating preference:", error);
