@@ -15,14 +15,12 @@ export function Footer() {
 
   const footerSections = [
     {
-      title: "Servicios Populares",
+      title: "Para Clientes",
       links: [
-        { label: "Plomería", href: "/servicios/plomeria" },
-        { label: "Electricidad", href: "/servicios/electricidad" },
-        { label: "Pintura", href: "/servicios/pintura" },
-        { label: "Limpieza", href: "/servicios/limpieza" },
-        { label: "Carpintería", href: "/servicios/carpinteria" },
+        { label: "Buscar servicios", href: "/buscar" },
         { label: "Ver todos los servicios", href: "/servicios" },
+        { label: "Cómo funciona", href: "/como-funciona" },
+        { label: "Crear solicitud", href: "/crear-solicitud" },
       ]
     },
     {
@@ -30,13 +28,12 @@ export function Footer() {
       links: [
         { label: "Registrarse como Profesional", href: "/register-provider" },
         { label: "Cómo funciona", href: "/como-funciona" },
-        { label: "Guía de precios", href: "/precios" },
+        { label: "Comprar créditos", href: "/comprar-creditos" },
       ]
     },
     {
       title: "Ayuda",
       links: [
-        { label: "Cómo funciona", href: "/como-funciona" },
         { label: "Centro de ayuda", href: "/centro-ayuda" },
         { label: "Contacto", href: "/contacto" },
         { label: "Sobre nosotros", href: "/about" },
@@ -78,45 +75,34 @@ export function Footer() {
               </p>
             </div>
             
-            {/* Quick Contact */}
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Link 
-                href="/contacto" 
-                className="inline-flex items-center justify-center space-x-2 bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:scale-105 shadow-lg"
-              >
-                <Mail className="h-5 w-5" />
-                <span>Contactanos</span>
-              </Link>
-              <Link 
-                href="/servicios"
-                className="inline-flex items-center justify-center space-x-2 border border-slate-600 hover:border-slate-500 text-slate-300 hover:text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:scale-105"
-              >
-                <span>Ver Servicios</span>
-              </Link>
+            {/* Social Links */}
+            <div className="flex space-x-4">
+              <a href="#" className="text-slate-400 hover:text-white transition-colors">
+                <Facebook className="h-5 w-5" />
+              </a>
+              <a href="#" className="text-slate-400 hover:text-white transition-colors">
+                <Instagram className="h-5 w-5" />
+              </a>
+              <a href="#" className="text-slate-400 hover:text-white transition-colors">
+                <Twitter className="h-5 w-5" />
+              </a>
             </div>
           </div>
 
-          {/* Footer Links */}
-          {footerSections.map((section, index) => (
-            <div key={index} className="lg:col-span-1">
-              <h3 className="font-semibold text-white mb-4 border-b border-slate-700 pb-2">{section.title}</h3>
+          {/* Footer Links Sections */}
+          {footerSections.map((section, idx) => (
+            <div key={idx}>
+              <h3 className="font-semibold text-white text-sm uppercase tracking-wider mb-4">
+                {section.title}
+              </h3>
               <ul className="space-y-3">
-                {section.links.map((link, linkIndex) => (
-                  <li key={linkIndex}>
-                    {link.href.startsWith('http') ? (
-                      <a 
-                        href={link.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-slate-300 hover:text-primary text-sm transition-colors cursor-pointer hover:translate-x-1 transform duration-200 inline-block"
-                      >
+                {section.links.map((link, linkIdx) => (
+                  <li key={linkIdx}>
+                    <Link href={link.href}>
+                      <a className="text-slate-300 hover:text-white transition-colors text-sm">
                         {link.label}
                       </a>
-                    ) : (
-                      <Link href={link.href} className="text-slate-300 hover:text-primary text-sm transition-colors cursor-pointer hover:translate-x-1 transform duration-200 inline-block">
-                        {link.label}
-                      </Link>
-                    )}
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -124,66 +110,15 @@ export function Footer() {
           ))}
         </div>
 
-        {/* Trust Indicators */}
-        <div className="mt-12 pt-8 border-t border-slate-700">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-            <div className="flex flex-col items-center">
-              <div className="w-12 h-12 bg-green-600/20 rounded-full flex items-center justify-center mb-3">
-                <Heart className="h-6 w-6 text-green-400" />
-              </div>
-              <h4 className="font-semibold text-white mb-1">Profesionales Verificados</h4>
-              <p className="text-slate-400 text-sm">Nuestros profesionales completan verificación de identidad para mayor seguridad</p>
+        {/* Bottom Section */}
+        <div className="mt-12 pt-8 border-t border-slate-800">
+          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <div className="flex items-center space-x-2 text-slate-400 text-sm">
+              <Mail className="h-4 w-4" />
+              <span>contacto@servicioshogar.com.ar</span>
             </div>
-            <div className="flex flex-col items-center">
-              <div className="w-12 h-12 bg-blue-600/20 rounded-full flex items-center justify-center mb-3">
-                <Phone className="h-6 w-6 text-blue-400" />
-              </div>
-              <h4 className="font-semibold text-white mb-1">Soporte</h4>
-              <p className="text-slate-400 text-sm">Estamos aquí para ayudarte en cada paso del proceso</p>
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="w-12 h-12 bg-purple-600/20 rounded-full flex items-center justify-center mb-3">
-                <MapPin className="h-6 w-6 text-purple-400" />
-              </div>
-              <h4 className="font-semibold text-white mb-1">Cobertura Nacional</h4>
-              <p className="text-slate-400 text-sm">Servicios disponibles en las principales ciudades de Argentina</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom Bar */}
-        <div className="mt-8 pt-6 border-t border-slate-800">
-          <div className="flex flex-col lg:flex-row justify-between items-center space-y-4 lg:space-y-0">
-            <div className="flex flex-col lg:flex-row items-center space-y-2 lg:space-y-0 lg:space-x-6">
-              <div className="text-slate-400 text-sm">
-                © {currentYear} ServiciosHogar.com.ar
-              </div>
-              <div className="flex items-center space-x-1 text-xs">
-                <span className="bg-green-500 w-2 h-2 rounded-full animate-pulse"></span>
-                <span className="text-slate-400">Plataforma en funcionamiento</span>
-              </div>
-            </div>
-            
-            <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
-              <Link href="/legal/terminos" className="text-slate-400 hover:text-primary transition-colors">
-                Términos
-              </Link>
-              <Link href="/legal/privacidad" className="text-slate-400 hover:text-primary transition-colors">
-                Privacidad
-              </Link>
-              <Link href="/legal/aviso" className="text-slate-400 hover:text-primary transition-colors">
-                Aviso Legal
-              </Link>
-              <Link href="/contacto" className="text-slate-400 hover:text-primary transition-colors">
-                Contacto
-              </Link>
-              <div className="flex items-center space-x-2 text-slate-400">
-                <span>Pagos seguros:</span>
-                <div className="flex space-x-1">
-                  <div className="bg-gradient-to-r from-blue-500 to-yellow-500 text-white px-2 py-1 rounded text-xs font-medium">MP</div>
-                  <div className="bg-slate-700 text-slate-300 px-2 py-1 rounded text-xs">Banco</div>
-                </div>
-              </div>
+            <div className="text-slate-400 text-sm">
+              © {currentYear} ServiciosHogar.com.ar. Todos los derechos reservados.
             </div>
           </div>
         </div>
