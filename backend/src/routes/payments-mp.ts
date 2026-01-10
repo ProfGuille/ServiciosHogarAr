@@ -1,5 +1,5 @@
 import { Router } from "express";
-import mercadoPagoService from "../services/mercadoPagoService";
+import { mercadoPagoService } from "../services/mercadoPagoService";
 import { validateMercadoPagoWebhook } from "../utils/webhookValidator";
 import { webhookService } from "../services/webhookService";
 
