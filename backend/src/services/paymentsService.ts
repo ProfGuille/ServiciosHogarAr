@@ -18,6 +18,24 @@ export const paymentsService = {
     return purchase;
   },
 
+  /**
+   * Obtiene una compra por ID
+   * NUEVO: Necesario para el flujo atómico
+   */
+  async getPurchaseById(purchaseId: number) {
+    const [purchase] = await db
+      .select()
+      .from(creditPurchases)
+      .where(eq(creditPurchases.id, purchaseId))
+      .limit(1);
+    
+    return purchase || null;
+  },
+
+  /**
+   * LEGACY: Mantener para compatibilidad pero ya NO se usa
+   * El nuevo flujo usa acreditar_creditos_atomico() directamente
+   */
   async confirmPurchase(purchaseId: number) {
     const [purchase] = await db
       .select()

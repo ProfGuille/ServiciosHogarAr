@@ -8,6 +8,7 @@ import searchRoutes from './routes/search.js';
 import searchSuggestionsRoutes from './routes/search-suggestions.js';
 import categoriesRoutes from './routes/categories.js';
 import serviceProvidersRoutes from './routes/serviceProviders.js';
+import paymentsMPRoutes from './routes/payments-mp.js';
 
 const app = express();
 
@@ -95,6 +96,7 @@ app.use('/api/search', searchRoutes);
 app.use('/api/search-suggestions', searchSuggestionsRoutes);
 app.use('/api/categories', categoriesRoutes);
 app.use('/api/providers', serviceProvidersRoutes);
+app.use('/api/payments/mp', paymentsMPRoutes);
 
 // Auth endpoints
 app.post('/api/auth/login', async (req, res) => {
