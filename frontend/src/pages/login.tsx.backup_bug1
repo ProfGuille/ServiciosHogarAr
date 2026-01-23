@@ -33,13 +33,20 @@ export default function Login() {
         throw new Error(data.message || 'Error al iniciar sesión');
       }
 
-      // Backend usa cookies HTTP-only, no envía token en JSON
-      if (data.user) {
-        localStorage.setItem('user', JSON.stringify(data.user));
+      // ✅ CRÍTICO: Guardar el token en localStorage
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+        
+        // También guardamos info del usuario si viene en la respuesta
+        if (data.user) {
+          localStorage.setItem('user', JSON.stringify(data.user));
+        }
+
+        // Redirigir al dashboard o comprar créditos
+        setLocation('/comprar-creditos');
+      } else {
+        throw new Error('No se recibió el token de autenticación');
       }
-      
-      // Redirigir según tipo de usuario
-      setTimeout(() => { window.location.href = data.user?.userType === 'provider' ? '/dashboard-profesional' : '/dashboard'; }, 100);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al iniciar sesión');
     } finally {

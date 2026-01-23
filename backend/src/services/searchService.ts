@@ -35,9 +35,7 @@ export const searchService = {
 
     const conditions: SQL[] = [eq(serviceProviders.isActive, true)];
 
-    // -----------------------------
     // TEXT SEARCH
-    // -----------------------------
     if (searchQuery) {
       const searchTerms = searchQuery
         .split(" ")
@@ -49,62 +47,31 @@ export const searchService = {
       conditions.push(
         or(
           sql`to_tsvector('spanish', COALESCE(${serviceProviders.businessName}, '')) @@ to_tsquery('spanish', ${tsQuery})`,
-          sql`to_tsvector('spanish', COALESCE(${serviceProviders.businessDescription}, '')) @@ to_tsquery('spanish', ${tsQuery})`,
+          sql`to_tsvector('spanish', COALESCE(${serviceProviders.description}, '')) @@ to_tsquery('spanish', ${tsQuery})`,
           ilike(serviceProviders.businessName, `%${searchQuery}%`),
-          ilike(serviceProviders.businessDescription, `%${searchQuery}%`)
+          ilike(serviceProviders.description, `%${searchQuery}%`)
         ) as SQL
       );
     }
 
-    // -----------------------------
     // LOCATION FILTERS
-    // -----------------------------
     if (city) conditions.push(ilike(serviceProviders.city, `%${city}%`));
     if (province) conditions.push(ilike(serviceProviders.province, `%${province}%`));
 
-    // -----------------------------
     // RATING & REVIEWS
-    // -----------------------------
-    if (minRating) conditions.push(gte(serviceProviders.averageRating, Number(minRating)));
+    if (minRating) conditions.push(gte(serviceProviders.rating, Number(minRating)));
     if (hasReviews === "true") conditions.push(gte(serviceProviders.totalReviews, 1));
 
-    // -----------------------------
-    // VERIFIED / CREDITS
-    // -----------------------------
+    // VERIFIED
     if (verified === "true") conditions.push(eq(serviceProviders.isVerified, true));
-    if (hasCredits === "true") conditions.push(gte(serviceProviders.credits, 1));
 
-    // -----------------------------
     // EXPERIENCE
-    // -----------------------------
     if (experienceYears) {
       const exp = Number(experienceYears);
       if (!isNaN(exp)) conditions.push(gte(serviceProviders.experienceYears, exp));
     }
 
-    // -----------------------------
-    // RESPONSE TIME
-    // -----------------------------
-    if (responseTime) {
-      const now = new Date();
-      if (responseTime === "fast") {
-        conditions.push(gte(serviceProviders.lastActive, new Date(now.getTime() - 2 * 3600 * 1000)));
-      } else if (responseTime === "medium") {
-        conditions.push(gte(serviceProviders.lastActive, new Date(now.getTime() - 24 * 3600 * 1000)));
-      }
-    }
-
-    // -----------------------------
-    // AVAILABILITY (simplificada)
-    // -----------------------------
-    if (availability && availability !== "anytime") {
-      const recentlyActive = new Date(Date.now() - 7 * 24 * 3600 * 1000);
-      conditions.push(gte(serviceProviders.lastActive, recentlyActive));
-    }
-
-    // -----------------------------
     // LOCATION-BASED SEARCH
-    // -----------------------------
     const useGeo = latitude && longitude && radius;
 
     if (useGeo) {
@@ -119,16 +86,15 @@ export const searchService = {
           .select({
             id: serviceProviders.id,
             businessName: serviceProviders.businessName,
-            businessDescription: serviceProviders.businessDescription,
-            averageRating: serviceProviders.averageRating,
+            description: serviceProviders.description,
+            rating: serviceProviders.rating,
             totalReviews: serviceProviders.totalReviews,
             isVerified: serviceProviders.isVerified,
-            credits: serviceProviders.credits,
             city: serviceProviders.city,
             province: serviceProviders.province,
-            phone: serviceProviders.phone,
+            phoneNumber: serviceProviders.phoneNumber,
+            hourlyRate: serviceProviders.hourlyRate,
             email: users.email,
-            lastActive: serviceProviders.lastActive,
             latitude: providerLocations.latitude,
             longitude: providerLocations.longitude,
             address: providerLocations.address,
@@ -154,7 +120,6 @@ export const searchService = {
           .filter((p) => p.distance <= radiusKm);
 
         const sorted = this.sortProviders(withDistance, sortBy);
-
         const paginated = sorted.slice(offsetNum, offsetNum + limitNum);
 
         return {
@@ -169,25 +134,22 @@ export const searchService = {
       }
     }
 
-    // -----------------------------
     // NON-GEO SEARCH
-    // -----------------------------
     const orderBy = this.getOrderBy(sortBy);
 
     const providers = await db
       .select({
         id: serviceProviders.id,
         businessName: serviceProviders.businessName,
-        businessDescription: serviceProviders.businessDescription,
-        averageRating: serviceProviders.averageRating,
+        description: serviceProviders.description,
+        rating: serviceProviders.rating,
         totalReviews: serviceProviders.totalReviews,
         isVerified: serviceProviders.isVerified,
-        credits: serviceProviders.credits,
         city: serviceProviders.city,
         province: serviceProviders.province,
-        phone: serviceProviders.phone,
+        phoneNumber: serviceProviders.phoneNumber,
+        hourlyRate: serviceProviders.hourlyRate,
         email: users.email,
-        lastActive: serviceProviders.lastActive,
       })
       .from(serviceProviders)
       .innerJoin(users, eq(serviceProviders.userId, users.id))
@@ -212,29 +174,21 @@ export const searchService = {
     };
   },
 
-  // -----------------------------
-  // ORDERING
-  // -----------------------------
   getOrderBy(sortBy: string) {
     switch (sortBy) {
       case "rating":
-        return desc(serviceProviders.averageRating);
+        return desc(serviceProviders.rating);
       case "reviews":
         return desc(serviceProviders.totalReviews);
       case "newest":
         return desc(serviceProviders.createdAt);
-      case "response_time":
-        return desc(serviceProviders.lastActive);
       case "experience":
         return desc(serviceProviders.experienceYears);
       default:
-        return desc(serviceProviders.lastActive);
+        return desc(serviceProviders.createdAt);
     }
   },
 
-  // -----------------------------
-  // SORTING FOR GEO SEARCH
-  // -----------------------------
   sortProviders(list: any[], sortBy: string) {
     const sorted = [...list];
 
@@ -243,7 +197,7 @@ export const searchService = {
         sorted.sort((a, b) => a.distance - b.distance);
         break;
       case "rating":
-        sorted.sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0));
+        sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
         break;
       case "reviews":
         sorted.sort((a, b) => (b.totalReviews || 0) - (a.totalReviews || 0));
@@ -255,4 +209,3 @@ export const searchService = {
     return sorted;
   },
 };
-

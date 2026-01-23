@@ -1,5 +1,3 @@
-// frontend/src/lib/auth.ts
-
 /**
  * Obtiene el token JWT del localStorage
  */
@@ -9,28 +7,11 @@ export function getToken(): string | null {
 
 /**
  * Verifica si el usuario está autenticado
+ * Usa 'user' en localStorage porque backend maneja auth con cookies HTTP-only
  */
 export function isAuthenticated(): boolean {
-  const token = getToken();
-  if (!token) return false;
-
-  try {
-    // Decodificar el JWT para verificar si expiró
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    const now = Date.now() / 1000;
-    
-    // Si el token expiró, lo eliminamos
-    if (payload.exp && payload.exp < now) {
-      logout();
-      return false;
-    }
-    
-    return true;
-  } catch {
-    // Si hay error al decodificar, token inválido
-    logout();
-    return false;
-  }
+  const userStr = localStorage.getItem('user');
+  return !!userStr;
 }
 
 /**
@@ -53,6 +34,8 @@ export function getUser(): any | null {
 export function logout(): void {
   localStorage.removeItem('token');
   localStorage.removeItem('user');
+  // También limpiar la cookie del backend
+  document.cookie = 'sessionId=; Max-Age=0; path=/;';
 }
 
 /**

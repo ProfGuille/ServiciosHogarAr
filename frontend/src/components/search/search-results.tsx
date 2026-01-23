@@ -176,7 +176,7 @@ export function SearchResults({
 
                   {/* Categories */}
                   <div className="flex flex-wrap gap-2 mb-3">
-                    {provider.categories.map((category) => (
+                    {provider.categories?.map((category) => (
                       <Badge key={category.id} variant="secondary">
                         {category.name}
                       </Badge>

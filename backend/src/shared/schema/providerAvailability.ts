@@ -1,7 +1,7 @@
 import { 
   pgTable, serial, integer, boolean, time, date, timestamp, index 
 } from "drizzle-orm/pg-core";
-import { serviceProviders } from "./serviceProviders.js";
+import { serviceProviders } from "./serviceProviders.ts";
 import { InferSelectModel } from "drizzle-orm";
 
 export const providerAvailability = pgTable("provider_availability", {

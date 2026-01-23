@@ -22,45 +22,31 @@ if (!process.env.JWT_SECRET) {
 }
 
 // -----------------------------
-// 2. CORS MANUAL CON LOGS
-// -----------------------------
-const allowedOrigins = process.env.NODE_ENV === "production"
-  ? ["https://servicioshogar.com.ar", "https://www.servicioshogar.com.ar"]
-  : ["http://localhost:5173", "http://localhost:3000"];
-
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  
-  console.log("🔍 CORS Debug:");
-  console.log("  - Origin header:", origin);
-  console.log("  - Method:", req.method);
-  console.log("  - Path:", req.path);
-  console.log("  - Allowed origins:", allowedOrigins);
-  
-  if (origin && allowedOrigins.includes(origin)) {
-    console.log("  ✅ Origin permitido, agregando headers CORS");
-    res.setHeader("Access-Control-Allow-Origin", origin);
-  } else {
-    console.log("  ❌ Origin NO permitido o undefined");
-  }
-  
-  res.setHeader("Access-Control-Allow-Credentials", "true");
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization");
-  
-  if (req.method === "OPTIONS") {
-    console.log("  📋 Respondiendo a preflight OPTIONS");
-    return res.sendStatus(204);
-  }
-  
-  next();
-});
-
-// -----------------------------
-// 3. SECURITY MIDDLEWARES
+// 2. SECURITY MIDDLEWARES
 // -----------------------------
 app.use(helmet());
 app.use(compression());
+
+// -----------------------------
+// 3. CORS
+// -----------------------------
+app.use(
+  cors({
+    origin:
+      process.env.NODE_ENV === "production"
+        ? [
+            "https://servicioshogar.com.ar",
+            "https://www.servicioshogar.com.ar",
+          ]
+        : ["http://localhost:5173", "http://localhost:3000"],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
+// Fix adicional para CORS preflight
+app.options('*', cors());
 
 // -----------------------------
 // 4. BODY PARSING
@@ -74,6 +60,7 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use((req, res, next) => {
   const start = Date.now();
   const originalSend = res.send;
+
   res.send = function (body) {
     const duration = Date.now() - start;
     if (req.path.startsWith("/api")) {
@@ -81,6 +68,7 @@ app.use((req, res, next) => {
     }
     return originalSend.call(this, body);
   };
+
   next();
 });
 
@@ -98,6 +86,7 @@ app.get("/api/info", (req, res) => {
 
 app.get("/api/health", (req, res) => {
   const dbStatus = isDatabaseAvailable() ? "connected" : "disconnected";
+
   res.status(dbStatus === "connected" ? 200 : 503).json({
     status: dbStatus === "connected" ? "ok" : "error",
     timestamp: new Date().toISOString(),
@@ -123,7 +112,9 @@ app.use("/api/*", (req, res) => {
 // -----------------------------
 app.use((err, req, res, next) => {
   console.error("❌ Error:", err);
+
   if (res.headersSent) return next(err);
+
   res.status(err.status || 500).json({
     error:
       process.env.NODE_ENV === "production"
@@ -138,6 +129,7 @@ app.use((err, req, res, next) => {
 async function start() {
   console.log("🔄 Ejecutando migraciones...");
   await runMigrations();
+
   app.listen(PORT, () => {
     console.log(`🚀 Servidor iniciado en puerto ${PORT}`);
   });
@@ -147,3 +139,4 @@ start().catch((err) => {
   console.error("❌ Error inicializando la aplicación:", err);
   process.exit(1);
 });
+

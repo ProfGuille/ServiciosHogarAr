@@ -1,59 +1,37 @@
-import {
-  pgTable,
-  serial,
-  integer,
-  varchar,
-  boolean,
-  timestamp,
-  text,
-  numeric,
-} from "drizzle-orm/pg-core";
+import { pgTable, serial, varchar, text, integer, timestamp, boolean, numeric } from "drizzle-orm/pg-core";
 import { InferSelectModel } from "drizzle-orm";
 
 export const serviceRequests = pgTable("service_requests", {
   id: serial("id").primaryKey(),
-
-  customerId: varchar("customer_id").notNull(), // Firebase UID o string
+  customerId: varchar("customer_id"),
   providerId: integer("provider_id"),
-
   categoryId: integer("category_id").notNull(),
-
-  // Nuevo: servicio específico del proveedor
-  serviceId: integer("service_id"),
-
   title: varchar("title", { length: 200 }).notNull(),
   description: text("description").notNull(),
-
   address: text("address").notNull(),
   city: varchar("city", { length: 100 }).notNull(),
   province: varchar("province", { length: 100 }).notNull(),
-
   preferredDate: timestamp("preferred_date"),
-
-  // Nuevo: fecha acordada final
-  scheduledDate: timestamp("scheduled_date"),
-
-  estimatedBudget: numeric("estimated_budget", { precision: 10, scale: 2 }),
-
+  estimatedBudget: numeric("estimated_budget"),
   status: varchar("status").notNull().default("pending"),
-
-  quotedPrice: numeric("quoted_price", { precision: 10, scale: 2 }),
+  quotedPrice: numeric("quoted_price"),
   quotedAt: timestamp("quoted_at"),
-
   acceptedAt: timestamp("accepted_at"),
   completedAt: timestamp("completed_at"),
-
   isUrgent: boolean("is_urgent").default(false),
-
   customerNotes: text("customer_notes"),
   providerNotes: text("provider_notes"),
-
-  paymentStatus: varchar("payment_status").default("pending"),
-  stripePaymentIntentId: varchar("stripe_payment_intent_id", { length: 255 }),
-
+  paymentStatus: varchar("payment_status"),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+  
+  // Campos para sistema de leads
+  customerFirstName: varchar("customer_first_name", { length: 100 }),
+  customerPhone: varchar("customer_phone", { length: 20 }),
+  customerEmail: varchar("customer_email", { length: 255 }),
+  neighborhood: varchar("neighborhood", { length: 100 }),
+  preferredContactMethods: text("preferred_contact_methods"),
 });
 
 export type ServiceRequest = InferSelectModel<typeof serviceRequests>;
-

@@ -1,5 +1,5 @@
 import { pgTable, integer, date } from 'drizzle-orm/pg-core';
-import { serviceProviders } from "./serviceProviders.js";
+import { serviceProviders } from "./serviceProviders.ts";
 import { relations } from 'drizzle-orm';
 
 export const providerMetrics = pgTable('provider_metrics', {

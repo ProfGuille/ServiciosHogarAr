@@ -41,7 +41,7 @@ export const getQueryFn: <T>(options: {
   async ({ queryKey }) => {
     const endpoint = queryKey.join("/") as string;
     // Ensure URL is absolute
-    const fullUrl = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}/${endpoint}`;
+    const fullUrl = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
     
     const res = await fetch(fullUrl, {
       credentials: "include",

@@ -41,6 +41,63 @@ interface SearchFilters {
   useCurrentLocation?: boolean;
 }
 
+
+// Fallback data
+  const fallbackCategories = [
+    { id: 1, name: "Plomería" },
+    { id: 2, name: "Electricidad" },
+    { id: 3, name: "Pintura" },
+    { id: 4, name: "Limpieza" },
+    { id: 5, name: "Carpintería" },
+    { id: 6, name: "Gasista" },
+    { id: 7, name: "Albañilería" },
+    { id: 8, name: "Aire Acondicionado" },
+    { id: 9, name: "Jardinería" },
+    { id: 10, name: "Cerrajería" },
+    { id: 11, name: "Mudanzas" },
+    { id: 12, name: "Herrero" },
+    { id: 13, name: "Techista" },
+    { id: 14, name: "Fumigador" },
+    { id: 15, name: "Técnico PC" },
+    { id: 16, name: "Pequeños Arreglos" },
+    { id: 17, name: "Tapicero" }
+  ];
+
+  const fallbackProviders = [
+    {
+      id: 1,
+      businessName: "Plomería Express Buenos Aires",
+      description: "Especialistas en reparaciones urgentes de plomería. Servicio 24/7 en CABA y GBA.",
+      rating: "4.8",
+      totalReviews: 127,
+      hourlyRate: "$3,500",
+      city: "Buenos Aires",
+      province: "CABA",
+      experienceYears: 8,
+      isVerified: true,
+      categories: [{ id: 1, name: "Plomería" }],
+      hasCredits: true,
+      avgResponseTime: 45,
+      completedJobs: 340
+    },
+    {
+      id: 2,
+      businessName: "Electricistas Profesionales",
+      description: "Instalaciones eléctricas residenciales y comerciales. Certificados por ENIC.",
+      rating: "4.9",
+      totalReviews: 89,
+      hourlyRate: "$4,200",
+      city: "La Plata",
+      province: "Buenos Aires",
+      experienceYears: 12,
+      isVerified: true,
+      categories: [{ id: 2, name: "Electricidad" }],
+      hasCredits: true,
+      avgResponseTime: 30,
+      completedJobs: 275
+    }
+  ];
+
 export default function Search() {
   const { toast } = useToast();
   const urlSearchParams = new URLSearchParams(useWouterSearch());
@@ -146,61 +203,6 @@ export default function Search() {
   });
 
   // Fallback categories when API is not available
-  const fallbackCategories = [
-    { id: 1, name: "Plomería" },
-    { id: 2, name: "Electricidad" },
-    { id: 3, name: "Pintura" },
-    { id: 4, name: "Limpieza" },
-    { id: 5, name: "Carpintería" },
-    { id: 6, name: "Gasista" },
-    { id: 7, name: "Albañilería" },
-    { id: 8, name: "Aire Acondicionado" },
-    { id: 9, name: "Jardinería" },
-    { id: 10, name: "Cerrajería" },
-    { id: 11, name: "Mudanzas" },
-    { id: 12, name: "Herrero" },
-    { id: 13, name: "Techista" },
-    { id: 14, name: "Fumigador" },
-    { id: 15, name: "Técnico PC" },
-    { id: 16, name: "Pequeños Arreglos" },
-    { id: 17, name: "Tapicero" }
-  ];
-
-  // Simple fallback providers for search
-  const fallbackProviders = [
-    {
-      id: 1,
-      businessName: "Plomería Express Buenos Aires",
-      description: "Especialistas en reparaciones urgentes de plomería. Servicio 24/7 en CABA y GBA.",
-      rating: "4.8",
-      totalReviews: 127,
-      hourlyRate: "$3,500",
-      city: "Buenos Aires",
-      province: "CABA",
-      experienceYears: 8,
-      isVerified: true,
-      categories: [{ id: 1, name: "Plomería" }],
-      hasCredits: true,
-      avgResponseTime: 45,
-      completedJobs: 340
-    },
-    {
-      id: 2,
-      businessName: "Electricistas Profesionales",
-      description: "Instalaciones eléctricas residenciales y comerciales. Certificados por ENIC.",
-      rating: "4.9",
-      totalReviews: 89,
-      hourlyRate: "$4,200",
-      city: "La Plata",
-      province: "Buenos Aires",
-      experienceYears: 12,
-      isVerified: true,
-      categories: [{ id: 2, name: "Electricidad" }],
-      hasCredits: true,
-      avgResponseTime: 30,
-      completedJobs: 275
-    }
-  ];
 
   // Use fallback if categories API fails
   const displayCategories = categories || fallbackCategories;
