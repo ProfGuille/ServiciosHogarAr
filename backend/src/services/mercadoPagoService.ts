@@ -1,203 +1,268 @@
-import { db } from "../db.js";
-import { paymentsService } from "./paymentsService.js";
-import { sql } from "drizzle-orm";
+import crypto from 'crypto';
+import { db, sql } from "../db.js";
+import { mercadopagoWebhooks } from "../shared/schema/index.js";
+import { eq } from 'drizzle-orm';
 
-const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
+const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN!;
+const MP_WEBHOOK_SECRET = process.env.MP_WEBHOOK_SECRET!;
 
-if (!MP_ACCESS_TOKEN) {
-  console.error("❌ MP_ACCESS_TOKEN no está definido en el entorno");
+interface WebhookResult {
+  success: boolean;
+  message: string;
 }
 
-// Mapeo de créditos a precios
-const CREDIT_PACKAGES: any = {
-  10: { price: 5000, name: "Básico" },
-  50: { price: 20000, name: "Popular" },
-  100: { price: 35000, name: "Premium" }
-};
+class MercadoPagoService {
+  /**
+   * Valida la firma HMAC del webhook de Mercado Pago
+   * Documentación: https://www.mercadopago.com.ar/developers/es/docs/your-integrations/notifications/webhooks
+   */
+  private validateWebhookSignature(
+    xSignature: string, 
+    xRequestId: string, 
+    dataId: string
+  ): boolean {
+    try {
+      if (!MP_WEBHOOK_SECRET) {
+        console.error('❌ MP_WEBHOOK_SECRET no configurado');
+        return false;
+      }
 
-export const mercadoPagoService = {
-  async createPreference(providerId: number, credits: number) {
-    const packageInfo = CREDIT_PACKAGES[credits];
-    
-    if (!packageInfo) {
-      throw new Error("Paquete de créditos inválido");
+      // x-signature viene como: "ts=1234567890,v1=abc123def456..."
+      const parts = xSignature.split(',');
+      const ts = parts.find(p => p.startsWith('ts='))?.split('=')[1];
+      const hash = parts.find(p => p.startsWith('v1='))?.split('=')[1];
+
+      if (!ts || !hash) {
+        console.error('❌ Firma inválida: falta ts o v1');
+        return false;
+      }
+
+      // Template según documentación de MP
+      const template = `id:${dataId};request-id:${xRequestId};ts:${ts};`;
+      
+      // Generar HMAC con SHA-256
+      const hmac = crypto
+        .createHmac('sha256', MP_WEBHOOK_SECRET)
+        .update(template)
+        .digest('hex');
+
+      const isValid = hmac === hash;
+      
+      if (!isValid) {
+        console.error('❌ HMAC no coincide');
+        console.error('  Template:', template);
+        console.error('  Expected:', hash);
+        console.error('  Computed:', hmac);
+      } else {
+        console.log('✅ HMAC válido');
+      }
+
+      return isValid;
+    } catch (error) {
+      console.error('❌ Error validando firma HMAC:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Procesa webhook de Mercado Pago con validaciones completas
+   */
+  async processWebhook(body: any, headers: any): Promise<WebhookResult> {
+    try {
+      const { type, data, id: eventId, action } = body;
+      const xSignature = headers['x-signature'];
+      const xRequestId = headers['x-request-id'];
+
+      console.log('📨 Webhook recibido:', { eventId, type, action, paymentId: data?.id });
+
+      // 1. Validar tipo de evento
+      if (type !== 'payment') {
+        console.log('ℹ️  Evento ignorado (no es payment)');
+        return { success: true, message: 'Evento ignorado (no es payment)' };
+      }
+
+      const paymentId = data?.id;
+      if (!paymentId) {
+        console.error('❌ paymentId faltante en webhook');
+        return { success: false, message: 'paymentId faltante' };
+      }
+
+      // 2. VALIDACIÓN HMAC (CRÍTICO)
+      if (!this.validateWebhookSignature(xSignature, xRequestId, String(paymentId))) {
+        console.error('⛔ Webhook RECHAZADO: firma HMAC inválida');
+        return { success: false, message: 'Firma inválida' };
+      }
+
+      // 3. IDEMPOTENCIA: Verificar si ya procesamos este event_id
+      const existing = await db
+        .select()
+        .from(mercadopagoWebhooks)
+        .where(eq(mercadopagoWebhooks.eventId, String(eventId)))
+        .limit(1);
+
+      if (existing.length > 0) {
+        console.log(`✅ Webhook ${eventId} ya procesado previamente. Ignorando.`);
+        return { success: true, message: 'Webhook duplicado (ya procesado)' };
+      }
+
+      // 4. Registrar webhook ANTES de procesar (idempotencia)
+      await db.insert(mercadopagoWebhooks).values({
+        eventId: String(eventId),
+        paymentId: String(paymentId),
+        action: action || null,
+        type: type || null,
+        data: body,
+        signature: xSignature,
+        requestId: xRequestId,
+        processed: false
+      });
+
+      console.log(`✅ Webhook ${eventId} registrado`);
+
+      // 5. Consultar estado del pago en MP API
+      const response = await fetch(
+        `https://api.mercadopago.com/v1/payments/${paymentId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${MP_ACCESS_TOKEN}`
+          }
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`MP API error: ${response.status}`);
+      }
+
+      const payment: any = await response.json();
+      const purchaseId = Number(payment.additional_info?.items?.[0]?.id);
+
+      if (!purchaseId) {
+        console.error('❌ purchaseId no encontrado en payment.additional_info');
+        return { success: false, message: 'purchaseId faltante en payment' };
+      }
+
+      console.log(`💳 Pago ${paymentId} status: ${payment.status}, purchaseId: ${purchaseId}`);
+
+      // 6. Procesar pago si está aprobado
+      if (payment.status === 'approved') {
+        const result = await this.confirmPurchaseAtomic(purchaseId, String(paymentId));
+        
+        // Marcar webhook como procesado
+        await db
+          .update(mercadopagoWebhooks)
+          .set({ processed: true, processedAt: new Date() })
+          .where(eq(mercadopagoWebhooks.eventId, String(eventId)));
+
+        console.log(`✅ Pago ${paymentId} procesado: +${result.credits} créditos para provider ${result.provider_id}`);
+        return { success: true, message: 'Pago procesado exitosamente' };
+      }
+
+      console.log(`ℹ️  Pago ${paymentId} con status: ${payment.status} (no procesado)`);
+      return { success: true, message: `Status: ${payment.status}` };
+
+    } catch (error: any) {
+      console.error('❌ Error procesando webhook:', error);
+      return { success: false, message: error.message };
+    }
+  }
+
+  /**
+   * Confirma compra con operación SQL atómica (igual que desbloqueo de leads)
+   * Previene race conditions y doble acreditación
+   */
+  private async confirmPurchaseAtomic(purchaseId: number, paymentId: string) {
+    console.log(`🔄 Confirmando compra ${purchaseId} con pago ${paymentId}...`);
+
+    const result = await sql`
+      WITH purchase_check AS (
+        SELECT id, provider_id, credits, status
+        FROM credit_purchases
+        WHERE id = ${purchaseId} 
+          AND mercadopago_payment_id = ${paymentId}
+          AND status = 'pending'
+      ),
+      update_purchase AS (
+        UPDATE credit_purchases
+        SET status = 'completed'
+        WHERE id = ${purchaseId}
+          AND EXISTS (SELECT 1 FROM purchase_check)
+        RETURNING id
+      ),
+      update_credits AS (
+        UPDATE provider_credits
+        SET 
+          current_credits = current_credits + (SELECT credits FROM purchase_check),
+          total_purchased = total_purchased + (SELECT credits FROM purchase_check),
+          last_purchase_at = NOW(),
+          updated_at = NOW()
+        WHERE provider_id = (SELECT provider_id FROM purchase_check)
+          AND EXISTS (SELECT 1 FROM update_purchase)
+        RETURNING current_credits, total_purchased
+      )
+      SELECT 
+        p.id as purchase_id,
+        p.provider_id,
+        p.credits,
+        c.current_credits,
+        c.total_purchased
+      FROM purchase_check p
+      CROSS JOIN update_credits c;
+    `;
+
+    if (result.length === 0) {
+      throw new Error('Compra no encontrada, ya procesada, o estado inválido');
     }
 
-    // Registrar compra pendiente
-    const purchase = await paymentsService.registerPurchase(
-      providerId,
-      credits,
-      packageInfo.price,
-      "mercadopago"
-    );
+    return result[0];
+  }
 
-    const body = {
+  /**
+   * Crea preferencia de pago en Mercado Pago
+   */
+  async createPreference(data: {
+    title: string;
+    quantity: number;
+    unit_price: number;
+    providerId: number;
+    purchaseId: number;
+  }) {
+    const preferenceData = {
       items: [
         {
-          id: String(purchase.id),
-          title: `Créditos ServiciosHogar - ${packageInfo.name}`,
-          description: `${credits} créditos para ver contactos de clientes`,
-          quantity: 1,
-          unit_price: packageInfo.price,
+          id: String(data.purchaseId),
+          title: data.title,
+          quantity: data.quantity,
+          unit_price: data.unit_price,
           currency_id: "ARS",
         },
       ],
       back_urls: {
-        success: "https://servicioshogar.com.ar/compra-exitosa",
-        failure: "https://servicioshogar.com.ar/compra-fallida",
-        pending: "https://servicioshogar.com.ar/compra-pendiente"
+        success: process.env.MP_SUCCESS_URL,
+        failure: process.env.MP_FAILURE_URL,
+        pending: process.env.MP_PENDING_URL,
       },
-      notification_url: "https://api.servicioshogar.com.ar/api/payments/mp/webhook",
       auto_return: "approved",
+      notification_url: process.env.MP_WEBHOOK_URL,
     };
 
-    const response = await fetch("https://api.mercadopago.com/checkout/preferences", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
-      },
-      body: JSON.stringify(body),
-    });
-
-    const data: any = await response.json();
-
-    if (!data.init_point) {
-      console.error("❌ Error creando preferencia MP:", data);
-      throw new Error("No se pudo crear la preferencia de pago");
-    }
-
-    return {
-      init_point: data.init_point,
-      sandbox_init_point: data.sandbox_init_point,
-      purchaseId: purchase.id,
-    };
-  },
-
-  /**
-   * Procesa un webhook de Mercado Pago de forma segura
-   * usando la función PL/pgSQL atómica
-   * 
-   * @param body - Body del webhook
-   * @param paymentId - ID del pago (viene del header x-request-id o se extrae del body)
-   * @returns Resultado del procesamiento
-   */
-  async processWebhook(body: any, paymentId?: string) {
-    // Solo procesar notificaciones de pago
-    if (body.type !== "payment") {
-      console.log("ℹ️ Webhook no es de tipo payment, ignorando:", body.type);
-      return { processed: false, reason: "not_payment_type" };
-    }
-
-    const mpPaymentId = paymentId || body.data?.id;
-
-    if (!mpPaymentId) {
-      console.error("❌ Webhook sin payment_id:", body);
-      return { processed: false, reason: "missing_payment_id" };
-    }
-
-    // Consultar estado del pago en Mercado Pago
-    console.log(`🔍 Consultando pago ${mpPaymentId} en Mercado Pago...`);
-    
-    const response = await fetch(`https://api.mercadopago.com/v1/payments/${mpPaymentId}`, {
-      headers: {
-        Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
-      },
-    });
+    const response = await fetch(
+      "https://api.mercadopago.com/checkout/preferences",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
+        },
+        body: JSON.stringify(preferenceData),
+      }
+    );
 
     if (!response.ok) {
-      console.error(`❌ Error consultando pago ${mpPaymentId}:`, response.status);
-      return { processed: false, reason: "mp_api_error" };
+      throw new Error(`Error creando preferencia MP: ${response.status}`);
     }
 
-    const payment: any = await response.json();
-    const purchaseId = Number(payment.additional_info?.items?.[0]?.id);
+    return response.json();
+  }
+}
 
-    if (!purchaseId) {
-      console.error("❌ No se pudo extraer purchase_id del pago:", payment);
-      return { processed: false, reason: "missing_purchase_id" };
-    }
-
-    console.log(`📦 Payment ${mpPaymentId} → Purchase ${purchaseId} → Status: ${payment.status}`);
-
-    // Procesar según el status
-    if (payment.status === "approved") {
-      // Usar la función atómica de PostgreSQL
-      const result = await this.acreditarCreditosSeguro(
-        purchaseId,
-        mpPaymentId
-      );
-
-      if (result.success) {
-        console.log(`✅ Créditos acreditados: ${result.message}`);
-        console.log(`💰 Nuevo balance: ${result.new_balance} créditos`);
-      } else if (result.was_duplicate) {
-        console.log(`⚠️ Webhook duplicado detectado: ${result.message}`);
-      } else {
-        console.error(`❌ Error acreditando: ${result.message}`);
-      }
-
-      return {
-        processed: result.success,
-        duplicate: result.was_duplicate,
-        newBalance: result.new_balance,
-        message: result.message,
-      };
-
-    } else if (payment.status === "rejected") {
-      await paymentsService.failPurchase(purchaseId);
-      console.log(`❌ Pago rechazado: ${mpPaymentId}`);
-      return { processed: true, status: "rejected" };
-
-    } else {
-      console.log(`ℹ️ Pago en estado ${payment.status}, no se procesa aún`);
-      return { processed: false, reason: "pending_status", status: payment.status };
-    }
-  },
-
-  /**
-   * Acredita créditos usando la función PL/pgSQL atómica
-   * Garantiza idempotencia y previene race conditions
-   */
-  async acreditarCreditosSeguro(
-    purchaseId: number,
-    mpPaymentId: string
-  ): Promise<{
-    success: boolean;
-    new_balance: number;
-    was_duplicate: boolean;
-    message: string;
-  }> {
-    // 1. Obtener datos de la compra
-    const purchase = await paymentsService.getPurchaseById(purchaseId);
-    
-    if (!purchase) {
-      return {
-        success: false,
-        new_balance: 0,
-        was_duplicate: false,
-        message: "Compra no encontrada"
-      };
-    }
-
-    // 2. Llamar a la función PL/pgSQL atómica
-    const result = await db.execute(sql`
-      SELECT * FROM acreditar_creditos_atomico(
-        ${purchase.providerId}::integer,
-        ${purchaseId}::integer,
-        ${purchase.credits}::integer,
-        ${mpPaymentId}::varchar
-      )
-    `);
-
-    // 3. Parsear resultado
-    const row: any = result.rows[0];
-    
-    return {
-      success: row.success,
-      new_balance: row.new_balance,
-      was_duplicate: row.was_duplicate,
-      message: row.message
-    };
-  },
-};
+export const mercadoPagoService = new MercadoPagoService();

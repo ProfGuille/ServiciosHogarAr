@@ -1,11 +1,11 @@
 import { Router } from "express";
-import { db, sql as neonSql } from "../db";
+import { db, sql as neonSql } from "../db.js";
 import { 
   serviceRequests, 
   leadResponses, 
   categories,
   providerCredits
-} from "../shared/schema";
+} from "../shared/schema/index.js";
 import { eq, and, notInArray, sql, desc } from "drizzle-orm";
 
 const router = Router();

@@ -1,53 +1,76 @@
 import { Router } from "express";
-import { requireAuth } from "../middleware/auth.js";
+import { mercadoPagoService } from "../services/mercadoPagoService.js";
 import { paymentsService } from "../services/paymentsService.js";
 
 const router = Router();
 
-// Registrar compra (pendiente)
-router.post("/purchase", requireAuth, async (req, res) => {
+/**
+ * Webhook de Mercado Pago
+ * CRÍTICO: Validación HMAC + Idempotencia implementadas
+ */
+router.post("/mp/webhook", async (req, res) => {
   try {
-    if (req.user.role !== "provider") {
-      return res.status(403).json({ error: "Solo proveedores pueden comprar créditos" });
+    console.log('🔔 Webhook MP recibido');
+    
+    const result = await mercadoPagoService.processWebhook(req.body, req.headers);
+    
+    if (!result.success) {
+      console.error('❌ Webhook falló:', result.message);
+      return res.status(400).json({ error: result.message });
     }
 
-    const providerId = req.user.providerId;
-    const { amount, method } = req.body;
-
-    if (!amount || !method) {
-      return res.status(400).json({ error: "Faltan parámetros" });
-    }
-
-    const purchase = await paymentsService.registerPurchase(
-      providerId,
-      amount,
-      method
-    );
-
-    res.json(purchase);
-  } catch (err) {
-    console.error("Error en /payments/purchase:", err);
-    res.status(400).json({ error: err.message });
+    console.log('✅ Webhook procesado:', result.message);
+    res.sendStatus(200);
+  } catch (error: any) {
+    console.error('❌ Error crítico en webhook:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
-// Confirmar compra (sumar créditos)
-router.post("/confirm", requireAuth, async (req, res) => {
+/**
+ * Crear preferencia de pago MP
+ */
+router.post("/mp/create", async (req, res) => {
   try {
-    const { purchaseId } = req.body;
+    const { providerId, credits, amount } = req.body;
 
-    if (!purchaseId) {
-      return res.status(400).json({ error: "Falta purchaseId" });
+    if (!providerId || !credits || !amount) {
+      return res.status(400).json({ 
+        error: "Faltan campos requeridos: providerId, credits, amount" 
+      });
     }
 
-    await paymentsService.confirmPurchase(purchaseId);
+    // Registrar compra pendiente
+    const purchase = await paymentsService.registerPurchase({
+      providerId,
+      credits,
+      amount,
+    });
 
-    res.json({ success: true });
-  } catch (err) {
-    console.error("Error en /payments/confirm:", err);
-    res.status(400).json({ error: err.message });
+    // Crear preferencia en MP
+    const preference = await mercadoPagoService.createPreference({
+      title: `${credits} créditos`,
+      quantity: 1,
+      unit_price: Number(amount),
+      providerId,
+      purchaseId: purchase.id,
+    });
+
+    // Actualizar purchase con payment_id
+    await paymentsService.updatePurchasePaymentId(
+      purchase.id,
+      preference.id
+    );
+
+    res.json({ 
+      preferenceId: preference.id,
+      initPoint: preference.init_point,
+      purchaseId: purchase.id
+    });
+  } catch (error: any) {
+    console.error('❌ Error creando preferencia MP:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
 export default router;
-

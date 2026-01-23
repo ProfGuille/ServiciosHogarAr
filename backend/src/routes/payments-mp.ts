@@ -1,151 +1,74 @@
 import { Router } from "express";
-import { requireAuth } from "../middleware/auth.js";
 import { mercadoPagoService } from "../services/mercadoPagoService.js";
-import { validateMercadoPagoWebhook } from "../utils/webhookValidator";
-import { webhookService } from "../services/webhookService";
-import { db } from "../db.js";
-import { serviceProviders } from "../shared/schema/serviceProviders.js";
-import { eq } from "drizzle-orm";
+import { paymentsService } from "../services/paymentsService.js";
 
 const router = Router();
 
-// Mapeo de packageId a créditos (RESTAURADO DEL ORIGINAL)
-const PACKAGE_TO_CREDITS: any = {
-  "basico": 10,
-  "popular": 50,
-  "premium": 100,
-  "1": 10,
-  "2": 50,
-  "3": 100
-};
-
-// GET para que MP verifique el endpoint
-router.get("/webhook", (req, res) => {
-  console.log("✅ Webhook verificado por Mercado Pago (GET)");
-  res.sendStatus(200);
-});
-
-// POST para recibir notificaciones
+/**
+ * Webhook de Mercado Pago
+ * CRÍTICO: Validación HMAC + Idempotencia implementadas
+ */
 router.post("/webhook", async (req, res) => {
   try {
-    console.log("📨 Webhook recibido de Mercado Pago");
+    console.log('🔔 Webhook MP recibido');
     
-    const xSignature = req.headers["x-signature"] as string;
-    const xRequestId = req.headers["x-request-id"] as string;
+    const result = await mercadoPagoService.processWebhook(req.body, req.headers);
     
-    console.log("Headers:", {
-      xSignature: xSignature ? "presente" : "ausente",
-      xRequestId: xRequestId ? "presente" : "ausente"
-    });
-    console.log("Body:", JSON.stringify(req.body, null, 2));
-
-    // Extraer información básica
-    const body = req.body;
-    const paymentId = body.data?.id;
-    const webhookType = body.type || body.topic || "unknown";
-
-    // Registrar webhook (solo log, sin BD)
-    const webhookId = await webhookService.registerWebhook({
-      type: webhookType,
-      paymentId,
-      rawData: body
-    });
-
-    console.log(`📝 Webhook registrado con ID: ${webhookId}`);
-
-    // ⚠️ CAMBIO: Validar HMAC solo si MP_WEBHOOK_SECRET existe
-    const MP_WEBHOOK_SECRET = process.env.MP_WEBHOOK_SECRET;
-    
-    if (MP_WEBHOOK_SECRET) {
-      // Si existe el secret, validar HMAC
-      if (!xSignature) {
-        console.log("🔒 Webhook rechazado: Header x-signature faltante");
-        return res.json({ 
-          received: true, 
-          processed: false, 
-          reason: "Header x-signature faltante" 
-        });
-      }
-
-      const dataId = body.data?.id || body.id;
-      if (!dataId) {
-        console.log("🔒 Webhook rechazado: data.id faltante en el body");
-        return res.json({ 
-          received: true, 
-          processed: false, 
-          reason: "data.id faltante en el body" 
-        });
-      }
-
-      const validation = validateMercadoPagoWebhook(xSignature, xRequestId, dataId);
-      
-      if (!validation.isValid) {
-        console.log("🔒 Webhook rechazado: Firma HMAC inválida - webhook potencialmente falso");
-        return res.json({ 
-          received: true, 
-          processed: false, 
-          reason: validation.error || "Firma HMAC inválida" 
-        });
-      }
-
-      console.log("✅ Webhook HMAC validado correctamente");
-    } else {
-      // Si NO existe el secret, solo advertir pero procesar igual
-      console.log("⚠️ MP_WEBHOOK_SECRET no configurado - procesando sin validación HMAC (INSEGURO)");
+    if (!result.success) {
+      console.error('❌ Webhook falló:', result.message);
+      return res.status(400).json({ error: result.message });
     }
 
-    // Procesar webhook
-    await mercadoPagoService.processWebhook(body);
-
-    console.log("✅ Webhook procesado exitosamente");
-    res.json({ 
-      received: true, 
-      processed: true,
-      webhookId 
-    });
-
+    console.log('✅ Webhook procesado:', result.message);
+    res.sendStatus(200);
   } catch (error: any) {
-    console.error("❌ Error procesando webhook:", error);
-    res.status(500).json({ 
-      received: true, 
-      processed: false, 
-      error: error.message 
-    });
+    console.error('❌ Error crítico en webhook:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
-// ENDPOINT ORIGINAL RESTAURADO
-router.post("/create", requireAuth, async (req: any, res) => {
+/**
+ * Crear preferencia de pago MP
+ */
+router.post("/create", async (req, res) => {
   try {
-    const { packageId } = req.body;
-    const userId = req.user.id;
+    const { providerId, credits, amount } = req.body;
 
-    // Obtener proveedor
-    const [provider] = await db
-      .select()
-      .from(serviceProviders)
-      .where(eq(serviceProviders.userId, userId));
-
-    if (!provider) {
-      return res.status(404).json({ error: "Proveedor no encontrado" });
+    if (!providerId || !credits || !amount) {
+      return res.status(400).json({ 
+        error: "Faltan campos requeridos: providerId, credits, amount" 
+      });
     }
 
-    // Convertir packageId a créditos
-    const credits = PACKAGE_TO_CREDITS[packageId];
-    
-    if (!credits) {
-      return res.status(400).json({ error: "Paquete inválido" });
-    }
+    // Registrar compra pendiente
+    const purchase = await paymentsService.registerPurchase({
+      providerId,
+      credits,
+      amount,
+    });
 
-    // Crear preferencia
-    const preference = await mercadoPagoService.createPreference(
-      provider.id,
-      credits
+    // Crear preferencia en MP
+    const preference = await mercadoPagoService.createPreference({
+      title: `${credits} créditos`,
+      quantity: 1,
+      unit_price: Number(amount),
+      providerId,
+      purchaseId: purchase.id,
+    });
+
+    // Actualizar purchase con payment_id
+    await paymentsService.updatePurchasePaymentId(
+      purchase.id,
+      preference.id
     );
 
-    res.json(preference);
+    res.json({ 
+      preferenceId: preference.id,
+      initPoint: preference.init_point,
+      purchaseId: purchase.id
+    });
   } catch (error: any) {
-    console.error("Error creating preference:", error);
+    console.error('❌ Error creando preferencia MP:', error);
     res.status(500).json({ error: error.message });
   }
 });
