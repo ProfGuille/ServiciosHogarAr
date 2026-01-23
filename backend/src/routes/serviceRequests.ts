@@ -1,177 +1,288 @@
-import express from "express";
-import { requireAuth } from "../middleware/auth.js";
-import { serviceRequestsService } from "../services/serviceRequestsService.js";
+import { Router } from "express";
+import { db, sql as neonSql } from "../db";
+import { 
+  serviceRequests, 
+  leadResponses, 
+  categories,
+  providerCredits
+} from "../shared/schema";
+import { eq, and, notInArray, sql, desc } from "drizzle-orm";
 
-const router = express.Router();
+const router = Router();
 
-// -----------------------------
-// Helpers
-// -----------------------------
-function ensureCustomer(req) {
-  if (req.user.role !== "customer") {
-    throw { status: 403, message: "Solo clientes pueden realizar esta acción" };
-  }
-}
-
-function ensureProvider(req) {
-  if (req.user.role !== "provider") {
-    throw { status: 403, message: "Solo proveedores pueden realizar esta acción" };
-  }
-}
-
-// -----------------------------
-// Crear solicitud (cliente)
-// -----------------------------
-router.post("/", requireAuth, async (req, res) => {
+router.get("/available", async (req, res) => {
   try {
-    ensureCustomer(req);
+    const providerId = parseInt(req.query.providerId as string);
+    const limit = parseInt(req.query.limit as string) || 20;
+    const offset = parseInt(req.query.offset as string) || 0;
 
-    const created = await serviceRequestsService.create(req.user.uid, req.body);
-    res.status(201).json(created);
-  } catch (err) {
-    console.error("POST /service-requests:", err);
-    res.status(400).json({ error: err.message });
+    if (!providerId || isNaN(providerId)) {
+      return res.status(400).json({ 
+        error: "providerId es requerido y debe ser un número válido" 
+      });
+    }
+
+    const unlockedLeadIds = await db
+      .select({ serviceRequestId: leadResponses.serviceRequestId })
+      .from(leadResponses)
+      .where(eq(leadResponses.providerId, providerId));
+
+    const unlockedIds = unlockedLeadIds.map(r => r.serviceRequestId);
+
+    let query = db
+      .select({
+        id: serviceRequests.id,
+        title: serviceRequests.title,
+        descriptionPreview: sql<string>`LEFT(${serviceRequests.description}, 100)`,
+        neighborhood: serviceRequests.neighborhood,
+        city: serviceRequests.city,
+        province: serviceRequests.province,
+        categoryId: serviceRequests.categoryId,
+        categoryName: categories.name,
+        isUrgent: serviceRequests.isUrgent,
+        preferredDate: serviceRequests.preferredDate,
+        createdAt: serviceRequests.createdAt,
+        status: serviceRequests.status
+      })
+      .from(serviceRequests)
+      .leftJoin(categories, eq(serviceRequests.categoryId, categories.id))
+      .where(
+        and(
+          eq(serviceRequests.status, "pending"),
+          unlockedIds.length > 0 
+            ? notInArray(serviceRequests.id, unlockedIds)
+            : undefined
+        )
+      )
+      .orderBy(desc(serviceRequests.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    const leads = await query;
+
+    const countResult = await db
+      .select({ count: sql<number>`COUNT(*)` })
+      .from(serviceRequests)
+      .where(
+        and(
+          eq(serviceRequests.status, "pending"),
+          unlockedIds.length > 0 
+            ? notInArray(serviceRequests.id, unlockedIds)
+            : undefined
+        )
+      );
+
+    const total = Number(countResult[0]?.count || 0);
+
+    res.json({
+      data: leads.map(lead => ({
+        ...lead,
+        descriptionPreview: lead.descriptionPreview + (lead.descriptionPreview.length >= 100 ? "..." : "")
+      })),
+      total,
+      page: Math.floor(offset / limit) + 1,
+      totalPages: Math.ceil(total / limit),
+      limit
+    });
+
+  } catch (error) {
+    console.error("❌ Error en GET /api/service-requests/available:", error);
+    res.status(500).json({ error: "Error al obtener leads disponibles" });
   }
 });
 
-// -----------------------------
-// Obtener solicitudes del cliente
-// -----------------------------
-router.get("/customer", requireAuth, async (req, res) => {
-  try {
-    ensureCustomer(req);
+router.post("/:id/unlock", async (req, res) => {
+  const leadId = parseInt(req.params.id);
+  const { providerId } = req.body;
 
-    const list = await serviceRequestsService.getByCustomer(req.user.uid);
-    res.json(list);
-  } catch (err) {
-    console.error("GET /service-requests/customer:", err);
-    res.status(400).json({ error: err.message });
+  if (!leadId || isNaN(leadId)) {
+    return res.status(400).json({ error: "ID de lead inválido" });
+  }
+
+  if (!providerId || isNaN(parseInt(providerId))) {
+    return res.status(400).json({ error: "providerId es requerido" });
+  }
+
+  const providerIdInt = parseInt(providerId);
+
+  try {
+    // Operación atómica usando CTE (Common Table Expression)
+    const result = await neonSql`
+      WITH lead_check AS (
+        SELECT id, status, title, description, customer_first_name, customer_phone, 
+               customer_email, preferred_contact_methods, address, neighborhood, 
+               city, province, preferred_date, is_urgent, category_id, created_at
+        FROM service_requests
+        WHERE id = ${leadId} AND status = 'pending'
+      ),
+      existing_unlock_check AS (
+        SELECT id FROM lead_responses 
+        WHERE service_request_id = ${leadId} AND provider_id = ${providerIdInt}
+      ),
+      credits_check AS (
+        SELECT id, current_credits 
+        FROM provider_credits 
+        WHERE provider_id = ${providerIdInt} AND current_credits >= 1
+      ),
+      insert_response AS (
+      INSERT INTO lead_responses (service_request_id, provider_id, 
+credits_used, credits_spent, unlocked_at)
+      SELECT ${leadId}, ${providerIdInt}, 1, 1, NOW()
+      WHERE EXISTS (SELECT 1 FROM lead_check)
+          AND NOT EXISTS (SELECT 1 FROM existing_unlock_check)
+          AND EXISTS (SELECT 1 FROM credits_check)
+        RETURNING id, unlocked_at
+      ),
+      update_credits AS (
+        UPDATE provider_credits
+        SET current_credits = current_credits - 1
+        WHERE provider_id = ${providerIdInt}
+          AND EXISTS (SELECT 1 FROM insert_response)
+        RETURNING current_credits
+      )
+      SELECT 
+        l.*,
+        r.id as response_id,
+        r.unlocked_at,
+        c.current_credits as remaining_credits
+      FROM lead_check l
+      CROSS JOIN insert_response r
+      CROSS JOIN update_credits c;
+    `;
+
+    if (result.length === 0) {
+      // Determinar qué falló
+      const [lead] = await neonSql`SELECT id, status FROM service_requests WHERE id = ${leadId}`;
+      
+      if (!lead) {
+        return res.status(404).json({ error: "Lead no encontrado" });
+      }
+      
+      if (lead.status !== 'pending') {
+        return res.status(400).json({ error: "Este lead ya no está disponible" });
+      }
+
+      const [existing] = await neonSql`
+        SELECT id FROM lead_responses 
+        WHERE service_request_id = ${leadId} AND provider_id = ${providerIdInt}
+      `;
+      
+      if (existing) {
+        return res.status(400).json({ error: "Ya desbloqueaste este lead anteriormente" });
+      }
+
+      const [credits] = await neonSql`
+        SELECT current_credits FROM provider_credits WHERE provider_id = ${providerIdInt}
+      `;
+      
+      if (!credits) {
+        return res.status(404).json({ 
+          error: "No se encontró el registro de créditos del proveedor" 
+        });
+      }
+
+      if (credits.current_credits < 1) {
+        return res.status(402).json({ 
+          error: "Créditos insuficientes. Necesitas al menos 1 crédito para desbloquear este lead." 
+        });
+      }
+
+      return res.status(500).json({ error: "Error desconocido al desbloquear el lead" });
+    }
+
+    const leadData = result[0];
+
+    res.json({
+      success: true,
+      lead: {
+        id: leadData.id,
+        title: leadData.title,
+        description: leadData.description,
+        customerFirstName: leadData.customer_first_name,
+        customerPhone: leadData.customer_phone,
+        customerEmail: leadData.customer_email,
+        preferredContactMethods: leadData.preferred_contact_methods,
+        neighborhood: leadData.neighborhood,
+        city: leadData.city,
+        province: leadData.province,
+        preferredDate: leadData.preferred_date,
+        isUrgent: leadData.is_urgent,
+        categoryId: leadData.category_id,
+        createdAt: leadData.created_at
+      },
+      creditsSpent: 1,
+      remainingCredits: leadData.remaining_credits,
+      unlockedAt: leadData.unlocked_at
+    });
+
+  } catch (error: any) {
+    console.error("❌ Error en POST /api/service-requests/:id/unlock:", error);
+    res.status(500).json({ 
+      error: "Error al desbloquear el lead. La operación fue cancelada." 
+    });
   }
 });
 
-// -----------------------------
-// Obtener solicitudes del proveedor
-// -----------------------------
-router.get("/provider", requireAuth, async (req, res) => {
+router.get("/unlocked", async (req, res) => {
   try {
-    ensureProvider(req);
+    const providerId = parseInt(req.query.providerId as string);
+    const limit = parseInt(req.query.limit as string) || 20;
+    const offset = parseInt(req.query.offset as string) || 0;
 
-    const list = await serviceRequestsService.getByProvider(req.user.providerId);
-    res.json(list);
-  } catch (err) {
-    console.error("GET /service-requests/provider:", err);
-    res.status(400).json({ error: err.message });
-  }
-});
+    if (!providerId || isNaN(providerId)) {
+      return res.status(400).json({ 
+        error: "providerId es requerido y debe ser un número válido" 
+      });
+    }
 
-// -----------------------------
-// Cotizar (provider)
-// -----------------------------
-router.post("/:id/quote", requireAuth, async (req, res) => {
-  try {
-    ensureProvider(req);
+    const leads = await db
+      .select({
+        id: serviceRequests.id,
+        title: serviceRequests.title,
+        description: serviceRequests.description,
+        customerFirstName: serviceRequests.customerFirstName,
+        customerPhone: serviceRequests.customerPhone,
+        customerEmail: serviceRequests.customerEmail,
+        preferredContactMethods: serviceRequests.preferredContactMethods,
+        neighborhood: serviceRequests.neighborhood,
+        city: serviceRequests.city,
+        province: serviceRequests.province,
+        categoryId: serviceRequests.categoryId,
+        categoryName: categories.name,
+        isUrgent: serviceRequests.isUrgent,
+        preferredDate: serviceRequests.preferredDate,
+        status: serviceRequests.status,
+        createdAt: serviceRequests.createdAt,
+        unlockedAt: leadResponses.unlockedAt,
+        creditsSpent: leadResponses.creditsSpent
+      })
+      .from(leadResponses)
+      .innerJoin(serviceRequests, eq(leadResponses.serviceRequestId, serviceRequests.id))
+      .leftJoin(categories, eq(serviceRequests.categoryId, categories.id))
+      .where(eq(leadResponses.providerId, providerId))
+      .orderBy(desc(leadResponses.unlockedAt))
+      .limit(limit)
+      .offset(offset);
 
-    const requestId = Number(req.params.id);
-    const price = Number(req.body.price);
+    const countResult = await db
+      .select({ count: sql<number>`COUNT(*)` })
+      .from(leadResponses)
+      .where(eq(leadResponses.providerId, providerId));
 
-    const updated = await serviceRequestsService.quote(
-      requestId,
-      req.user.providerId,
-      price
-    );
+    const total = Number(countResult[0]?.count || 0);
 
-    res.json(updated);
-  } catch (err) {
-    console.error("POST /service-requests/:id/quote:", err);
-    res.status(400).json({ error: err.message });
-  }
-});
+    res.json({
+      data: leads,
+      total,
+      page: Math.floor(offset / limit) + 1,
+      totalPages: Math.ceil(total / limit),
+      limit
+    });
 
-// -----------------------------
-// Aceptar cotización (customer)
-// -----------------------------
-router.post("/:id/accept", requireAuth, async (req, res) => {
-  try {
-    ensureCustomer(req);
-
-    const requestId = Number(req.params.id);
-
-    const updated = await serviceRequestsService.accept(
-      requestId,
-      req.user.uid
-    );
-
-    res.json(updated);
-  } catch (err) {
-    console.error("POST /service-requests/:id/accept:", err);
-    res.status(400).json({ error: err.message });
-  }
-});
-
-// -----------------------------
-// Iniciar trabajo (provider)
-// -----------------------------
-router.post("/:id/start", requireAuth, async (req, res) => {
-  try {
-    ensureProvider(req);
-
-    const requestId = Number(req.params.id);
-
-    const updated = await serviceRequestsService.start(
-      requestId,
-      req.user.providerId
-    );
-
-    res.json(updated);
-  } catch (err) {
-    console.error("POST /service-requests/:id/start:", err);
-    res.status(400).json({ error: err.message });
-  }
-});
-
-// -----------------------------
-// Completar trabajo (provider)
-// -----------------------------
-router.post("/:id/complete", requireAuth, async (req, res) => {
-  try {
-    ensureProvider(req);
-
-    const requestId = Number(req.params.id);
-
-    const updated = await serviceRequestsService.complete(
-      requestId,
-      req.user.providerId
-    );
-
-    res.json(updated);
-  } catch (err) {
-    console.error("POST /service-requests/:id/complete:", err);
-    res.status(400).json({ error: err.message });
-  }
-});
-
-// -----------------------------
-// Cancelar (customer o provider)
-// -----------------------------
-router.post("/:id/cancel", requireAuth, async (req, res) => {
-  try {
-    const requestId = Number(req.params.id);
-
-    const actor = req.user.role === "customer" ? "customer" : "provider";
-    const actorId = req.user.role === "customer" ? req.user.uid : req.user.providerId;
-
-    const updated = await serviceRequestsService.cancel(
-      requestId,
-      actor,
-      actorId
-    );
-
-    res.json(updated);
-  } catch (err) {
-    console.error("POST /service-requests/:id/cancel:", err);
-    res.status(400).json({ error: err.message });
+  } catch (error) {
+    console.error("❌ Error en GET /api/service-requests/unlocked:", error);
+    res.status(500).json({ error: "Error al obtener leads desbloqueados" });
   }
 });
 
 export default router;
-

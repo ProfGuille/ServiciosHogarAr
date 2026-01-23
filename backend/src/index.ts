@@ -137,7 +137,7 @@ app.use((err, req, res, next) => {
 // -----------------------------
 async function start() {
   console.log("🔄 Ejecutando migraciones...");
-  await runMigrations();
+  //   await runMigrations();
   app.listen(PORT, () => {
     console.log(`🚀 Servidor iniciado en puerto ${PORT}`);
   });

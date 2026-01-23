@@ -1,492 +1,352 @@
-import { useState, useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Navbar } from "@/components/layout/navbar";
-import { Footer } from "@/components/layout/footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Clock, 
-  CreditCard, 
-  MapPin, 
-  Calendar, 
-  DollarSign, 
-  AlertCircle,
-  CheckCircle,
-  Phone,
-  Mail,
-  User,
-  Briefcase,
-  TrendingUp,
-  Star,
-  Eye,
-  Loader2
-} from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Clock, MapPin, AlertCircle, Phone, MessageCircle, Mail, CreditCard, Send } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
-interface ServiceRequest {
+interface Lead {
   id: number;
   title: string;
-  description: string;
-  categoryId: number;
+  description?: string;
+  descriptionPreview?: string;
+  neighborhood: string;
   city: string;
-  estimatedBudget: number;
+  province: string;
+  categoryId: number;
+  categoryName: string;
   isUrgent: boolean;
+  preferredDate: string | null;
   createdAt: string;
-  preferredDate?: string;
-  creditCost: number;
+  status: string;
+  customerFirstName?: string;
+  customerPhone?: string;
+  customerEmail?: string;
+  preferredContactMethods?: string;
+  unlockedAt?: string;
+  creditsSpent?: number;
 }
 
-interface PurchasedLead {
-  id: number;
+interface Credits {
   providerId: number;
-  requestId: number;
-  creditCost: number;
-  purchasedAt: string;
-  serviceRequest: {
-    id: number;
-    title: string;
-    description: string;
-    city: string;
-    estimatedBudget: number;
-    isUrgent: boolean;
-    preferredDate?: string;
-    status: string;
-  };
-  clientContact: {
-    name: string;
-    email: string;
-    phone: string;
-  };
+  currentCredits: number;
+  totalPurchased: number;
+  totalSpent: number;
 }
-
-interface CreditTransaction {
-  id: number;
-  providerId: number;
-  type: string;
-  credits: number;
-  description: string;
-  createdAt: string;
-}
-
-const categoryNames = {
-  1: "Plomería",
-  2: "Electricidad", 
-  3: "Carpintería",
-  4: "Pintura",
-  5: "Limpieza",
-  6: "Jardinería",
-  7: "Techado",
-  8: "Aire Acondicionado",
-  9: "Cerrajería",
-  10: "Albañilería"
-};
 
 export default function ProviderDashboard() {
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
-  const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedTab, setSelectedTab] = useState("available");
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [showUnlockDialog, setShowUnlockDialog] = useState(false);
+  const [activeTab, setActiveTab] = useState("available");
 
-  useEffect(() => {
-    if (!authLoading && (!isAuthenticated || user?.userType !== 'provider')) {
-      toast({
-        title: "Acceso denegado",
-        description: "Esta página es solo para proveedores de servicios.",
-        variant: "destructive",
-      });
+  // Obtener providerId del usuario (temporalmente hardcodeado, debería venir de auth)
+  const providerId = 4; // TODO: Obtener del contexto de autenticación
+
+  // Query: Créditos disponibles
+  const { data: credits } = useQuery<Credits>({
+    queryKey: ["provider-credits", providerId],
+    queryFn: async () => {
+      const res = await fetch(`http://localhost:3000/api/provider-credits/${providerId}`);
+      if (!res.ok) throw new Error("Error al obtener créditos");
+      return res.json();
     }
-  }, [isAuthenticated, authLoading, user, toast]);
-
-  // Fetch available service requests
-  const { data: availableRequests, isLoading: availableLoading } = useQuery({
-    queryKey: ["/api/provider/available-requests"],
-    enabled: isAuthenticated && user?.userType === 'provider',
-    refetchInterval: 30000, // Refresh every 30 seconds
   });
 
-  // Fetch purchased leads
-  const { data: purchasedLeads, isLoading: purchasedLoading } = useQuery({
-    queryKey: ["/api/provider/my-purchases"],
-    enabled: isAuthenticated && user?.userType === 'provider',
+  // Query: Leads disponibles
+  const { data: availableLeads, isLoading: loadingAvailable } = useQuery<{
+    data: Lead[];
+    total: number;
+  }>({
+    queryKey: ["available-leads", providerId],
+    queryFn: async () => {
+      const res = await fetch(`http://localhost:3000/api/service-requests/available?providerId=${providerId}`);
+      if (!res.ok) throw new Error("Error al obtener leads");
+      return res.json();
+    }
   });
 
-  // Fetch credit history
-  const { data: creditHistory, isLoading: creditLoading } = useQuery({
-    queryKey: ["/api/provider/credit-history"],
-    enabled: isAuthenticated && user?.userType === 'provider',
+  // Query: Leads desbloqueados
+  const { data: unlockedLeads, isLoading: loadingUnlocked } = useQuery<{
+    data: Lead[];
+    total: number;
+  }>({
+    queryKey: ["unlocked-leads", providerId],
+    queryFn: async () => {
+      const res = await fetch(`http://localhost:3000/api/service-requests/unlocked?providerId=${providerId}`);
+      if (!res.ok) throw new Error("Error al obtener leads desbloqueados");
+      return res.json();
+    }
   });
 
-  // Purchase lead mutation
-  const purchaseLeadMutation = useMutation({
-    mutationFn: async (requestId: number) => {
-      const response = await fetch(`/api/provider/purchase-lead/${requestId}`, {
-        method: 'POST',
-        credentials: 'include',
+  // Mutation: Desbloquear lead
+  const unlockMutation = useMutation({
+    mutationFn: async (leadId: number) => {
+      const res = await fetch(`http://localhost:3000/api/service-requests/${leadId}/unlock`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ providerId })
       });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Error al comprar contacto');
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Error al desbloquear lead");
       }
-      
-      return response.json();
+      return res.json();
     },
-    onSuccess: (data) => {
-      toast({
-        title: "¡Contacto comprado!",
-        description: `Has obtenido el contacto del cliente. Créditos restantes: ${data.remainingCredits}`,
-      });
-      
-      // Refresh queries
-      queryClient.invalidateQueries({ queryKey: ["/api/provider/available-requests"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/provider/my-purchases"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/provider/credit-history"] });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Error al comprar contacto",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["available-leads"] });
+      queryClient.invalidateQueries({ queryKey: ["unlocked-leads"] });
+      queryClient.invalidateQueries({ queryKey: ["provider-credits"] });
+      setShowUnlockDialog(false);
+      setSelectedLead(null);
+      // Cambiar automáticamente a la pestaña "Mis Leads"
+      setActiveTab("unlocked");
+    }
   });
 
-  if (!isAuthenticated || user?.userType !== 'provider') {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <div className="container mx-auto px-4 py-8">
-          <Card className="max-w-md mx-auto">
-            <CardContent className="text-center p-8">
-              <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-              <h2 className="text-xl font-semibold mb-2">Acceso Restringido</h2>
-              <p className="text-gray-600 mb-4">
-                Esta página es solo para proveedores de servicios registrados.
-              </p>
-              <Button onClick={() => window.location.href = "/register-provider"}>
-                Registrarse como Proveedor
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
+  const handleUnlockClick = (lead: Lead) => {
+    setSelectedLead(lead);
+    setShowUnlockDialog(true);
+  };
+
+  const handleConfirmUnlock = () => {
+    if (selectedLead) {
+      unlockMutation.mutate(selectedLead.id);
+    }
+  };
+
+  const getWhatsAppLink = (phone: string, leadTitle: string) => {
+    const message = encodeURIComponent(`Hola! Vi tu solicitud de "${leadTitle}" en ServiciosHogar. Me gustaría enviarte un presupuesto.`);
+    return `https://wa.me/54${phone.replace(/\D/g, "")}?text=${message}`;
+  };
+
+  const getTelegramLink = (phone: string) => {
+    // Telegram usa el número sin el código de país en el username
+    // O se puede usar el deep link directo si conocemos el username
+    return `https://t.me/+54${phone.replace(/\D/g, "")}`;
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Dashboard del Proveedor
-          </h1>
-          <p className="text-gray-600">
-            Bienvenido de vuelta, {user?.name}
-          </p>
+    <div className="container mx-auto py-8 px-4">
+      {/* Header con créditos */}
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold">Dashboard Proveedor</h1>
+          <p className="text-muted-foreground">Gestiona tus leads y presupuestos</p>
         </div>
-
-        {/* Credit Balance Card */}
-        <Card className="mb-8 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold mb-1">Créditos Disponibles</h3>
-                <p className="text-blue-100">
-                  Usa tus créditos para acceder a información de contacto de clientes
-                </p>
-              </div>
-              <div className="text-right">
-                <div className="text-3xl font-bold mb-1">
-                  {creditLoading ? (
-                    <Skeleton className="h-8 w-16 bg-blue-400" />
-                  ) : (
-                    creditHistory?.currentCredits || 0
-                  )}
-                </div>
-                <p className="text-blue-100 text-sm">créditos</p>
-              </div>
-            </div>
+        <Card className="w-64">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <CreditCard className="h-4 w-4" />
+              Créditos Disponibles
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{credits?.currentCredits || 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {credits?.totalSpent || 0} usados
+            </p>
           </CardContent>
         </Card>
-
-        {/* Tabs */}
-        <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-          <TabsList className="grid w-full grid-cols-3 mb-6">
-            <TabsTrigger value="available">Solicitudes Disponibles</TabsTrigger>
-            <TabsTrigger value="purchased">Mis Contactos</TabsTrigger>
-            <TabsTrigger value="credits">Historial de Créditos</TabsTrigger>
-          </TabsList>
-
-          {/* Available Requests Tab */}
-          <TabsContent value="available">
-            <Card>
-              <CardHeader>
-                <CardTitle>Solicitudes de Trabajo Disponibles</CardTitle>
-                <CardDescription>
-                  Solicitudes que coinciden con tus categorías de servicio. Cada contacto cuesta 5 créditos.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {availableLoading ? (
-                  <div className="space-y-4">
-                    {[1, 2, 3].map((i) => (
-                      <Skeleton key={i} className="h-32 w-full" />
-                    ))}
-                  </div>
-                ) : !availableRequests?.length ? (
-                  <div className="text-center py-8">
-                    <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-600 mb-2">
-                      No hay solicitudes disponibles
-                    </h3>
-                    <p className="text-gray-500">
-                      Vuelve pronto para ver nuevas oportunidades de trabajo.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {availableRequests.map((request: ServiceRequest) => (
-                      <Card key={request.id} className="border-l-4 border-l-blue-500">
-                        <CardContent className="p-6">
-                          <div className="flex justify-between items-start mb-4">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-2">
-                                <h3 className="text-lg font-semibold">{request.title}</h3>
-                                {request.isUrgent && (
-                                  <Badge variant="destructive" className="text-xs">
-                                    URGENTE
-                                  </Badge>
-                                )}
-                                <Badge variant="secondary" className="text-xs">
-                                  {categoryNames[request.categoryId as keyof typeof categoryNames]}
-                                </Badge>
-                              </div>
-                              <p className="text-gray-600 mb-3 line-clamp-2">
-                                {request.description}
-                              </p>
-                              
-                              <div className="flex items-center gap-4 text-sm text-gray-500">
-                                <div className="flex items-center gap-1">
-                                  <MapPin className="h-4 w-4" />
-                                  {request.city}
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <DollarSign className="h-4 w-4" />
-                                  ${request.estimatedBudget?.toLocaleString()} ARS
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <Calendar className="h-4 w-4" />
-                                  {request.preferredDate ? 
-                                    format(new Date(request.preferredDate), "dd/MM/yyyy", { locale: es }) :
-                                    "Fecha flexible"
-                                  }
-                                </div>
-                              </div>
-                            </div>
-                            
-                            <div className="flex flex-col items-end gap-2">
-                              <div className="text-right">
-                                <div className="text-lg font-bold text-blue-600">
-                                  {request.creditCost} créditos
-                                </div>
-                                <div className="text-xs text-gray-500">
-                                  para ver contacto
-                                </div>
-                              </div>
-                              
-                              <Button
-                                onClick={() => purchaseLeadMutation.mutate(request.id)}
-                                disabled={purchaseLeadMutation.isPending || (creditHistory?.currentCredits || 0) < request.creditCost}
-                                className="bg-blue-600 hover:bg-blue-700"
-                              >
-                                {purchaseLeadMutation.isPending ? (
-                                  <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Comprando...
-                                  </>
-                                ) : (
-                                  <>
-                                    <Eye className="mr-2 h-4 w-4" />
-                                    Ver Contacto
-                                  </>
-                                )}
-                              </Button>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Purchased Leads Tab */}
-          <TabsContent value="purchased">
-            <Card>
-              <CardHeader>
-                <CardTitle>Mis Contactos Comprados</CardTitle>
-                <CardDescription>
-                  Clientes cuya información de contacto has adquirido
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {purchasedLoading ? (
-                  <div className="space-y-4">
-                    {[1, 2].map((i) => (
-                      <Skeleton key={i} className="h-40 w-full" />
-                    ))}
-                  </div>
-                ) : !purchasedLeads?.length ? (
-                  <div className="text-center py-8">
-                    <Briefcase className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-600 mb-2">
-                      Aún no has comprado contactos
-                    </h3>
-                    <p className="text-gray-500">
-                      Comienza comprando contactos de las solicitudes disponibles.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {purchasedLeads.map((lead: PurchasedLead) => (
-                      <Card key={lead.id} className="border-l-4 border-l-green-500">
-                        <CardContent className="p-6">
-                          <div className="flex justify-between items-start mb-4">
-                            <div className="flex-1">
-                              <h3 className="text-lg font-semibold mb-2">
-                                {lead.serviceRequest.title}
-                              </h3>
-                              <p className="text-gray-600 mb-3">
-                                {lead.serviceRequest.description}
-                              </p>
-                              
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                <div>
-                                  <h4 className="font-semibold text-sm mb-2">Información del Cliente:</h4>
-                                  <div className="space-y-1 text-sm">
-                                    <div className="flex items-center gap-2">
-                                      <User className="h-4 w-4 text-blue-600" />
-                                      <span className="font-medium">{lead.clientContact.name}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      <Mail className="h-4 w-4 text-blue-600" />
-                                      <a href={`mailto:${lead.clientContact.email}`} className="text-blue-600 hover:underline">
-                                        {lead.clientContact.email}
-                                      </a>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      <Phone className="h-4 w-4 text-blue-600" />
-                                      <a href={`tel:${lead.clientContact.phone}`} className="text-blue-600 hover:underline">
-                                        {lead.clientContact.phone}
-                                      </a>
-                                    </div>
-                                  </div>
-                                </div>
-                                
-                                <div>
-                                  <h4 className="font-semibold text-sm mb-2">Detalles del Trabajo:</h4>
-                                  <div className="space-y-1 text-sm text-gray-600">
-                                    <div className="flex items-center gap-2">
-                                      <MapPin className="h-4 w-4" />
-                                      {lead.serviceRequest.city}
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      <DollarSign className="h-4 w-4" />
-                                      ${lead.serviceRequest.estimatedBudget?.toLocaleString()} ARS
-                                    </div>
-                                    {lead.serviceRequest.preferredDate && (
-                                      <div className="flex items-center gap-2">
-                                        <Calendar className="h-4 w-4" />
-                                        {format(new Date(lead.serviceRequest.preferredDate), "dd/MM/yyyy", { locale: es })}
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                            
-                            <div className="text-right">
-                              <div className="text-sm text-gray-500 mb-1">
-                                Comprado el {format(new Date(lead.purchasedAt), "dd/MM/yyyy", { locale: es })}
-                              </div>
-                              <Badge variant="outline" className="text-xs">
-                                {lead.creditCost} créditos gastados
-                              </Badge>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Credit History Tab */}
-          <TabsContent value="credits">
-            <Card>
-              <CardHeader>
-                <CardTitle>Historial de Créditos</CardTitle>
-                <CardDescription>
-                  Registro de todas las transacciones de créditos
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {creditLoading ? (
-                  <div className="space-y-3">
-                    {[1, 2, 3, 4].map((i) => (
-                      <Skeleton key={i} className="h-16 w-full" />
-                    ))}
-                  </div>
-                ) : !creditHistory?.transactions?.length ? (
-                  <div className="text-center py-8">
-                    <CreditCard className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-600 mb-2">
-                      Sin transacciones
-                    </h3>
-                    <p className="text-gray-500">
-                      Tu historial de transacciones aparecerá aquí.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {creditHistory.transactions.map((transaction: CreditTransaction) => (
-                      <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div>
-                          <div className="font-medium">{transaction.description}</div>
-                          <div className="text-sm text-gray-500">
-                            {format(new Date(transaction.createdAt), "dd/MM/yyyy HH:mm", { locale: es })}
-                          </div>
-                        </div>
-                        <div className={`font-semibold ${
-                          transaction.credits > 0 ? 'text-green-600' : 'text-red-600'
-                        }`}>
-                          {transaction.credits > 0 ? '+' : ''}{transaction.credits} créditos
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
       </div>
 
-      <Footer />
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="available">
+            Leads Disponibles ({availableLeads?.total || 0})
+          </TabsTrigger>
+          <TabsTrigger value="unlocked">
+            Mis Leads ({unlockedLeads?.total || 0})
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Tab: Leads Disponibles */}
+        <TabsContent value="available" className="space-y-4">
+          {loadingAvailable ? (
+            <div className="text-center py-12">Cargando leads...</div>
+          ) : availableLeads?.data.length === 0 ? (
+            <Card>
+              <CardContent className="py-12 text-center text-muted-foreground">
+                No hay leads disponibles en este momento
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {availableLeads?.data.map((lead) => (
+                <Card key={lead.id} className="hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <CardTitle className="text-lg">{lead.title}</CardTitle>
+                      {lead.isUrgent && (
+                        <Badge variant="destructive" className="flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" />
+                          Urgente
+                        </Badge>
+                      )}
+                    </div>
+                    <CardDescription className="flex items-center gap-1">
+                      <MapPin className="h-3 w-3" />
+                      {lead.neighborhood}, {lead.city}, {lead.province}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        {lead.descriptionPreview}
+                      </p>
+                      <Badge variant="outline">{lead.categoryName}</Badge>
+                    </div>
+
+                    {lead.preferredDate && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Clock className="h-4 w-4" />
+                        {format(new Date(lead.preferredDate), "PPP", { locale: es })}
+                      </div>
+                    )}
+
+                    <Button
+                      className="w-full"
+                      onClick={() => handleUnlockClick(lead)}
+                      disabled={!credits || credits.currentCredits < 1}
+                    >
+                      <CreditCard className="h-4 w-4 mr-2" />
+                      Desbloquear (1 crédito)
+                    </Button>
+
+                    <p className="text-xs text-muted-foreground text-center">
+                      Publicado {format(new Date(lead.createdAt), "PPP", { locale: es })}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        {/* Tab: Mis Leads */}
+        <TabsContent value="unlocked" className="space-y-4">
+          {loadingUnlocked ? (
+            <div className="text-center py-12">Cargando leads...</div>
+          ) : unlockedLeads?.data.length === 0 ? (
+            <Card>
+              <CardContent className="py-12 text-center text-muted-foreground">
+                No has desbloqueado ningún lead todavía
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2">
+              {unlockedLeads?.data.map((lead) => (
+                <Card key={lead.id}>
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <CardTitle className="text-lg">{lead.title}</CardTitle>
+                        <CardDescription>
+                          Cliente: {lead.customerFirstName}
+                        </CardDescription>
+                      </div>
+                      {lead.isUrgent && (
+                        <Badge variant="destructive">Urgente</Badge>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <h4 className="font-semibold text-sm mb-2">Descripción:</h4>
+                      <p className="text-sm text-muted-foreground">{lead.description}</p>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-sm">
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                      {lead.neighborhood}, {lead.city}, {lead.province}
+                    </div>
+
+                    <div className="space-y-2">
+                      <h4 className="font-semibold text-sm">Datos de contacto:</h4>
+                      <div className="space-y-1 text-sm">
+                        <div className="flex items-center gap-2">
+                          <Phone className="h-4 w-4 text-muted-foreground" />
+                          {lead.customerPhone}
+                        </div>
+                        {lead.customerEmail && (
+                          <div className="flex items-center gap-2">
+                            <Mail className="h-4 w-4 text-muted-foreground" />
+                            {lead.customerEmail}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button
+                        className="bg-green-600 hover:bg-green-700"
+                        onClick={() => window.open(getWhatsAppLink(lead.customerPhone!, lead.title), "_blank")}
+                      >
+                        <MessageCircle className="h-4 w-4 mr-2" />
+                        WhatsApp
+                      </Button>
+                      <Button
+                        className="bg-blue-500 hover:bg-blue-600"
+                        onClick={() => window.open(getTelegramLink(lead.customerPhone!), "_blank")}
+                      >
+                        <Send className="h-4 w-4 mr-2" />
+                        Telegram
+                      </Button>
+                    </div>
+
+                    <div className="text-xs text-muted-foreground text-center pt-2 border-t">
+                      Desbloqueado {format(new Date(lead.unlockedAt!), "PPP 'a las' HH:mm", { locale: es })}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
+
+      {/* Dialog de confirmación */}
+      <Dialog open={showUnlockDialog} onOpenChange={setShowUnlockDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>¿Desbloquear este lead?</DialogTitle>
+            <DialogDescription>
+              Se descontará 1 crédito de tu cuenta. Tendrás acceso a los datos completos del cliente.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedLead && (
+            <div className="space-y-2 py-4">
+              <h4 className="font-semibold">{selectedLead.title}</h4>
+              <p className="text-sm text-muted-foreground">{selectedLead.descriptionPreview}</p>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <MapPin className="h-4 w-4" />
+                {selectedLead.neighborhood}, {selectedLead.city}
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowUnlockDialog(false)}>
+              Cancelar
+            </Button>
+            <Button 
+              onClick={handleConfirmUnlock}
+              disabled={unlockMutation.isPending}
+            >
+              {unlockMutation.isPending ? "Desbloqueando..." : "Confirmar (1 crédito)"}
+            </Button>
+          </DialogFooter>
+          {unlockMutation.isError && (
+            <p className="text-sm text-red-600 mt-2">
+              {unlockMutation.error.message}
+            </p>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
