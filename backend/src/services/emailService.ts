@@ -2,13 +2,18 @@ import nodemailer from 'nodemailer';
 import type { Transporter } from 'nodemailer';
 
 const SMTP_CONFIG = {
-  host: process.env.SMTP_HOST || 'smtp.zoho.com',
-  port: parseInt(process.env.SMTP_PORT || '587'),
+  host: process.env.SMTP_HOST || '136.143.182.56', // IP directa de smtp.zoho.com
+  port: parseInt(process.env.SMTP_PORT || '465'),
   secure: process.env.SMTP_SECURE === 'true',
   auth: {
     user: process.env.SMTP_USER || 'administrador@servicioshogar.com.ar',
     pass: process.env.SMTP_PASS,
   },
+  connectionTimeout: 60000, // 60 segundos
+  greetingTimeout: 30000,   // 30 segundos
+  socketTimeout: 60000,     // 60 segundos
+  debug: true,              // Logs detallados
+  logger: true,
 };
 
 const EMAIL_FROM = process.env.EMAIL_FROM || 'administrador@servicioshogar.com.ar';
@@ -17,6 +22,12 @@ let transporter: Transporter | null = null;
 
 function getTransporter(): Transporter {
   if (!transporter) {
+    console.log('📧 Creando transporter SMTP con config:', {
+      host: SMTP_CONFIG.host,
+      port: SMTP_CONFIG.port,
+      secure: SMTP_CONFIG.secure,
+      user: SMTP_CONFIG.auth.user,
+    });
     transporter = nodemailer.createTransport(SMTP_CONFIG);
   }
   return transporter;
@@ -68,7 +79,7 @@ export async function sendLeadNotification(
               <h2>${leadData.title}</h2>
               <p>📍 Zona: ${leadData.neighborhood}</p>
               <p>🏷️ Categoría: ${leadData.categoryName}</p>
-              <p>📝 Descripción: ${leadData.descriptionPreview}...</p>
+              <p>📝 Descripción: ${leadData.descriptionPreview}</p>
               <p>🕐 Fecha: ${new Date(leadData.createdAt).toLocaleString('es-AR')}</p>
             </div>
             <center>
@@ -84,42 +95,37 @@ export async function sendLeadNotification(
       </html>
     `;
 
-    const mailOptions = {
-      from: `"ServiciosHogar.com.ar" <${EMAIL_FROM}>`,
+    console.log(`📤 Intentando enviar email a ${providerEmail}...`);
+
+    const info = await transport.sendMail({
+      from: EMAIL_FROM,
       to: providerEmail,
-      subject: `🔔 Nuevo Lead: ${leadData.categoryName} en ${leadData.neighborhood}`,
+      subject: `Nuevo lead disponible - ${leadData.categoryName}`,
       html: htmlContent,
-    };
+    });
 
-    const info = await transport.sendMail(mailOptions);
-    console.log(`✅ Email enviado a ${providerEmail}: ${info.messageId}`);
+    console.log(`✅ Email enviado a ${providerEmail}:`, info.messageId);
     return true;
-
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Error enviando email:', error);
     return false;
   }
 }
 
-export async function sendTestEmail(toEmail: string): Promise<boolean> {
+export async function sendTestEmail(to: string): Promise<boolean> {
   try {
     const transport = getTransporter();
-    if (!SMTP_CONFIG.auth.pass) {
-      console.error('❌ SMTP_PASS no está configurado');
-      return false;
-    }
 
-    const mailOptions = {
-      from: `"ServiciosHogar.com.ar" <${EMAIL_FROM}>`,
-      to: toEmail,
-      subject: '✅ Test de Email - ServiciosHogar.com.ar',
-      html: '<h1>✅ Email funcionando correctamente</h1>',
-    };
+    const info = await transport.sendMail({
+      from: EMAIL_FROM,
+      to,
+      subject: 'Test Email - ServiciosHogar',
+      html: '<h1>Email de prueba</h1><p>Este es un email de prueba del sistema.</p>',
+    });
 
-    await transport.sendMail(mailOptions);
-    console.log(`✅ Email de prueba enviado a ${toEmail}`);
+    console.log(`✅ Email de prueba enviado a ${to}:`, info.messageId);
     return true;
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Error enviando email de prueba:', error);
     return false;
   }
@@ -129,10 +135,10 @@ export async function verifyEmailConnection(): Promise<boolean> {
   try {
     const transport = getTransporter();
     await transport.verify();
-    console.log('✅ Conexión SMTP verificada');
+    console.log('✅ Conexión SMTP verificada correctamente');
     return true;
-  } catch (error) {
-    console.error('❌ Error verificando SMTP:', error);
+  } catch (error: any) {
+    console.error('❌ Error verificando conexión SMTP:', error);
     return false;
   }
 }

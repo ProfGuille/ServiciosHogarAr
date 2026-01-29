@@ -17,7 +17,6 @@ export async function notifyProvidersAboutNewLead(leadData: NewLeadData): Promis
   try {
     console.log(`📧 Nuevo lead #${leadData.id} - ${leadData.categoryName}`);
     
-    // Buscar proveedores que ofrecen servicios en esta categoría
     const providersInCategory = await db
       .select({
         providerId: serviceProviders.id,
@@ -38,7 +37,6 @@ export async function notifyProvidersAboutNewLead(leadData: NewLeadData): Promis
       return;
     }
 
-    // Filtrar proveedores activos con email válido
     const validProviders = providersInCategory.filter(
       (p) => p.isActive && p.email && p.email.trim() !== ''
     );
@@ -54,7 +52,6 @@ export async function notifyProvidersAboutNewLead(leadData: NewLeadData): Promis
       ? leadData.description.substring(0, 100) + '...'
       : leadData.description;
 
-    // Enviar notificaciones en paralelo con timeout
     const notificationPromises = validProviders.map(async (provider) => {
       try {
         const sent = await sendLeadNotification(
@@ -83,7 +80,6 @@ export async function notifyProvidersAboutNewLead(leadData: NewLeadData): Promis
       }
     });
 
-    // Esperar todas las notificaciones (sin bloquear el flujo principal)
     const results = await Promise.allSettled(notificationPromises);
     
     const successful = results.filter(
@@ -94,6 +90,5 @@ export async function notifyProvidersAboutNewLead(leadData: NewLeadData): Promis
 
   } catch (error) {
     console.error('❌ Error crítico en sistema de notificaciones:', error);
-    // No lanzamos el error para que no bloquee la creación del lead
   }
 }
