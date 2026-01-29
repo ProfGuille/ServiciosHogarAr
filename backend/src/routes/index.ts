@@ -24,3 +24,5 @@ router.use("/provider-credits", providerCreditsRoutes);
 router.use("/test-email", testEmailRoutes);
 
 export default router;
+import testSmtpRoutes from './testSmtpConnection.js';
+router.use('/api', testSmtpRoutes);
