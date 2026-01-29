@@ -1,3 +1,6 @@
+import { db } from '../db.js';
+import { providerCategories, serviceProviders, users } from '../shared/schema/index.js';
+import { eq } from 'drizzle-orm';
 import { sendLeadNotification } from './emailService.js';
 
 interface NewLeadData {
@@ -14,33 +17,83 @@ export async function notifyProvidersAboutNewLead(leadData: NewLeadData): Promis
   try {
     console.log(`📧 Nuevo lead #${leadData.id} - ${leadData.categoryName}`);
     
-    // TODO: Implementar búsqueda real de proveedores por categoría
-    // Por ahora, enviamos email de prueba al administrador
-    
-    const descriptionPreview = leadData.description.length > 100
-      ? leadData.description.substring(0, 100)
-      : leadData.description;
+    // Buscar proveedores que ofrecen servicios en esta categoría
+    const providersInCategory = await db
+      .select({
+        providerId: serviceProviders.id,
+        businessName: serviceProviders.businessName,
+        userId: serviceProviders.userId,
+        email: users.email,
+        isActive: serviceProviders.isActive,
+      })
+      .from(providerCategories)
+      .innerJoin(serviceProviders, eq(providerCategories.providerId, serviceProviders.id))
+      .innerJoin(users, eq(serviceProviders.userId, users.id))
+      .where(eq(providerCategories.categoryId, leadData.categoryId));
 
-    const sent = await sendLeadNotification(
-      'circaireargentino@gmail.com', // TODO: Reemplazar con búsqueda de proveedores reales
-      'Administrador',
-      {
-        id: leadData.id,
-        title: leadData.title,
-        descriptionPreview,
-        neighborhood: leadData.neighborhood,
-        categoryName: leadData.categoryName,
-        createdAt: leadData.createdAt,
-      }
-    );
+    console.log(`🔍 Encontrados ${providersInCategory.length} proveedores para categoría ${leadData.categoryName}`);
 
-    if (sent) {
-      console.log(`✅ Notificación de prueba enviada`);
-    } else {
-      console.log(`❌ Error enviando notificación`);
+    if (providersInCategory.length === 0) {
+      console.log(`⚠️  No hay proveedores registrados para la categoría ${leadData.categoryName}`);
+      return;
     }
 
+    // Filtrar proveedores activos con email válido
+    const validProviders = providersInCategory.filter(
+      (p) => p.isActive && p.email && p.email.trim() !== ''
+    );
+
+    console.log(`✅ ${validProviders.length} proveedores activos con email válido`);
+
+    if (validProviders.length === 0) {
+      console.log(`⚠️  No hay proveedores activos con email para notificar`);
+      return;
+    }
+
+    const descriptionPreview = leadData.description.length > 100
+      ? leadData.description.substring(0, 100) + '...'
+      : leadData.description;
+
+    // Enviar notificaciones en paralelo con timeout
+    const notificationPromises = validProviders.map(async (provider) => {
+      try {
+        const sent = await sendLeadNotification(
+          provider.email!,
+          provider.businessName || 'Proveedor',
+          {
+            id: leadData.id,
+            title: leadData.title,
+            descriptionPreview,
+            neighborhood: leadData.neighborhood,
+            categoryName: leadData.categoryName,
+            createdAt: leadData.createdAt,
+          }
+        );
+
+        if (sent) {
+          console.log(`✅ Email enviado a ${provider.businessName} (${provider.email})`);
+          return { provider: provider.businessName, success: true };
+        } else {
+          console.log(`❌ Error enviando a ${provider.businessName} (${provider.email})`);
+          return { provider: provider.businessName, success: false };
+        }
+      } catch (error) {
+        console.error(`❌ Error enviando a ${provider.businessName}:`, error);
+        return { provider: provider.businessName, success: false, error };
+      }
+    });
+
+    // Esperar todas las notificaciones (sin bloquear el flujo principal)
+    const results = await Promise.allSettled(notificationPromises);
+    
+    const successful = results.filter(
+      (r) => r.status === 'fulfilled' && r.value.success
+    ).length;
+    
+    console.log(`📊 Resultado: ${successful}/${validProviders.length} emails enviados correctamente`);
+
   } catch (error) {
-    console.error('❌ Error en notificaciones:', error);
+    console.error('❌ Error crítico en sistema de notificaciones:', error);
+    // No lanzamos el error para que no bloquee la creación del lead
   }
 }

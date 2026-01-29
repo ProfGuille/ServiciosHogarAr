@@ -23,3 +23,4 @@ export * from "./pushSubscriptions.js";
 export * from "./providerAvailability.js";
 
 export * from './mercadopagoWebhooks.js';
+export * from './providerCategories.js';
