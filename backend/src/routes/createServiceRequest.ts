@@ -1,6 +1,9 @@
 import { Router } from "express";
 import { db } from "../db.js";
 import { serviceRequests } from "../shared/schema/serviceRequests.js";
+import { notifyProvidersAboutNewLead } from '../services/leadNotificationHelper.js';
+import { categories } from '../shared/schema/index.js';
+import { eq } from 'drizzle-orm';
 
 const router = Router();
 
@@ -46,18 +49,35 @@ router.post("/", async (req, res) => {
       })
       .returning();
 
+    const [category] = await db
+      .select({ name: categories.name })
+      .from(categories)
+      .where(eq(categories.id, parseInt(categoryId)))
+      .limit(1);
+
+    if (category) {
+      notifyProvidersAboutNewLead({
+        id: newRequest.id,
+        title: title,
+        description: description,
+        neighborhood: neighborhood || city || 'No especificado',
+        categoryId: parseInt(categoryId),
+        categoryName: category.name,
+        createdAt: newRequest.createdAt || new Date()
+      }).catch((err) => {
+        console.error('⚠️ Error enviando notificaciones:', err);
+      });
+    }
+
     res.status(201).json({
       success: true,
       request: newRequest,
     });
-
   } catch (error) {
     console.error("❌ ERROR COMPLETO:", error);
-    console.error("Causa:", error.cause);
     res.status(500).json({ 
       error: "Error interno del servidor",
-      details: error.message,
-      cause: error.cause?.message
+      details: error.message
     });
   }
 });

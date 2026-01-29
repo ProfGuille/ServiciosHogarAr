@@ -6,6 +6,7 @@ import compression from "compression";
 import registerRoutes from "./routes/index.js";
 import { runMigrations, isDatabaseAvailable } from "./db.js";
 
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -110,6 +111,7 @@ app.get("/api/health", (req, res) => {
 // 7. REGISTER ROUTES
 // -----------------------------
 app.use("/api", registerRoutes);
+// Rutas de testing de email
 
 // -----------------------------
 // 8. 404 HANDLER
