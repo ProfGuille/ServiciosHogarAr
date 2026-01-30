@@ -45,6 +45,7 @@
     "openid-client": "^6.6.2",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
+    "resend": "^6.9.1",
     "socket.io": "^4.8.1",
     "web-push": "^3.6.7",
     "ws": "^8.19.0",

@@ -1,7 +1,7 @@
 import { db } from '../db.js';
 import { providerCategories, serviceProviders, users } from '../shared/schema/index.js';
 import { eq } from 'drizzle-orm';
-import { sendLeadNotification } from './emailService.js';
+import { sendLeadNotificationViaResend } from './resendEmailService.js';
 
 interface NewLeadData {
   id: number;
@@ -54,7 +54,7 @@ export async function notifyProvidersAboutNewLead(leadData: NewLeadData): Promis
 
     const notificationPromises = validProviders.map(async (provider) => {
       try {
-        const sent = await sendLeadNotification(
+        const sent = await sendLeadNotificationViaResend(
           provider.email!,
           provider.businessName || 'Proveedor',
           {
