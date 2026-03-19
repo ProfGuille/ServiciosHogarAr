@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
@@ -11,23 +11,15 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle, Loader2, AlertCircle } from "lucide-react";
 import { getApiUrl } from "@/lib/api";
 
-const serviceCategories = [
-  { id: "1", name: "Plomería" },
-  { id: "2", name: "Electricidad" },
-  { id: "3", name: "Carpintería" },
-  { id: "4", name: "Pintura" },
-  { id: "5", name: "Limpieza" },
-  { id: "6", name: "Jardinería" },
-  { id: "7", name: "Techado" },
-  { id: "8", name: "Aire Acondicionado" },
-  { id: "9", name: "Cerrajería" },
-  { id: "10", name: "Albañilería" },
-  { id: "11", name: "Gasista" },
-  { id: "12", name: "Herrería" },
-];
+interface Category {
+  id: number;
+  name: string;
+}
 
 export default function RegisterProvider() {
   const [, setLocation] = useLocation();
+  const [categories, setCategories] = useState<Category[]>([]);
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -47,31 +39,64 @@ export default function RegisterProvider() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
 
+  // Cargar categorías desde la API
+  useEffect(() => {
+    fetch(getApiUrl('/api/categories'))
+      .then(res => res.json())
+      .then((data: Category[]) => setCategories(data))
+      .catch(() => {
+        // Fallback con las 25 categorías conocidas si la API no responde
+        setCategories([
+          { id: 1,  name: "Plomería" },
+          { id: 2,  name: "Electricidad" },
+          { id: 3,  name: "Pintura" },
+          { id: 4,  name: "Limpieza" },
+          { id: 5,  name: "Carpintería" },
+          { id: 6,  name: "Gasista" },
+          { id: 7,  name: "Albañilería" },
+          { id: 8,  name: "Aire Acondicionado" },
+          { id: 9,  name: "Jardinería" },
+          { id: 10, name: "Cerrajería" },
+          { id: 11, name: "Mudanzas" },
+          { id: 12, name: "Herrería" },
+          { id: 13, name: "Techos" },
+          { id: 14, name: "Fumigación" },
+          { id: 15, name: "Electrodomésticos" },
+          { id: 16, name: "Tapicería" },
+          { id: 17, name: "Vidriería" },
+          { id: 18, name: "Pisos y Revestimientos" },
+          { id: 19, name: "Alarmas y Seguridad" },
+          { id: 20, name: "Piscinas" },
+          { id: 21, name: "Decoración" },
+          { id: 22, name: "Durlock" },
+          { id: 23, name: "Automatización" },
+          { id: 24, name: "Energía Solar" },
+          { id: 25, name: "Calefacción" },
+        ]);
+      });
+  }, []);
+
   const handleSubmit = async () => {
     setError('');
 
     if (!formData.name || !formData.email || !formData.password) {
-      setError('Por favor completa todos los campos obligatorios');
+      setError('Por favor completá todos los campos obligatorios');
       return;
     }
-
     if (formData.password.length < 8) {
       setError('La contraseña debe tener al menos 8 caracteres');
       return;
     }
-
     if (formData.serviceCategories.length === 0) {
-      setError('Selecciona al menos un servicio');
+      setError('Seleccioná al menos un servicio');
       return;
     }
-
     if (!formData.termsAccepted) {
-      setError('Debes aceptar los términos y condiciones');
+      setError('Debés aceptar los términos y condiciones');
       return;
     }
 
     setLoading(true);
-
     try {
       const response = await fetch(getApiUrl('/api/auth/register-provider'), {
         method: 'POST',
@@ -87,7 +112,6 @@ export default function RegisterProvider() {
 
       setSuccess(true);
       setTimeout(() => setLocation('/login'), 5000);
-
     } catch (err: any) {
       setError(err.message || 'Error al procesar el registro');
     } finally {
@@ -100,7 +124,7 @@ export default function RegisterProvider() {
       ...prev,
       serviceCategories: prev.serviceCategories.includes(categoryId)
         ? prev.serviceCategories.filter(id => id !== categoryId)
-        : [...prev.serviceCategories, categoryId]
+        : [...prev.serviceCategories, categoryId],
     }));
   };
 
@@ -114,7 +138,7 @@ export default function RegisterProvider() {
               <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
               <h2 className="text-2xl font-bold mb-2">¡Registro Exitoso!</h2>
               <p className="text-gray-600 mb-4">
-                Recibirás 10 créditos de bienvenida. Redirigiendo...
+                Recibirás 10 créditos de bienvenida. Redirigiendo al login...
               </p>
             </CardContent>
           </Card>
@@ -127,12 +151,12 @@ export default function RegisterProvider() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <Navbar />
-      
+
       <div className="container mx-auto py-8 px-4">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-2">
-              Registrate como Proveedor
+              Registrate como Profesional
             </h1>
             <p className="text-lg text-gray-600">
               Conectá con clientes que necesitan tus servicios
@@ -141,7 +165,7 @@ export default function RegisterProvider() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Datos del Proveedor</CardTitle>
+              <CardTitle>Tus datos</CardTitle>
               <CardDescription>
                 Completá tus datos para empezar a recibir solicitudes
               </CardDescription>
@@ -155,122 +179,121 @@ export default function RegisterProvider() {
                 </Alert>
               )}
 
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="name">Nombre Completo *</Label>
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                      placeholder="Juan Pérez"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="email">Email *</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                      placeholder="tu@email.com"
-                    />
-                  </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="name">Nombre Completo *</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="Juan Pérez"
+                  />
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="phone">Teléfono *</Label>
-                    <Input
-                      id="phone"
-                      value={formData.phone}
-                      onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                      placeholder="+54 9 11 1234-5678"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="password">Contraseña *</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={formData.password}
-                      onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                      placeholder="Mínimo 8 caracteres"
-                    />
-                  </div>
+                <div>
+                  <Label htmlFor="email">Email *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={e => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                    placeholder="tu@email.com"
+                  />
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="businessName">Nombre del Negocio *</Label>
-                    <Input
-                      id="businessName"
-                      value={formData.businessName}
-                      onChange={(e) => setFormData(prev => ({ ...prev, businessName: e.target.value }))}
-                      placeholder="Ej: Plomería Buenos Aires"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="city">Ciudad *</Label>
-                    <Input
-                      id="city"
-                      value={formData.city}
-                      onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
-                      placeholder="Ej: Buenos Aires"
-                    />
-                  </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="phone">Teléfono *</Label>
+                  <Input
+                    id="phone"
+                    value={formData.phone}
+                    onChange={e => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                    placeholder="+54 9 11 1234-5678"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="password">Contraseña *</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={formData.password}
+                    onChange={e => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                    placeholder="Mínimo 8 caracteres"
+                  />
                 </div>
               </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="businessName">Nombre del Negocio *</Label>
+                  <Input
+                    id="businessName"
+                    value={formData.businessName}
+                    onChange={e => setFormData(prev => ({ ...prev, businessName: e.target.value }))}
+                    placeholder="Ej: Plomería Buenos Aires"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="city">Ciudad *</Label>
+                  <Input
+                    id="city"
+                    value={formData.city}
+                    onChange={e => setFormData(prev => ({ ...prev, city: e.target.value }))}
+                    placeholder="Ej: Buenos Aires"
+                  />
+                </div>
+              </div>
+
+              {/* Categorías desde API */}
               <div className="space-y-3">
-                <Label>Servicios que Ofreces *</Label>
-                <p className="text-sm text-gray-600">
-                  Selecciona al menos un servicio
-                </p>
-                
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {serviceCategories.map((category) => {
-                    const isSelected = formData.serviceCategories.includes(category.id);
-                    
-                    return (
-                      <button
-                        key={category.id}
-                        type="button"
-                        onClick={() => toggleCategory(category.id)}
-                        className={`p-3 rounded-lg border-2 cursor-pointer transition-all text-left ${
-                          isSelected
-                            ? 'border-blue-500 bg-blue-50'
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                      >
-                        <div className="flex items-center space-x-2">
-                          <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
-                            isSelected ? 'bg-blue-500 border-blue-500' : 'border-gray-300'
-                          }`}>
-                            {isSelected && <div className="text-white text-xs">✓</div>}
+                <Label>Servicios que Ofrecés *</Label>
+                <p className="text-sm text-gray-600">Seleccioná al menos un servicio</p>
+
+                {categories.length === 0 ? (
+                  <div className="flex items-center gap-2 text-sm text-gray-500 py-4">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Cargando servicios...
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {categories.map(category => {
+                      const isSelected = formData.serviceCategories.includes(String(category.id));
+                      return (
+                        <button
+                          key={category.id}
+                          type="button"
+                          onClick={() => toggleCategory(String(category.id))}
+                          className={`p-3 rounded-lg border-2 cursor-pointer transition-all text-left ${
+                            isSelected
+                              ? 'border-blue-500 bg-blue-50'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <div className="flex items-center space-x-2">
+                            <div className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${
+                              isSelected ? 'bg-blue-500 border-blue-500' : 'border-gray-300'
+                            }`}>
+                              {isSelected && <div className="text-white text-xs">✓</div>}
+                            </div>
+                            <span className="text-sm font-medium">{category.name}</span>
                           </div>
-                          <span className="text-sm font-medium">
-                            {category.name}
-                          </span>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
               <div className="flex items-start space-x-2">
                 <Checkbox
                   checked={formData.termsAccepted}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, termsAccepted: !!checked }))}
+                  onCheckedChange={checked => setFormData(prev => ({ ...prev, termsAccepted: !!checked }))}
                 />
                 <span className="text-sm">
-                  Acepto los términos y condiciones y la política de privacidad
+                  Acepto los{' '}
+                  <a href="/terminos" className="text-blue-600 hover:underline">términos y condiciones</a>
+                  {' '}y la{' '}
+                  <a href="/privacidad" className="text-blue-600 hover:underline">política de privacidad</a>
                 </span>
               </div>
 
@@ -280,26 +303,20 @@ export default function RegisterProvider() {
                 className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3"
               >
                 {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Registrando...
-                  </>
+                  <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Registrando...</>
                 ) : (
-                  <>
-                    <CheckCircle className="mr-2 h-5 w-5" />
-                    Crear Cuenta de Proveedor
-                  </>
+                  <><CheckCircle className="mr-2 h-5 w-5" />Crear Cuenta de Profesional</>
                 )}
               </Button>
 
-              <div className="mt-6 text-center">
+              <div className="text-center">
                 <p className="text-sm text-gray-600">
-                  ¿Ya tienes cuenta?{' '}
+                  ¿Ya tenés cuenta?{' '}
                   <button
                     onClick={() => setLocation('/login')}
                     className="text-blue-600 hover:underline font-medium"
                   >
-                    Inicia sesión aquí
+                    Iniciá sesión aquí
                   </button>
                 </p>
               </div>
@@ -312,13 +329,11 @@ export default function RegisterProvider() {
               <h3 className="font-semibold mb-1">10 Créditos Gratis</h3>
               <p className="text-sm text-gray-600">Al registrarte</p>
             </Card>
-
             <Card className="text-center p-4">
               <div className="text-3xl mb-2">💰</div>
               <h3 className="font-semibold mb-1">Sin Comisiones</h3>
               <p className="text-sm text-gray-600">Cobrás el 100% del trabajo</p>
             </Card>
-
             <Card className="text-center p-4">
               <div className="text-3xl mb-2">📱</div>
               <h3 className="font-semibold mb-1">Contacto Directo</h3>

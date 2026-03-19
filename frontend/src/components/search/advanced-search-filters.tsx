@@ -570,7 +570,7 @@ export function AdvancedSearchFilters({
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="px-6 pb-6 max-h-[calc(100vh-200px)]">
+        <div className="px-6 pb-6 max-h-[calc(100vh-200px)] overflow-y-auto">
           {filterContent}
         </div>
       </CardContent>

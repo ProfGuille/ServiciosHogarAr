@@ -1,589 +1,306 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ServiceSearch } from "@/components/services/service-search";
-import { 
-  Wrench, 
-  Zap, 
-  Brush, 
-  Hammer, 
-  PaintBucket, 
-  Snowflake,
+import {
   UserCheck,
   Shield,
   Star,
-  Search,
-  MapPin,
-  Flame,
-  HardHat,
-  Wind,
-  Home,
-  Trees,
-  Truck,
-  Laptop,
-  Bug,
-  Sofa,
-  Key,
-  Square,
-  Sun,
-  Plus,
-  MessageCircle
+  ArrowRight,
+  CheckCircle2,
+  Zap,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { TestimonialSection } from "@/components/sections/testimonial-section";
-import UserTypeSelector from "@/components/ui/UserTypeSelector";
-import ServiceSelector from "@/components/ui/ServiceSelector";
-import { servicesList } from "@/data/services";
-import { useAuth } from "@/hooks/useAuth";
+import { getCategoryImage } from "@/config/categoryImages";
 
-const serviceIcons = {
-  plomeria: Wrench,
-  electricidad: Zap,
-  limpieza: Brush,
-  carpinteria: Hammer,
-  pintura: PaintBucket,
-  refrigeracion: Snowflake,
-  gasista: Flame,
-  albañil: HardHat,
-  "técnico de aire": Wind,
-  techista: Home,
-  herrero: Wrench,
-  jardinería: Trees,
-  mudanzas: Truck,
-  "técnico pc": Laptop,
-  fumigador: Bug,
-  "pequeños arreglos": Hammer,
-  tapicero: Sofa,
-  cerrajero: Key,
-  vidriero: Square,
-  "instalador solar": Sun,
-};
+const FALLBACK_CATEGORIES = [
+  { id: 1,  name: "Plomería" },
+  { id: 2,  name: "Electricidad" },
+  { id: 3,  name: "Pintura" },
+  { id: 4,  name: "Limpieza" },
+  { id: 5,  name: "Carpintería" },
+  { id: 6,  name: "Gasista" },
+  { id: 7,  name: "Albañilería" },
+  { id: 8,  name: "Aire Acondicionado" },
+  { id: 9,  name: "Jardinería" },
+  { id: 10, name: "Cerrajería" },
+  { id: 11, name: "Mudanzas" },
+  { id: 12, name: "Herrería" },
+  { id: 13, name: "Techos" },
+  { id: 14, name: "Fumigación" },
+  { id: 15, name: "Electrodomésticos" },
+  { id: 16, name: "Tapicería" },
+];
 
 export default function Landing() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [location, setLocation] = useState("");
-  const [userType, setUserType] = useState<'client' | 'provider' | ''>('');
-  const [showServiceSelector, setShowServiceSelector] = useState(false);
   const { t } = useTranslation();
-  const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    
-    // Check for busco parameter in URL
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('busco') === 'true') {
-      // For demo purposes, show selector without authentication
-      // TODO: Re-enable authentication check in production
-      setUserType('client');
-      setShowServiceSelector(true);
-    }
   }, []);
 
-  const { data: categories } = useQuery({
+  const { data: categories } = useQuery<{ id: number; name: string }[]>({
     queryKey: ["/api/categories"],
   });
 
-  // Fallback categories when API is not available
-  const fallbackCategories = [
-    { id: 1, name: "Plomería" },
-    { id: 2, name: "Electricidad" },
-    { id: 3, name: "Pintura" },
-    { id: 4, name: "Limpieza" },
-    { id: 5, name: "Carpintería" },
-    { id: 6, name: "Gasista" },
-    { id: 7, name: "Albañil" },
-    { id: 8, name: "Técnico de aire" },
-    { id: 9, name: "Jardinería" },
-    { id: 10, name: "Cerrajero" },
-    { id: 11, name: "Mudanzas" },
-    { id: 12, name: "Herrero" },
-    { id: 13, name: "Techista" },
-    { id: 14, name: "Fumigador" },
-    { id: 15, name: "Técnico PC" },
-    { id: 16, name: "Pequeños arreglos" },
-    { id: 17, name: "Tapicero" }
-  ];
-
-  // Use fallback if categories API fails
-  const displayCategories = categories || fallbackCategories;
-
-  const { data: featuredProviders } = useQuery({
-    queryKey: ["/api/providers"],
-    queryFn: () => fetch("/api/providers?limit=4&isVerified=true").then(res => {
-      if (!res.ok) {
-        throw new Error('Providers API not available');
-      }
-      return res.json();
-    }),
-    retry: false,
-    enabled: false, // Disable this query for now since providers API is not implemented
-  });
-
-  const handleSearch = () => {
-    // Redirect to advanced search page with search query
-    let url = '/buscar';
-    const params = new URLSearchParams();
-    if (searchQuery) {
-      params.set('q', searchQuery);
-    }
-    if (location) {
-      params.set('city', location);
-    }
-    if (params.toString()) {
-      url += `?${params.toString()}`;
-    }
-    window.location.href = url;
-  };
-
-  const handleProviderSignup = () => {
-    window.location.href = "/register-provider";
-  };
-
-  const handleUserTypeSelect = (type: 'client' | 'provider') => {
-    setUserType(type);
-    if (type === 'client') {
-      // For demo purposes, allow ServiceSelector to show without authentication
-      // TODO: Re-enable authentication check in production
-      // if (!isAuthenticated) {
-      //   window.location.href = "/login?redirect=buscar";
-      //   return;
-      // }
-      setShowServiceSelector(true);
-    } else {
-      // Redirect to provider registration
-      window.location.href = "/register-provider";
-    }
-  };
-
-  // Service name to route mapping to ensure correct navigation
-  const serviceRouteMap: Record<string, string> = {
-    'plomería': 'plomeria',
-    'electricidad': 'electricidad', 
-    'pintura': 'pintura',
-    'limpieza': 'limpieza',
-    'carpintería': 'carpinteria',
-    'gasista': 'gasista',
-    'albañil': 'albanil',
-    'técnico de aire': 'tecnico-aire',
-    'jardinería': 'jardineria',
-    'cerrajero': 'cerrajero',
-    'mudanzas': 'mudanzas',
-    'herrero': 'herrero',
-    'techista': 'techista',
-    'fumigador': 'fumigador',
-    'técnico pc': 'tecnico-pc',
-    'pequeños arreglos': 'pequenos-arreglos',
-    'tapicero': 'tapicero',
-    'vidriero': 'vidriero',
-    'instalador solar': 'instalador-solar'
-  };
-
-  const handleServiceSelect = (service: any, location?: string) => {
-    // Navigate to specific service page using correct route mapping
-    const serviceName = service.name.toLowerCase();
-    const servicePath = serviceRouteMap[serviceName] || serviceName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-");
-    let url = `/servicios/${servicePath}`;
-    
-    // Add location as query parameter if provided
-    if (location) {
-      const params = new URLSearchParams();
-      params.set('ubicacion', location);
-      url += `?${params.toString()}`;
-    }
-    
-    window.location.href = url;
-  };
-
-  const prepareServicesForSelector = () => {
-    // Create a mapping from category names to services for proper image handling
-    const categoryToServiceMap: Record<string, string> = {
-      'plomería': 'plomeria',
-      'electricidad': 'electricidad', 
-      'pintura': 'pintura',
-      'limpieza': 'limpieza',
-      'carpintería': 'carpinteria',
-      'gasista': 'gasista',
-      'albañil': 'albanileria',
-      'técnico de aire': 'aire_acondicionado',
-      'jardinería': 'jardineria',
-      'cerrajero': 'cerrajeria',
-      'mudanzas': 'mudanzas',
-      'herrero': 'herrero',
-      'techista': 'techista',
-      'fumigador': 'fumigador',
-      'técnico pc': 'tecnico_pc',
-      'pequeños arreglos': 'pequenos_arreglos',
-      'tapicero': 'tapicero',
-      'vidriero': 'vidriero', // fallback, not in servicesList
-      'instalador solar': 'instalador_solar' // fallback, not in servicesList
-    };
-
-    // Use servicesList from data/services.ts as fallback to ensure all services always show
-    const fallbackServices = servicesList.slice(0, 18).map((service, index) => ({
-      id: (index + 1).toString(),
-      name: service.name,
-      description: "150+ profesionales disponibles",
-      category: service.category,
-      image: service.image
-    }));
-
-    if (!displayCategories || displayCategories.length === 0) {
-      return fallbackServices;
-    }
-    
-    // Create a mapping from service IDs to services for better lookup
-    const serviceMap = servicesList.reduce((acc, service) => {
-      acc[service.id] = service;
-      return acc;
-    }, {} as Record<string, any>);
-
-    return displayCategories.map((category: any) => {
-      const categoryName = category.name.toLowerCase();
-      const serviceId = categoryToServiceMap[categoryName];
-      const matchingService = serviceId ? serviceMap[serviceId] : null;
-      
-      // If we have a matching service from servicesList, use it
-      if (matchingService) {
-        return {
-          id: category.id.toString(),
-          name: category.name,
-          description: "150+ profesionales disponibles",
-          category: category.name,
-          image: matchingService.image
-        };
-      }
-      
-      // Fallback for services not in servicesList (like vidriero, instalador solar)
-      const fallbackImageName = categoryName
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/\s+/g, "_");
-      
-      return {
-        id: category.id.toString(),
-        name: category.name,
-        description: "150+ profesionales disponibles",
-        category: category.name,
-        image: `/images/services/${fallbackImageName}.jpg`
-      };
-    });
-  };
+  const displayCategories = categories ?? FALLBACK_CATEGORIES;
 
   return (
     <div className="min-h-screen bg-slate-50">
       <Navbar />
-      
-      {/* Hero Section with User Type Selection */}
-      <section className="bg-gradient-to-br from-primary to-blue-700 text-white min-h-[85vh] flex items-center">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full">
-          <div className="text-center mb-12">
-            <h1 className="text-3xl lg:text-5xl font-bold mb-6">
-              {t('landing.hero.title')}
+
+      {/* HERO */}
+      <section className="relative bg-gradient-to-br from-primary via-blue-600 to-blue-800 text-white overflow-hidden">
+        <div className="absolute inset-0 opacity-10 pointer-events-none">
+          <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl" />
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl" />
+        </div>
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
+          <div className="text-center max-w-4xl mx-auto">
+            <Badge className="mb-6 bg-white/20 text-white border-white/30 px-4 py-2 text-sm font-medium">
+              <Zap className="w-4 h-4 mr-2 inline" />
+              100% gratis para clientes
+            </Badge>
+
+            <h1 className="text-4xl lg:text-6xl font-bold mb-6 leading-tight">
+              Encontrá el profesional que necesitás
+              <span className="block text-blue-200 mt-2">en minutos</span>
             </h1>
-            <p className="text-lg mb-8 text-blue-100 max-w-3xl mx-auto">
-              {t('landing.hero.subtitle')}
+
+            <p className="text-xl lg:text-2xl mb-10 text-blue-100 max-w-2xl mx-auto">
+              Pedí presupuestos gratis y compará profesionales verificados cerca tuyo
             </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+              <Link href="/nueva-solicitud">
+                <Button
+                  size="lg"
+                  className="bg-white text-primary hover:bg-blue-50 px-8 py-6 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all w-full sm:w-auto group"
+                >
+                  Solicitar Profesional Gratis
+                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+
+              <Link href="/register-provider">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-2 border-white/30 bg-white/10 text-white hover:bg-white hover:text-primary px-8 py-6 text-lg font-semibold backdrop-blur-sm w-full sm:w-auto"
+                >
+                  Soy Profesional
+                </Button>
+              </Link>
+            </div>
+
+            <div className="flex flex-wrap justify-center gap-6 text-sm text-blue-100">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-green-300" />
+                <span>Profesionales verificados</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-green-300" />
+                <span>Sin costo para clientes</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-green-300" />
+                <span>Respuestas en 24hs</span>
+              </div>
+            </div>
           </div>
-
-          {/* User Type Selection - Primary Interaction */}
-          {!userType && (
-            <UserTypeSelector 
-              onSelect={handleUserTypeSelect}
-              selectedType={userType}
-              className="mb-8"
-            />
-          )}
-
-          {/* Service Selection for Clients */}
-          {userType === 'client' && showServiceSelector && (
-            <div className="bg-white rounded-lg p-8 shadow-2xl max-w-5xl mx-auto">
-              <ServiceSelector
-                title="¿Qué servicio necesitas?"
-                subtitle="Elegí el tipo de profesional que buscas"
-                services={prepareServicesForSelector()}
-                onServiceSelect={handleServiceSelect}
-                className="text-gray-900"
-              />
-            </div>
-          )}
-
-          {/* Fallback Traditional Search */}
-          {!userType && (
-            <div className="max-w-4xl mx-auto">
-              <ServiceSearch />
-            </div>
-          )}
         </div>
       </section>
 
-      {/* Service Categories - Hide when ServiceSelector is shown */}
-      {!(userType === 'client' && showServiceSelector) && (
-        <section className="py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-slate-900 mb-4">Servicios más solicitados</h2>
-              <p className="text-lg text-slate-600">Encuentra el profesional perfecto para cualquier tarea en tu hogar</p>
-            </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-            {displayCategories?.slice(0, 17).map((category) => {
-              const IconComponent = serviceIcons[category.name.toLowerCase() as keyof typeof serviceIcons] || Wrench;
-              // Use the same route mapping as ServiceSelector
-              const serviceName = category.name.toLowerCase();
-              const categoryPath = serviceRouteMap[serviceName] || serviceName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-");
-              return (
-                <Link key={category.id} href={`/servicios/${categoryPath}`}>
-                  <Card className="text-center shadow-sm hover:shadow-md transition-shadow cursor-pointer group h-full">
-                    <CardContent className="p-6">
-                      <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
-                        <IconComponent className="h-8 w-8 text-primary group-hover:text-white" />
-                      </div>
-                      <h3 className="font-semibold text-slate-900 mb-2">{category.name}</h3>
-                      <p className="text-sm text-slate-500">150+ profesionales</p>
-                    </CardContent>
-                  </Card>
-                </Link>
-              );
-            })}
-            
-            {/* Suggest a Service Button */}
-            <Link href="/contacto?sugerir=servicio">
-              <Card className="text-center shadow-sm hover:shadow-md transition-shadow cursor-pointer group h-full border-dashed border-2">
-                <CardContent className="p-6">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
-                    <Plus className="h-8 w-8 text-gray-500 group-hover:text-white" />
-                  </div>
-                  <h3 className="font-semibold text-slate-900 mb-2">¿No encuentras el servicio?</h3>
-                  <p className="text-sm text-primary font-medium">Sugerir servicio</p>
-                </CardContent>
-              </Card>
+      {/* GRID SERVICIOS */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
+              ¿Qué servicio necesitás?
+            </h2>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+              Elegí la categoría y recibí presupuestos de profesionales verificados
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {displayCategories.slice(0, 16).map((category) => (
+              <Link
+                key={category.id}
+                href={`/buscar?category=${encodeURIComponent(category.name)}`}
+              >
+                <Card className="group cursor-pointer transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 border-2 hover:border-primary h-full">
+                  <CardContent className="p-0">
+                    <div className="relative overflow-hidden rounded-t-lg aspect-video">
+                      <img
+                        src={getCategoryImage(category.name)}
+                        alt={`Servicio de ${category.name}`}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src =
+                            "/images/services/pequenos_arreglos.jpg";
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-semibold text-slate-900 mb-2 text-center group-hover:text-primary transition-colors">
+                        {category.name}
+                      </h3>
+                      <Badge
+                        variant="secondary"
+                        className="w-full justify-center text-xs"
+                      >
+                        <UserCheck className="w-3 h-3 mr-1" />
+                        Profesionales verificados
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <Link href="/servicios">
+              <Button variant="outline" size="lg" className="group">
+                Ver todos los servicios
+                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              </Button>
             </Link>
           </div>
         </div>
       </section>
-      )}
 
-      {/* How It Works */}
-      <section className="py-16 bg-white">
+      {/* CÓMO FUNCIONA */}
+      <section className="py-20 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">Cómo funciona</h2>
-            <p className="text-lg text-slate-600">Solo 3 pasos para resolver cualquier problema en tu hogar</p>
+          <div className="text-center mb-16">
+            <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
+              Así de simple
+            </h2>
+            <p className="text-lg text-slate-600">
+              Sólo 3 pasos para encontrar al profesional ideal
+            </p>
           </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
+
+          <div className="grid md:grid-cols-3 gap-12 max-w-5xl mx-auto">
             <div className="text-center">
-              <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
                 <span className="text-2xl font-bold text-white">1</span>
               </div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-4">Describe tu necesidad</h3>
-              <p className="text-slate-600">Contanos qué servicio necesitas y en qué zona te encontrás. <strong>Es 100% gratis</strong> y sin compromiso.</p>
+              <h3 className="text-xl font-bold text-slate-900 mb-3">
+                Contá qué necesitás
+              </h3>
+              <p className="text-slate-600 leading-relaxed">
+                Describí el trabajo y tu ubicación. Toma menos de 2 minutos.
+              </p>
             </div>
-            
+
             <div className="text-center">
-              <div className="w-20 h-20 bg-secondary rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="w-16 h-16 bg-secondary rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
                 <span className="text-2xl font-bold text-white">2</span>
               </div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-4">Recibí presupuestos</h3>
-              <p className="text-slate-600">Los profesionales verificados de tu zona te enviarán presupuestos personalizados.</p>
+              <h3 className="text-xl font-bold text-slate-900 mb-3">
+                Recibí presupuestos
+              </h3>
+              <p className="text-slate-600 leading-relaxed">
+                Profesionales verificados te enviarán sus propuestas en 24hs.
+              </p>
             </div>
-            
+
             <div className="text-center">
-              <div className="w-20 h-20 bg-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="w-16 h-16 bg-yellow-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
                 <span className="text-2xl font-bold text-white">3</span>
               </div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-4">Elegí y contratá</h3>
-              <p className="text-slate-600">Compará perfiles, lee reseñas y elegí al profesional que más te convenga.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Providers */}
-      {featuredProviders && featuredProviders.length > 0 && (
-        <section className="py-16 bg-slate-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-slate-900 mb-4">Profesionales destacados</h2>
-              <p className="text-lg text-slate-600">Conocé a algunos de nuestros mejores profesionales verificados</p>
-            </div>
-            
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featuredProviders?.map((provider) => (
-                <Link key={provider.id} href={`/profesional/${provider.id}`}>
-                  <Card className="shadow-sm hover:shadow-md transition-shadow cursor-pointer h-full">
-                    <CardContent className="p-6 text-center">
-                    <img 
-                      src={provider.profileImageUrl || "https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300"} 
-                      alt={`${provider.businessName} - Profesional`} 
-                      className="w-20 h-20 rounded-full mx-auto mb-4 object-cover"
-                    />
-                    <h3 className="font-semibold text-slate-900 mb-1">{provider.businessName}</h3>
-                    <p className="text-sm text-slate-600 mb-3">{provider.city}</p>
-                    <div className="flex items-center justify-center mb-3">
-                      <div className="flex text-yellow-400">
-                        {[...Array(5)].map((_, i) => (
-                          <Star key={i} className="h-4 w-4 fill-current" />
-                        ))}
-                      </div>
-                      <span className="text-sm text-slate-600 ml-2">{provider.rating} ({provider.totalReviews} reseñas)</span>
-                    </div>
-                    <div className="text-sm text-slate-500 space-y-1">
-                      {provider.isVerified && (
-                        <div className="flex items-center justify-center">
-                          <UserCheck className="h-4 w-4 text-secondary mr-2" />
-                          <span>Verificado</span>
-                        </div>
-                      )}
-                      <div className="flex items-center justify-center">
-                        <Shield className="h-4 w-4 text-primary mr-2" />
-                        <span>Asegurado</span>
-                      </div>
-                    </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Pricing Information CTA */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8">
-            <div className="max-w-3xl mx-auto">
-              <h2 className="text-3xl font-bold text-slate-900 mb-4">
-                ¿Necesitas conocer los precios?
-              </h2>
-              <p className="text-lg text-slate-600 mb-6">
-                Consulta nuestra guía completa de precios referenciales para todos los servicios del hogar
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <Link href="/precios">
-                  <Button className="bg-primary text-white hover:bg-primary/90 px-8 py-3">
-                    Ver Guía de Precios
-                  </Button>
-                </Link>
-                <Link href="/crear-solicitud">
-                  <Button variant="outline" className="px-8 py-3">
-                    Solicitar Presupuestos Gratis
-                  </Button>
-                </Link>
-              </div>
-              <p className="text-sm text-slate-500 mt-4">
-                Los precios finales varían según la complejidad del trabajo y la zona
+              <h3 className="text-xl font-bold text-slate-900 mb-3">
+                Elegí y listo
+              </h3>
+              <p className="text-slate-600 leading-relaxed">
+                Compará perfiles, reseñas y elegí al mejor. Sin comisiones.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Testimonial Section */}
       <TestimonialSection />
 
-      {/* Trust Indicators */}
-      <section className="py-16 bg-white">
+      {/* TRUST */}
+      <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">¿Por qué elegir ServiciosHogar?</h2>
-            <p className="text-lg text-slate-600">La tranquilidad de contratar con confianza</p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <div className="text-center">
-              <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto mb-6">
-                <UserCheck className="h-8 w-8 text-white" />
+              <div className="w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <UserCheck className="h-8 w-8 text-secondary" />
               </div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-4">Profesionales verificados</h3>
-              <p className="text-slate-600">Nuestros profesionales completan un proceso de verificación de identidad para mayor seguridad.</p>
+              <h3 className="text-lg font-bold text-slate-900 mb-2">
+                Profesionales verificados
+              </h3>
+              <p className="text-slate-600 text-sm">
+                Todos completan verificación de identidad
+              </p>
             </div>
-            
+
             <div className="text-center">
-              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
-                <Shield className="h-8 w-8 text-white" />
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Shield className="h-8 w-8 text-primary" />
               </div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-4">100% Gratis para clientes</h3>
-              <p className="text-slate-600">Buscá y solicitá presupuestos sin costo. Pagás directamente al profesional por el servicio.</p>
+              <h3 className="text-lg font-bold text-slate-900 mb-2">
+                100% gratis para vos
+              </h3>
+              <p className="text-slate-600 text-sm">
+                Solicitá presupuestos sin costo alguno
+              </p>
             </div>
-            
+
             <div className="text-center">
-              <div className="w-16 h-16 bg-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Star className="h-8 w-8 text-white" />
+              <div className="w-16 h-16 bg-yellow-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Star className="h-8 w-8 text-yellow-500" />
               </div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-4">Calidad garantizada</h3>
-              <p className="text-slate-600">Sistema de reseñas y calificaciones real. Solo los mejores profesionales permanecen en la plataforma.</p>
-            </div>
-          </div>
-          
-          <div className="mt-16 bg-slate-50 rounded-2xl p-8">
-            <div className="grid md:grid-cols-4 gap-8 text-center">
-              <div>
-                <div className="text-3xl font-bold text-primary mb-2">10,000+</div>
-                <p className="text-slate-600">Servicios completados</p>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-primary mb-2">2,500+</div>
-                <p className="text-slate-600">Profesionales activos</p>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-primary mb-2">4.8/5</div>
-                <p className="text-slate-600">Calificación promedio</p>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-primary mb-2">98%</div>
-                <p className="text-slate-600">Clientes satisfechos</p>
-              </div>
+              <h3 className="text-lg font-bold text-slate-900 mb-2">
+                Reseñas reales
+              </h3>
+              <p className="text-slate-600 text-sm">
+                Lee opiniones verificadas de otros clientes
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Provider CTA */}
+      {/* CTA PROFESIONALES */}
       <section className="py-20 bg-gradient-to-r from-secondary to-green-700 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold mb-6">¿Eres un profesional de servicios?</h2>
-          <p className="text-xl mb-12 text-green-100 max-w-3xl mx-auto">Únete a nuestra plataforma y conecta con miles de clientes potenciales</p>
-          
-          <div className="grid md:grid-cols-3 gap-8 mb-16">
-            <div className="text-center">
-              <UserCheck className="h-16 w-16 mx-auto mb-4 text-green-200" />
-              <h3 className="text-lg font-semibold mb-2">Más clientes</h3>
-              <p className="text-green-100">Accede a una base de clientes en crecimiento</p>
-            </div>
-            <div className="text-center">
-              <Shield className="h-16 w-16 mx-auto mb-4 text-green-200" />
-              <h3 className="text-lg font-semibold mb-2">Gestión simple</h3>
-              <p className="text-green-100">Administra tus servicios y horarios fácilmente</p>
-            </div>
-            <div className="text-center">
-              <Star className="h-16 w-16 mx-auto mb-4 text-green-200" />
-              <h3 className="text-lg font-semibold mb-2">Más oportunidades</h3>
-              <p className="text-green-100">Comprá créditos para responder a solicitudes</p>
-            </div>
-          </div>
-          
-          <div className="space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center max-w-md mx-auto">
-            <Button 
-              className="w-full sm:w-auto bg-white text-secondary hover:bg-slate-50 px-8 py-3 text-lg font-medium"
-              onClick={handleProviderSignup}
-            >
-              Registrarme como Profesional
-            </Button>
-            <Link href="/precios">
-              <Button 
-                variant="outline" 
-                className="w-full sm:w-auto border-white text-white bg-white/10 hover:bg-white hover:text-secondary px-8 py-3 text-lg font-medium"
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl lg:text-4xl font-bold mb-6">
+            ¿Sos profesional de servicios?
+          </h2>
+          <p className="text-xl mb-10 text-green-100">
+            Conectá con clientes que necesitan tus servicios hoy mismo
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/register-provider">
+              <Button
+                size="lg"
+                className="bg-white text-secondary hover:bg-slate-50 px-8 py-6 text-lg font-semibold shadow-xl w-full sm:w-auto"
               >
-                Ver Planes y Precios
+                Registrarme Gratis
+              </Button>
+            </Link>
+            <Link href="/comprar-creditos">
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-2 border-white/30 bg-white/10 text-white hover:bg-white hover:text-secondary px-8 py-6 text-lg font-semibold backdrop-blur-sm w-full sm:w-auto"
+              >
+                Ver Planes
               </Button>
             </Link>
           </div>

@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
+import { getApiUrl } from '@/lib/api';
 
 export default function NewServiceRequest() {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
   const [selectedProvince, setSelectedProvince] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
   const [customCity, setCustomCity] = useState('');
@@ -15,10 +16,10 @@ export default function NewServiceRequest() {
     'Corrientes', 'Entre Ríos', 'Formosa', 'Jujuy', 'La Pampa', 'La Rioja',
     'Mendoza', 'Misiones', 'Neuquén', 'Río Negro', 'Salta', 'San Juan',
     'San Luis', 'Santa Cruz', 'Santa Fe', 'Santiago del Estero',
-    'Tierra del Fuego', 'Tucumán'
+    'Tierra del Fuego', 'Tucumán',
   ];
 
-  const citiesByProvince = {
+  const citiesByProvince: Record<string, string[]> = {
     'Buenos Aires': ['La Plata', 'Mar del Plata', 'Bahía Blanca', 'Tandil', 'Zárate', 'San Nicolás', 'Pergamino', 'Junín', 'Olavarría', 'Azul', 'Luján', 'Campana'],
     'CABA': ['Buenos Aires'],
     'Córdoba': ['Córdoba', 'Río Cuarto', 'Villa María', 'San Francisco'],
@@ -42,10 +43,10 @@ export default function NewServiceRequest() {
     'Chubut': ['Comodoro Rivadavia', 'Trelew', 'Puerto Madryn', 'Rawson', 'Esquel'],
     'Santa Cruz': ['Río Gallegos', 'Caleta Olivia', 'El Calafate'],
     'Tierra del Fuego': ['Ushuaia', 'Río Grande'],
-    'La Pampa': ['Santa Rosa', 'General Pico']
+    'La Pampa': ['Santa Rosa', 'General Pico'],
   };
 
-  const availableCities = selectedProvince ? (citiesByProvince[selectedProvince] || []) : [];
+  const availableCities = selectedProvince ? (citiesByProvince[selectedProvince] ?? []) : [];
 
   useEffect(() => {
     setSelectedCity('');
@@ -53,46 +54,45 @@ export default function NewServiceRequest() {
   }, [selectedProvince]);
 
   useEffect(() => {
-    fetch('http://localhost:3000/api/categories')
+    fetch(getApiUrl('/api/categories'))
       .then(res => res.json())
       .then(data => setCategories(data))
-      .catch(err => console.error('Error:', err));
+      .catch(err => console.error('Error cargando categorías:', err));
   }, []);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
 
     const form = e.currentTarget;
     const formData = new FormData(form);
-    
+
     const finalCity = selectedCity === 'OTRA' ? customCity : selectedCity;
 
-    // Recoger preferencias de contacto
-    const contactMethods = [];
-    if (formData.get('contact_phone')) contactMethods.push('Llamada');
+    const contactMethods: string[] = [];
+    if (formData.get('contact_phone'))    contactMethods.push('Llamada');
     if (formData.get('contact_whatsapp')) contactMethods.push('WhatsApp');
     if (formData.get('contact_telegram')) contactMethods.push('Telegram');
-    if (formData.get('contact_email')) contactMethods.push('Email');
+    if (formData.get('contact_email'))    contactMethods.push('Email');
 
     const requestData = {
-      categoryId: parseInt(formData.get('categoryId')),
-      title: formData.get('title'),
-      description: formData.get('description'),
-      address: formData.get('address'),
-      neighborhood: formData.get('neighborhood'),
-      city: finalCity,
-      province: formData.get('province'),
-      customerFirstName: formData.get('firstName'),
-      customerPhone: formData.get('phone'),
-      customerEmail: formData.get('email') || null,
+      categoryId:              parseInt(formData.get('categoryId') as string),
+      title:                   formData.get('title'),
+      description:             formData.get('description'),
+      address:                 formData.get('address'),
+      neighborhood:            formData.get('neighborhood'),
+      city:                    finalCity,
+      province:                formData.get('province'),
+      customerFirstName:       formData.get('firstName'),
+      customerPhone:           formData.get('phone'),
+      customerEmail:           formData.get('email') || null,
       preferredContactMethods: contactMethods.join(', '),
-      preferredDate: formData.get('preferredDate') || null,
-      isUrgent: formData.get('isUrgent') === 'on',
+      preferredDate:           formData.get('preferredDate') || null,
+      isUrgent:                formData.get('isUrgent') === 'on',
     };
 
     try {
-      const response = await fetch('http://localhost:3000/api/service-requests', {
+      const response = await fetch(getApiUrl('/api/service-requests'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestData),
@@ -106,7 +106,7 @@ export default function NewServiceRequest() {
         setLoading(false);
       }
     } catch (error) {
-      alert('Error de conexión. Verificá que el backend esté corriendo en http://localhost:3000');
+      alert('Error de conexión. Intentá de nuevo en unos segundos.');
       setLoading(false);
     }
   };
@@ -141,6 +141,7 @@ export default function NewServiceRequest() {
 
         <form onSubmit={handleSubmit}>
           <div className="space-y-6">
+
             <div>
               <label className="block text-sm font-medium mb-2">Tipo de servicio *</label>
               <select name="categoryId" required className="w-full border rounded-lg px-4 py-2">
@@ -176,15 +177,14 @@ export default function NewServiceRequest() {
 
             <div className="border-t pt-6">
               <h3 className="font-semibold mb-4">Datos de contacto</h3>
-              
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">Tu nombre *</label>
-                  <input 
-                    type="text" 
-                    name="firstName" 
-                    required 
-                    placeholder="Juan" 
+                  <input
+                    type="text"
+                    name="firstName"
+                    required
+                    placeholder="Juan"
                     className="w-full border rounded-lg px-4 py-2"
                     autoComplete="off"
                   />
@@ -192,11 +192,11 @@ export default function NewServiceRequest() {
 
                 <div>
                   <label className="block text-sm font-medium mb-2">Teléfono *</label>
-                  <input 
-                    type="tel" 
-                    name="phone" 
-                    required 
-                    placeholder="+54 9 11 1234-5678" 
+                  <input
+                    type="tel"
+                    name="phone"
+                    required
+                    placeholder="+54 9 11 1234-5678"
                     className="w-full border rounded-lg px-4 py-2"
                     autoComplete="off"
                   />
@@ -204,10 +204,10 @@ export default function NewServiceRequest() {
 
                 <div>
                   <label className="block text-sm font-medium mb-2">Email (opcional)</label>
-                  <input 
-                    type="email" 
-                    name="email" 
-                    placeholder="tu@email.com" 
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="tu@email.com"
                     className="w-full border rounded-lg px-4 py-2"
                     autoComplete="off"
                   />
@@ -239,27 +239,26 @@ export default function NewServiceRequest() {
 
             <div className="border-t pt-6">
               <h3 className="font-semibold mb-4">Ubicación</h3>
-              
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">Provincia *</label>
-                  <select 
-                    name="province" 
-                    required 
-                    value={selectedProvince} 
-                    onChange={(e) => setSelectedProvince(e.target.value)} 
+                  <select
+                    name="province"
+                    required
+                    value={selectedProvince}
+                    onChange={e => setSelectedProvince(e.target.value)}
                     className="w-full border rounded-lg px-4 py-2"
                   >
                     <option value="">Seleccioná tu provincia</option>
-                    {provinces.map(p => (<option key={p} value={p}>{p}</option>))}
+                    {provinces.map(p => <option key={p} value={p}>{p}</option>)}
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium mb-2">Ciudad *</label>
-                  <select 
-                    value={selectedCity} 
-                    onChange={(e) => setSelectedCity(e.target.value)} 
+                  <select
+                    value={selectedCity}
+                    onChange={e => setSelectedCity(e.target.value)}
                     required={!customCity}
                     disabled={!selectedProvince}
                     className="w-full border rounded-lg px-4 py-2 disabled:bg-gray-100"
@@ -267,7 +266,7 @@ export default function NewServiceRequest() {
                     <option value="">
                       {selectedProvince ? 'Seleccioná tu ciudad' : 'Primero seleccioná provincia'}
                     </option>
-                    {availableCities.map(c => (<option key={c} value={c}>{c}</option>))}
+                    {availableCities.map(c => <option key={c} value={c}>{c}</option>)}
                     {selectedProvince && <option value="OTRA">Otra ciudad...</option>}
                   </select>
                 </div>
@@ -278,9 +277,9 @@ export default function NewServiceRequest() {
                     <input
                       type="text"
                       value={customCity}
-                      onChange={(e) => setCustomCity(e.target.value)}
+                      onChange={e => setCustomCity(e.target.value)}
                       required
-                      placeholder="Escribe tu ciudad"
+                      placeholder="Escribí tu ciudad"
                       className="w-full border rounded-lg px-4 py-2"
                       autoComplete="off"
                     />
@@ -294,12 +293,14 @@ export default function NewServiceRequest() {
                     name="address"
                     required
                     value={address}
-                    onChange={(e) => setAddress(e.target.value)}
+                    onChange={e => setAddress(e.target.value)}
                     placeholder="Av. Santa Fe 1234"
                     className="w-full border rounded-lg px-4 py-2"
                     autoComplete="off"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Solo vos verás la dirección. Los proveedores ven solo la zona.</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Solo vos verás la dirección. Los proveedores ven solo la zona.
+                  </p>
                 </div>
 
                 <div>
@@ -309,7 +310,7 @@ export default function NewServiceRequest() {
                     name="neighborhood"
                     required
                     value={neighborhood}
-                    onChange={(e) => setNeighborhood(e.target.value)}
+                    onChange={e => setNeighborhood(e.target.value)}
                     placeholder="Centro, Palermo..."
                     className="w-full border rounded-lg px-4 py-2"
                     autoComplete="off"
@@ -323,7 +324,6 @@ export default function NewServiceRequest() {
                 <label className="block text-sm font-medium mb-2">¿Cuándo? (opcional)</label>
                 <input type="date" name="preferredDate" className="w-full border rounded-lg px-4 py-2" />
               </div>
-
               <div className="flex items-center">
                 <input type="checkbox" name="isUrgent" id="urgent" className="w-4 h-4" />
                 <label htmlFor="urgent" className="ml-2 text-sm">Es urgente</label>
@@ -339,10 +339,11 @@ export default function NewServiceRequest() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400"
+              className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
             >
               {loading ? 'Enviando...' : 'Enviar Solicitud'}
             </button>
+
           </div>
         </form>
       </div>
