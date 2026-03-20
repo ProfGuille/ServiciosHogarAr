@@ -209,7 +209,7 @@ class MercadoPagoService {
       CROSS JOIN update_credits c;
     `;
 
-    if (result.length === 0) {
+    if ((result as any[]).length === 0) {
       throw new Error('Compra no encontrada, ya procesada, o estado inválido');
     }
 

@@ -109,8 +109,7 @@ router.get("/:id", async (req, res) => {
     if (!provider) return res.status(404).json({ error: "Proveedor no encontrado" });
 
     // Sanitizar datos sensibles
-    delete provider.email;
-    delete provider.phone;
+    delete provider.phoneNumber;
 
     res.json(provider);
   } catch (err) {

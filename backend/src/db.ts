@@ -22,7 +22,7 @@ export const db = drizzle(sql, { schema });
 
 export async function isDatabaseAvailable(): Promise<boolean> {
   try {
-    await sql('SELECT 1');
+    await sql`SELECT 1`;
     return true;
   } catch (error) {
     console.error("❌ Error al conectar con la base de datos:", error);

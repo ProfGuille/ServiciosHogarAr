@@ -145,7 +145,7 @@ export function requireRole(...allowedRoles: string[]) {
 // JWT GENERATOR
 // -----------------------------
 export function generateJWTToken(
-  userId: number,
+  userId: string,
   email: string,
   role: string = "customer"
 ): string {

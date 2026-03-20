@@ -278,9 +278,9 @@ export class EmailService {
 
       // Get user email from users table
       const user = await db
-        .select({ email: users.email, name: users.name })
+        .select({ email: users.email, name: users.firstName })
         .from(users)
-        .where(eq(users.id, userId))
+        .where(eq(users.id, String(userId)))
         .limit(1);
 
       if (user.length === 0) {

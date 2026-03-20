@@ -168,7 +168,6 @@ export const serviceRequestsService = {
         customerId,
         providerId: data.providerId ?? null,
         categoryId: data.categoryId,
-        serviceId: data.serviceId ?? null,
         title: data.title,
         description: data.description,
         address: data.address,
@@ -227,10 +226,9 @@ export const serviceRequestsService = {
     const [updated] = await db
       .update(serviceRequests)
       .set({
-        quotedPrice: price,
+        quotedPrice: String(price),
         quotedAt: new Date(),
         status: "quoted",
-        providerRespondedAt: req.providerRespondedAt ?? new Date(),
         updatedAt: new Date(),
       })
       .where(eq(serviceRequests.id, requestId))
@@ -355,7 +353,6 @@ export const serviceRequestsService = {
     const [updated] = await db
       .update(serviceRequests)
       .set({
-        cancelledAt: new Date(),
         status: "cancelled",
         updatedAt: new Date(),
       })

@@ -125,7 +125,7 @@ export const providersService = {
 
     const [updated] = await db
       .update(serviceProviders)
-      .set({ latitude, longitude })
+      .set({ updatedAt: new Date() }) // latitude/longitude no existen en BD — pendiente migración
       .where(eq(serviceProviders.id, id))
       .returning();
 
@@ -147,8 +147,7 @@ export const providersService = {
     const [updated] = await db
       .update(serviceProviders)
       .set({
-        isOnline,
-        lastSeenAt: new Date(),
+        updatedAt: new Date(), // isOnline/lastSeenAt no existen en BD — pendiente migración
       })
       .where(eq(serviceProviders.id, id))
       .returning();

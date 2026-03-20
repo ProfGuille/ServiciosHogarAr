@@ -8,8 +8,6 @@ import serviceProvidersRoutes from "./serviceProviders.js";
 import createServiceRequestRoutes from "./createServiceRequest.js";
 import serviceRequestsRoutes from "./serviceRequests.js";
 import providerCreditsRoutes from "./providerCredits.js";
-import testEmailRoutes from "./testEmailRoutes.js";
-import testSmtpRoutes from './testSmtpConnection.js';
 
 const router = Router();
 
@@ -22,7 +20,5 @@ router.use("/providers", serviceProvidersRoutes);
 router.use("/service-requests", createServiceRequestRoutes);
 router.use("/service-requests", serviceRequestsRoutes);
 router.use("/provider-credits", providerCreditsRoutes);
-router.use("/test-email", testEmailRoutes);
-router.use("/", testSmtpRoutes);
 
 export default router;

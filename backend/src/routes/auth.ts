@@ -15,7 +15,7 @@ const router = Router();
 // -----------------------------
 router.post("/register", async (req: Request, res: Response) => {
   try {
-    const { name, email, password, role = "customer" } = req.body;
+    const { name, email, password } = req.body;
 
     if (!name || name.length < 2) {
       return res.status(400).json({ error: "Nombre inválido" });
@@ -37,20 +37,23 @@ router.post("/register", async (req: Request, res: Response) => {
 
     const hashed = await bcrypt.hash(password, 10);
 
+    const userId = crypto.randomUUID();
     const [created] = await db.insert(users).values({
-      name,
+      id: userId,
+      firstName: name.split(' ')[0] || name,
+      lastName: name.split(' ').slice(1).join(' ') || '',
       email,
       password: hashed,
-      role,
+      userType: 'customer',
       createdAt: new Date(),
-      isActive: true,
+      updatedAt: new Date(),
     }).returning();
 
-    const token = generateJWTToken(created.id, created.email, created.role);
+    const token = generateJWTToken(created.id, created.email, created.userType);
 
     res.json({
       message: "Registro exitoso",
-      user: { id: created.id, name: created.name, email: created.email, role: created.role },
+      user: { id: created.id, firstName: created.firstName, lastName: created.lastName, email: created.email, userType: created.userType },
       token,
     });
   } catch (err) {
@@ -200,9 +203,10 @@ router.get("/me", requireAuth, async (req: any, res: Response) => {
 
     res.json({
       id: u.id,
-      name: u.name,
+      firstName: u.firstName,
+      lastName: u.lastName,
       email: u.email,
-      role: u.role,
+      userType: u.userType,
       createdAt: u.createdAt,
     });
   } catch (err) {

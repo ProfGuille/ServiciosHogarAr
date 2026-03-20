@@ -41,11 +41,12 @@ router.post("/create", async (req, res) => {
     }
 
     // Registrar compra pendiente
-    const purchase = await paymentsService.registerPurchase({
+    const purchase = await paymentsService.registerPurchase(
       providerId,
       credits,
-      amount,
-    });
+      Number(amount),
+      "mercadopago"
+    );
 
     // Crear preferencia en MP
     const preference = await mercadoPagoService.createPreference({
@@ -56,11 +57,6 @@ router.post("/create", async (req, res) => {
       purchaseId: purchase.id,
     });
 
-    // Actualizar purchase con payment_id
-    await paymentsService.updatePurchasePaymentId(
-      purchase.id,
-      preference.id
-    );
 
     res.json({ 
       preferenceId: preference.id,

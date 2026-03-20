@@ -150,9 +150,9 @@ credits_used, credits_spent, unlocked_at)
       CROSS JOIN update_credits c;
     `;
 
-    if (result.length === 0) {
+    if ((result as any[]).length === 0) {
       // Determinar qué falló
-      const [lead] = await neonSql`SELECT id, status FROM service_requests WHERE id = ${leadId}`;
+      const [lead] = (await neonSql`SELECT id, status FROM service_requests WHERE id = ${leadId}`) as any[];
       
       if (!lead) {
         return res.status(404).json({ error: "Lead no encontrado" });
@@ -162,18 +162,18 @@ credits_used, credits_spent, unlocked_at)
         return res.status(400).json({ error: "Este lead ya no está disponible" });
       }
 
-      const [existing] = await neonSql`
+      const [existing] = (await neonSql`
         SELECT id FROM lead_responses 
         WHERE service_request_id = ${leadId} AND provider_id = ${providerIdInt}
-      `;
+      `) as any[];
       
       if (existing) {
         return res.status(400).json({ error: "Ya desbloqueaste este lead anteriormente" });
       }
 
-      const [credits] = await neonSql`
+      const [credits] = (await neonSql`
         SELECT current_credits FROM provider_credits WHERE provider_id = ${providerIdInt}
-      `;
+      `) as any[];
       
       if (!credits) {
         return res.status(404).json({ 

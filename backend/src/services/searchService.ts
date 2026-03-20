@@ -73,7 +73,7 @@ export const searchService = {
     if (province) conditions.push(ilike(serviceProviders.province, `%${province}%`));
 
     // RATING & REVIEWS
-    if (minRating) conditions.push(gte(serviceProviders.rating, Number(minRating)));
+    if (minRating) conditions.push(gte(serviceProviders.rating, String(minRating)));
     if (hasReviews === "true") conditions.push(gte(serviceProviders.totalReviews, 1));
 
     // VERIFIED
