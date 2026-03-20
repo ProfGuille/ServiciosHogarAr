@@ -1,3 +1,5 @@
+import { Navbar } from "@/components/layout/navbar";
+import { Footer } from "@/components/layout/footer";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -131,7 +133,9 @@ export default function ProviderDashboard() {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="min-h-screen bg-slate-50">
+      <Navbar />
+      <div className="container mx-auto py-8 px-4">
       {/* Header con créditos */}
       <div className="flex justify-between items-center mb-8">
         <div>
@@ -347,6 +351,8 @@ export default function ProviderDashboard() {
           )}
         </DialogContent>
       </Dialog>
+    </div>
+    <Footer />
     </div>
   );
 }
