@@ -139,8 +139,8 @@ export default function ProviderDashboard() {
       {/* Header con créditos */}
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Dashboard Proveedor</h1>
-          <p className="text-muted-foreground">Gestiona tus leads y presupuestos</p>
+          <h1 className="text-3xl font-bold">Mis Solicitudes</h1>
+          <p className="text-muted-foreground">Clientes que buscan tus servicios</p>
         </div>
         <Card className="w-64">
           <CardHeader className="pb-3">

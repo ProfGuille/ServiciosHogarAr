@@ -49,7 +49,7 @@ export function Navbar() {
 
   const authenticatedLinks = [
     { href: "/mis-solicitudes", label: t('nav.requests') || "Solicitudes", icon: FileText },
-    { href: "/dashboard-profesional", label: t('nav.providerDashboard') || "Mi Negocio", icon: Briefcase },
+    { href: "/dashboard-profesional", label: "Mi Panel", icon: Briefcase },
   ];
 
   const adminLinks = [
@@ -112,7 +112,7 @@ export function Navbar() {
             <DropdownMenuItem asChild>
               <Link href="/dashboard-profesional">
                 <Briefcase className="mr-2 h-4 w-4" />
-                {t('nav.providerDashboard') || "Panel Profesional"}
+                {"Mi Panel"}
               </Link>
             </DropdownMenuItem>
           )}
@@ -176,7 +176,7 @@ export function Navbar() {
                     className="flex items-center space-x-2"
                   >
                     <Briefcase className="h-4 w-4" />
-                    <span>{t('nav.providerDashboard') || "Mi Negocio"}</span>
+                    <span>{"Mi Panel"}</span>
                   </Button>
                 </Link>
               )}
