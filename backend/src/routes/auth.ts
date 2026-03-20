@@ -5,7 +5,7 @@ import { users } from "../shared/schema/users.js";
 import { serviceProviders } from "../shared/schema/serviceProviders.js";
 import { providerCredits } from "../shared/schema/providerCredits.js";
 import { providerServices } from "../shared/schema/providerServices.js";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { generateJWTToken, requireAuth } from "../middleware/auth.js";
 
 const router = Router();
@@ -119,11 +119,16 @@ router.post("/register-provider", async (req: Request, res: Response) => {
         serviceName: "Servicio",
         price: 0,
         durationMinutes: 60,
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       }));
-      await db.insert(providerServices).values(categoryValues).onConflictDoNothing();
+      for (const catId2 of serviceCategories) {
+        await db.execute(
+          sql`INSERT INTO provider_services (provider_id, category_id, is_active, created_at)
+          VALUES (${provider.id}, ${parseInt(catId2)}, true, NOW())
+          ON CONFLICT DO NOTHING`
+        );
+      }
       console.log("Categorías guardadas:", serviceCategories.length);
     }
 
