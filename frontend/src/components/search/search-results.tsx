@@ -135,7 +135,7 @@ export function SearchResults({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between mb-2">
                     <div>
-                      <Link href={`/provider/${provider.id}`}>
+                      <Link href={`/profesional/${provider.id}`}>
                         <h3 className="text-lg font-semibold hover:text-primary transition-colors">
                           {provider.businessName}
                           {provider.isVerified && (
@@ -229,7 +229,7 @@ export function SearchResults({
 
                   {/* Action buttons */}
                   <div className="flex gap-2 mt-4">
-                    <Link href={`/provider/${provider.id}`}>
+                    <Link href={`/profesional/${provider.id}`}>
                       <Button>Ver perfil</Button>
                     </Link>
                     <Button variant="outline">

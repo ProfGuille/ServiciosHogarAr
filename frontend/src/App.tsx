@@ -41,7 +41,7 @@ function App() {
       <Route path="/mis-solicitudes" component={MyRequests} />
       <Route path="/mensajes" component={Messages} />
       <Route path="/dashboard-profesional" component={ProviderDashboard} />
-      <Route path="/perfil-profesional" component={ProviderProfile} />
+      <Route path="/profesional/:id" component={ProviderProfile} />
       <Route path="/comprar-creditos" component={ComprarCreditos} />
       <Route path="/compra-exitosa" component={CompraExitosa} />
       <Route path="/compra-fallida" component={CompraFallida} />
