@@ -98,11 +98,7 @@ export function Footer() {
               <ul className="space-y-3">
                 {section.links.map((link, linkIdx) => (
                   <li key={linkIdx}>
-                    <Link href={link.href}>
-                      <a className="text-slate-300 hover:text-white transition-colors text-sm">
-                        {link.label}
-                      </a>
-                    </Link>
+                    <Link href={link.href} className="text-slate-300 hover:text-white transition-colors text-sm">{link.label}</Link>
                   </li>
                 ))}
               </ul>
