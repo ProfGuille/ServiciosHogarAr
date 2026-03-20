@@ -130,7 +130,7 @@ export default function Landing() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {displayCategories.slice(0, 16).map((category) => (
+            {displayCategories.slice(0, 25).map((category) => (
               <Link
                 key={category.id}
                 href={`/buscar?category=${encodeURIComponent(category.name)}`}
