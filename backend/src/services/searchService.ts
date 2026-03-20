@@ -2,7 +2,8 @@ import { db } from "../db.js";
 import { serviceProviders } from "../shared/schema/serviceProviders.js";
 import { providerLocations } from "../shared/schema/providerLocations.js";
 import { users } from "../shared/schema/users.js";
-import { sql, and, or, ilike, gte, lte, desc, asc, eq, SQL } from "drizzle-orm";
+import { sql, and, or, ilike, gte, lte, desc, asc, eq, inArray, SQL } from "drizzle-orm";
+import { providerServices } from "../shared/schema/providerServices.js";
 import { haversineDistance, calculateBoundingBox } from "../utils/geoUtils.js";
 
 export const searchService = {
@@ -12,6 +13,7 @@ export const searchService = {
       city,
       province,
       categoryIds,
+      categoryId,
       minPrice,
       maxPrice,
       minRating,
@@ -51,6 +53,18 @@ export const searchService = {
           ilike(serviceProviders.businessName, `%${searchQuery}%`),
           ilike(serviceProviders.description, `%${searchQuery}%`)
         ) as SQL
+      );
+    }
+
+    // CATEGORY FILTER
+    if (categoryId) {
+      const subquery = db
+        .select({ providerId: providerServices.providerId })
+        .from(providerServices)
+        .where(eq(providerServices.categoryId, parseInt(categoryId as string)))
+        .as("cat_sub");
+      conditions.push(
+        sql`${serviceProviders.id} IN (SELECT provider_id FROM provider_services WHERE category_id = ${parseInt(categoryId as string)} AND is_active = true)` as SQL
       );
     }
 

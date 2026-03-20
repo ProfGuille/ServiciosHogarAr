@@ -20,7 +20,7 @@ export function Footer() {
         { label: "Buscar servicios", href: "/buscar" },
         { label: "Ver todos los servicios", href: "/servicios" },
         { label: "Cómo funciona", href: "/como-funciona" },
-        { label: "Crear solicitud", href: "/crear-solicitud" },
+        { label: "Crear solicitud", href: "/nueva-solicitud" },
       ]
     },
     {

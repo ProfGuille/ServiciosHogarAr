@@ -170,7 +170,7 @@ export default function Landing() {
           <div className="text-center mt-12">
             <Link href="/servicios">
               <Button variant="outline" size="lg" className="group">
-                Ver todos los servicios
+                Encontrá tu profesional
                 <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>

@@ -283,6 +283,9 @@ export default function RegisterProvider() {
                   </div>
                 )}
               </div>
+              <div className="mt-3 p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                  <p className="text-sm text-slate-600">¿Tu especialidad no está en la lista? <a href="/contacto" className="text-blue-600 hover:underline font-medium">Solicitá que la agreguemos</a></p>
+                </div>
 
               <div className="flex items-start space-x-2">
                 <Checkbox

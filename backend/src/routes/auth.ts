@@ -4,6 +4,7 @@ import { db } from "../db.js";
 import { users } from "../shared/schema/users.js";
 import { serviceProviders } from "../shared/schema/serviceProviders.js";
 import { providerCredits } from "../shared/schema/providerCredits.js";
+import { providerServices } from "../shared/schema/providerServices.js";
 import { eq } from "drizzle-orm";
 import { generateJWTToken, requireAuth } from "../middleware/auth.js";
 
@@ -109,6 +110,23 @@ router.post("/register-provider", async (req: Request, res: Response) => {
       currentCredits: 10
     });
     
+    // PASO 4: Guardar categorías seleccionadas
+    const { serviceCategories } = req.body;
+    if (serviceCategories && Array.isArray(serviceCategories) && serviceCategories.length > 0) {
+      const categoryValues = serviceCategories.map((catId: string) => ({
+        providerId: provider.id,
+        categoryId: parseInt(catId),
+        serviceName: "Servicio",
+        price: 0,
+        durationMinutes: 60,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }));
+      await db.insert(providerServices).values(categoryValues).onConflictDoNothing();
+      console.log("Categorías guardadas:", serviceCategories.length);
+    }
+
     console.log("=== REGISTER PROVIDER SUCCESS ===");
     
     res.status(201).json({ 
