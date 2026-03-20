@@ -24,8 +24,6 @@ import {
 
 export default function ProviderProfile() {
   const { id } = useParams();
-  console.log("ID recibido en useParams:", id);
-  console.log("Valor de id en useParams:", id);
 
   const { data: provider, isLoading: providerLoading } = useQuery({
     queryKey: ["/api/providers", id],
