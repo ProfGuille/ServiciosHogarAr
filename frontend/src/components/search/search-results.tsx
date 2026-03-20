@@ -232,10 +232,12 @@ export function SearchResults({
                     <Link href={`/profesional/${provider.id}`}>
                       <Button>Ver perfil</Button>
                     </Link>
-                    <Button variant="outline">
-                      <MessageSquare className="h-4 w-4 mr-2" />
-                      Contactar
-                    </Button>
+                    <Link href="/nueva-solicitud">
+                      <Button variant="outline">
+                        <MessageSquare className="h-4 w-4 mr-2" />
+                        Solicitar servicio
+                      </Button>
+                    </Link>
                   </div>
                 </div>
               </div>

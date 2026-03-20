@@ -1,4 +1,4 @@
-import { useParams } from "wouter";
+import { useParams, Link } from "wouter";
 import { getApiUrl } from '@/lib/api';
 import { useQuery } from "@tanstack/react-query";
 import { Navbar } from "@/components/layout/navbar";
@@ -21,7 +21,6 @@ import {
   Users,
   Award,
 } from "lucide-react";
-import { StartConversationButton } from "@/components/chat/StartConversationButton";
 
 export default function ProviderProfile() {
   const { id } = useParams();
@@ -170,14 +169,12 @@ export default function ProviderProfile() {
                     )}
 
                     <div className="flex flex-col sm:flex-row gap-3">
-                      <Button className="flex-1">
-                        <Calendar className="h-4 w-4 mr-2" />
-                        Solicitar servicio
-                      </Button>
-                      <StartConversationButton 
-                        provider={provider} 
-                        className="flex-1"
-                      />
+                      <Link href="/nueva-solicitud">
+                        <Button className="flex-1">
+                          <Calendar className="h-4 w-4 mr-2" />
+                          Solicitar servicio
+                        </Button>
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -390,7 +387,9 @@ export default function ProviderProfile() {
 
                 <div className="flex items-center gap-3">
                   <Mail className="h-4 w-4 text-slate-400" />
-                  <span className="text-slate-700">Contactar por mensaje</span>
+                  <Link href="/nueva-solicitud">
+                    <span className="text-slate-700 cursor-pointer hover:text-blue-600 underline">Solicitar servicio</span>
+                  </Link>
                 </div>
 
                 {provider.address && (
