@@ -343,6 +343,46 @@ export default function ProviderDashboard() {
             </div>
           )}
         </TabsContent>
+
+        <TabsContent value="perfil" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Zona de cobertura</CardTitle>
+              <CardDescription>
+                Configurá el radio en el que ofrecés tus servicios.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Radio de cobertura</label>
+                <div className="flex items-center gap-4">
+                  <input
+                    type="range"
+                    min={1}
+                    max={50}
+                    value={coverageRadius}
+                    onChange={(e) => setCoverageRadius(Number(e.target.value))}
+                    className="flex-1"
+                  />
+                  <span className="text-sm font-semibold w-16 text-right">{coverageRadius} km</span>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  {[5, 10, 20, 30, 50].map(v => (
+                    <Button key={v} size="sm" variant={coverageRadius === v ? "default" : "outline"} onClick={() => setCoverageRadius(v)}>
+                      {v} km
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              <Button onClick={handleSaveCoverage} disabled={savingCoverage} className="w-full">
+                {savingCoverage ? "Guardando..." : "Guardar zona de cobertura"}
+              </Button>
+              {coverageSaved && (
+                <p className="text-sm text-green-600 text-center">✓ Zona guardada correctamente</p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
 
       {/* Dialog de confirmación */}
