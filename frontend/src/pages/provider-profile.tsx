@@ -1,4 +1,6 @@
 import { useParams, Link } from "wouter";
+import { useState, useEffect } from "react";
+import { LeafletMap } from "@/components/maps/LeafletMap";
 import { getApiUrl } from '@/lib/api';
 import { useQuery } from "@tanstack/react-query";
 import { Navbar } from "@/components/layout/navbar";
@@ -51,6 +53,22 @@ export default function ProviderProfile() {
       fetch(getApiUrl(`/api/providers/${id}/stats`)).then((res) => res.json()),
     enabled: !!id,
   });
+
+  // Geocodificación por ciudad para el mapa
+  const [mapCoords, setMapCoords] = useState<[number, number] | null>(null);
+
+  useEffect(() => {
+    if (!provider?.city) return;
+    const city = encodeURIComponent(`${provider.city}, ${provider.province || 'Argentina'}, Argentina`);
+    fetch(`https://nominatim.openstreetmap.org/search?q=${city}&format=json&limit=1`)
+      .then(r => r.json())
+      .then(data => {
+        if (data && data[0]) {
+          setMapCoords([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
+        }
+      })
+      .catch(() => {});
+  }, [provider?.city, provider?.province]);
 
   if (providerLoading) {
     return (
@@ -421,6 +439,31 @@ export default function ProviderProfile() {
                         <span className="text-sm text-slate-700">{area}</span>
                       </div>
                     ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Zona de cobertura */}
+            {mapCoords && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MapPin className="h-5 w-5" />
+                    Zona de cobertura
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0 overflow-hidden rounded-b-lg">
+                  <LeafletMap
+                    center={mapCoords}
+                    zoom={12}
+                    providers={[]}
+                    userLocation={{ lat: mapCoords[0], lng: mapCoords[1] }}
+                    searchRadius={10}
+                    height="220px"
+                  />
+                  <div className="px-4 py-2 text-xs text-slate-500 text-center">
+                    Zona aproximada · {provider.city}{provider.province ? `, ${provider.province}` : ''}
                   </div>
                 </CardContent>
               </Card>

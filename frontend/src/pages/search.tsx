@@ -524,14 +524,7 @@ export default function Search() {
                       <List className="w-4 h-4 mr-2" />
                       Lista
                     </Button>
-                    <Button
-                      variant={viewMode === 'map' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setViewMode('map')}
-                    >
-                      <MapPin className="w-4 h-4 mr-2" />
-                      Mapa
-                    </Button>
+                    {/* Botón Mapa oculto temporalmente — pendiente geolocalización real en BD */}
                   </div>
                 </div>
               </CardContent>
