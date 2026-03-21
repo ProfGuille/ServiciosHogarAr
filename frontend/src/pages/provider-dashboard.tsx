@@ -2,6 +2,8 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
+import { getApiUrl } from "@/lib/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -45,15 +47,39 @@ export default function ProviderDashboard() {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [showUnlockDialog, setShowUnlockDialog] = useState(false);
   const [activeTab, setActiveTab] = useState("available");
+  const [coverageRadius, setCoverageRadius] = useState(10);
+  const [savingCoverage, setSavingCoverage] = useState(false);
+  const [coverageSaved, setCoverageSaved] = useState(false);
 
-  // Obtener providerId del usuario (temporalmente hardcodeado, debería venir de auth)
-  const providerId = 4; // TODO: Obtener del contexto de autenticación
+  const handleSaveCoverage = async () => {
+    if (!providerId) return;
+    setSavingCoverage(true);
+    setCoverageSaved(false);
+    try {
+      const res = await fetch(getApiUrl(`/api/providers/${providerId}`), {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ coverageRadiusKm: coverageRadius }),
+      });
+      if (!res.ok) throw new Error("Error al guardar");
+      setCoverageSaved(true);
+      setTimeout(() => setCoverageSaved(false), 3000);
+    } catch {
+      alert("Error al guardar la zona de cobertura");
+    } finally {
+      setSavingCoverage(false);
+    }
+  };
+
+  const { user } = useAuth();
+  const providerId = (user as any)?.providerId ?? null;
 
   // Query: Créditos disponibles
   const { data: credits } = useQuery<Credits>({
     queryKey: ["provider-credits", providerId],
+    enabled: !!providerId,
     queryFn: async () => {
-      const res = await fetch(`http://localhost:3000/api/provider-credits/${providerId}`);
+      const res = await fetch(`${getApiUrl()}/api/provider-credits/${providerId}`);
       if (!res.ok) throw new Error("Error al obtener créditos");
       return res.json();
     }
@@ -65,8 +91,9 @@ export default function ProviderDashboard() {
     total: number;
   }>({
     queryKey: ["available-leads", providerId],
+    enabled: !!providerId,
     queryFn: async () => {
-      const res = await fetch(`http://localhost:3000/api/service-requests/available?providerId=${providerId}`);
+      const res = await fetch(`${getApiUrl()}/api/service-requests/available?providerId=${providerId}`);
       if (!res.ok) throw new Error("Error al obtener leads");
       return res.json();
     }
@@ -78,8 +105,9 @@ export default function ProviderDashboard() {
     total: number;
   }>({
     queryKey: ["unlocked-leads", providerId],
+    enabled: !!providerId,
     queryFn: async () => {
-      const res = await fetch(`http://localhost:3000/api/service-requests/unlocked?providerId=${providerId}`);
+      const res = await fetch(`${getApiUrl()}/api/service-requests/unlocked?providerId=${providerId}`);
       if (!res.ok) throw new Error("Error al obtener leads desbloqueados");
       return res.json();
     }
@@ -88,7 +116,7 @@ export default function ProviderDashboard() {
   // Mutation: Desbloquear lead
   const unlockMutation = useMutation({
     mutationFn: async (leadId: number) => {
-      const res = await fetch(`http://localhost:3000/api/service-requests/${leadId}/unlock`, {
+      const res = await fetch(`${getApiUrl()}/api/service-requests/${leadId}/unlock`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ providerId })
@@ -166,6 +194,9 @@ export default function ProviderDashboard() {
           </TabsTrigger>
           <TabsTrigger value="unlocked">
             Mis Leads ({unlockedLeads?.total || 0})
+          </TabsTrigger>
+          <TabsTrigger value="perfil">
+            Mi Perfil
           </TabsTrigger>
         </TabsList>
 

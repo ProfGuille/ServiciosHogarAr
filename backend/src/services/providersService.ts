@@ -48,6 +48,7 @@ export const providersService = {
       "city",
       "province",
       "phone",
+      "coverageRadiusKm",
     ];
 
     const safeData: any = {};

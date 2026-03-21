@@ -201,6 +201,15 @@ router.get("/me", requireAuth, async (req: any, res: Response) => {
 
     const u = user[0];
 
+    let providerId = null;
+    if (u.userType === "provider") {
+      const provider = await db.select({ id: serviceProviders.id })
+        .from(serviceProviders)
+        .where(eq(serviceProviders.userId, u.id))
+        .limit(1);
+      if (provider.length > 0) providerId = provider[0].id;
+    }
+
     res.json({
       id: u.id,
       firstName: u.firstName,
@@ -208,6 +217,7 @@ router.get("/me", requireAuth, async (req: any, res: Response) => {
       email: u.email,
       userType: u.userType,
       createdAt: u.createdAt,
+      ...(providerId !== null && { providerId }),
     });
   } catch (err) {
     console.error("Error en /me:", err);
