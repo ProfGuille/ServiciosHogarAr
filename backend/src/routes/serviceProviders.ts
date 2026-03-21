@@ -11,6 +11,7 @@ const router = Router();
 // Helpers
 // -----------------------------
 async function ensureOwnership(req, providerId) {
+  console.log("ensureOwnership — role:", req.user.role, "userId:", req.user.id, "providerId param:", providerId);
   if (req.user.role !== "provider") {
     throw { status: 403, message: "Solo los proveedores pueden realizar esta acción" };
   }
@@ -18,6 +19,7 @@ async function ensureOwnership(req, providerId) {
     .from(serviceProviders)
     .where(eq(serviceProviders.userId, req.user.id))
     .limit(1);
+  console.log("ensureOwnership — provider found:", provider);
   if (!provider.length || provider[0].id !== providerId) {
     throw { status: 403, message: "No autorizado para modificar este perfil" };
   }
