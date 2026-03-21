@@ -16,7 +16,7 @@ async function ensureOwnership(req, providerId) {
   }
   const provider = await db.select({ id: serviceProviders.id })
     .from(serviceProviders)
-    .where(eq(serviceProviders.userId, req.user.userId))
+    .where(eq(serviceProviders.userId, req.user.id))
     .limit(1);
   if (!provider.length || provider[0].id !== providerId) {
     throw { status: 403, message: "No autorizado para modificar este perfil" };
