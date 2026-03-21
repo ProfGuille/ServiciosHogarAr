@@ -33,9 +33,11 @@ export default function Login() {
         throw new Error(data.message || 'Error al iniciar sesión');
       }
 
-      // Backend usa cookies HTTP-only, no envía token en JSON
       if (data.user) {
         localStorage.setItem('user', JSON.stringify(data.user));
+      }
+      if (data.token) {
+        localStorage.setItem('token', data.token);
       }
       
       // Redirigir según tipo de usuario
