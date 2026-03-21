@@ -59,7 +59,8 @@ export default function ProviderDashboard() {
     try {
       const res = await fetch(getApiUrl(`/api/providers/${providerId}`), {
         method: "PATCH",
-        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ coverageRadiusKm: coverageRadius }),
       });
       if (!res.ok) throw new Error("Error al guardar");
