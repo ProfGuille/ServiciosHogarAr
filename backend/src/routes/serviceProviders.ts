@@ -1,17 +1,24 @@
 import { Router } from "express";
 import { providersService } from "../services/providersService.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
+import { db } from "../db.js";
+import { serviceProviders } from "../shared/schema/serviceProviders.js";
+import { eq } from "drizzle-orm";
 
 const router = Router();
 
 // -----------------------------
 // Helpers
 // -----------------------------
-function ensureOwnership(req, providerId) {
+async function ensureOwnership(req, providerId) {
   if (req.user.role !== "provider") {
     throw { status: 403, message: "Solo los proveedores pueden realizar esta acción" };
   }
-  if (req.user.providerId !== providerId) {
+  const provider = await db.select({ id: serviceProviders.id })
+    .from(serviceProviders)
+    .where(eq(serviceProviders.userId, req.user.userId))
+    .limit(1);
+  if (!provider.length || provider[0].id !== providerId) {
     throw { status: 403, message: "No autorizado para modificar este perfil" };
   }
 }
@@ -40,7 +47,7 @@ router.patch("/:id", requireAuth, async (req, res) => {
   if (isNaN(providerId)) return res.status(400).json({ error: "ID inválido" });
 
   try {
-    ensureOwnership(req, providerId);
+    await ensureOwnership(req, providerId);
 
     const updated = await providersService.updateProfile(providerId, req.body);
     res.json(updated);
@@ -58,7 +65,7 @@ router.patch("/:id/location", requireAuth, async (req, res) => {
   if (isNaN(providerId)) return res.status(400).json({ error: "ID inválido" });
 
   try {
-    ensureOwnership(req, providerId);
+    await ensureOwnership(req, providerId);
 
     const { latitude, longitude } = req.body;
 
@@ -83,7 +90,7 @@ router.patch("/:id/online", requireAuth, async (req, res) => {
   if (isNaN(providerId)) return res.status(400).json({ error: "ID inválido" });
 
   try {
-    ensureOwnership(req, providerId);
+    await ensureOwnership(req, providerId);
 
     const updated = await providersService.updateOnlineStatus(
       providerId,
