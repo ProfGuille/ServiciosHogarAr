@@ -175,15 +175,25 @@ router.post("/login", async (req: Request, res: Response) => {
       return res.status(401).json({ error: "Credenciales inválidas" });
     
     const token = generateJWTToken(user.id, user.email, user.userType);
-    
+
+    let providerId = null;
+    if (user.userType === "provider") {
+      const provider = await db.select({ id: serviceProviders.id })
+        .from(serviceProviders)
+        .where(eq(serviceProviders.userId, user.id))
+        .limit(1);
+      if (provider.length > 0) providerId = provider[0].id;
+    }
+
     res.json({
       message: "Inicio de sesión exitoso",
-      user: { 
-        id: user.id, 
+      user: {
+        id: user.id,
         firstName: user.firstName,
         lastName: user.lastName,
-        email: user.email, 
-        userType: user.userType 
+        email: user.email,
+        userType: user.userType,
+        ...(providerId !== null && { providerId }),
       },
       token,
     });
