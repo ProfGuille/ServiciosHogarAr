@@ -15,12 +15,12 @@ async function ensureOwnership(req, providerId) {
   if (req.user.role !== "provider") {
     throw { status: 403, message: "Solo los proveedores pueden realizar esta acción" };
   }
-  const provider = await db.select({ id: serviceProviders.id })
+  const provider = await db.select({ id: serviceProviders.id, userId: serviceProviders.userId })
     .from(serviceProviders)
-    .where(eq(serviceProviders.userId, req.user.id))
+    .where(eq(serviceProviders.id, providerId))
     .limit(1);
   console.log("ensureOwnership — provider found:", provider);
-  if (!provider.length || provider[0].id !== providerId) {
+  if (!provider.length || provider[0].userId !== req.user.id) {
     throw { status: 403, message: "No autorizado para modificar este perfil" };
   }
 }
