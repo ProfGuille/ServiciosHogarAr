@@ -1,7 +1,7 @@
 import { db } from "../db.js";
 import { serviceProviders } from "../shared/schema/serviceProviders.js";
 import { providerServices } from "../shared/schema/providerServices.js";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 export const providersService = {
   // ---------------------------------------------------------
@@ -94,6 +94,17 @@ export const providersService = {
 
     if (Object.keys(safeData).length === 0) {
       throw new Error("No se enviaron campos válidos para actualizar");
+    }
+
+    // coverageRadiusKm requiere SQL directo (columna no está en schema Drizzle)
+    if (safeData.coverageRadiusKm !== undefined) {
+      const radius = safeData.coverageRadiusKm;
+      delete safeData.coverageRadiusKm;
+      await db.execute(sql`UPDATE service_providers SET coverage_radius_km = ${radius} WHERE id = ${id}`);
+      if (Object.keys(safeData).length === 0) {
+        const result = await db.execute(sql`SELECT * FROM service_providers WHERE id = ${id} LIMIT 1`);
+        return (result as any)[0];
+      }
     }
 
     const [updated] = await db
