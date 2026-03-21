@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { getApiUrl } from "@/lib/api";
+import { getAuthHeaders } from "@/lib/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -58,7 +59,7 @@ export default function ProviderDashboard() {
     try {
       const res = await fetch(getApiUrl(`/api/providers/${providerId}`), {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({ coverageRadiusKm: coverageRadius }),
       });
       if (!res.ok) throw new Error("Error al guardar");
