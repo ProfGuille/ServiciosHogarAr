@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getApiUrl } from "@/lib/api";
-import { useSearch } from "wouter";
+import { useSearch, Link } from "wouter";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -255,7 +255,7 @@ export default function Services() {
                               {provider.hourlyRate ? `$${provider.hourlyRate}/hora` : ''}
                             </span>
                             <Button size="sm" asChild>
-                              <a href={`/profesional/${provider.id}`}>Ver perfil</a>
+                              <Link href={`/profesional/${provider.id}`}>Ver perfil</Link>
                             </Button>
                           </div>
                         </div>
