@@ -37,7 +37,8 @@ import {
   Settings,
   FileText,
   BarChart3,
-  Globe
+  Globe,
+  Activity
 } from "lucide-react";
 
 export default function AdminDashboard() {
