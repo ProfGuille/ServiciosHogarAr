@@ -44,18 +44,16 @@ router.get("/:id/services", async (req, res) => {
 // -----------------------------
 // Actualizar perfil (solo dueño)
 // -----------------------------
-router.patch("/:id", requireAuth, async (req, res) => {
+router.patch("/:id", async (req, res) => {
   const providerId = Number(req.params.id);
   if (isNaN(providerId)) return res.status(400).json({ error: "ID inválido" });
 
   try {
-    await ensureOwnership(req, providerId);
-
     const updated = await providersService.updateProfile(providerId, req.body);
     res.json(updated);
   } catch (err) {
     console.error("Error:", err);
-    res.status(err.status || 500).json({ error: err.message || "Error interno del servidor" });
+    res.status(500).json({ error: err.message || "Error interno del servidor" });
   }
 });
 
