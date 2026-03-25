@@ -115,6 +115,52 @@ export default function ProviderDashboard() {
     }
   });
 
+  // Query: Perfil del proveedor
+  const { data: providerProfile, refetch: refetchProfile } = useQuery({
+    queryKey: ["provider-profile", providerId],
+    enabled: !!providerId,
+    queryFn: async () => {
+      const res = await fetch(getApiUrl(`/api/providers/${providerId}`));
+      if (!res.ok) throw new Error("Error al obtener perfil");
+      return res.json();
+    }
+  });
+
+  // Estado para edición de perfil
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [profileForm, setProfileForm] = useState({ businessName: "", description: "", hourlyRate: "", phone: "" });
+
+  const handleEditProfile = () => {
+    setProfileForm({
+      businessName: providerProfile?.businessName || providerProfile?.business_name || "",
+      description: providerProfile?.description || "",
+      hourlyRate: providerProfile?.hourlyRate || providerProfile?.hourly_rate || "",
+      phone: providerProfile?.phoneNumber || providerProfile?.phone_number || "",
+    });
+    setEditingProfile(true);
+  };
+
+  const handleSaveProfile = async () => {
+    if (!providerId) return;
+    try {
+      const res = await fetch(getApiUrl(`/api/providers/${providerId}`), {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          businessName: profileForm.businessName,
+          businessDescription: profileForm.description,
+          hourlyRate: profileForm.hourlyRate ? Number(profileForm.hourlyRate) : undefined,
+          phone: profileForm.phone,
+        }),
+      });
+      if (!res.ok) throw new Error("Error al guardar");
+      setEditingProfile(false);
+      refetchProfile();
+    } catch {
+      alert("Error al guardar el perfil");
+    }
+  };
+
   // Mutation: Desbloquear lead
   const unlockMutation = useMutation({
     mutationFn: async (leadId: number) => {
@@ -169,8 +215,8 @@ export default function ProviderDashboard() {
       {/* Header con créditos */}
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Mis Solicitudes</h1>
-          <p className="text-muted-foreground">Clientes que buscan tus servicios</p>
+          <h1 className="text-3xl font-bold">Mi Panel</h1>
+          <p className="text-muted-foreground">Gestioná tus solicitudes y configurá tu perfil</p>
         </div>
         <Card className="w-64">
           <CardHeader className="pb-3">
@@ -184,6 +230,9 @@ export default function ProviderDashboard() {
             <p className="text-xs text-muted-foreground mt-1">
               {credits?.totalSpent || 0} usados
             </p>
+            <Button size="sm" variant="outline" className="mt-2 w-full text-xs" onClick={() => window.location.href = '/comprar-creditos'}>
+              Comprar créditos
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -192,10 +241,10 @@ export default function ProviderDashboard() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="available">
-            Leads Disponibles ({availableLeads?.total || 0})
+            Nuevas solicitudes ({availableLeads?.total || 0})
           </TabsTrigger>
           <TabsTrigger value="unlocked">
-            Mis Leads ({unlockedLeads?.total || 0})
+            Mis solicitudes ({unlockedLeads?.total || 0})
           </TabsTrigger>
           <TabsTrigger value="perfil">
             Mi Perfil
@@ -205,11 +254,11 @@ export default function ProviderDashboard() {
         {/* Tab: Leads Disponibles */}
         <TabsContent value="available" className="space-y-4">
           {loadingAvailable ? (
-            <div className="text-center py-12">Cargando leads...</div>
+            <div className="text-center py-12">Cargando solicitudes...</div>
           ) : availableLeads?.data.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center text-muted-foreground">
-                No hay leads disponibles en este momento
+                No hay nuevas solicitudes en este momento
               </CardContent>
             </Card>
           ) : (
@@ -252,7 +301,7 @@ export default function ProviderDashboard() {
                       disabled={!credits || credits.currentCredits < 1}
                     >
                       <CreditCard className="h-4 w-4 mr-2" />
-                      Desbloquear (1 crédito)
+                      Desbloquear datos del cliente (1 crédito)
                     </Button>
 
                     <p className="text-xs text-muted-foreground text-center">
@@ -268,11 +317,11 @@ export default function ProviderDashboard() {
         {/* Tab: Mis Leads */}
         <TabsContent value="unlocked" className="space-y-4">
           {loadingUnlocked ? (
-            <div className="text-center py-12">Cargando leads...</div>
+            <div className="text-center py-12">Cargando solicitudes...</div>
           ) : unlockedLeads?.data.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center text-muted-foreground">
-                No has desbloqueado ningún lead todavía
+                Todavía no desbloqueaste ninguna solicitud
               </CardContent>
             </Card>
           ) : (
@@ -347,41 +396,86 @@ export default function ProviderDashboard() {
         </TabsContent>
 
         <TabsContent value="perfil" className="space-y-4">
+          {/* Datos del negocio */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Datos de tu negocio</CardTitle>
+                <CardDescription>Información que ven los clientes en tu perfil público</CardDescription>
+              </div>
+              {!editingProfile && (
+                <Button size="sm" variant="outline" onClick={handleEditProfile}>Editar</Button>
+              )}
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {editingProfile ? (
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-sm font-medium">Nombre del negocio</label>
+                    <input className="w-full mt-1 px-3 py-2 border rounded-md text-sm" value={profileForm.businessName} onChange={e => setProfileForm({...profileForm, businessName: e.target.value})} />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Descripción</label>
+                    <textarea className="w-full mt-1 px-3 py-2 border rounded-md text-sm" rows={3} value={profileForm.description} onChange={e => setProfileForm({...profileForm, description: e.target.value})} />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Tarifa por hora (ARS)</label>
+                    <input className="w-full mt-1 px-3 py-2 border rounded-md text-sm" type="number" value={profileForm.hourlyRate} onChange={e => setProfileForm({...profileForm, hourlyRate: e.target.value})} />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Teléfono de contacto</label>
+                    <input className="w-full mt-1 px-3 py-2 border rounded-md text-sm" value={profileForm.phone} onChange={e => setProfileForm({...profileForm, phone: e.target.value})} />
+                  </div>
+                  <div className="flex gap-2 pt-2">
+                    <Button className="flex-1" onClick={handleSaveProfile}>Guardar cambios</Button>
+                    <Button variant="outline" className="flex-1" onClick={() => setEditingProfile(false)}>Cancelar</Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Nombre</span>
+                    <span className="font-medium">{providerProfile?.businessName || providerProfile?.business_name || "—"}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Descripción</span>
+                    <span className="font-medium max-w-xs text-right">{providerProfile?.description || "—"}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Tarifa/hora</span>
+                    <span className="font-medium">{providerProfile?.hourlyRate || providerProfile?.hourly_rate ? `$${providerProfile?.hourlyRate || providerProfile?.hourly_rate} ARS` : "—"}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Teléfono</span>
+                    <span className="font-medium">{providerProfile?.phoneNumber || providerProfile?.phone_number || "—"}</span>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Zona de cobertura */}
           <Card>
             <CardHeader>
               <CardTitle>Zona de cobertura</CardTitle>
-              <CardDescription>
-                Configurá el radio en el que ofrecés tus servicios.
-              </CardDescription>
+              <CardDescription>Radio en el que ofrecés tus servicios. Se muestra en tu perfil público.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Radio de cobertura</label>
                 <div className="flex items-center gap-4">
-                  <input
-                    type="range"
-                    min={1}
-                    max={50}
-                    value={coverageRadius}
-                    onChange={(e) => setCoverageRadius(Number(e.target.value))}
-                    className="flex-1"
-                  />
+                  <input type="range" min={1} max={50} value={coverageRadius} onChange={(e) => setCoverageRadius(Number(e.target.value))} className="flex-1" />
                   <span className="text-sm font-semibold w-16 text-right">{coverageRadius} km</span>
                 </div>
                 <div className="flex gap-2 flex-wrap">
                   {[5, 10, 20, 30, 50].map(v => (
-                    <Button key={v} size="sm" variant={coverageRadius === v ? "default" : "outline"} onClick={() => setCoverageRadius(v)}>
-                      {v} km
-                    </Button>
+                    <Button key={v} size="sm" variant={coverageRadius === v ? "default" : "outline"} onClick={() => setCoverageRadius(v)}>{v} km</Button>
                   ))}
                 </div>
               </div>
               <Button onClick={handleSaveCoverage} disabled={savingCoverage} className="w-full">
                 {savingCoverage ? "Guardando..." : "Guardar zona de cobertura"}
               </Button>
-              {coverageSaved && (
-                <p className="text-sm text-green-600 text-center">✓ Zona guardada correctamente</p>
-              )}
+              {coverageSaved && <p className="text-sm text-green-600 text-center">✓ Zona guardada correctamente</p>}
             </CardContent>
           </Card>
         </TabsContent>
@@ -391,7 +485,7 @@ export default function ProviderDashboard() {
       <Dialog open={showUnlockDialog} onOpenChange={setShowUnlockDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>¿Desbloquear este lead?</DialogTitle>
+            <DialogTitle>¿Desbloquear datos del cliente?</DialogTitle>
             <DialogDescription>
               Se descontará 1 crédito de tu cuenta. Tendrás acceso a los datos completos del cliente.
             </DialogDescription>
@@ -414,7 +508,7 @@ export default function ProviderDashboard() {
               onClick={handleConfirmUnlock}
               disabled={unlockMutation.isPending}
             >
-              {unlockMutation.isPending ? "Desbloqueando..." : "Confirmar (1 crédito)"}
+              {unlockMutation.isPending ? "Desbloqueando..." : "Confirmar desbloqueo (1 crédito)"}
             </Button>
           </DialogFooter>
           {unlockMutation.isError && (
