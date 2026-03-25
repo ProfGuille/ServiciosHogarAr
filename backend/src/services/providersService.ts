@@ -103,7 +103,8 @@ export const providersService = {
       await db.execute(sql`UPDATE service_providers SET coverage_radius_km = ${radius} WHERE id = ${id}`);
       if (Object.keys(safeData).length === 0) {
         const result = await db.execute(sql`SELECT * FROM service_providers WHERE id = ${id} LIMIT 1`);
-        return (result as any)[0];
+        const rows = (result as any).rows || result;
+        return rows[0] || { id, updated: true };
       }
     }
 
