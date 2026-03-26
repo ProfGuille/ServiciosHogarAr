@@ -69,13 +69,18 @@ export default function AdminDashboard() {
   });
 
   const { data: recentProviders } = useQuery({
-    queryKey: ["/api/providers", { limit: 10, isVerified: false }],
+    queryKey: ["/api/admin/providers"],
     enabled: !!user && user.userType === 'admin',
   });
 
   const { data: recentRequests } = useQuery({
-    queryKey: ["/api/requests", { limit: 10 }],
+    queryKey: ["/api/admin/requests"],
     enabled: !!user && user.userType === 'admin',
+  });
+
+  const { data: recentActivity } = useQuery({
+    queryKey: ["/api/admin/activity"],
+    enabled: !!user && user.userType === "admin",
   });
 
   const { data: categories, refetch: refetchCategories } = useQuery({
@@ -175,26 +180,6 @@ export default function AdminDashboard() {
                   Analytics
                 </Button>
               </a>
-              <a href="/admin/wordpress">
-                <Button variant="outline">
-                  <Globe className="h-4 w-4 mr-2" />
-                  WordPress
-                </Button>
-              </a>
-              <a href="/admin/integrations">
-                <Button variant="outline">
-                  <Activity className="h-4 w-4 mr-2" />
-                  Integrations
-                </Button>
-              </a>
-              <Button variant="outline">
-                <Settings className="h-4 w-4 mr-2" />
-                Configuración
-              </Button>
-              <Button>
-                <FileText className="h-4 w-4 mr-2" />
-                Reportes
-              </Button>
             </div>
           </div>
         </div>
@@ -284,37 +269,22 @@ export default function AdminDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">Nuevo profesional registrado</p>
-                        <p className="text-xs text-slate-500">Hace 5 minutos</p>
+                    {recentActivity && recentActivity.length > 0 ? recentActivity.map((item: any, i: number) => (
+                      <div key={i} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                        <div className={`w-2 h-2 rounded-full ${item.type === "provider" ? "bg-green-500" : "bg-blue-500"}`}></div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">
+                            {item.type === "provider" ? "Nuevo profesional: " : "Nueva solicitud: "}
+                            {item.label}
+                          </p>
+                          <p className="text-xs text-slate-500">
+                            {new Date(item.created_at).toLocaleDateString("es-AR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">Solicitud de servicio completada</p>
-                        <p className="text-xs text-slate-500">Hace 12 minutos</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-                      <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">Profesional pendiente de verificación</p>
-                        <p className="text-xs text-slate-500">Hace 1 hora</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">Nueva reseña publicada</p>
-                        <p className="text-xs text-slate-500">Hace 2 horas</p>
-                      </div>
-                    </div>
+                    )) : (
+                      <p className="text-sm text-slate-500 text-center py-4">Sin actividad reciente</p>
+                    )}
                   </div>
                 </CardContent>
               </Card>
