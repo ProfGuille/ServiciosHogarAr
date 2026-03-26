@@ -57,10 +57,13 @@ export default function ProviderDashboard() {
     setSavingCoverage(true);
     setCoverageSaved(false);
     try {
+      const token = localStorage.getItem("token");
       const res = await fetch(getApiUrl(`/api/providers/${providerId}`), {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({ coverageRadiusKm: coverageRadius }),
       });
       if (!res.ok) throw new Error("Error al guardar");
@@ -143,9 +146,13 @@ export default function ProviderDashboard() {
   const handleSaveProfile = async () => {
     if (!providerId) return;
     try {
+      const token = localStorage.getItem("token");
       const res = await fetch(getApiUrl(`/api/providers/${providerId}`), {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({
           businessName: profileForm.businessName,
           businessDescription: profileForm.description,

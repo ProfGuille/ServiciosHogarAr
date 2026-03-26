@@ -44,7 +44,7 @@ router.get("/:id/services", async (req, res) => {
 // -----------------------------
 // Actualizar perfil (solo dueño)
 // -----------------------------
-router.patch("/:id", async (req, res) => {
+router.patch("/:id", requireAuth, async (req, res) => {
   const providerId = Number(req.params.id);
   if (isNaN(providerId)) return res.status(400).json({ error: "ID inválido" });
 
