@@ -3,6 +3,7 @@ import { Footer } from "@/components/layout/footer";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
+import { useLocation } from "wouter";
 import { getApiUrl } from "@/lib/api";
 import { getAuthHeaders } from "@/lib/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -77,7 +78,15 @@ export default function ProviderDashboard() {
   };
 
   const { user } = useAuth();
+  const [, navigate] = useLocation();
   const providerId = (user as any)?.providerId ?? null;
+
+  // Redirigir si no es proveedor
+  if (user && user.userType !== "provider") {
+    if (user.userType === "admin") navigate("/admin");
+    else navigate("/");
+    return null;
+  }
 
   // Query: Créditos disponibles
   const { data: credits } = useQuery<Credits>({
