@@ -47,6 +47,44 @@ export default function AdminDashboard() {
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
   const [showCategoryForm, setShowCategoryForm] = useState(false);
   const [editingCategory, setEditingCategory] = useState<ServiceCategory | null>(null);
+  const [selectedProvider, setSelectedProvider] = useState<any | null>(null);
+  const [providerDialogOpen, setProviderDialogOpen] = useState(false);
+
+  const verifyProviderMutation = useMutation({
+    mutationFn: async (providerId: number) => {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`/api/admin/providers/${providerId}/verify`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: data.isVerified ? "Proveedor verificado" : "Verificacion removida",
+        description: data.isVerified ? "El profesional fue verificado exitosamente." : "Se removio la verificacion.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/providers"] });
+      if (selectedProvider) setSelectedProvider((prev: any) => ({ ...prev, isVerified: data.isVerified }));
+    },
+    onError: () => {
+      toast({ title: "Error", description: "No se pudo verificar el proveedor.", variant: "destructive" });
+    },
+  });
+
+  const handleVerProviderProfile = async (providerId: number) => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`/api/admin/providers/${providerId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      setSelectedProvider(data);
+      setProviderDialogOpen(true);
+    } catch {
+      toast({ title: "Error", description: "No se pudo cargar el perfil.", variant: "destructive" });
+    }
+  };
 
   // Redirect if not authenticated or not admin
   useEffect(() => {
@@ -388,12 +426,17 @@ export default function AdminDashboard() {
                           </div>
                           
                           <div className="flex gap-2">
-                            <Button size="sm" variant="outline">
+                            <Button size="sm" variant="outline" onClick={() => handleVerProviderProfile(provider.id)}>
                               Ver perfil
                             </Button>
-                            <Button size="sm">
+                            <Button
+                              size="sm"
+                              variant={provider.isVerified ? "outline" : "default"}
+                              onClick={() => verifyProviderMutation.mutate(provider.id)}
+                              disabled={verifyProviderMutation.isPending}
+                            >
                               <Shield className="h-4 w-4 mr-1" />
-                              Verificar
+                              {provider.isVerified ? "Quitar verificacion" : "Verificar"}
                             </Button>
                           </div>
                         </div>
@@ -632,6 +675,76 @@ export default function AdminDashboard() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Provider Profile Dialog */}
+      <Dialog open={providerDialogOpen} onOpenChange={setProviderDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Briefcase className="h-5 w-5" />
+              {selectedProvider?.businessName}
+            </DialogTitle>
+            <DialogDescription>Perfil completo del profesional</DialogDescription>
+          </DialogHeader>
+          {selectedProvider && (
+            <div className="space-y-4 py-2">
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <span className="text-slate-500 block">Nombre</span>
+                  <span className="font-medium">{selectedProvider.firstName} {selectedProvider.lastName}</span>
+                </div>
+                <div>
+                  <span className="text-slate-500 block">Email</span>
+                  <span className="font-medium">{selectedProvider.email}</span>
+                </div>
+                <div>
+                  <span className="text-slate-500 block">Telefono</span>
+                  <span className="font-medium">{selectedProvider.phoneNumber || "—"}</span>
+                </div>
+                <div>
+                  <span className="text-slate-500 block">Ubicacion</span>
+                  <span className="font-medium">{selectedProvider.city}, {selectedProvider.province}</span>
+                </div>
+                <div>
+                  <span className="text-slate-500 block">Experiencia</span>
+                  <span className="font-medium">{selectedProvider.experienceYears} anos</span>
+                </div>
+                <div>
+                  <span className="text-slate-500 block">Tarifa/hora</span>
+                  <span className="font-medium">{selectedProvider.hourlyRate ? `$${Number(selectedProvider.hourlyRate).toLocaleString("es-AR")}` : "—"}</span>
+                </div>
+                <div>
+                  <span className="text-slate-500 block">Estado</span>
+                  <Badge variant={selectedProvider.isVerified ? "default" : "secondary"}>
+                    {selectedProvider.isVerified ? "Verificado" : "Sin verificar"}
+                  </Badge>
+                </div>
+                <div>
+                  <span className="text-slate-500 block">Registro</span>
+                  <span className="font-medium">{new Date(selectedProvider.createdAt).toLocaleDateString("es-AR")}</span>
+                </div>
+              </div>
+              {selectedProvider.description && (
+                <div>
+                  <span className="text-slate-500 block text-sm mb-1">Descripcion</span>
+                  <p className="text-sm border rounded p-2 bg-slate-50">{selectedProvider.description}</p>
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setProviderDialogOpen(false)}>Cerrar</Button>
+            <Button
+              variant={selectedProvider?.isVerified ? "outline" : "default"}
+              onClick={() => selectedProvider && verifyProviderMutation.mutate(selectedProvider.id)}
+              disabled={verifyProviderMutation.isPending}
+            >
+              <Shield className="h-4 w-4 mr-1" />
+              {selectedProvider?.isVerified ? "Quitar verificacion" : "Verificar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Category Form Dialog */}
       <Dialog open={showCategoryForm} onOpenChange={setShowCategoryForm}>

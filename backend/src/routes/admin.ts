@@ -98,4 +98,62 @@ router.get("/activity", async (req, res) => {
   }
 });
 
+
+// GET /api/admin/providers/:id
+router.get("/providers/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [provider] = await sql`
+      SELECT
+        sp.id, sp.business_name, sp.description, sp.city, sp.province,
+        sp.experience_years, sp.is_verified, sp.is_active, sp.rating,
+        sp.total_reviews, sp.phone_number, sp.address, sp.hourly_rate,
+        sp.coverage_radius_km, sp.created_at,
+        u.email, u.first_name, u.last_name
+      FROM service_providers sp
+      JOIN users u ON sp.user_id = u.id
+      WHERE sp.id = ${id}
+    `;
+    res.json({
+      id: provider.id,
+      businessName: provider.business_name,
+      description: provider.description,
+      city: provider.city,
+      province: provider.province,
+      experienceYears: provider.experience_years,
+      isVerified: provider.is_verified,
+      isActive: provider.is_active,
+      rating: provider.rating,
+      totalReviews: provider.total_reviews,
+      phoneNumber: provider.phone_number,
+      address: provider.address,
+      hourlyRate: provider.hourly_rate,
+      coverageRadiusKm: provider.coverage_radius_km,
+      createdAt: provider.created_at,
+      email: provider.email,
+      firstName: provider.first_name,
+      lastName: provider.last_name,
+    });
+  } catch (error) {
+    console.error("Error en GET /api/admin/providers/:id:", error);
+    res.status(500).json({ error: "Error al obtener proveedor" });
+  }
+});
+
+// PATCH /api/admin/providers/:id/verify
+router.patch("/providers/:id/verify", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [updated] = await sql`
+      UPDATE service_providers
+      SET is_verified = NOT is_verified, updated_at = NOW()
+      WHERE id = ${id}
+      RETURNING id, is_verified
+    `;
+    res.json({ id: updated.id, isVerified: updated.is_verified });
+  } catch (error) {
+    console.error("Error en PATCH /api/admin/providers/:id/verify:", error);
+    res.status(500).json({ error: "Error al verificar proveedor" });
+  }
+});
 export default router;
