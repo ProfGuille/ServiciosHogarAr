@@ -133,6 +133,11 @@ export default function AdminDashboard() {
     enabled: !!user && user.userType === 'admin',
   });
 
+  const { data: metrics } = useQuery({
+    queryKey: ["/api/admin/metrics"],
+    enabled: !!user && user.userType === "admin",
+  });
+
   const { data: recentActivity } = useQuery({
     queryKey: ["/api/admin/activity"],
     enabled: !!user && user.userType === "admin",
@@ -356,41 +361,41 @@ export default function AdminDashboard() {
                   <div className="space-y-6">
                     <div>
                       <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm font-medium text-slate-700">Tasa de finalización</span>
-                        <span className="text-sm font-bold">87%</span>
-                      </div>
-                      <div className="w-full bg-slate-200 rounded-full h-2">
-                        <div className="bg-green-600 h-2 rounded-full" style={{ width: '87%' }}></div>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm font-medium text-slate-700">Satisfacción del cliente</span>
-                        <span className="text-sm font-bold">4.8/5</span>
-                      </div>
-                      <div className="w-full bg-slate-200 rounded-full h-2">
-                        <div className="bg-yellow-500 h-2 rounded-full" style={{ width: '96%' }}></div>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <div className="flex justify-between items-center mb-2">
                         <span className="text-sm font-medium text-slate-700">Profesionales verificados</span>
-                        <span className="text-sm font-bold">92%</span>
+                        <span className="text-sm font-bold">{metrics?.verifiedCount ?? "—"} / {metrics?.totalProviders ?? "—"} ({metrics?.verifiedPercent ?? "—"}%)</span>
                       </div>
                       <div className="w-full bg-slate-200 rounded-full h-2">
-                        <div className="bg-blue-600 h-2 rounded-full" style={{ width: '92%' }}></div>
+                        <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${metrics?.verifiedPercent ?? 0}%` }}></div>
                       </div>
                     </div>
-                    
+
                     <div>
                       <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm font-medium text-slate-700">Tiempo promedio de respuesta</span>
-                        <span className="text-sm font-bold">2.3 hrs</span>
+                        <span className="text-sm font-medium text-slate-700">Solicitudes convertidas</span>
+                        <span className="text-sm font-bold">{metrics?.convertedRequests ?? "—"} / {metrics?.totalRequests ?? "—"} ({metrics?.conversionPercent ?? "—"}%)</span>
                       </div>
                       <div className="w-full bg-slate-200 rounded-full h-2">
-                        <div className="bg-purple-600 h-2 rounded-full" style={{ width: '78%' }}></div>
+                        <div className="bg-green-600 h-2 rounded-full" style={{ width: `${metrics?.conversionPercent ?? 0}%` }}></div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-medium text-slate-700">Solicitudes urgentes</span>
+                        <span className="text-sm font-bold">{metrics?.urgentCount ?? "—"} / {metrics?.totalRequests ?? "—"} ({metrics?.urgentPercent ?? "—"}%)</span>
+                      </div>
+                      <div className="w-full bg-slate-200 rounded-full h-2">
+                        <div className="bg-yellow-500 h-2 rounded-full" style={{ width: `${metrics?.urgentPercent ?? 0}%` }}></div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-medium text-slate-700">Solicitudes activas</span>
+                        <span className="text-sm font-bold">{metrics?.activeCount ?? "—"} / {metrics?.totalRequests ?? "—"} ({metrics?.activePercent ?? "—"}%)</span>
+                      </div>
+                      <div className="w-full bg-slate-200 rounded-full h-2">
+                        <div className="bg-purple-600 h-2 rounded-full" style={{ width: `${metrics?.activePercent ?? 0}%` }}></div>
                       </div>
                     </div>
                   </div>

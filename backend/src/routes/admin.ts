@@ -199,4 +199,44 @@ router.get("/requests/:id", async (req, res) => {
     res.status(500).json({ error: "Error al obtener solicitud" });
   }
 });
+
+// GET /api/admin/metrics
+router.get("/metrics", async (req, res) => {
+  try {
+    const [verified] = await sql`
+      SELECT
+        COUNT(*) FILTER (WHERE is_verified = true) as verified,
+        COUNT(*) as total
+      FROM service_providers
+    `;
+    const [requests] = await sql`
+      SELECT
+        COUNT(*) as total,
+        COUNT(*) FILTER (WHERE is_urgent = true) as urgent,
+        COUNT(*) FILTER (WHERE status != 'cancelled') as active
+      FROM service_requests
+    `;
+    const [conversions] = await sql`
+      SELECT COUNT(DISTINCT service_request_id) as converted
+      FROM lead_responses
+    `;
+    const totalProviders = Number(verified.total);
+    const totalRequests = Number(requests.total);
+    res.json({
+      verifiedPercent: totalProviders > 0 ? Math.round((Number(verified.verified) / totalProviders) * 100) : 0,
+      verifiedCount: Number(verified.verified),
+      totalProviders,
+      conversionPercent: totalRequests > 0 ? Math.round((Number(conversions.converted) / totalRequests) * 100) : 0,
+      convertedRequests: Number(conversions.converted),
+      urgentPercent: totalRequests > 0 ? Math.round((Number(requests.urgent) / totalRequests) * 100) : 0,
+      urgentCount: Number(requests.urgent),
+      activePercent: totalRequests > 0 ? Math.round((Number(requests.active) / totalRequests) * 100) : 0,
+      activeCount: Number(requests.active),
+      totalRequests,
+    });
+  } catch (error) {
+    console.error("Error en GET /api/admin/metrics:", error);
+    res.status(500).json({ error: "Error al obtener metricas" });
+  }
+});
 export default router;
