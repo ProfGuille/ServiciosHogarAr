@@ -156,4 +156,47 @@ router.patch("/providers/:id/verify", async (req, res) => {
     res.status(500).json({ error: "Error al verificar proveedor" });
   }
 });
+
+// GET /api/admin/requests/:id
+router.get("/requests/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [r] = await sql`
+      SELECT
+        sr.id, sr.title, sr.description, sr.address, sr.city, sr.province,
+        sr.neighborhood, sr.preferred_date, sr.estimated_budget, sr.status,
+        sr.is_urgent, sr.customer_notes, sr.preferred_contact_methods,
+        sr.customer_first_name, sr.customer_phone, sr.customer_email,
+        sr.created_at, sr.category_id,
+        c.name as category_name
+      FROM service_requests sr
+      LEFT JOIN categories c ON sr.category_id = c.id
+      WHERE sr.id = ${id}
+    `;
+    if (router.patch(/providers/:id/verify, async (req, res) => {) return res.status(404).json({ error: "Solicitud no encontrada" });
+    res.json({
+      id: r.id,
+      title: r.title,
+      description: r.description,
+      address: r.address,
+      city: r.city,
+      province: r.province,
+      neighborhood: r.neighborhood,
+      preferredDate: r.preferred_date,
+      estimatedBudget: r.estimated_budget,
+      status: r.status,
+      isUrgent: r.is_urgent,
+      customerNotes: r.customer_notes,
+      preferredContactMethods: r.preferred_contact_methods,
+      customerFirstName: r.customer_first_name,
+      customerPhone: r.customer_phone,
+      customerEmail: r.customer_email,
+      createdAt: r.created_at,
+      categoryName: r.category_name,
+    });
+  } catch (error) {
+    console.error("Error en GET /api/admin/requests/:id:", error);
+    res.status(500).json({ error: "Error al obtener solicitud" });
+  }
+});
 export default router;

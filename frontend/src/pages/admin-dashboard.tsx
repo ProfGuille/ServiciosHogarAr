@@ -72,6 +72,23 @@ export default function AdminDashboard() {
     },
   });
 
+  const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
+  const [requestDialogOpen, setRequestDialogOpen] = useState(false);
+
+  const handleVerRequestDetail = async (requestId: number) => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`/api/admin/requests/${requestId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      setSelectedRequest(data);
+      setRequestDialogOpen(true);
+    } catch {
+      toast({ title: "Error", description: "No se pudo cargar la solicitud.", variant: "destructive" });
+    }
+  };
+
   const handleVerProviderProfile = async (providerId: number) => {
     try {
       const token = localStorage.getItem("token");
@@ -512,7 +529,7 @@ export default function AdminDashboard() {
                                   Urgente
                                 </Badge>
                               )}
-                              <Button size="sm" variant="outline">
+                              <Button size="sm" variant="outline" onClick={() => handleVerRequestDetail(request.id)}>
                                 Ver detalles
                               </Button>
                             </div>
@@ -675,6 +692,79 @@ export default function AdminDashboard() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Request Detail Dialog */}
+      <Dialog open={requestDialogOpen} onOpenChange={setRequestDialogOpen}>
+        <DialogContent className="sm:max-w-[540px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              {selectedRequest?.title}
+            </DialogTitle>
+            <DialogDescription>Detalle completo de la solicitud</DialogDescription>
+          </DialogHeader>
+          {selectedRequest && (
+            <div className="space-y-4 py-2">
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <span className="text-slate-500 block">Cliente</span>
+                  <span className="font-medium">{selectedRequest.customerFirstName || "—"}</span>
+                </div>
+                <div>
+                  <span className="text-slate-500 block">Email</span>
+                  <span className="font-medium">{selectedRequest.customerEmail || "—"}</span>
+                </div>
+                <div>
+                  <span className="text-slate-500 block">Telefono</span>
+                  <span className="font-medium">{selectedRequest.customerPhone || "—"}</span>
+                </div>
+                <div>
+                  <span className="text-slate-500 block">Categoria</span>
+                  <span className="font-medium">{selectedRequest.categoryName || "—"}</span>
+                </div>
+                <div>
+                  <span className="text-slate-500 block">Ubicacion</span>
+                  <span className="font-medium">{selectedRequest.city}{selectedRequest.neighborhood ? `, ${selectedRequest.neighborhood}` : ""}, {selectedRequest.province}</span>
+                </div>
+                <div>
+                  <span className="text-slate-500 block">Estado</span>
+                  <Badge variant={selectedRequest.status === "completed" ? "default" : "secondary"}>
+                    {selectedRequest.status}
+                  </Badge>
+                </div>
+                <div>
+                  <span className="text-slate-500 block">Presupuesto</span>
+                  <span className="font-medium">{selectedRequest.estimatedBudget ? `$${Number(selectedRequest.estimatedBudget).toLocaleString("es-AR")}` : "—"}</span>
+                </div>
+                <div>
+                  <span className="text-slate-500 block">Fecha preferida</span>
+                  <span className="font-medium">{selectedRequest.preferredDate ? new Date(selectedRequest.preferredDate).toLocaleDateString("es-AR") : "—"}</span>
+                </div>
+                {selectedRequest.isUrgent && (
+                  <div className="col-span-2">
+                    <Badge variant="destructive"><AlertTriangle className="h-3 w-3 mr-1" />Urgente</Badge>
+                  </div>
+                )}
+              </div>
+              {selectedRequest.description && (
+                <div>
+                  <span className="text-slate-500 block text-sm mb-1">Descripcion</span>
+                  <p className="text-sm border rounded p-2 bg-slate-50">{selectedRequest.description}</p>
+                </div>
+              )}
+              {selectedRequest.customerNotes && (
+                <div>
+                  <span className="text-slate-500 block text-sm mb-1">Notas del cliente</span>
+                  <p className="text-sm border rounded p-2 bg-slate-50">{selectedRequest.customerNotes}</p>
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRequestDialogOpen(false)}>Cerrar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Provider Profile Dialog */}
       <Dialog open={providerDialogOpen} onOpenChange={setProviderDialogOpen}>
