@@ -15,13 +15,13 @@ export default function ResetPassword() {
     const params = new URLSearchParams(window.location.search);
     const t = params.get("token");
     if (t) setToken(t);
-    else setError("Token invalido o expirado.");
+    else setError("Token inválido o expirado.");
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (password !== confirm) {
-      setError("Las contrasenas no coinciden");
+      setError("Las contraseñas no coinciden");
       return;
     }
     setLoading(true);
@@ -45,22 +45,22 @@ export default function ResetPassword() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="bg-white rounded-xl shadow-md p-8 w-full max-w-md">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Nueva contrasena</h1>
-        <p className="text-gray-500 text-sm mb-6">Ingresa tu nueva contrasena.</p>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Nueva contraseña</h1>
+        <p className="text-gray-500 text-sm mb-6">Ingresá tu nueva contraseña.</p>
 
         {done ? (
           <div className="text-center">
             <div className="text-green-600 font-medium mb-4">
-              Contrasena actualizada correctamente.
+              Contraseña actualizada correctamente.
             </div>
             <Link href="/login" className="text-blue-600 hover:underline text-sm">
-              Ir al inicio de sesion
+              Ir al inicio de sesión
             </Link>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nueva contrasena</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nueva contraseña</label>
               <input
                 type="password"
                 required
@@ -68,11 +68,11 @@ export default function ResetPassword() {
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Minimo 6 caracteres"
+                placeholder="Mínimo 6 caracteres"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar contrasena</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar contraseña</label>
               <input
                 type="password"
                 required
@@ -80,7 +80,7 @@ export default function ResetPassword() {
                 value={confirm}
                 onChange={e => setConfirm(e.target.value)}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Repeti la contrasena"
+                placeholder="Repetí la contraseña"
               />
             </div>
             {error && <p className="text-red-500 text-sm">{error}</p>}
@@ -89,7 +89,7 @@ export default function ResetPassword() {
               disabled={loading || !token}
               className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-medium py-2 rounded-lg transition"
             >
-              {loading ? "Guardando..." : "Guardar nueva contrasena"}
+              {loading ? "Guardando..." : "Guardar nueva contraseña"}
             </button>
           </form>
         )}

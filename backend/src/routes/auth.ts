@@ -262,11 +262,11 @@ router.post("/forgot-password", async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
     if (!email || !email.includes("@"))
-      return res.status(400).json({ error: "Email invalido" });
+      return res.status(400).json({ error: "Email inválido" });
 
     const result = await sqlDirect`SELECT id FROM users WHERE email = ${email} LIMIT 1`;
     if (result.length === 0)
-      return res.json({ message: "Si el email existe, recibiras un link en breve." });
+      return res.json({ message: "Si el email existe, recibirás un link en breve." });
 
     const token = crypto.randomUUID();
     const expires = new Date(Date.now() + 60 * 60 * 1000);
@@ -279,7 +279,7 @@ router.post("/forgot-password", async (req: Request, res: Response) => {
 
     await sendPasswordResetEmail(email, token);
 
-    res.json({ message: "Si el email existe, recibiras un link en breve." });
+    res.json({ message: "Si el email existe, recibirás un link en breve." });
   } catch (err) {
     console.error("Error en forgot-password:", err);
     res.status(500).json({ error: "Error interno del servidor" });
@@ -293,9 +293,9 @@ router.post("/reset-password", async (req: Request, res: Response) => {
   try {
     const { token, password } = req.body;
 
-    if (!token) return res.status(400).json({ error: "Token invalido" });
+    if (!token) return res.status(400).json({ error: "Token inválido" });
     if (!password || password.length < 6)
-      return res.status(400).json({ error: "La contrasena debe tener al menos 6 caracteres" });
+      return res.status(400).json({ error: "La contraseña debe tener al menos 6 caracteres" });
 
     const result = await sqlDirect`
       SELECT id, reset_token_expires
@@ -305,11 +305,11 @@ router.post("/reset-password", async (req: Request, res: Response) => {
     `;
 
     if (result.length === 0)
-      return res.status(400).json({ error: "Token invalido o expirado" });
+      return res.status(400).json({ error: "Token inválido o expirado" });
 
     const user = result[0];
     if (!user.reset_token_expires || new Date(user.reset_token_expires) < new Date())
-      return res.status(400).json({ error: "Token invalido o expirado" });
+      return res.status(400).json({ error: "Token inválido o expirado" });
 
     const hashed = await bcrypt.hash(password, 10);
 
@@ -319,7 +319,7 @@ router.post("/reset-password", async (req: Request, res: Response) => {
       WHERE id = ${user.id}
     `;
 
-    res.json({ message: "Contrasena actualizada correctamente" });
+    res.json({ message: "Contraseña actualizada correctamente" });
   } catch (err) {
     console.error("Error en reset-password:", err);
     res.status(500).json({ error: "Error interno del servidor" });
