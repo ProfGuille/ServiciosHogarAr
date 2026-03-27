@@ -865,11 +865,7 @@ export default function AdminDashboard() {
               };
               
               if (editingCategory) {
-                // TODO: Implement edit functionality
-                toast({
-                  title: "En desarrollo",
-                  description: "La edición de categorías estará disponible pronto.",
-                });
+                updateCategoryMutation.mutate({ id: editingCategory.id, ...data });
               } else {
                 createCategoryMutation.mutate(data);
               }
@@ -924,7 +920,7 @@ export default function AdminDashboard() {
               >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={createCategoryMutation.isPending}>
+              <Button type="submit" disabled={createCategoryMutation.isPending || updateCategoryMutation.isPending}>
                 {editingCategory ? "Guardar cambios" : "Crear categoría"}
               </Button>
             </DialogFooter>

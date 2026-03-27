@@ -239,4 +239,45 @@ router.get("/metrics", async (req, res) => {
     res.status(500).json({ error: "Error al obtener metricas" });
   }
 });
+
+// POST /api/admin/categories
+router.post("/categories", requireAuth, requireRole("admin"), async (req, res) => {
+  try {
+    const { name, description, icon } = req.body;
+    if (!name) return res.status(400).json({ error: "Nombre requerido" });
+    const [cat] = await sql`
+      INSERT INTO service_categories (name, description, icon, is_active)
+      VALUES (${name}, ${description || null}, ${icon || null}, true)
+      RETURNING id, name, description, icon, is_active as "isActive", created_at as "createdAt"
+    `;
+    res.json(cat);
+  } catch (error) {
+    console.error("Error en POST /api/admin/categories:", error);
+    res.status(500).json({ error: "Error al crear categoria" });
+  }
+});
+
+// PATCH /api/admin/categories/:id
+router.patch("/categories/:id", requireAuth, requireRole("admin"), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, description, icon, isActive } = req.body;
+    const [cat] = await sql`
+      UPDATE service_categories
+      SET
+        name = COALESCE(${name || null}, name),
+        description = COALESCE(${description !== undefined ? description : null}, description),
+        icon = COALESCE(${icon !== undefined ? icon : null}, icon),
+        is_active = COALESCE(${isActive !== undefined ? isActive : null}, is_active)
+      WHERE id = ${id}
+      RETURNING id, name, description, icon, is_active as "isActive", created_at as "createdAt"
+    `;
+    if (!cat) return res.status(404).json({ error: "Categoria no encontrada" });
+    res.json(cat);
+  } catch (error) {
+    console.error("Error en PATCH /api/admin/categories/:id:", error);
+    res.status(500).json({ error: "Error al actualizar categoria" });
+  }
+});
+
 export default router;
