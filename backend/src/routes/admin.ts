@@ -173,7 +173,7 @@ router.get("/requests/:id", async (req, res) => {
       LEFT JOIN categories c ON sr.category_id = c.id
       WHERE sr.id = ${id}
     `;
-    if (router.patch(/providers/:id/verify, async (req, res) => {) return res.status(404).json({ error: "Solicitud no encontrada" });
+    if (!r) return res.status(404).json({ error: "Solicitud no encontrada" });
     res.json({
       id: r.id,
       title: r.title,

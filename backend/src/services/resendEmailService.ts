@@ -110,40 +110,4 @@ export async function sendPasswordResetEmail(
   }
 }
 
-export async function sendPasswordResetEmail(
-  toEmail: string,
-  resetToken: string
-): Promise<void> {
-  const resetUrl = `https://servicioshogar.com.ar/reset-password?token=${resetToken}`;
-  try {
-    const { data, error } = await resend.emails.send({
-      from: 'ServiciosHogar <administrador@servicioshogar.com.ar>',
-      to: toEmail,
-      subject: 'Recuperar contrasena - ServiciosHogar',
-      html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px"><h2 style="color:#1d4ed8">Recuperar contrasena</h2><p>Recibimos una solicitud para restablecer la contrasena de tu cuenta.</p><p>Hace clic en el boton para crear una nueva contrasena. El link es valido por <strong>1 hora</strong>.</p><a href="${resetUrl}" style="display:inline-block;margin:16px 0;padding:12px 24px;background:#1d4ed8;color:#fff;border-radius:6px;text-decoration:none;font-weight:bold">Restablecer contrasena</a><p style="color:#6b7280;font-size:13px">Si no solicitaste esto, ignora este email.</p><hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0"/><p style="color:#9ca3af;font-size:12px">ServiciosHogar.com.ar</p></div>`,
-    });
-    if (error) console.error('Error Resend password reset:', error);
-    else console.log('Email reset enviado a', toEmail, 'ID:', data?.id);
-  } catch (err) {
-    console.error('Error enviando email reset:', err);
-  }
-}
 
-export async function sendPasswordResetEmail(
-  toEmail: string,
-  resetToken: string
-): Promise<void> {
-  const resetUrl = `https://servicioshogar.com.ar/reset-password?token=${resetToken}`;
-  try {
-    const { data, error } = await resend.emails.send({
-      from: 'ServiciosHogar <administrador@servicioshogar.com.ar>',
-      to: toEmail,
-      subject: 'Recuperar contrasena - ServiciosHogar',
-      html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px"><h2 style="color:#1d4ed8">Recuperar contrasena</h2><p>Recibimos una solicitud para restablecer la contrasena de tu cuenta.</p><p>Hace clic en el boton para crear una nueva contrasena. El link es valido por <strong>1 hora</strong>.</p><a href="${resetUrl}" style="display:inline-block;margin:16px 0;padding:12px 24px;background:#1d4ed8;color:#fff;border-radius:6px;text-decoration:none;font-weight:bold">Restablecer contrasena</a><p style="color:#6b7280;font-size:13px">Si no solicitaste esto, ignora este email.</p><hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0"/><p style="color:#9ca3af;font-size:12px">ServiciosHogar.com.ar</p></div>`,
-    });
-    if (error) console.error('Error Resend password reset:', error);
-    else console.log('Email reset enviado a', toEmail, 'ID:', data?.id);
-  } catch (err) {
-    console.error('Error enviando email reset:', err);
-  }
-}
