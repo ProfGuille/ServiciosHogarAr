@@ -43,8 +43,10 @@ export const getQueryFn: <T>(options: {
     // Ensure URL is absolute
     const fullUrl = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
     
+    const token = localStorage.getItem("token");
     const res = await fetch(fullUrl, {
       credentials: "include",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
