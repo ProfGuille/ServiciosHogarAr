@@ -7,6 +7,10 @@ import { providerCredits } from "../shared/schema/providerCredits.js";
 import { providerServices } from "../shared/schema/providerServices.js";
 import { eq, sql } from "drizzle-orm";
 import { generateJWTToken, requireAuth } from "../middleware/auth.js";
+import { neon } from "@neondatabase/serverless";
+import { sendPasswordResetEmail } from "../services/resendEmailService.js";
+
+const sqlDirect = neon(process.env.DATABASE_URL!);
 
 const router = Router();
 
@@ -248,6 +252,78 @@ router.post("/refresh", requireAuth, (req: any, res: Response) => {
 // -----------------------------
 router.post("/logout", (req: Request, res: Response) => {
   res.json({ message: "Logout exitoso (JWT invalidado en cliente)" });
+});
+
+
+// -----------------------------
+// FORGOT PASSWORD
+// -----------------------------
+router.post("/forgot-password", async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+    if (!email || !email.includes("@"))
+      return res.status(400).json({ error: "Email invalido" });
+
+    const result = await sqlDirect`SELECT id FROM users WHERE email = ${email} LIMIT 1`;
+    if (result.length === 0)
+      return res.json({ message: "Si el email existe, recibiras un link en breve." });
+
+    const token = crypto.randomUUID();
+    const expires = new Date(Date.now() + 60 * 60 * 1000);
+
+    await sqlDirect`
+      UPDATE users
+      SET reset_token = ${token}, reset_token_expires = ${expires}
+      WHERE email = ${email}
+    `;
+
+    await sendPasswordResetEmail(email, token);
+
+    res.json({ message: "Si el email existe, recibiras un link en breve." });
+  } catch (err) {
+    console.error("Error en forgot-password:", err);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+});
+
+// -----------------------------
+// RESET PASSWORD
+// -----------------------------
+router.post("/reset-password", async (req: Request, res: Response) => {
+  try {
+    const { token, password } = req.body;
+
+    if (!token) return res.status(400).json({ error: "Token invalido" });
+    if (!password || password.length < 6)
+      return res.status(400).json({ error: "La contrasena debe tener al menos 6 caracteres" });
+
+    const result = await sqlDirect`
+      SELECT id, reset_token_expires
+      FROM users
+      WHERE reset_token = ${token}
+      LIMIT 1
+    `;
+
+    if (result.length === 0)
+      return res.status(400).json({ error: "Token invalido o expirado" });
+
+    const user = result[0];
+    if (!user.reset_token_expires || new Date(user.reset_token_expires) < new Date())
+      return res.status(400).json({ error: "Token invalido o expirado" });
+
+    const hashed = await bcrypt.hash(password, 10);
+
+    await sqlDirect`
+      UPDATE users
+      SET password = ${hashed}, reset_token = NULL, reset_token_expires = NULL, updated_at = NOW()
+      WHERE id = ${user.id}
+    `;
+
+    res.json({ message: "Contrasena actualizada correctamente" });
+  } catch (err) {
+    console.error("Error en reset-password:", err);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
 });
 
 export default router;

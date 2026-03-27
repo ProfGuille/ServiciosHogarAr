@@ -2,6 +2,8 @@ import { Route, Switch } from 'wouter';
 import HomePage from '@/pages/home';
 import Landing from '@/pages/landing';
 import Login from '@/pages/login';
+import ForgotPassword from '@/pages/forgot-password';
+import ResetPassword from '@/pages/reset-password';
 import Register from '@/pages/register';
 import RegisterProvider from '@/pages/register-provider';
 import ProviderDashboard from '@/pages/provider-dashboard';
@@ -34,6 +36,8 @@ function App() {
     <Switch>
       <Route path="/" component={Landing} />
       <Route path="/login" component={Login} />
+      <Route path="/forgot-password" component={ForgotPassword} />
+      <Route path="/reset-password" component={ResetPassword} />
       <Route path="/register" component={Register} />
       <Route path="/register-provider" component={RegisterProvider} />
       <Route path="/dashboard" component={HomePage} />

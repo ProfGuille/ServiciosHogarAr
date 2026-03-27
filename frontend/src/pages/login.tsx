@@ -104,6 +104,15 @@ export default function Login() {
               {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
             </Button>
             
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => setLocation('/forgot-password')}
+                className="text-sm text-gray-500 hover:text-blue-600"
+              >
+                ¿Olvidaste tu contraseña?
+              </button>
+            </div>
             <div className="text-sm text-center text-gray-600">
               ¿No tenés cuenta?{' '}
               <button
