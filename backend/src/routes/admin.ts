@@ -15,7 +15,7 @@ router.get("/stats", async (req, res) => {
     const [totalUsers] = await sql`SELECT COUNT(*) as count FROM users`;
     const [totalProviders] = await sql`SELECT COUNT(*) as count FROM service_providers`;
     const [totalRequests] = await sql`SELECT COUNT(*) as count FROM service_requests`;
-    const [totalUnlocks] = await sql`SELECT COUNT(*) as count FROM unlocked_leads`;
+    const [totalUnlocks] = await sql`SELECT COUNT(*) as count FROM lead_responses`;
     res.json({
       totalUsers: Number(totalUsers.count),
       totalProviders: Number(totalProviders.count),
