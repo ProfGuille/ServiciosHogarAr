@@ -73,7 +73,11 @@ export default function AdminDashboard() {
   });
 
   const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
-  const [requestDialogOpen, setRequestDialogOpen] = useState(false);
+  const { data: analyticsData } = useQuery({
+    queryKey: ["/api/admin/analytics"],
+  });
+
+    const [requestDialogOpen, setRequestDialogOpen] = useState(false);
 
   const handleVerRequestDetail = async (requestId: number) => {
     try {
@@ -635,26 +639,35 @@ export default function AdminDashboard() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5" />
-                    Crecimiento de la plataforma
+                    <Users className="h-5 w-5" />
+                    Usuarios este mes
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-6">
+                  <div className="space-y-4">
                     <div className="text-center p-6 bg-slate-50 rounded-lg">
-                      <div className="text-3xl font-bold text-primary mb-2">+127%</div>
-                      <p className="text-slate-600">Crecimiento en usuarios este año</p>
+                      <div className="text-3xl font-bold text-primary mb-1">
+                        {analyticsData?.users?.thisMonth ?? "—"}
+                      </div>
+                      <p className="text-slate-600 text-sm">Nuevos usuarios este mes</p>
+                      {analyticsData?.users?.delta !== undefined && (
+                        <p className={`text-xs mt-1 font-medium ${analyticsData.users.delta >= 0 ? "text-green-600" : "text-red-500"}`}>
+                          {analyticsData.users.delta >= 0 ? "▲" : "▼"} {Math.abs(analyticsData.users.delta)}% vs mes anterior
+                        </p>
+                      )}
                     </div>
-                    
                     <div className="grid grid-cols-2 gap-4">
                       <div className="text-center p-4 bg-blue-50 rounded-lg">
-                        <div className="text-xl font-bold text-blue-600 mb-1">2,840</div>
-                        <p className="text-xs text-slate-600">Nuevos usuarios este mes</p>
+                        <div className="text-xl font-bold text-blue-600 mb-1">
+                          {analyticsData?.users?.lastMonth ?? "—"}
+                        </div>
+                        <p className="text-xs text-slate-600">Mes anterior</p>
                       </div>
-                      
-                      <div className="text-center p-4 bg-green-50 rounded-lg">
-                        <div className="text-xl font-bold text-green-600 mb-1">456</div>
-                        <p className="text-xs text-slate-600">Nuevos profesionales</p>
+                      <div className="text-center p-4 bg-slate-100 rounded-lg">
+                        <div className="text-xl font-bold text-slate-700 mb-1">
+                          {analyticsData?.users?.total ?? "—"}
+                        </div>
+                        <p className="text-xs text-slate-600">Total acumulado</p>
                       </div>
                     </div>
                   </div>
@@ -664,30 +677,111 @@ export default function AdminDashboard() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <DollarSign className="h-5 w-5" />
-                    Rendimiento financiero
+                    <Briefcase className="h-5 w-5" />
+                    Profesionales este mes
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-6">
+                  <div className="space-y-4">
                     <div className="text-center p-6 bg-slate-50 rounded-lg">
-                      <div className="text-3xl font-bold text-green-600 mb-2">
-                        ${(485000).toLocaleString('es-AR')}
+                      <div className="text-3xl font-bold text-primary mb-1">
+                        {analyticsData?.providers?.thisMonth ?? "—"}
                       </div>
-                      <p className="text-slate-600">Volumen transaccional este mes</p>
+                      <p className="text-slate-600 text-sm">Nuevos profesionales este mes</p>
+                      {analyticsData?.providers?.delta !== undefined && (
+                        <p className={`text-xs mt-1 font-medium ${analyticsData.providers.delta >= 0 ? "text-green-600" : "text-red-500"}`}>
+                          {analyticsData.providers.delta >= 0 ? "▲" : "▼"} {Math.abs(analyticsData.providers.delta)}% vs mes anterior
+                        </p>
+                      )}
                     </div>
-                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center p-4 bg-green-50 rounded-lg">
+                        <div className="text-xl font-bold text-green-600 mb-1">
+                          {analyticsData?.providers?.lastMonth ?? "—"}
+                        </div>
+                        <p className="text-xs text-slate-600">Mes anterior</p>
+                      </div>
+                      <div className="text-center p-4 bg-slate-100 rounded-lg">
+                        <div className="text-xl font-bold text-slate-700 mb-1">
+                          {analyticsData?.providers?.total ?? "—"}
+                        </div>
+                        <p className="text-xs text-slate-600">Total acumulado</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="h-5 w-5" />
+                    Solicitudes este mes
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="text-center p-6 bg-slate-50 rounded-lg">
+                      <div className="text-3xl font-bold text-primary mb-1">
+                        {analyticsData?.requests?.thisMonth ?? "—"}
+                      </div>
+                      <p className="text-slate-600 text-sm">Solicitudes creadas este mes</p>
+                      {analyticsData?.requests?.delta !== undefined && (
+                        <p className={`text-xs mt-1 font-medium ${analyticsData.requests.delta >= 0 ? "text-green-600" : "text-red-500"}`}>
+                          {analyticsData.requests.delta >= 0 ? "▲" : "▼"} {Math.abs(analyticsData.requests.delta)}% vs mes anterior
+                        </p>
+                      )}
+                    </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="text-center p-4 bg-yellow-50 rounded-lg">
                         <div className="text-xl font-bold text-yellow-600 mb-1">
-                          ${(24250).toLocaleString('es-AR')}
+                          {analyticsData?.requests?.lastMonth ?? "—"}
                         </div>
-                        <p className="text-xs text-slate-600">Comisiones generadas</p>
+                        <p className="text-xs text-slate-600">Mes anterior</p>
                       </div>
-                      
+                      <div className="text-center p-4 bg-slate-100 rounded-lg">
+                        <div className="text-xl font-bold text-slate-700 mb-1">
+                          {analyticsData?.requests?.total ?? "—"}
+                        </div>
+                        <p className="text-xs text-slate-600">Total acumulado</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Activity className="h-5 w-5" />
+                    Desbloqueos este mes
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="text-center p-6 bg-slate-50 rounded-lg">
+                      <div className="text-3xl font-bold text-primary mb-1">
+                        {analyticsData?.unlocks?.thisMonth ?? "—"}
+                      </div>
+                      <p className="text-slate-600 text-sm">Datos desbloqueados este mes</p>
+                      {analyticsData?.unlocks?.delta !== undefined && (
+                        <p className={`text-xs mt-1 font-medium ${analyticsData.unlocks.delta >= 0 ? "text-green-600" : "text-red-500"}`}>
+                          {analyticsData.unlocks.delta >= 0 ? "▲" : "▼"} {Math.abs(analyticsData.unlocks.delta)}% vs mes anterior
+                        </p>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
                       <div className="text-center p-4 bg-purple-50 rounded-lg">
-                        <div className="text-xl font-bold text-purple-600 mb-1">5.0%</div>
-                        <p className="text-xs text-slate-600">Comisión promedio</p>
+                        <div className="text-xl font-bold text-purple-600 mb-1">
+                          {analyticsData?.unlocks?.lastMonth ?? "—"}
+                        </div>
+                        <p className="text-xs text-slate-600">Mes anterior</p>
+                      </div>
+                      <div className="text-center p-4 bg-slate-100 rounded-lg">
+                        <div className="text-xl font-bold text-slate-700 mb-1">
+                          {analyticsData?.unlocks?.total ?? "—"}
+                        </div>
+                        <p className="text-xs text-slate-600">Total acumulado</p>
                       </div>
                     </div>
                   </div>

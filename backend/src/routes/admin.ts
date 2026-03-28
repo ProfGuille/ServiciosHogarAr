@@ -240,6 +240,86 @@ router.get("/metrics", async (req, res) => {
   }
 });
 
+
+// GET /api/admin/analytics
+router.get("/analytics", async (req, res) => {
+  try {
+    const [users] = await sql`
+      SELECT
+        COUNT(*) FILTER (WHERE created_at >= date_trunc('month', now())) as this_month,
+        COUNT(*) FILTER (WHERE created_at >= date_trunc('month', now() - interval '1 month')
+                           AND created_at < date_trunc('month', now())) as last_month,
+        COUNT(*) as total
+      FROM users
+    `;
+    const [providers] = await sql`
+      SELECT
+        COUNT(*) FILTER (WHERE created_at >= date_trunc('month', now())) as this_month,
+        COUNT(*) FILTER (WHERE created_at >= date_trunc('month', now() - interval '1 month')
+                           AND created_at < date_trunc('month', now())) as last_month,
+        COUNT(*) as total
+      FROM service_providers
+    `;
+    const [requests] = await sql`
+      SELECT
+        COUNT(*) FILTER (WHERE created_at >= date_trunc('month', now())) as this_month,
+        COUNT(*) FILTER (WHERE created_at >= date_trunc('month', now() - interval '1 month')
+                           AND created_at < date_trunc('month', now())) as last_month,
+        COUNT(*) as total
+      FROM service_requests
+    `;
+    const [unlocks] = await sql`
+      SELECT
+        COUNT(*) FILTER (WHERE unlocked_at >= date_trunc('month', now())) as this_month,
+        COUNT(*) FILTER (WHERE unlocked_at >= date_trunc('month', now() - interval '1 month')
+                           AND unlocked_at < date_trunc('month', now())) as last_month,
+        COUNT(*) as total
+      FROM lead_responses
+    `;
+    const calcDelta = (current: number, previous: number) => {
+      if (previous === 0) return current > 0 ? 100 : 0;
+      return Math.round(((current - previous) / previous) * 100);
+    };
+    const thisMonthUsers = Number(users.this_month);
+    const lastMonthUsers = Number(users.last_month);
+    const thisMonthProviders = Number(providers.this_month);
+    const lastMonthProviders = Number(providers.last_month);
+    const thisMonthRequests = Number(requests.this_month);
+    const lastMonthRequests = Number(requests.last_month);
+    const thisMonthUnlocks = Number(unlocks.this_month);
+    const lastMonthUnlocks = Number(unlocks.last_month);
+    res.json({
+      users: {
+        thisMonth: thisMonthUsers,
+        lastMonth: lastMonthUsers,
+        total: Number(users.total),
+        delta: calcDelta(thisMonthUsers, lastMonthUsers),
+      },
+      providers: {
+        thisMonth: thisMonthProviders,
+        lastMonth: lastMonthProviders,
+        total: Number(providers.total),
+        delta: calcDelta(thisMonthProviders, lastMonthProviders),
+      },
+      requests: {
+        thisMonth: thisMonthRequests,
+        lastMonth: lastMonthRequests,
+        total: Number(requests.total),
+        delta: calcDelta(thisMonthRequests, lastMonthRequests),
+      },
+      unlocks: {
+        thisMonth: thisMonthUnlocks,
+        lastMonth: lastMonthUnlocks,
+        total: Number(unlocks.total),
+        delta: calcDelta(thisMonthUnlocks, lastMonthUnlocks),
+      },
+    });
+  } catch (error) {
+    console.error("Error en GET /api/admin/analytics:", error);
+    res.status(500).json({ error: "Error al obtener analytics" });
+  }
+});
+
 // POST /api/admin/categories
 router.post("/categories", requireAuth, requireRole("admin"), async (req, res) => {
   try {
