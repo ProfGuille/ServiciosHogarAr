@@ -19,7 +19,7 @@ export default function Privacidad() {
             Política de Privacidad
           </h1>
           <p className="text-slate-600">
-            Última actualización: Julio 2025
+            Última actualización: Marzo 2026
           </p>
         </div>
 
@@ -44,10 +44,35 @@ export default function Privacidad() {
                 <li>Historial de servicios y transacciones</li>
                 <li>Comunicaciones y mensajes</li>
                 <li>Datos de uso y navegación</li>
+                <li>Número de documento de identidad (DNI) o identificación tributaria (CUIT) para proveedores que solicitan verificación de identidad en la plataforma</li>
               </ul>
             </CardContent>
           </Card>
 
+
+          <Card>
+            <CardHeader>
+              <CardTitle>1b. Verificación de Identidad de Proveedores</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="mb-4">
+                Los proveedores que deseen obtener el distintivo de identidad verificada deberán aportar voluntariamente, mediante consentimiento expreso, los siguientes datos según su tipo:
+              </p>
+              <ul className="list-disc pl-6 space-y-2 mb-4">
+                <li><strong>Persona física:</strong> número de Documento Nacional de Identidad (DNI)</li>
+                <li><strong>Persona jurídica (empresa, sociedad, etc.):</strong> número de CUIT de la entidad y nombre completo del representante legal</li>
+              </ul>
+              <p className="mb-4"><strong>Finalidad:</strong> exclusivamente verificar la identidad del proveedor para brindar mayor confianza a los usuarios de la plataforma.</p>
+              <p className="mb-4"><strong>Base legal:</strong> consentimiento expreso del titular (Art. 5, Ley 25.326) y necesidad para el desarrollo de la relación contractual con la plataforma.</p>
+              <p className="mb-4"><strong>Retención:</strong> estos datos se conservan mientras la cuenta del proveedor esté activa. Ante solicitud de baja o supresión, se eliminan en un plazo máximo de 30 días hábiles.</p>
+              <p className="mb-4"><strong>Cesión:</strong> estos datos no son compartidos con terceros bajo ningún concepto, salvo requerimiento de autoridad competente.</p>
+              <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                <p className="text-amber-800 text-sm">
+                  El proceso de verificación es voluntario. No verificarse no impide operar en la plataforma, pero el perfil no mostrará el distintivo de proveedor verificado.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
           <Card>
             <CardHeader>
               <CardTitle>2. Cómo Utilizamos su Información</CardTitle>
@@ -173,9 +198,7 @@ export default function Privacidad() {
             </CardHeader>
             <CardContent>
               <p>
-                Su información puede ser procesada en servidores ubicados fuera de 
-                Argentina. En estos casos, aplicamos las mismas medidas de protección 
-                y cumplimos con las regulaciones aplicables de transferencia de datos.
+                Su información puede ser procesada en servidores ubicados fuera de Argentina, específicamente en Estados Unidos, donde operan los proveedores de infraestructura que utiliza esta plataforma: Render (servidor backend) y Neon (base de datos). Dichos proveedores cuentan con políticas de protección de datos compatibles con estándares internacionales. En todos los casos, aplicamos las mismas medidas de protección y cumplimos con las regulaciones aplicables de transferencia internacional de datos conforme al Art. 12 de la Ley 25.326.
               </p>
             </CardContent>
           </Card>

@@ -19,7 +19,7 @@ export default function Terminos() {
             Términos de Servicio
           </h1>
           <p className="text-slate-600">
-            Última actualización: Julio 2025
+            Última actualización: Marzo 2026
           </p>
         </div>
 
@@ -99,7 +99,9 @@ export default function Terminos() {
               </p>
               <p className="mb-4">Sin embargo, nos comprometemos a:</p>
               <ul className="list-disc pl-6 space-y-2">
-                <li>Verificar la identidad y credenciales de los profesionales</li>
+                <li>
+                  Verificar la identidad de los proveedores mediante un proceso voluntario: las personas físicas aportan su número de DNI y las personas jurídicas aportan su CUIT y los datos del representante legal. Este proceso requiere consentimiento expreso del proveedor conforme a la Ley 25.326 de Protección de Datos Personales. La verificación es opcional y su ausencia no impide operar en la plataforma.
+                </li>
                 <li>Mantener un sistema de calificaciones transparente</li>
                 <li>Ofrecer mediación en caso de disputas</li>
                 <li>Remover profesionales que no cumplan nuestros estándares</li>
