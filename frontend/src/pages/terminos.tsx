@@ -109,6 +109,30 @@ export default function Terminos() {
             </CardContent>
           </Card>
 
+
+          <Card>
+            <CardHeader>
+              <CardTitle>5b. Exactitud de la Información de Proveedores</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="mb-2">
+                Los proveedores registrados en ServiciosHogar.com.ar son los únicos y exclusivos responsables de la veracidad, exactitud y actualización de los datos que publican en la plataforma, incluyendo nombre, descripción, credenciales, experiencia, tarifas y cualquier otra información de su perfil.
+              </p>
+              <ul className="list-disc pl-6 space-y-2 mb-4">
+                <li>ServiciosHogar.com.ar actúa como intermediario tecnológico y no verifica de forma exhaustiva la totalidad de la información declarada por los proveedores.</li>
+                <li>El distintivo de <strong>proveedor verificado</strong> acredita únicamente que el proveedor completó el proceso de verificación de identidad (DNI o CUIT). No constituye una garantía de calidad, idoneidad profesional ni de los servicios prestados.</li>
+                <li>La plataforma no se responsabiliza por daños derivados de información falsa, inexacta u obsoleta publicada por proveedores, en tanto actúe con diligencia ante las denuncias recibidas.</li>
+                <li>Cualquier usuario que detecte información falsa o conducta irregular de un proveedor puede denunciarlo a <strong>legal@servicioshogar.com.ar</strong>. ServiciosHogar.com.ar se compromete a investigar y, de corresponder, suspender o dar de baja al proveedor infractor.</li>
+                <li>ServiciosHogar.com.ar se reserva el derecho de remover perfiles de proveedores que incurran en falsedad de datos, sin previo aviso y sin derecho a reembolso de créditos adquiridos.</li>
+              </ul>
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-blue-800 text-sm">
+                  <strong>Para usuarios:</strong> te recomendamos verificar las credenciales del profesional de forma independiente antes de contratar sus servicios, y reportar cualquier irregularidad a nuestro equipo.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>6. Pagos y Tarifas</CardTitle>
