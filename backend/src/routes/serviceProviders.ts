@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { sql } from "../db.js";
 import { providersService } from "../services/providersService.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
 import { db } from "../db.js";
@@ -133,6 +134,95 @@ router.get("/", async (req, res) => {
   res.status(410).json({
     error: "Este endpoint fue reemplazado por /api/search/providers",
   });
+});
+
+
+// POST /api/providers/:id/verification — proveedor solicita verificación
+router.post("/:id/verification", requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { personType, documentType, documentNumber, legalRepresentative, consentGiven } = req.body;
+
+    // Validar que el proveedor le pertenece al usuario autenticado
+    const [provider] = (await sql`
+      SELECT id, user_id FROM service_providers WHERE id = ${id}
+    `) as any[];
+    if (!provider) return res.status(404).json({ error: "Proveedor no encontrado" });
+    if (provider.user_id !== (req as any).user.id) return res.status(403).json({ error: "No autorizado" });
+
+    // Validar campos obligatorios
+    if (!personType || !documentType || !documentNumber) {
+      return res.status(400).json({ error: "personType, documentType y documentNumber son obligatorios" });
+    }
+    if (!["fisica", "juridica"].includes(personType)) {
+      return res.status(400).json({ error: "personType debe ser fisica o juridica" });
+    }
+    if (!["DNI", "CUIT"].includes(documentType)) {
+      return res.status(400).json({ error: "documentType debe ser DNI o CUIT" });
+    }
+    if (personType === "juridica" && !legalRepresentative) {
+      return res.status(400).json({ error: "legalRepresentative es obligatorio para personas juridicas" });
+    }
+    if (!consentGiven) {
+      return res.status(400).json({ error: "Se requiere consentimiento expreso (consentGiven: true)" });
+    }
+
+    // Verificar si ya tiene una solicitud pendiente o aprobada
+    const [existing] = (await sql`
+      SELECT id, status FROM provider_verifications
+      WHERE provider_id = ${id} AND status IN ('pending', 'approved')
+    `) as any[];
+    if (existing) {
+      return res.status(409).json({
+        error: existing.status === "approved"
+          ? "Este proveedor ya está verificado"
+          : "Ya existe una solicitud de verificacion pendiente"
+      });
+    }
+
+    const [verification] = (await sql`
+      INSERT INTO provider_verifications
+        (provider_id, person_type, document_type, document_number, legal_representative, consent_given, consent_at)
+      VALUES
+        (${id}, ${personType}, ${documentType}, ${documentNumber}, ${legalRepresentative || null}, true, NOW())
+      RETURNING id, status, created_at as "createdAt"
+    `) as any[];
+
+    res.status(201).json(verification);
+  } catch (error) {
+    console.error("Error en POST /api/providers/:id/verification:", error);
+    res.status(500).json({ error: "Error al crear solicitud de verificacion" });
+  }
+});
+
+// GET /api/providers/:id/verification — proveedor consulta estado de su verificación
+router.get("/:id/verification", requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const [provider] = (await sql`
+      SELECT id, user_id FROM service_providers WHERE id = ${id}
+    `) as any[];
+    if (!provider) return res.status(404).json({ error: "Proveedor no encontrado" });
+    if (provider.user_id !== (req as any).user.id) return res.status(403).json({ error: "No autorizado" });
+
+    const [verification] = (await sql`
+      SELECT id, person_type as "personType", document_type as "documentType",
+        document_number as "documentNumber", legal_representative as "legalRepresentative",
+        status, admin_notes as "adminNotes", reviewed_at as "reviewedAt",
+        consent_given as "consentGiven", created_at as "createdAt"
+      FROM provider_verifications
+      WHERE provider_id = ${id}
+      ORDER BY created_at DESC
+      LIMIT 1
+    `) as any[];
+
+    if (!verification) return res.status(404).json({ error: "Sin solicitudes de verificacion" });
+    res.json(verification);
+  } catch (error) {
+    console.error("Error en GET /api/providers/:id/verification:", error);
+    res.status(500).json({ error: "Error al obtener verificacion" });
+  }
 });
 
 export default router;

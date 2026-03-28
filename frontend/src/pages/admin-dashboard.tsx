@@ -41,6 +41,34 @@ import {
   Activity
 } from "lucide-react";
 
+
+function VerificationActions({ id, onReview }: { id: number; onReview: (args: { id: number; status: string; adminNotes: string }) => void }) {
+  const [notes, setNotes] = useState("");
+  return (
+    <div className="space-y-2 pt-2 border-t">
+      <textarea
+        className="w-full px-3 py-2 border rounded-md text-sm"
+        rows={2}
+        placeholder="Nota para el proveedor (opcional para aprobar, recomendada para rechazar)"
+        value={notes}
+        onChange={e => setNotes(e.target.value)}
+      />
+      <div className="flex gap-2">
+        <button
+          className="flex-1 px-3 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700"
+          onClick={() => onReview({ id, status: "approved", adminNotes: notes })}>
+          Aprobar
+        </button>
+        <button
+          className="flex-1 px-3 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-700"
+          onClick={() => onReview({ id, status: "rejected", adminNotes: notes })}>
+          Rechazar
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminDashboard() {
   const { user, isLoading } = useAuth();
   const { toast } = useToast();
@@ -49,6 +77,31 @@ export default function AdminDashboard() {
   const [editingCategory, setEditingCategory] = useState<ServiceCategory | null>(null);
   const [selectedProvider, setSelectedProvider] = useState<any | null>(null);
   const [providerDialogOpen, setProviderDialogOpen] = useState(false);
+
+  const { data: verificationsData, refetch: refetchVerifications } = useQuery({
+    queryKey: ["/api/admin/verifications"],
+    queryFn: async () => {
+      const res = await fetch(getApiUrl("/api/admin/verifications"), { headers: getAuthHeaders() });
+      if (!res.ok) throw new Error("Error al obtener verificaciones");
+      return res.json();
+    },
+  });
+
+  const reviewVerificationMutation = useMutation({
+    mutationFn: async ({ id, status, adminNotes }: { id: number; status: string; adminNotes: string }) => {
+      const res = await fetch(getApiUrl(`/api/admin/verifications/${id}`), {
+        method: "PATCH",
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ status, adminNotes })
+      });
+      if (!res.ok) throw new Error("Error al revisar verificacion");
+      return res.json();
+    },
+    onSuccess: () => {
+      refetchVerifications();
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/providers"] });
+    }
+  });
 
   const verifyProviderMutation = useMutation({
     mutationFn: async (providerId: number) => {
@@ -313,12 +366,13 @@ export default function AdminDashboard() {
 
         {/* Main Content */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid grid-cols-5 w-full max-w-2xl">
+          <TabsList className="grid grid-cols-6 w-full max-w-2xl">
             <TabsTrigger value="overview">Resumen</TabsTrigger>
             <TabsTrigger value="providers">Profesionales</TabsTrigger>
             <TabsTrigger value="requests">Solicitudes</TabsTrigger>
             <TabsTrigger value="categories">Categorías</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="verifications">Verificaciones</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">

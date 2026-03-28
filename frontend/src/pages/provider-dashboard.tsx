@@ -52,6 +52,42 @@ export default function ProviderDashboard() {
   const [coverageRadius, setCoverageRadius] = useState(10);
   const [savingCoverage, setSavingCoverage] = useState(false);
   const [coverageSaved, setCoverageSaved] = useState(false);
+  const [verifForm, setVerifForm] = useState({ personType: "fisica", documentType: "DNI", documentNumber: "", legalRepresentative: "", consentGiven: false });
+  const [verifError, setVerifError] = useState("");
+
+  // Verificación de identidad
+  const { data: verificationData } = useQuery({
+    queryKey: ["/api/providers/verification"],
+    queryFn: async () => {
+      const res = await fetch(getApiUrl(`/api/providers/${providerProfile?.id}/verification`), {
+        headers: getAuthHeaders()
+      });
+      if (res.status === 404) return null;
+      if (!res.ok) throw new Error("Error al obtener verificacion");
+      return res.json();
+    },
+    enabled: !!providerProfile?.id,
+  });
+
+  const submitVerificationMutation = useMutation({
+    mutationFn: async (data: typeof verifForm) => {
+      const res = await fetch(getApiUrl(`/api/providers/${providerProfile?.id}/verification`), {
+        method: "POST",
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Error al enviar solicitud");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/providers/verification"] });
+      setVerifError("");
+    },
+    onError: (err: Error) => setVerifError(err.message),
+  });
 
   const handleSaveCoverage = async () => {
     if (!providerId) return;
@@ -492,6 +528,77 @@ export default function ProviderDashboard() {
                 {savingCoverage ? "Guardando..." : "Guardar zona de cobertura"}
               </Button>
               {coverageSaved && <p className="text-sm text-green-600 text-center">✓ Zona guardada correctamente</p>}
+            </CardContent>
+          </Card>
+
+          {/* Verificación de identidad */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Verificación de identidad</CardTitle>
+              <CardDescription>Obtené el distintivo de proveedor verificado para generar más confianza.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {verificationData?.status === "approved" && (
+                <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <span className="text-green-700 font-medium">✓ Identidad verificada</span>
+                </div>
+              )}
+              {verificationData?.status === "pending" && (
+                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <p className="text-amber-700 text-sm font-medium">Solicitud en revisión</p>
+                  <p className="text-amber-600 text-xs mt-1">Tu solicitud fue recibida y está siendo revisada por nuestro equipo.</p>
+                </div>
+              )}
+              {verificationData?.status === "rejected" && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-red-700 text-sm font-medium">Solicitud rechazada</p>
+                  {verificationData.adminNotes && <p className="text-red-600 text-xs mt-1">{verificationData.adminNotes}</p>}
+                </div>
+              )}
+              {(!verificationData || verificationData?.status === "rejected") && (
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-sm font-medium">Tipo de persona</label>
+                    <select className="w-full mt-1 px-3 py-2 border rounded-md text-sm" value={verifForm.personType}
+                      onChange={e => setVerifForm({...verifForm, personType: e.target.value, documentType: e.target.value === "fisica" ? "DNI" : "CUIT"})}>
+                      <option value="fisica">Persona física</option>
+                      <option value="juridica">Persona jurídica (empresa)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">{verifForm.personType === "fisica" ? "Número de DNI" : "CUIT"}</label>
+                    <input className="w-full mt-1 px-3 py-2 border rounded-md text-sm"
+                      placeholder={verifForm.personType === "fisica" ? "Ej: 30123456" : "Ej: 20-30123456-7"}
+                      value={verifForm.documentNumber}
+                      onChange={e => setVerifForm({...verifForm, documentNumber: e.target.value})} />
+                  </div>
+                  {verifForm.personType === "juridica" && (
+                    <div>
+                      <label className="text-sm font-medium">Nombre del representante legal</label>
+                      <input className="w-full mt-1 px-3 py-2 border rounded-md text-sm"
+                        placeholder="Nombre y apellido"
+                        value={verifForm.legalRepresentative}
+                        onChange={e => setVerifForm({...verifForm, legalRepresentative: e.target.value})} />
+                    </div>
+                  )}
+                  <div className="flex items-start gap-2 p-3 bg-slate-50 border rounded-lg">
+                    <input type="checkbox" id="consent" className="mt-1"
+                      checked={verifForm.consentGiven}
+                      onChange={e => setVerifForm({...verifForm, consentGiven: e.target.checked})} />
+                    <label htmlFor="consent" className="text-xs text-slate-600">
+                      Acepto que ServiciosHogar.com.ar almacene mi número de documento con fines de verificación de identidad, conforme a la{" "}
+                      <a href="/privacidad" className="underline text-blue-600" target="_blank">Política de Privacidad</a>.
+                    </label>
+                  </div>
+                  {verifError && <p className="text-sm text-red-600">{verifError}</p>}
+                  <Button
+                    className="w-full"
+                    disabled={!verifForm.documentNumber || !verifForm.consentGiven || submitVerificationMutation.isPending}
+                    onClick={() => submitVerificationMutation.mutate(verifForm)}>
+                    {submitVerificationMutation.isPending ? "Enviando..." : "Solicitar verificación"}
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

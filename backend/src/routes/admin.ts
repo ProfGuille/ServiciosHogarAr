@@ -360,4 +360,84 @@ router.patch("/categories/:id", requireAuth, requireRole("admin"), async (req, r
   }
 });
 
+
+// GET /api/admin/verifications — listar solicitudes de verificación
+router.get("/verifications", requireAuth, requireRole("admin"), async (req, res) => {
+  try {
+    const verifications = await sql`
+      SELECT
+        pv.id,
+        pv.provider_id as "providerId",
+        pv.person_type as "personType",
+        pv.document_type as "documentType",
+        pv.document_number as "documentNumber",
+        pv.legal_representative as "legalRepresentative",
+        pv.status,
+        pv.admin_notes as "adminNotes",
+        pv.reviewed_at as "reviewedAt",
+        pv.consent_given as "consentGiven",
+        pv.consent_at as "consentAt",
+        pv.created_at as "createdAt",
+        sp.business_name as "businessName",
+        u.first_name as "firstName",
+        u.last_name as "lastName",
+        u.email
+      FROM provider_verifications pv
+      JOIN service_providers sp ON sp.id = pv.provider_id
+      JOIN users u ON u.id = sp.user_id
+      ORDER BY
+        CASE pv.status WHEN 'pending' THEN 0 WHEN 'rejected' THEN 1 ELSE 2 END,
+        pv.created_at DESC
+    `;
+    res.json(verifications);
+  } catch (error) {
+    console.error("Error en GET /api/admin/verifications:", error);
+    res.status(500).json({ error: "Error al obtener verificaciones" });
+  }
+});
+
+// PATCH /api/admin/verifications/:id — aprobar o rechazar
+router.patch("/verifications/:id", requireAuth, requireRole("admin"), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, adminNotes } = req.body;
+    if (!["approved", "rejected"].includes(status)) {
+      return res.status(400).json({ error: "Status debe ser approved o rejected" });
+    }
+    const adminId = (req as any).user.id;
+
+    const [verification] = await sql`
+      UPDATE provider_verifications
+      SET
+        status = ${status},
+        admin_notes = ${adminNotes || null},
+        reviewed_by = ${adminId},
+        reviewed_at = NOW(),
+        updated_at = NOW()
+      WHERE id = ${id}
+      RETURNING id, provider_id as "providerId", status
+    `;
+    if (!verification) return res.status(404).json({ error: "Verificacion no encontrada" });
+
+    if (status === "approved") {
+      await sql`
+        UPDATE service_providers
+        SET is_verified = true, updated_at = NOW()
+        WHERE id = ${verification.providerId}
+      `;
+    } else if (status === "rejected") {
+      await sql`
+        UPDATE service_providers
+        SET is_verified = false, updated_at = NOW()
+        WHERE id = ${verification.providerId}
+      `;
+    }
+
+    res.json(verification);
+  } catch (error) {
+    console.error("Error en PATCH /api/admin/verifications/:id:", error);
+    res.status(500).json({ error: "Error al actualizar verificacion" });
+  }
+});
+
 export default router;
