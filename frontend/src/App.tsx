@@ -1,85 +1,75 @@
 import { Route, Switch } from 'wouter';
-import HomePage from '@/pages/home';
-import Landing from '@/pages/landing';
-import Login from '@/pages/login';
-import ForgotPassword from '@/pages/forgot-password';
-import ResetPassword from '@/pages/reset-password';
-import Register from '@/pages/register';
-import RegisterProvider from '@/pages/register-provider';
-import ProviderDashboard from '@/pages/provider-dashboard';
-import ProviderProfile from '@/pages/provider-profile';
-import ComprarCreditos from '@/pages/comprar-creditos';
-import CompraExitosa from '@/pages/compra-exitosa';
-import CompraFallida from '@/pages/compra-fallida';
-import CompraPendiente from '@/pages/compra-pendiente';
-import Services from '@/pages/services';
-import ServiceDetail from '@/pages/service-detail';
-import Search from '@/pages/search';
-import CreateRequest from '@/pages/create-request';
-import MyRequests from '@/pages/my-requests';
-import Profile from '@/pages/profile';
-import Messages from '@/pages/messages';
-import AdminDashboard from '@/pages/admin-dashboard';
-import AnalyticsDashboard from '@/pages/analytics-dashboard';
-import About from '@/pages/about';
-import ComoFunciona from '@/pages/como-funciona';
-import CentroAyuda from '@/pages/centro-ayuda';
-import Contacto from '@/pages/contacto-fixed';
-import Terminos from '@/pages/terminos';
-import Privacidad from '@/pages/privacidad';
-import AvisoLegal from '@/pages/aviso-legal';
-import Seguridad from '@/pages/seguridad';
-import NewServiceRequest from '@/pages/NewServiceRequest'; // ← NUEVO
+import { lazy, Suspense } from 'react';
+
+const Landing = lazy(() => import('@/pages/landing'));
+const HomePage = lazy(() => import('@/pages/home'));
+const Login = lazy(() => import('@/pages/login'));
+const ForgotPassword = lazy(() => import('@/pages/forgot-password'));
+const ResetPassword = lazy(() => import('@/pages/reset-password'));
+const Register = lazy(() => import('@/pages/register'));
+const RegisterProvider = lazy(() => import('@/pages/register-provider'));
+const ProviderDashboard = lazy(() => import('@/pages/provider-dashboard'));
+const ProviderProfile = lazy(() => import('@/pages/provider-profile'));
+const ComprarCreditos = lazy(() => import('@/pages/comprar-creditos'));
+const CompraExitosa = lazy(() => import('@/pages/compra-exitosa'));
+const CompraFallida = lazy(() => import('@/pages/compra-fallida'));
+const CompraPendiente = lazy(() => import('@/pages/compra-pendiente'));
+const Services = lazy(() => import('@/pages/services'));
+const ServiceDetail = lazy(() => import('@/pages/service-detail'));
+const Search = lazy(() => import('@/pages/search'));
+const CreateRequest = lazy(() => import('@/pages/create-request'));
+const MyRequests = lazy(() => import('@/pages/my-requests'));
+const Profile = lazy(() => import('@/pages/profile'));
+const Messages = lazy(() => import('@/pages/messages'));
+const AdminDashboard = lazy(() => import('@/pages/admin-dashboard'));
+const AnalyticsDashboard = lazy(() => import('@/pages/analytics-dashboard'));
+const About = lazy(() => import('@/pages/about'));
+const ComoFunciona = lazy(() => import('@/pages/como-funciona'));
+const CentroAyuda = lazy(() => import('@/pages/centro-ayuda'));
+const Contacto = lazy(() => import('@/pages/contacto-fixed'));
+const Terminos = lazy(() => import('@/pages/terminos'));
+const Privacidad = lazy(() => import('@/pages/privacidad'));
+const AvisoLegal = lazy(() => import('@/pages/aviso-legal'));
+const Seguridad = lazy(() => import('@/pages/seguridad'));
+const NewServiceRequest = lazy(() => import('@/pages/NewServiceRequest'));
 
 function App() {
   return (
-    <Switch>
-      <Route path="/" component={Landing} />
-      <Route path="/login" component={Login} />
-      <Route path="/forgot-password" component={ForgotPassword} />
-      <Route path="/reset-password" component={ResetPassword} />
-      <Route path="/register" component={Register} />
-      <Route path="/register-provider" component={RegisterProvider} />
-      <Route path="/dashboard" component={HomePage} />
-      <Route path="/perfil" component={Profile} />
-      <Route path="/mis-solicitudes" component={MyRequests} />
-      <Route path="/mensajes" component={Messages} />
-      <Route path="/dashboard-profesional" component={ProviderDashboard} />
-      <Route path="/profesional/:id" component={ProviderProfile} />
-      <Route path="/comprar-creditos" component={ComprarCreditos} />
-      <Route path="/compra-exitosa" component={CompraExitosa} />
-      <Route path="/compra-fallida" component={CompraFallida} />
-      <Route path="/compra-pendiente" component={CompraPendiente} />
-      <Route path="/servicios" component={Services} />
-      <Route path="/buscar" component={Search} />
-      <Route path="/servicio/:id" component={ServiceDetail} />
-      <Route path="/crear-solicitud" component={CreateRequest} />
-      <Route path="/nueva-solicitud" component={NewServiceRequest} /> {/* ← NUEVO */}
-      <Route path="/admin" component={AdminDashboard} />
-      <Route path="/analytics" component={AnalyticsDashboard} />
-      <Route path="/about" component={About} />
-      <Route path="/como-funciona" component={ComoFunciona} />
-      <Route path="/centro-ayuda" component={CentroAyuda} />
-      <Route path="/contacto" component={Contacto} />
-      <Route path="/terminos" component={Terminos} />
-      <Route path="/legal/terminos" component={Terminos} />
-      <Route path="/privacidad" component={Privacidad} />
-      <Route path="/legal/privacidad" component={Privacidad} />
-      <Route path="/aviso-legal" component={AvisoLegal} />
-      <Route path="/legal/aviso" component={AvisoLegal} />
-      <Route path="/seguridad" component={Seguridad} />
-      <Route>
-        <div className="min-h-screen flex items-center justify-center bg-gray-100">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">404</h1>
-            <p className="text-gray-600 mb-4">Página no encontrada</p>
-            <a href="/" className="text-blue-600 hover:text-blue-800">
-              Volver al inicio
-            </a>
-          </div>
-        </div>
-      </Route>
-    </Switch>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+      <Switch>
+        <Route path="/" component={Landing} />
+        <Route path="/login" component={Login} />
+        <Route path="/forgot-password" component={ForgotPassword} />
+        <Route path="/reset-password" component={ResetPassword} />
+        <Route path="/register" component={Register} />
+        <Route path="/register-provider" component={RegisterProvider} />
+        <Route path="/dashboard" component={HomePage} />
+        <Route path="/perfil" component={Profile} />
+        <Route path="/mis-solicitudes" component={MyRequests} />
+        <Route path="/mensajes" component={Messages} />
+        <Route path="/dashboard-profesional" component={ProviderDashboard} />
+        <Route path="/profesional/:id" component={ProviderProfile} />
+        <Route path="/comprar-creditos" component={ComprarCreditos} />
+        <Route path="/compra-exitosa" component={CompraExitosa} />
+        <Route path="/compra-fallida" component={CompraFallida} />
+        <Route path="/compra-pendiente" component={CompraPendiente} />
+        <Route path="/servicios" component={Services} />
+        <Route path="/buscar" component={Search} />
+        <Route path="/servicio/:id" component={ServiceDetail} />
+        <Route path="/crear-solicitud" component={CreateRequest} />
+        <Route path="/nueva-solicitud" component={NewServiceRequest} />
+        <Route path="/admin" component={AdminDashboard} />
+        <Route path="/analytics" component={AnalyticsDashboard} />
+        <Route path="/about" component={About} />
+        <Route path="/como-funciona" component={ComoFunciona} />
+        <Route path="/centro-ayuda" component={CentroAyuda} />
+        <Route path="/contacto" component={Contacto} />
+        <Route path="/terminos" component={Terminos} />
+        <Route path="/privacidad" component={Privacidad} />
+        <Route path="/aviso-legal" component={AvisoLegal} />
+        <Route path="/seguridad" component={Seguridad} />
+      </Switch>
+    </Suspense>
   );
 }
 
