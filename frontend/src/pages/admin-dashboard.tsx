@@ -106,7 +106,7 @@ export default function AdminDashboard() {
   const verifyProviderMutation = useMutation({
     mutationFn: async (providerId: number) => {
       const token = localStorage.getItem("token");
-      const res = await fetch(`/api/admin/providers/${providerId}/verify`, {
+      const res = await fetch(getApiUrl(`/api/admin/providers/${providerId}/verify`), {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -135,7 +135,7 @@ export default function AdminDashboard() {
   const handleVerRequestDetail = async (requestId: number) => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`/api/admin/requests/${requestId}`, {
+      const res = await fetch(getApiUrl(`/api/admin/requests/${requestId}`), {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -149,7 +149,7 @@ export default function AdminDashboard() {
   const handleVerProviderProfile = async (providerId: number) => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`/api/admin/providers/${providerId}`, {
+      const res = await fetch(getApiUrl(`/api/admin/providers/${providerId}`), {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -291,6 +291,11 @@ export default function AdminDashboard() {
             </div>
             
             <div className="flex gap-3">
+              <a href="/dashboard-profesional">
+                <Button variant="outline">
+                  Ver Dashboard Profesional
+                </Button>
+              </a>
               <a href="/analytics">
                 <Button variant="outline">
                   <BarChart3 className="h-4 w-4 mr-2" />
