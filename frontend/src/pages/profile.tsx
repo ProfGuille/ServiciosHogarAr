@@ -108,19 +108,6 @@ export default function Profile() {
 
           {/* Account Status */}
           <div className="space-y-6">
-            {/* Achievement Gallery */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Trophy className="h-5 w-5 text-yellow-500" />
-                  Mis Logros
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <AchievementGallery userId={user.id} />
-              </CardContent>
-            </Card>
-            
             <Card>
               <CardHeader>
                 <CardTitle>Estado de la Cuenta</CardTitle>
@@ -171,6 +158,19 @@ export default function Profile() {
           </div>
         </div>
         
+        {/* Achievement Section */}
+        <div className="mt-8 space-y-4">
+          <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+            <Trophy className="h-6 w-6 text-yellow-500" />
+            Mis Logros
+          </h2>
+          <Card>
+            <CardContent className="p-0 pt-6">
+              <AchievementGallery userId={user.id} />
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Referral Section */}
         <div className="mt-8 space-y-4">
           <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
