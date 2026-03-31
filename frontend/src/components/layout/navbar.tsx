@@ -54,7 +54,6 @@ export function Navbar() {
 
   const adminLinks = [
     { href: "/admin", label: t('nav.admin') || "Admin", icon: Shield },
-    { href: "/analytics", label: t('nav.analytics') || "Analytics", icon: BarChart },
   ];
 
   const handleLogout = () => {
