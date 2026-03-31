@@ -40,6 +40,12 @@ export default defineConfig({
           if (id.includes("date-fns") || id.includes("zod") || id.includes("clsx") || id.includes("tailwind-merge")) {
             return "utils";
           }
+          if (id.includes("/src/hooks/")) {
+            return "hooks";
+          }
+          if (id.includes("/src/lib/auth")) {
+            return "hooks";
+          }
           if (id.includes("node_modules/react/") || id.includes("node_modules/react-dom/") || id.includes("node_modules/wouter/") || id.includes("@tanstack/react-query")) {
             return "vendor";
           }
