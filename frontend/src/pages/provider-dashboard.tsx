@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -113,14 +113,11 @@ export default function ProviderDashboard() {
     }
   };
 
-  const { user, isLoading } = useAuth();
+  const { user } = useAuth();
   const [, navigate] = useLocation();
   const providerId = (user as any)?.providerId ?? null;
 
   // Redirigir si no es proveedor
-  if (isLoading) {
-    return <div className="min-h-screen bg-slate-50 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>;
-  }
   if (user && user.userType !== "provider") {
     if (user.userType === "admin") navigate("/admin");
     else navigate("/");
