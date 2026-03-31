@@ -146,7 +146,7 @@ router.post("/:id/verification", requireAuth, async (req, res) => {
 
     // Validar que el proveedor le pertenece al usuario autenticado
     const [provider] = (await sql`
-      SELECT id, user_id FROM service_providers WHERE id = ${id}
+      SELECT id, user_id, business_name FROM service_providers WHERE id = ${id}
     `) as any[];
     if (!provider) return res.status(404).json({ error: "Proveedor no encontrado" });
     if (provider.user_id !== (req as any).user.id) return res.status(403).json({ error: "No autorizado" });
