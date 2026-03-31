@@ -1,6 +1,6 @@
-import { useState } from "react";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
@@ -113,11 +113,17 @@ export default function ProviderDashboard() {
     }
   };
 
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const [, navigate] = useLocation();
   const providerId = (user as any)?.providerId ?? null;
 
-  }
+  // Redirigir si no es proveedor
+  useEffect(() => {
+    if (user && user.userType !== "provider") {
+      if (user.userType === "admin") navigate("/admin");
+      else navigate("/");
+    }
+  }, [user]);
 
   // Query: Créditos disponibles
   const { data: credits } = useQuery<Credits>({
@@ -254,13 +260,6 @@ export default function ProviderDashboard() {
     // O se puede usar el deep link directo si conocemos el username
     return `https://t.me/+54${phone.replace(/\D/g, "")}`;
   };
-
-  // Redirigir si no es proveedor (despues de todos los hooks)
-  if (user && user.userType !== "provider") {
-    if (user.userType === "admin") navigate("/admin");
-    else navigate("/");
-    return null;
-  }
 
   return (
     <div className="min-h-screen bg-slate-50">
