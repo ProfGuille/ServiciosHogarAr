@@ -159,7 +159,7 @@ export default function Profile() {
         </div>
         
         {/* Achievement Section */}
-        <div className="mt-8 space-y-4">
+        {user.userType !== 'admin' && <div className="mt-8 space-y-4">
           <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
             <Trophy className="h-6 w-6 text-yellow-500" />
             Mis Logros
@@ -169,7 +169,7 @@ export default function Profile() {
               <AchievementGallery userId={user.id} />
             </CardContent>
           </Card>
-        </div>
+        </div>}
 
         {/* Referral Section */}
         <div className="mt-8 space-y-4">
