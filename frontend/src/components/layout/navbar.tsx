@@ -49,7 +49,7 @@ export function Navbar() {
 
   const authenticatedLinks = [
     { href: "/mis-solicitudes", label: t('nav.requests') || "Solicitudes", icon: FileText },
-    { href: "/dashboard-profesional", label: "Mi Panel", icon: Briefcase },
+    ...(user?.userType === 'provider' ? [{ href: "/dashboard-profesional", label: "Mi Panel", icon: Briefcase }] : []),
   ];
 
   const adminLinks = [
