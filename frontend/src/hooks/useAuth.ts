@@ -5,18 +5,13 @@ export function useAuth() {
   const { data: user, isLoading } = useQuery({
     queryKey: ["auth", "user"],
     queryFn: () => {
-      // Verificar si hay token válido en localStorage
-      if (!checkAuth()) {
-        return null;
-      }
-      
-      // Obtener usuario del localStorage
-      const userData = getUser();
-      return userData;
+      if (!checkAuth()) return null;
+      return getUser();
     },
+    initialData: () => checkAuth() ? getUser() : null,
     retry: false,
-    staleTime: 5 * 60 * 1000, // 5 minutos
-    gcTime: 10 * 60 * 1000, // 10 minutos
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 
   return {
