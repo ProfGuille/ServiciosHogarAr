@@ -296,12 +296,7 @@ export default function AdminDashboard() {
                   Ver Dashboard Profesional
                 </Button>
               </a>
-              <a href="/analytics">
-                <Button variant="outline">
-                  <BarChart3 className="h-4 w-4 mr-2" />
-                  Analytics
-                </Button>
-              </a>
+
             </div>
           </div>
         </div>
