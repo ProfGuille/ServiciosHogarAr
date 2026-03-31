@@ -109,10 +109,17 @@ export default function Home() {
                       <User className="h-4 w-4 mr-2" />
                       Mi perfil
                     </Button>
-                    <Button variant="outline" className="w-full" size="sm" onClick={() => window.location.href = "/dashboard-profesional"}>
-                      <Calendar className="h-4 w-4 mr-2" />
-                      Ver dashboard profesional
-                    </Button>
+                    {user.userType === 'provider' && (
+                      <Button variant="outline" className="w-full" size="sm" onClick={() => window.location.href = "/dashboard-profesional"}>
+                        <Calendar className="h-4 w-4 mr-2" />
+                        Ver dashboard profesional
+                      </Button>
+                    )}
+                    {user.userType === 'admin' && (
+                      <Button variant="outline" className="w-full" size="sm" onClick={() => window.location.href = "/admin"}>
+                        Panel de administración
+                      </Button>
+                    )}
                   </>
                 )}
               </CardContent>
