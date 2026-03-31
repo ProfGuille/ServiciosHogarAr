@@ -157,7 +157,7 @@ export default function ProviderDashboard() {
 
   const submitVerificationMutation = useMutation({
     mutationFn: async (data: typeof verifForm) => {
-      const res = await fetch(getApiUrl(`/api/providers/${providerProfile?.id}/verification`), {
+      const res = await fetch(getApiUrl(`/api/providers/${providerId}/verification`), {
         method: "POST",
         headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify(data)
