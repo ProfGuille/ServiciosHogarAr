@@ -157,3 +157,33 @@ export async function sendVerificationResultEmail(
     console.error("❌ Error enviando email verificación:", err);
   }
 }
+
+export async function sendAdminVerificationNotificationEmail(
+  providerName: string,
+  documentType: string,
+  documentNumber: string,
+  personType: string
+): Promise<void> {
+  await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${process.env.RESEND_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: "ServiciosHogar <administrador@servicioshogar.com.ar>",
+      to: ["administrador@servicioshogar.com.ar"],
+      subject: "Nueva solicitud de verificación de identidad",
+      html: `
+        <h2>Nueva solicitud de verificación</h2>
+        <p><strong>Proveedor:</strong> ${providerName}</p>
+        <p><strong>Tipo de persona:</strong> ${personType === "fisica" ? "Persona física" : "Persona jurídica"}</p>
+        <p><strong>Documento:</strong> ${documentType} ${documentNumber}</p>
+        <p>Ingresá al panel de administración para aprobar o rechazar la solicitud:</p>
+        <a href="https://servicioshogar.com.ar/admin" style="background:#2563eb;color:white;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;margin-top:12px">
+          Ver en panel admin
+        </a>
+      `,
+    }),
+  });
+}

@@ -2,6 +2,7 @@ import { Router } from "express";
 import { sql } from "../db.js";
 import { providersService } from "../services/providersService.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
+import { sendAdminVerificationNotificationEmail } from "../services/resendEmailService.js";
 import { db } from "../db.js";
 import { serviceProviders } from "../shared/schema/serviceProviders.js";
 import { eq } from "drizzle-orm";
@@ -187,6 +188,14 @@ router.post("/:id/verification", requireAuth, async (req, res) => {
         (${id}, ${personType}, ${documentType}, ${documentNumber}, ${legalRepresentative || null}, true, NOW())
       RETURNING id, status, created_at as "createdAt"
     `) as any[];
+
+    // Notificar al admin por email (no bloquea la respuesta)
+    sendAdminVerificationNotificationEmail(
+      provider.business_name || `Proveedor ID ${id}`,
+      documentType,
+      documentNumber,
+      personType
+    ).catch(err => console.error("Error enviando email admin verificacion:", err));
 
     res.status(201).json(verification);
   } catch (error) {
