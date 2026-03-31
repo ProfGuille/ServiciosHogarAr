@@ -838,6 +838,40 @@ export default function AdminDashboard() {
               </Card>
             </div>
           </TabsContent>
+
+          <TabsContent value="verifications">
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold">Solicitudes de verificación de identidad</h2>
+              {!verificationsData || verificationsData.length === 0 ? (
+                <Card><CardContent className="py-8 text-center text-slate-500">No hay solicitudes de verificación</CardContent></Card>
+              ) : (
+                verificationsData.map((v: any) => (
+                  <Card key={v.id}>
+                    <CardContent className="py-4">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="space-y-1">
+                          <p className="font-semibold">{v.businessName || `${v.firstName} ${v.lastName}`}</p>
+                          <p className="text-sm text-slate-500">{v.email}</p>
+                          <p className="text-sm">{v.personType === "fisica" ? "Persona física" : "Persona jurídica"} — {v.documentType} {v.documentNumber}</p>
+                          {v.legalRepresentative && <p className="text-sm">Representante: {v.legalRepresentative}</p>}
+                          <p className="text-xs text-slate-400">{new Date(v.createdAt).toLocaleDateString("es-AR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
+                          {v.adminNotes && <p className="text-sm text-slate-600 mt-1"><strong>Nota:</strong> {v.adminNotes}</p>}
+                        </div>
+                        <div className="flex flex-col items-end gap-2 min-w-[140px]">
+                          <span className={`text-xs font-semibold px-2 py-1 rounded-full ${v.status === "approved" ? "bg-green-100 text-green-700" : v.status === "rejected" ? "bg-red-100 text-red-700" : "bg-yellow-100 text-yellow-700"}`}>
+                            {v.status === "approved" ? "Aprobado" : v.status === "rejected" ? "Rechazado" : "Pendiente"}
+                          </span>
+                          {v.status === "pending" && (
+                            <VerificationActions id={v.id} onReview={(args) => reviewVerificationMutation.mutate(args)} />
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </div>
+          </TabsContent>
         </Tabs>
       </div>
 
