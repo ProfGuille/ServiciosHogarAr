@@ -117,11 +117,6 @@ export default function ProviderDashboard() {
   const [, navigate] = useLocation();
   const providerId = (user as any)?.providerId ?? null;
 
-  // Redirigir si no es proveedor
-  if (user && user.userType !== "provider") {
-    if (user.userType === "admin") navigate("/admin");
-    else navigate("/");
-    return null;
   }
 
   // Query: Créditos disponibles
@@ -259,6 +254,13 @@ export default function ProviderDashboard() {
     // O se puede usar el deep link directo si conocemos el username
     return `https://t.me/+54${phone.replace(/\D/g, "")}`;
   };
+
+  // Redirigir si no es proveedor (despues de todos los hooks)
+  if (user && user.userType !== "provider") {
+    if (user.userType === "admin") navigate("/admin");
+    else navigate("/");
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-slate-50">
