@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { requireAuth, requireRole } from "../middleware/auth.js";
 import { neon } from "@neondatabase/serverless";
+import { sendVerificationResultEmail } from "../services/resendEmailService.js";
 
 const router = Router();
 const sql = neon(process.env.DATABASE_URL!);
@@ -433,6 +434,17 @@ router.patch("/verifications/:id", requireAuth, requireRole("admin"), async (req
       `;
     }
 
+    // Notificar al proveedor por email
+    const [providerInfo] = await sql`
+      SELECT u.email, u.first_name, u.last_name
+      FROM service_providers sp
+      JOIN users u ON sp.user_id = u.id
+      WHERE sp.id = ${verification.providerId}
+    `;
+    if (providerInfo) {
+      const providerName = [providerInfo.first_name, providerInfo.last_name].filter(Boolean).join(" ") || "Profesional";
+      sendVerificationResultEmail(providerInfo.email, providerName, status, adminNotes).catch(console.error);
+    }
     res.json(verification);
   } catch (error) {
     console.error("Error en PATCH /api/admin/verifications/:id:", error);

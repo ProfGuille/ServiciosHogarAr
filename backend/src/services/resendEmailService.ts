@@ -111,3 +111,49 @@ export async function sendPasswordResetEmail(
 }
 
 
+
+export async function sendVerificationResultEmail(
+  toEmail: string,
+  providerName: string,
+  status: "approved" | "rejected",
+  adminNotes?: string
+): Promise<void> {
+  const isApproved = status === "approved";
+  const subject = isApproved
+    ? "✅ Tu verificación fue aprobada — ServiciosHogar"
+    : "❌ Tu verificación fue rechazada — ServiciosHogar";
+  const heading = isApproved
+    ? "¡Tu identidad fue verificada!"
+    : "Tu solicitud de verificación fue rechazada";
+  const message = isApproved
+    ? "Tu cuenta ahora muestra el distintivo de profesional verificado en ServiciosHogar. Esto aumenta la confianza de los clientes en tu perfil."
+    : "Tu solicitud de verificación de identidad no pudo ser aprobada en esta oportunidad.";
+  const notesHtml = adminNotes
+    ? `<p style="margin-top:12px"><strong>Nota del equipo:</strong> ${adminNotes}</p>`
+    : "";
+  const actionHtml = isApproved
+    ? ""
+    : `<p style="margin-top:12px">Podés volver a enviar tu solicitud desde tu <a href="https://servicioshogar.com.ar/dashboard-profesional" style="color:#1d4ed8">dashboard profesional</a> corrigiendo los datos indicados.</p>`;
+  try {
+    const { data, error } = await resend.emails.send({
+      from: "ServiciosHogar <administrador@servicioshogar.com.ar>",
+      to: toEmail,
+      subject,
+      html: `
+        <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
+          <h2 style="color:${isApproved ? "#16a34a" : "#dc2626"}">${heading}</h2>
+          <p>Hola ${providerName},</p>
+          <p>${message}</p>
+          ${notesHtml}
+          ${actionHtml}
+          <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0"/>
+          <p style="color:#9ca3af;font-size:12px">ServiciosHogar.com.ar</p>
+        </div>
+      `,
+    });
+    if (error) console.error("❌ Error Resend verification result:", error);
+    else console.log("✅ Email verificación enviado a", toEmail, "| ID:", data?.id);
+  } catch (err) {
+    console.error("❌ Error enviando email verificación:", err);
+  }
+}
