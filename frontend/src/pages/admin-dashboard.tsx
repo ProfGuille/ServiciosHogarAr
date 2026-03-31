@@ -291,11 +291,6 @@ export default function AdminDashboard() {
             </div>
             
             <div className="flex gap-3">
-              <a href="/dashboard-profesional">
-                <Button variant="outline">
-                  Ver Dashboard Profesional
-                </Button>
-              </a>
 
             </div>
           </div>
