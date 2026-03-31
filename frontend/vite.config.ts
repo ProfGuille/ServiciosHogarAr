@@ -6,7 +6,7 @@ const backendPort = Number(process.env.BACKEND_PORT) || 5000;
 
 export default defineConfig({
   plugins: [react()],
-  base: "./",
+  base: "/",
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
