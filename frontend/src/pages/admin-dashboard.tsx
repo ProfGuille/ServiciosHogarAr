@@ -187,7 +187,7 @@ export default function AdminDashboard() {
     enabled: !!user && user.userType === 'admin',
   });
 
-  const { data: recentRequests } = useQuery({
+  const { data: recentRequests, refetch: refetchRequests } = useQuery({
     queryKey: ["/api/admin/requests"],
     enabled: !!user && user.userType === 'admin',
   });
@@ -542,9 +542,14 @@ export default function AdminDashboard() {
                   <FileText className="h-5 w-5" />
                   Solicitudes recientes
                 </CardTitle>
-                <Button variant="outline" size="sm">
-                  Ver todas
-                </Button>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => refetchRequests()}>
+                    Actualizar
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    Ver todas
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 {recentRequests && recentRequests.length > 0 ? (
