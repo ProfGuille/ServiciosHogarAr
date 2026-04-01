@@ -13,6 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { getApiUrl } from "@/lib/api";
+import { getAuthHeaders } from "@/lib/auth";
 import { Label } from "@/components/ui/label";
 import {
   Dialog,
