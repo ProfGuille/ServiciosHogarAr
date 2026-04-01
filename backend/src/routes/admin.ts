@@ -171,7 +171,7 @@ router.get("/requests/:id", async (req, res) => {
         sr.created_at, sr.category_id,
         c.name as category_name
       FROM service_requests sr
-      LEFT JOIN categories c ON sr.category_id = c.id
+      LEFT JOIN service_categories c ON sr.category_id = c.id
       WHERE sr.id = ${id}
     `;
     if (!r) return res.status(404).json({ error: "Solicitud no encontrada" });
