@@ -153,12 +153,7 @@ export default function MyRequests() {
                         <Calendar className="w-4 h-4 mr-2" />
                         {new Date(request.createdAt).toLocaleDateString('es-AR')}
                       </div>
-                      {request.estimatedBudget && (
-                        <div className="flex items-center text-slate-600">
-                          <DollarSign className="w-4 h-4 mr-2" />
-                          ${Number(request.estimatedBudget).toLocaleString('es-AR')} ARS
-                        </div>
-                      )}
+
                     </div>
 
                     {request.preferredDate && (

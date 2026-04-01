@@ -571,11 +571,7 @@ export default function AdminDashboard() {
                                   <Calendar className="h-3 w-3" />
                                   {new Date(request.createdAt).toLocaleDateString('es-AR')}
                                 </div>
-                                {request.estimatedBudget && (
-                                  <div className="font-medium">
-                                    ${Number(request.estimatedBudget).toLocaleString('es-AR')} ARS
-                                  </div>
-                                )}
+
                               </div>
                             </div>
                             
@@ -916,10 +912,7 @@ export default function AdminDashboard() {
                     {selectedRequest.status}
                   </Badge>
                 </div>
-                <div>
-                  <span className="text-slate-500 block">Presupuesto</span>
-                  <span className="font-medium">{selectedRequest.estimatedBudget ? `$${Number(selectedRequest.estimatedBudget).toLocaleString("es-AR")}` : "—"}</span>
-                </div>
+
                 <div>
                   <span className="text-slate-500 block">Fecha preferida</span>
                   <span className="font-medium">{selectedRequest.preferredDate ? new Date(selectedRequest.preferredDate).toLocaleDateString("es-AR") : "—"}</span>

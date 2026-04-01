@@ -204,22 +204,7 @@ export default function CreateRequest() {
                 </Select>
               </div>
 
-              {/* Budget */}
-              <div>
-                <Label htmlFor="budget">Presupuesto estimado (ARS)</Label>
-                <Input
-                  id="budget"
-                  type="number"
-                  placeholder="Ej: 15000"
-                  value={form.estimatedBudget}
-                  onChange={(e) => updateForm("estimatedBudget", e.target.value)}
-                  min="0"
-                  step="100"
-                />
-                <p className="text-sm text-slate-500 mt-1">
-                  Opcional - Ayuda a los profesionales a entender el alcance del trabajo
-                </p>
-              </div>
+
 
               {/* Preferred Date */}
               <div>
