@@ -42,7 +42,8 @@ router.get("/available", async (req, res) => {
         isUrgent: serviceRequests.isUrgent,
         preferredDate: serviceRequests.preferredDate,
         createdAt: serviceRequests.createdAt,
-        status: serviceRequests.status
+        status: serviceRequests.status,
+        hasAccount: sql<boolean>`(${serviceRequests.customerId} IS NOT NULL)`
       })
       .from(serviceRequests)
       .leftJoin(categories, eq(serviceRequests.categoryId, categories.id))

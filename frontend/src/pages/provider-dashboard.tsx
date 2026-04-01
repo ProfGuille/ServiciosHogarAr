@@ -26,6 +26,7 @@ interface Lead {
   categoryId: number;
   categoryName: string;
   isUrgent: boolean;
+  hasAccount?: boolean;
   preferredDate: string | null;
   createdAt: string;
   status: string;
@@ -321,12 +322,17 @@ export default function ProviderDashboard() {
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <CardTitle className="text-lg">{lead.title}</CardTitle>
-                      {lead.isUrgent && (
-                        <Badge variant="destructive" className="flex items-center gap-1">
-                          <AlertCircle className="h-3 w-3" />
-                          Urgente
-                        </Badge>
-                      )}
+                      <div className="flex gap-2">
+                        {lead.isUrgent && (
+                          <Badge variant="destructive" className="flex items-center gap-1">
+                            <AlertCircle className="h-3 w-3" />
+                            Urgente
+                          </Badge>
+                        )}
+                        {!lead.hasAccount && (
+                          <Badge variant="outline" className="text-yellow-600 border-yellow-400">Sin cuenta registrada</Badge>
+                        )}
+                      </div>
                     </div>
                     <CardDescription className="flex items-center gap-1">
                       <MapPin className="h-3 w-3" />
@@ -391,6 +397,9 @@ export default function ProviderDashboard() {
                       </div>
                       {lead.isUrgent && (
                         <Badge variant="destructive">Urgente</Badge>
+                      )}
+                      {!lead.hasAccount && (
+                        <Badge variant="outline" className="text-yellow-600 border-yellow-400">Sin cuenta registrada</Badge>
                       )}
                     </div>
                   </CardHeader>
