@@ -36,7 +36,6 @@ interface ServiceRequest {
   city: string;
   latitude?: number;
   longitude?: number;
-  estimatedBudget?: number;
   isUrgent: boolean;
   preferredDate?: string;
   preferredTime?: string;

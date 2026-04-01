@@ -12,7 +12,6 @@ export const serviceRequests = pgTable("service_requests", {
   city: varchar("city", { length: 100 }).notNull(),
   province: varchar("province", { length: 100 }).notNull(),
   preferredDate: timestamp("preferred_date"),
-  estimatedBudget: numeric("estimated_budget"),
   status: varchar("status").notNull().default("pending"),
   quotedPrice: numeric("quoted_price"),
   quotedAt: timestamp("quoted_at"),

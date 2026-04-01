@@ -174,7 +174,6 @@ export const serviceRequestsService = {
         city: data.city,
         province: data.province,
         preferredDate: data.preferredDate ?? null,
-        estimatedBudget: data.estimatedBudget ?? null,
         isUrgent: data.isUrgent ?? false,
         customerNotes: data.customerNotes ?? null,
       })
