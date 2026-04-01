@@ -1,4 +1,7 @@
 import { Router } from "express";
+import jwt from "jsonwebtoken";
+
+const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret";
 import { db } from "../db.js";
 import { serviceRequests } from "../shared/schema/serviceRequests.js";
 import { notifyProvidersAboutNewLead } from '../services/leadNotificationHelper.js';
@@ -9,6 +12,15 @@ const router = Router();
 
 router.post("/", async (req, res) => {
   try {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      try {
+        const decoded = jwt.verify(authHeader.slice(7), JWT_SECRET) as any;
+        if (decoded.role === "provider") {
+          return res.status(403).json({ error: "Los proveedores no pueden crear solicitudes" });
+        }
+      } catch (_) {}
+    }
     const {
       categoryId,
       title,
