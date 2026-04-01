@@ -362,8 +362,8 @@ router.patch("/categories/:id", requireAuth, requireRole("admin"), async (req, r
 });
 
 
-// GET /api/admin/verifications — listar solicitudes de verificación
-router.get("/verifications", requireAuth, requireRole("admin"), async (req, res) => {
+// GET /api/admin/identity-reviews — listar solicitudes de verificación
+router.get("/identity-reviews", requireAuth, requireRole("admin"), async (req, res) => {
   try {
     const verifications = await sql`
       SELECT
@@ -392,13 +392,13 @@ router.get("/verifications", requireAuth, requireRole("admin"), async (req, res)
     `;
     res.json(verifications);
   } catch (error) {
-    console.error("Error en GET /api/admin/verifications:", error);
+    console.error("Error en GET /api/admin/identity-reviews:", error);
     res.status(500).json({ error: "Error al obtener verificaciones" });
   }
 });
 
-// PATCH /api/admin/verifications/:id — aprobar o rechazar
-router.patch("/verifications/:id", requireAuth, requireRole("admin"), async (req, res) => {
+// PATCH /api/admin/identity-reviews/:id — aprobar o rechazar
+router.patch("/identity-reviews/:id", requireAuth, requireRole("admin"), async (req, res) => {
   try {
     const { id } = req.params;
     const { status, adminNotes } = req.body;
@@ -447,7 +447,7 @@ router.patch("/verifications/:id", requireAuth, requireRole("admin"), async (req
     }
     res.json(verification);
   } catch (error) {
-    console.error("Error en PATCH /api/admin/verifications/:id:", error);
+    console.error("Error en PATCH /api/admin/identity-reviews/:id:", error);
     res.status(500).json({ error: "Error al actualizar verificacion" });
   }
 });

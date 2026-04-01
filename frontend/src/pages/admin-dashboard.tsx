@@ -79,9 +79,9 @@ export default function AdminDashboard() {
   const [providerDialogOpen, setProviderDialogOpen] = useState(false);
 
   const { data: verificationsData, refetch: refetchVerifications } = useQuery({
-    queryKey: ["/api/admin/verifications"],
+    queryKey: ["/api/admin/identity-reviews"],
     queryFn: async () => {
-      const res = await fetch(getApiUrl("/api/admin/verifications"), { headers: getAuthHeaders() });
+      const res = await fetch(getApiUrl("/api/admin/identity-reviews"), { headers: getAuthHeaders() });
       if (!res.ok) throw new Error("Error al obtener verificaciones");
       return res.json();
     },
@@ -89,7 +89,7 @@ export default function AdminDashboard() {
 
   const reviewVerificationMutation = useMutation({
     mutationFn: async ({ id, status, adminNotes }: { id: number; status: string; adminNotes: string }) => {
-      const res = await fetch(getApiUrl(`/api/admin/verifications/${id}`), {
+      const res = await fetch(getApiUrl(`/api/admin/identity-reviews/${id}`), {
         method: "PATCH",
         headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({ status, adminNotes })
