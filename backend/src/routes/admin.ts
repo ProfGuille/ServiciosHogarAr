@@ -159,7 +159,7 @@ router.patch("/providers/:id/verify", async (req, res) => {
 });
 
 // GET /api/admin/requests/:id
-router.get("/requests/:id", async (req, res) => {
+router.get("/requests/:id", requireAuth, requireRole("admin"), async (req, res) => {
   try {
     const { id } = req.params;
     const [r] = await sql`
