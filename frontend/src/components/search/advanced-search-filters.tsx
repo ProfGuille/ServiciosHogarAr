@@ -26,8 +26,6 @@ import {
   DollarSign,
   Star,
   Award,
-  Clock,
-  Globe,
   Filter,
   X,
   ChevronDown
@@ -118,14 +116,6 @@ export function AdvancedSearchFilters({
     "Tierra del Fuego", "Tucumán"
   ];
 
-  const languages = [
-    { code: 'es', name: 'Español' },
-    { code: 'en', name: 'Inglés' },
-    { code: 'pt', name: 'Portugués' },
-    { code: 'it', name: 'Italiano' },
-    { code: 'de', name: 'Alemán' },
-    { code: 'fr', name: 'Francés' }
-  ];
 
   const filterContent = (
     <ScrollArea className="h-full pr-4">
@@ -159,7 +149,7 @@ export function AdvancedSearchFilters({
 
         <Separator />
 
-        <Accordion type="multiple" defaultValue={["location", "categories", "price"]} className="w-full">
+        <Accordion type="multiple" defaultValue={["categories"]} className="w-full">
           {/* Location Filter */}
           <AccordionItem value="location">
             <AccordionTrigger>
@@ -375,149 +365,6 @@ export function AdvancedSearchFilters({
                 <Label htmlFor="has-reviews" className="cursor-pointer">
                   Solo con reseñas
                 </Label>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          {/* Professional Attributes */}
-          <AccordionItem value="attributes">
-            <AccordionTrigger>
-              <div className="flex items-center gap-2">
-                <Award className="h-4 w-4" />
-                Características del profesional
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="verified"
-                    checked={localFilters.isVerified || false}
-                    onCheckedChange={(checked) => updateFilter('isVerified', checked || undefined)}
-                  />
-                  <Label htmlFor="verified" className="cursor-pointer">
-                    Solo verificados
-                  </Label>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="has-credits"
-                    checked={localFilters.hasCredits || false}
-                    onCheckedChange={(checked) => updateFilter('hasCredits', checked || undefined)}
-                  />
-                  <Label htmlFor="has-credits" className="cursor-pointer">
-                    Disponible ahora (con créditos)
-                  </Label>
-                </div>
-              </div>
-
-              <div>
-                <Label>Años de experiencia mínimos</Label>
-                <Select
-                  value={localFilters.experienceYears?.toString() || ''}
-                  onValueChange={(value) => updateFilter('experienceYears', value ? Number(value) : undefined)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Cualquier experiencia" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Cualquier experiencia</SelectItem>
-                    <SelectItem value="1">1+ años</SelectItem>
-                    <SelectItem value="3">3+ años</SelectItem>
-                    <SelectItem value="5">5+ años</SelectItem>
-                    <SelectItem value="10">10+ años</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label className="mb-2 block">Idiomas</Label>
-                <div className="space-y-2">
-                  {languages.map(language => (
-                    <div key={language.code} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`lang-${language.code}`}
-                        checked={localFilters.languages?.includes(language.code) || false}
-                        onCheckedChange={(checked) => {
-                          const currentLangs = localFilters.languages || [];
-                          const newLangs = checked
-                            ? [...currentLangs, language.code]
-                            : currentLangs.filter(lang => lang !== language.code);
-                          updateFilter('languages', newLangs.length > 0 ? newLangs : undefined);
-                        }}
-                      />
-                      <Label htmlFor={`lang-${language.code}`} className="cursor-pointer">
-                        {language.name}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          {/* Availability & Response Time */}
-          <AccordionItem value="availability">
-            <AccordionTrigger>
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                Disponibilidad
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="space-y-4">
-              <div>
-                <Label>Disponibilidad</Label>
-                <Select
-                  value={localFilters.availability || ''}
-                  onValueChange={(value) => updateFilter('availability', value || undefined)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Cualquier momento" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Cualquier momento</SelectItem>
-                    <SelectItem value="today">Hoy</SelectItem>
-                    <SelectItem value="tomorrow">Mañana</SelectItem>
-                    <SelectItem value="week">Esta semana</SelectItem>
-                    <SelectItem value="anytime">Cuando sea</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Tiempo de respuesta</Label>
-                <RadioGroup
-                  value={localFilters.responseTime || ''}
-                  onValueChange={(value) => updateFilter('responseTime', value || undefined)}
-                >
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="" id="response-any" />
-                      <Label htmlFor="response-any" className="cursor-pointer">
-                        Cualquier tiempo
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="fast" id="response-fast" />
-                      <Label htmlFor="response-fast" className="cursor-pointer">
-                        Rápido (menos de 2 horas)
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="medium" id="response-medium" />
-                      <Label htmlFor="response-medium" className="cursor-pointer">
-                        Moderado (menos de 24 horas)
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="slow" id="response-slow" />
-                      <Label htmlFor="response-slow" className="cursor-pointer">
-                        Sin prisa (más de 24 horas)
-                      </Label>
-                    </div>
-                  </div>
-                </RadioGroup>
               </div>
             </AccordionContent>
           </AccordionItem>

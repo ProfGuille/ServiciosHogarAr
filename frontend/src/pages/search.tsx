@@ -428,7 +428,7 @@ export default function Search() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex gap-8">
           {/* Desktop filters sidebar */}
-          <aside className="hidden lg:block w-80 flex-shrink-0 space-y-6">
+          <aside className="hidden lg:block w-64 flex-shrink-0 space-y-6">
             {/* Saved Searches */}
             <SavedSearches
               currentFilters={filters}
