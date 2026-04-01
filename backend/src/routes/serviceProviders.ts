@@ -51,7 +51,7 @@ router.patch("/:id", requireAuth, async (req, res) => {
   if (isNaN(providerId)) return res.status(400).json({ error: "ID inválido" });
 
   try {
-    const updated = await providersService.updateProfile(providerId, req.body);
+    const updated = await providersService.updateProfile(providerId, req.body, (req as any).user?.id);
     res.json(updated);
   } catch (err) {
     console.error("Error:", err);
