@@ -234,5 +234,60 @@ router.get("/:id/verification", requireAuth, async (req, res) => {
   }
 });
 
+
+// -----------------------------
+// GET /api/providers/:id/reviews
+// -----------------------------
+router.get("/:id/reviews", async (req, res) => {
+  const providerId = Number(req.params.id);
+  if (isNaN(providerId)) return res.status(400).json({ error: "ID inválido" });
+  try {
+    const { neon } = await import("@neondatabase/serverless");
+    const sql = neon(process.env.DATABASE_URL!);
+    const rows = await sql`
+      SELECT r.id, r.rating, r.comment, r.created_at,
+             u.first_name AS reviewer_first_name
+      FROM reviews r
+      LEFT JOIN users u ON u.id = r.reviewer_id::varchar
+      WHERE r.reviewee_id::varchar IN (
+        SELECT user_id FROM service_providers WHERE id = ${providerId}
+      )
+      AND r.is_public = true
+      ORDER BY r.created_at DESC
+      LIMIT 20
+    `;
+    res.json({ data: rows, total: rows.length });
+  } catch (err) {
+    console.error("Error en GET /api/providers/:id/reviews:", err);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+});
+
+// -----------------------------
+// GET /api/providers/:id/stats
+// -----------------------------
+router.get("/:id/stats", async (req, res) => {
+  const providerId = Number(req.params.id);
+  if (isNaN(providerId)) return res.status(400).json({ error: "ID inválido" });
+  try {
+    const { neon } = await import("@neondatabase/serverless");
+    const sql = neon(process.env.DATABASE_URL!);
+    const [provider] = await sql`
+      SELECT rating, total_reviews, is_verified
+      FROM service_providers
+      WHERE id = ${providerId}
+    `;
+    if (!provider) return res.status(404).json({ error: "Proveedor no encontrado" });
+    res.json({
+      rating: provider.rating,
+      totalReviews: provider.total_reviews,
+      isVerified: provider.is_verified,
+    });
+  } catch (err) {
+    console.error("Error en GET /api/providers/:id/stats:", err);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+});
+
 export default router;
 
