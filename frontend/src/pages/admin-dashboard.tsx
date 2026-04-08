@@ -206,6 +206,7 @@ export default function AdminDashboard() {
     queryKey: ["/api/admin/profile-changes"],
     queryFn: async () => {
       const res = await fetch(getApiUrl("/api/admin/profile-changes"), { headers: getAuthHeaders() });
+      if (!res.ok) throw new Error("Error al cargar auditoría");
       return res.json();
     },
   });
@@ -888,7 +889,7 @@ export default function AdminDashboard() {
           <TabsContent value="auditoria">
             <div className="space-y-4">
               <h2 className="text-xl font-semibold">Auditoría de cambios de perfil</h2>
-              {!profileChanges || profileChanges.length === 0 ? (
+              {!profileChanges || !Array.isArray(profileChanges) || profileChanges.length === 0 ? (
                 <Card><CardContent className="py-8 text-center text-slate-500">No hay cambios registrados</CardContent></Card>
               ) : (
                 <Card>

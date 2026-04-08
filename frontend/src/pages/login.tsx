@@ -59,7 +59,7 @@ export default function Login() {
             Iniciar Sesión
           </CardTitle>
           <CardDescription className="text-center">
-            Ingresá a tu cuenta de proveedor
+            Ingresá a tu cuenta
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
