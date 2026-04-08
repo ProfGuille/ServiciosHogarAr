@@ -202,6 +202,14 @@ export default function AdminDashboard() {
     enabled: !!user && user.userType === "admin",
   });
 
+  const { data: profileChanges } = useQuery({
+    queryKey: ["/api/admin/profile-changes"],
+    queryFn: async () => {
+      const res = await fetch(getApiUrl("/api/admin/profile-changes"), { headers: getAuthHeaders() });
+      return res.json();
+    },
+  });
+
   const { data: categories, refetch: refetchCategories } = useQuery({
     queryKey: ["/api/categories"],
     enabled: !!user && user.userType === 'admin',
@@ -363,13 +371,14 @@ export default function AdminDashboard() {
 
         {/* Main Content */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid grid-cols-6 w-full max-w-2xl">
+          <TabsList className="grid grid-cols-7 w-full max-w-3xl">
             <TabsTrigger value="overview">Resumen</TabsTrigger>
             <TabsTrigger value="providers">Profesionales</TabsTrigger>
             <TabsTrigger value="requests">Solicitudes</TabsTrigger>
             <TabsTrigger value="categories">Categorías</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="verifications">Verificaciones</TabsTrigger>
+            <TabsTrigger value="auditoria">Auditoría</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">
@@ -872,6 +881,44 @@ export default function AdminDashboard() {
                     </CardContent>
                   </Card>
                 ))
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="auditoria">
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold">Auditoría de cambios de perfil</h2>
+              {!profileChanges || profileChanges.length === 0 ? (
+                <Card><CardContent className="py-8 text-center text-slate-500">No hay cambios registrados</CardContent></Card>
+              ) : (
+                <Card>
+                  <CardContent className="p-0">
+                    <table className="w-full text-sm">
+                      <thead className="bg-slate-50 border-b">
+                        <tr>
+                          <th className="text-left px-4 py-3 font-medium text-slate-600">Profesional</th>
+                          <th className="text-left px-4 py-3 font-medium text-slate-600">Campo</th>
+                          <th className="text-left px-4 py-3 font-medium text-slate-600">Valor anterior</th>
+                          <th className="text-left px-4 py-3 font-medium text-slate-600">Valor nuevo</th>
+                          <th className="text-left px-4 py-3 font-medium text-slate-600">Modificado por</th>
+                          <th className="text-left px-4 py-3 font-medium text-slate-600">Fecha</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y">
+                        {profileChanges.map((c: any) => (
+                          <tr key={c.id} className="hover:bg-slate-50">
+                            <td className="px-4 py-3">{c.business_name || `${c.provider_first} ${c.provider_last}`}</td>
+                            <td className="px-4 py-3 font-mono text-xs text-slate-500">{c.field_name}</td>
+                            <td className="px-4 py-3 text-red-600 max-w-[160px] truncate">{c.old_value ?? "—"}</td>
+                            <td className="px-4 py-3 text-green-700 max-w-[160px] truncate">{c.new_value ?? "—"}</td>
+                            <td className="px-4 py-3">{c.changed_by_first ? `${c.changed_by_first} ${c.changed_by_last}` : "—"}</td>
+                            <td className="px-4 py-3 text-slate-400 whitespace-nowrap">{new Date(c.changed_at).toLocaleDateString("es-AR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </CardContent>
+                </Card>
               )}
             </div>
           </TabsContent>

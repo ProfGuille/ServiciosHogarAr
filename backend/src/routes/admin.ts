@@ -452,4 +452,25 @@ router.patch("/identity-reviews/:id", requireAuth, requireRole("admin"), async (
   }
 });
 
+
+router.get("/profile-changes", requireAuth, requireRole("admin"), async (req, res) => {
+  try {
+    const changes = await sql`
+      SELECT ppc.id, ppc.provider_id, ppc.field_name, ppc.old_value, ppc.new_value, ppc.changed_at,
+             sp_u.first_name AS provider_first, sp_u.last_name AS provider_last, sp.business_name,
+             cb_u.first_name AS changed_by_first, cb_u.last_name AS changed_by_last
+      FROM provider_profile_changes ppc
+      JOIN service_providers sp ON ppc.provider_id = sp.id
+      JOIN users sp_u ON sp.user_id = sp_u.id
+      LEFT JOIN users cb_u ON ppc.changed_by = cb_u.id
+      ORDER BY ppc.changed_at DESC
+      LIMIT 200
+    `;
+    res.json(changes);
+  } catch (error) {
+    console.error("Error en GET /api/admin/profile-changes:", error);
+    res.status(500).json({ error: "Error al obtener auditoría" });
+  }
+});
+
 export default router;
