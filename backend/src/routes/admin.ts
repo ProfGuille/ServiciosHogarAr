@@ -165,7 +165,7 @@ router.get("/requests/:id", requireAuth, requireRole("admin"), async (req, res) 
     const [r] = await sql`
       SELECT
         sr.id, sr.title, sr.description, sr.address, sr.city, sr.province,
-        sr.neighborhood, sr.preferred_date, sr.estimated_budget, sr.status,
+        sr.neighborhood, sr.preferred_date, sr.status,
         sr.is_urgent, sr.customer_notes, sr.preferred_contact_methods,
         sr.customer_first_name, sr.customer_phone, sr.customer_email,
         sr.created_at, sr.category_id,
@@ -184,7 +184,6 @@ router.get("/requests/:id", requireAuth, requireRole("admin"), async (req, res) 
       province: r.province,
       neighborhood: r.neighborhood,
       preferredDate: r.preferred_date,
-      estimatedBudget: r.estimated_budget,
       status: r.status,
       isUrgent: r.is_urgent,
       customerNotes: r.customer_notes,
