@@ -59,7 +59,7 @@ function App() {
         <Route path="/crear-solicitud" component={CreateRequest} />
         <Route path="/nueva-solicitud" component={NewServiceRequest} />
         <Route path="/admin" component={AdminDashboard} />
-        <Route path="/analytics" component={AnalyticsDashboard} />
+        {/* TODO: página rota — proteger con requireRole("admin") antes de reactivar <Route path="/analytics" component={AnalyticsDashboard} /> */}
         <Route path="/about" component={About} />
         <Route path="/como-funciona" component={ComoFunciona} />
         <Route path="/centro-ayuda" component={CentroAyuda} />
