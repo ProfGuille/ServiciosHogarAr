@@ -202,7 +202,7 @@ export function BudgetCalculator() {
 
         <Button 
           className="w-full" 
-          onClick={() => window.location.href = '/crear-solicitud'}
+          onClick={() => window.location.href = '/nueva-solicitud'}
           disabled={!estimatedBudget}
         >
           Solicitar Presupuestos Gratis

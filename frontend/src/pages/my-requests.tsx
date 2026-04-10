@@ -98,7 +98,7 @@ export default function MyRequests() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold text-slate-900">Mis Solicitudes</h1>
-          <Button onClick={() => window.location.href = "/crear-solicitud"}>
+          <Button onClick={() => window.location.href = "/nueva-solicitud"}>
             <Plus className="h-4 w-4 mr-2" />
             Nueva solicitud
           </Button>
@@ -114,7 +114,7 @@ export default function MyRequests() {
               <p className="text-slate-600 mb-6">
                 Crea tu primera solicitud para conectar con profesionales verificados.
               </p>
-              <Button onClick={() => window.location.href = "/crear-solicitud"}>
+              <Button onClick={() => window.location.href = "/nueva-solicitud"}>
                 <Plus className="h-4 w-4 mr-2" />
                 Crear primera solicitud
               </Button>

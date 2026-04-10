@@ -94,7 +94,7 @@ export default function Home() {
               <CardContent className="space-y-3">
                 {user.userType === 'customer' ? (
                   <>
-                    <Button className="w-full" size="sm" onClick={() => window.location.href = "/crear-solicitud"}>
+                    <Button className="w-full" size="sm" onClick={() => window.location.href = "/nueva-solicitud"}>
                       <Calendar className="h-4 w-4 mr-2" />
                       Nueva solicitud
                     </Button>

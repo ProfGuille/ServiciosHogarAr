@@ -17,7 +17,6 @@ const CompraPendiente = lazy(() => import('@/pages/compra-pendiente'));
 const Services = lazy(() => import('@/pages/services'));
 const ServiceDetail = lazy(() => import('@/pages/service-detail'));
 const Search = lazy(() => import('@/pages/search'));
-const CreateRequest = lazy(() => import('@/pages/create-request'));
 const MyRequests = lazy(() => import('@/pages/my-requests'));
 const Profile = lazy(() => import('@/pages/profile'));
 const Messages = lazy(() => import('@/pages/messages'));
@@ -56,7 +55,6 @@ function App() {
         <Route path="/servicios" component={Services} />
         <Route path="/buscar" component={Search} />
         <Route path="/servicio/:id" component={ServiceDetail} />
-        <Route path="/crear-solicitud" component={CreateRequest} />
         <Route path="/nueva-solicitud" component={NewServiceRequest} />
         <Route path="/admin" component={AdminDashboard} />
         {/* TODO: página rota — proteger con requireRole("admin") antes de reactivar <Route path="/analytics" component={AnalyticsDashboard} /> */}
