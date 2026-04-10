@@ -19,7 +19,7 @@ export default function Terminos() {
             Términos de Servicio
           </h1>
           <p className="text-slate-600">
-            Última actualización: Marzo 2026
+            Última actualización: Abril 2026
           </p>
         </div>
 
@@ -30,8 +30,8 @@ export default function Terminos() {
             </CardHeader>
             <CardContent className="prose max-w-none">
               <p>
-                Al acceder y utilizar ServiciosHogar.com.ar, usted acepta estar sujeto a estos 
-                términos de servicio y todas las leyes y regulaciones aplicables. Si no está 
+                Al acceder y utilizar ServiciosHogar.com.ar, usted acepta estar sujeto a estos
+                términos de servicio y todas las leyes y regulaciones aplicables. Si no está
                 de acuerdo con alguno de estos términos, no utilice nuestro sitio web.
               </p>
             </CardContent>
@@ -43,15 +43,19 @@ export default function Terminos() {
             </CardHeader>
             <CardContent>
               <p className="mb-4">
-                ServiciosHogar.com.ar es una plataforma digital que conecta a usuarios que 
-                necesitan servicios domésticos con profesionales calificados. Facilitamos:
+                ServiciosHogar.com.ar es una plataforma digital de intermediación que conecta
+                a usuarios que necesitan servicios del hogar con prestadores independientes.
+                Nuestra función se limita a facilitar ese contacto inicial. No prestamos
+                servicios domésticos directamente ni intervenimos en los acuerdos comerciales
+                entre las partes.
               </p>
+              <p className="mb-4">Facilitamos:</p>
               <ul className="list-disc pl-6 space-y-2">
-                <li>Búsqueda y selección de profesionales</li>
-                <li>Sistema de reservas y agendamiento</li>
-                <li>Procesamiento de pagos seguros</li>
+                <li>Publicación de solicitudes de servicio por parte de clientes</li>
+                <li>Búsqueda y contacto con prestadores registrados</li>
+                <li>Sistema de créditos para que prestadores accedan a datos de contacto de clientes</li>
                 <li>Sistema de calificaciones y reseñas</li>
-                <li>Atención al cliente y soporte</li>
+                <li>Verificación voluntaria de identidad de proveedores</li>
               </ul>
             </CardContent>
           </Card>
@@ -66,7 +70,7 @@ export default function Terminos() {
                 <li>Proporcionar información veraz y actualizada</li>
                 <li>Mantener la confidencialidad de su cuenta</li>
                 <li>Notificar inmediatamente cualquier uso no autorizado</li>
-                <li>Ser mayor de 18 años o tener autorización parental</li>
+                <li>Ser mayor de 18 años</li>
               </ul>
             </CardContent>
           </Card>
@@ -80,35 +84,30 @@ export default function Terminos() {
               <ul className="list-disc pl-6 space-y-2">
                 <li>Utilizar la plataforma de manera legal y apropiada</li>
                 <li>No interferir con el funcionamiento del sitio</li>
-                <li>Respetar los derechos de otros usuarios y profesionales</li>
+                <li>Respetar los derechos de otros usuarios y prestadores</li>
                 <li>Proporcionar calificaciones honestas y constructivas</li>
-                <li>Cumplir con los términos de pago establecidos</li>
               </ul>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>5. Profesionales y Servicios</CardTitle>
+              <CardTitle>5. Prestadores de Servicios</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="mb-4">
-                Los profesionales registrados son contratistas independientes. 
-                ServiciosHogar.com.ar no es empleador de los profesionales y no es 
-                responsable directo por los servicios prestados.
+                Los prestadores registrados son trabajadores independientes o empresas autónomas.
+                ServiciosHogar.com.ar no es su empleador y no es responsable directo por los
+                servicios que presten.
               </p>
-              <p className="mb-4">Sin embargo, nos comprometemos a:</p>
+              <p className="mb-4">Nos comprometemos a:</p>
               <ul className="list-disc pl-6 space-y-2">
-                <li>
-                  Verificar la identidad de los proveedores mediante un proceso voluntario: las personas físicas aportan su número de DNI y las personas jurídicas aportan su CUIT y los datos del representante legal. Este proceso requiere consentimiento expreso del proveedor conforme a la Ley 25.326 de Protección de Datos Personales. La verificación es opcional y su ausencia no impide operar en la plataforma.
-                </li>
+                <li>Ofrecer un proceso voluntario de verificación de identidad (DNI para personas físicas; CUIT y representante legal para personas jurídicas), conforme a la Ley 25.326</li>
                 <li>Mantener un sistema de calificaciones transparente</li>
-                <li>Ofrecer mediación en caso de disputas</li>
-                <li>Remover profesionales que no cumplan nuestros estándares</li>
+                <li>Remover prestadores que incumplan nuestros estándares</li>
               </ul>
             </CardContent>
           </Card>
-
 
           <Card>
             <CardHeader>
@@ -116,18 +115,20 @@ export default function Terminos() {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="mb-2">
-                Los proveedores registrados en ServiciosHogar.com.ar son los únicos y exclusivos responsables de la veracidad, exactitud y actualización de los datos que publican en la plataforma, incluyendo nombre, descripción, credenciales, experiencia, tarifas y cualquier otra información de su perfil.
+                Los proveedores son los únicos responsables de la veracidad y actualización
+                de los datos que publican en la plataforma: nombre, descripción, credenciales,
+                experiencia, tarifas y cualquier otra información de su perfil.
               </p>
               <ul className="list-disc pl-6 space-y-2 mb-4">
                 <li>ServiciosHogar.com.ar actúa como intermediario tecnológico y no verifica de forma exhaustiva la totalidad de la información declarada por los proveedores.</li>
-                <li>El distintivo de <strong>proveedor verificado</strong> acredita únicamente que el proveedor completó el proceso de verificación de identidad (DNI o CUIT). No constituye una garantía de calidad, idoneidad profesional ni de los servicios prestados.</li>
-                <li>La plataforma no se responsabiliza por daños derivados de información falsa, inexacta u obsoleta publicada por proveedores, en tanto actúe con diligencia ante las denuncias recibidas.</li>
-                <li>Cualquier usuario que detecte información falsa o conducta irregular de un proveedor puede denunciarlo a <strong>legal@servicioshogar.com.ar</strong>. ServiciosHogar.com.ar se compromete a investigar y, de corresponder, suspender o dar de baja al proveedor infractor.</li>
-                <li>ServiciosHogar.com.ar se reserva el derecho de remover perfiles de proveedores que incurran en falsedad de datos, sin previo aviso y sin derecho a reembolso de créditos adquiridos.</li>
+                <li>El distintivo de <strong>proveedor verificado</strong> acredita únicamente que el proveedor completó el proceso de verificación de identidad. No constituye garantía de calidad ni idoneidad profesional.</li>
+                <li>La plataforma no se responsabiliza por daños derivados de información falsa o inexacta publicada por proveedores, en tanto actúe con diligencia ante las denuncias recibidas.</li>
+                <li>Cualquier usuario que detecte información falsa puede denunciarlo a <strong>legal@servicioshogar.com.ar</strong>. Nos comprometemos a investigar y, de corresponder, suspender o dar de baja al proveedor infractor.</li>
+                <li>Nos reservamos el derecho de remover perfiles que incurran en falsedad de datos, sin previo aviso y sin derecho a reembolso de créditos adquiridos.</li>
               </ul>
               <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <p className="text-blue-800 text-sm">
-                  <strong>Para usuarios:</strong> te recomendamos verificar las credenciales del profesional de forma independiente antes de contratar sus servicios, y reportar cualquier irregularidad a nuestro equipo.
+                  <strong>Para usuarios:</strong> recomendamos verificar las credenciales del prestador de forma independiente antes de contratarlo, y reportar cualquier irregularidad a nuestro equipo.
                 </p>
               </div>
             </CardContent>
@@ -135,63 +136,47 @@ export default function Terminos() {
 
           <Card>
             <CardHeader>
-              <CardTitle>6. Pagos y Tarifas</CardTitle>
+              <CardTitle>6. Sistema de Créditos</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="mb-4">
-                Los pagos se procesan de forma segura a través de nuestra plataforma. 
-                Cobramos una comisión del 10% sobre cada transacción completada.
+                Los prestadores adquieren créditos en la plataforma para acceder a los datos
+                de contacto de clientes interesados. Cada desbloqueo consume 1 crédito.
               </p>
-              <p className="mb-4">Métodos de pago aceptados:</p>
               <ul className="list-disc pl-6 space-y-2">
-                <li>Mercado Pago (tarjetas, efectivo, transferencias)</li>
-                <li>Transferencia bancaria directa</li>
-                <li>Efectivo al profesional (sin comisión)</li>
+                <li>Los créditos se adquieren mediante Mercado Pago</li>
+                <li>Los créditos no son reembolsables una vez utilizados</li>
+                <li>ServiciosHogar.com.ar no intermedia ni procesa pagos entre clientes y prestadores — esos acuerdos son exclusivamente entre las partes</li>
+                <li>Los créditos no vencen mientras la cuenta esté activa</li>
               </ul>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>7. Política de Cancelación</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="list-disc pl-6 space-y-2">
-                <li>Cancelación gratuita hasta 24 horas antes del servicio</li>
-                <li>Cancelaciones tardías pueden incurrir en cargos</li>
-                <li>Reembolsos procesados en 5-7 días hábiles</li>
-                <li>Casos especiales evaluados individualmente</li>
-              </ul>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>8. Limitación de Responsabilidad</CardTitle>
+              <CardTitle>7. Limitación de Responsabilidad</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
                   <h4 className="font-semibold text-red-800 mb-2">LIMITACIÓN EXPRESA DE RESPONSABILIDAD</h4>
                   <p className="text-red-700 text-sm">
-                    En los términos más amplios permitidos por la ley argentina, ServiciosHogar.com.ar 
-                    excluye toda responsabilidad por:
+                    En los términos más amplios permitidos por la legislación argentina,
+                    ServiciosHogar.com.ar excluye toda responsabilidad por:
                   </p>
                 </div>
-                
                 <ul className="list-disc pl-6 space-y-2">
                   <li>Daños directos, indirectos, incidentales, especiales o consecuentes</li>
-                  <li>Lucro cesante, pérdida de datos o interrupción de actividades</li>
                   <li>Actos u omisiones de los prestadores de servicios registrados</li>
                   <li>Calidad, seguridad o legalidad de los servicios prestados por terceros</li>
-                  <li>Cumplimiento de acuerdos entre usuarios y prestadores</li>
+                  <li>Cumplimiento de acuerdos económicos entre usuarios y prestadores</li>
                   <li>Disponibilidad continua e ininterrumpida de la plataforma</li>
+                  <li>Pérdida de datos o interrupción de actividades</li>
                 </ul>
-                
                 <p className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded text-amber-800 text-sm">
-                  <strong>Responsabilidad máxima:</strong> En caso de que se determine alguna 
-                  responsabilidad de nuestra parte, esta estará limitada al monto pagado por 
-                  comisiones de servicios en los últimos 30 días, sin exceder $10.000 ARS.
+                  <strong>Responsabilidad máxima:</strong> En caso de que se determine alguna
+                  responsabilidad de nuestra parte, esta estará limitada al monto abonado
+                  por el usuario en créditos durante los últimos 30 días.
                 </p>
               </div>
             </CardContent>
@@ -199,14 +184,26 @@ export default function Terminos() {
 
           <Card>
             <CardHeader>
-              <CardTitle>9. Modificaciones</CardTitle>
+              <CardTitle>8. Modificaciones</CardTitle>
             </CardHeader>
             <CardContent>
               <p>
-                Nos reservamos el derecho de modificar estos términos en cualquier momento. 
-                Las modificaciones entrarán en vigor inmediatamente después de su publicación 
-                en el sitio web. El uso continuado del servicio constituye aceptación de 
-                los términos modificados.
+                Nos reservamos el derecho de modificar estos términos en cualquier momento.
+                Las modificaciones entrarán en vigor inmediatamente después de su publicación.
+                El uso continuado del servicio constituye aceptación de los términos modificados.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>9. Jurisdicción y Ley Aplicable</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p>
+                Estos términos se rigen por las leyes de la República Argentina. Cualquier
+                disputa estará sujeta a la jurisdicción de los tribunales competentes de la
+                Ciudad Autónoma de Buenos Aires.
               </p>
             </CardContent>
           </Card>
@@ -217,12 +214,10 @@ export default function Terminos() {
             </CardHeader>
             <CardContent>
               <p className="mb-4">
-                Para preguntas sobre estos términos, contáctanos:
+                Para consultas sobre estos términos:
               </p>
               <ul className="space-y-1">
-                <li>Email: legal@servicioshogar.com.ar</li>
-                <li>Teléfono: +54 11 5555-0123</li>
-                <li>Dirección: Av. Corrientes 1234, CABA, Argentina</li>
+                <li>Email: <strong>legal@servicioshogar.com.ar</strong></li>
               </ul>
             </CardContent>
           </Card>

@@ -19,7 +19,7 @@ export default function Privacidad() {
             Política de Privacidad
           </h1>
           <p className="text-slate-600">
-            Última actualización: Marzo 2026
+            Última actualización: Abril 2026
           </p>
         </div>
 
@@ -32,23 +32,20 @@ export default function Privacidad() {
               <p className="mb-4">Recopilamos información cuando usted:</p>
               <ul className="list-disc pl-6 space-y-2">
                 <li>Se registra en nuestra plataforma</li>
-                <li>Reserva servicios o contrata profesionales</li>
+                <li>Publica o responde solicitudes de servicio</li>
                 <li>Se comunica con nosotros</li>
-                <li>Utiliza nuestro sitio web y aplicaciones</li>
+                <li>Utiliza nuestro sitio web</li>
                 <li>Deja reseñas o calificaciones</li>
               </ul>
               <p className="mt-4">Esta información incluye:</p>
               <ul className="list-disc pl-6 space-y-2">
                 <li>Datos personales (nombre, email, teléfono, dirección)</li>
-                <li>Información de pago (procesada de forma segura)</li>
-                <li>Historial de servicios y transacciones</li>
-                <li>Comunicaciones y mensajes</li>
+                <li>Historial de solicitudes y desbloqueos</li>
                 <li>Datos de uso y navegación</li>
-                <li>Número de documento de identidad (DNI) o identificación tributaria (CUIT) para proveedores que solicitan verificación de identidad en la plataforma</li>
+                <li>Número de DNI o CUIT para proveedores que solicitan verificación voluntaria de identidad</li>
               </ul>
             </CardContent>
           </Card>
-
 
           <Card>
             <CardHeader>
@@ -60,11 +57,11 @@ export default function Privacidad() {
               </p>
               <ul className="list-disc pl-6 space-y-2 mb-4">
                 <li><strong>Persona física:</strong> número de Documento Nacional de Identidad (DNI)</li>
-                <li><strong>Persona jurídica (empresa, sociedad, etc.):</strong> número de CUIT de la entidad y nombre completo del representante legal</li>
+                <li><strong>Persona jurídica:</strong> número de CUIT de la entidad y nombre completo del representante legal</li>
               </ul>
-              <p className="mb-4"><strong>Finalidad:</strong> exclusivamente verificar la identidad del proveedor para brindar mayor confianza a los usuarios de la plataforma.</p>
+              <p className="mb-4"><strong>Finalidad:</strong> exclusivamente verificar la identidad del proveedor para brindar mayor confianza a los usuarios.</p>
               <p className="mb-4"><strong>Base legal:</strong> consentimiento expreso del titular (Art. 5, Ley 25.326) y necesidad para el desarrollo de la relación contractual con la plataforma.</p>
-              <p className="mb-4"><strong>Retención:</strong> estos datos se conservan mientras la cuenta del proveedor esté activa. Ante solicitud de baja o supresión, se eliminan en un plazo máximo de 30 días hábiles.</p>
+              <p className="mb-4"><strong>Retención:</strong> estos datos se conservan mientras la cuenta esté activa. Ante solicitud de baja o supresión, se eliminan en un plazo máximo de 30 días hábiles.</p>
               <p className="mb-4"><strong>Cesión:</strong> estos datos no son compartidos con terceros bajo ningún concepto, salvo requerimiento de autoridad competente.</p>
               <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
                 <p className="text-amber-800 text-sm">
@@ -73,6 +70,7 @@ export default function Privacidad() {
               </div>
             </CardContent>
           </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>2. Cómo Utilizamos su Información</CardTitle>
@@ -80,11 +78,11 @@ export default function Privacidad() {
             <CardContent>
               <p className="mb-4">Utilizamos su información para:</p>
               <ul className="list-disc pl-6 space-y-2">
-                <li>Facilitar la conexión con profesionales</li>
-                <li>Procesar pagos y transacciones</li>
+                <li>Facilitar la conexión entre clientes y prestadores</li>
+                <li>Gestionar el sistema de créditos y desbloqueos</li>
                 <li>Brindar atención al cliente</li>
                 <li>Mejorar nuestros servicios</li>
-                <li>Enviar comunicaciones importantes</li>
+                <li>Enviar comunicaciones relacionadas con la plataforma</li>
                 <li>Cumplir con obligaciones legales</li>
                 <li>Prevenir fraudes y actividades maliciosas</li>
               </ul>
@@ -98,10 +96,10 @@ export default function Privacidad() {
             <CardContent>
               <p className="mb-4">Compartimos información limitada con:</p>
               <ul className="list-disc pl-6 space-y-2">
-                <li><strong>Profesionales:</strong> Datos necesarios para prestar el servicio</li>
-                <li><strong>Procesadores de pago:</strong> Para transacciones seguras</li>
-                <li><strong>Proveedores de servicios:</strong> Para operaciones técnicas</li>
-                <li><strong>Autoridades:</strong> Cuando lo requiera la ley</li>
+                <li><strong>Prestadores:</strong> datos de contacto del cliente, únicamente cuando el prestador desbloquea una solicitud</li>
+                <li><strong>Procesadores de pago:</strong> Mercado Pago, para transacciones de créditos</li>
+                <li><strong>Proveedores de infraestructura:</strong> para operaciones técnicas (ver sección 8)</li>
+                <li><strong>Autoridades:</strong> cuando lo requiera la ley</li>
               </ul>
               <p className="mt-4 font-semibold">
                 Nunca vendemos su información personal a terceros.
@@ -120,7 +118,6 @@ export default function Privacidad() {
                 <li>Servidores seguros y protegidos</li>
                 <li>Acceso restringido a información personal</li>
                 <li>Monitoreo continuo de seguridad</li>
-                <li>Auditorías regulares de seguridad</li>
               </ul>
             </CardContent>
           </Card>
@@ -134,14 +131,11 @@ export default function Privacidad() {
                 Conforme a la Ley 25.326 de Protección de Datos Personales de Argentina, usted tiene derecho a:
               </p>
               <ul className="list-disc pl-6 space-y-2">
-                <li><strong>Información:</strong> Conocer la existencia y finalidad de archivos de datos personales</li>
                 <li><strong>Acceso:</strong> Solicitar y obtener información sobre sus datos almacenados</li>
-                <li><strong>Rectificación:</strong> Corregir, actualizar o completar datos inexactos o incompletos</li>
+                <li><strong>Rectificación:</strong> Corregir datos inexactos o incompletos</li>
                 <li><strong>Supresión:</strong> Solicitar la eliminación de datos cuando sean excesivos o tratados ilícitamente</li>
                 <li><strong>Oposición:</strong> Oponerse al tratamiento de sus datos en casos específicos</li>
-                <li><strong>Portabilidad:</strong> Obtener una copia de sus datos en formato estructurado</li>
               </ul>
-              
               <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <h4 className="font-semibold text-blue-800 mb-2">Ejercicio de Derechos</h4>
                 <p className="text-blue-700 text-sm">
@@ -160,13 +154,11 @@ export default function Privacidad() {
               <p className="mb-4">Utilizamos cookies para:</p>
               <ul className="list-disc pl-6 space-y-2">
                 <li>Mantener su sesión iniciada</li>
-                <li>Recordar sus preferencias</li>
-                <li>Analizar el uso del sitio</li>
-                <li>Personalizar su experiencia</li>
+                <li>Analizar el uso del sitio (Google Analytics)</li>
                 <li>Mejorar la funcionalidad</li>
               </ul>
               <p className="mt-4">
-                Puede configurar su navegador para rechazar cookies, aunque esto 
+                Puede configurar su navegador para rechazar cookies, aunque esto
                 puede afectar la funcionalidad del sitio.
               </p>
             </CardContent>
@@ -177,12 +169,10 @@ export default function Privacidad() {
               <CardTitle>7. Retención de Datos</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="mb-4">
-                Conservamos su información mientras:
-              </p>
+              <p className="mb-4">Conservamos su información mientras:</p>
               <ul className="list-disc pl-6 space-y-2">
                 <li>Su cuenta esté activa</li>
-                <li>Sea necesario para brindar servicios</li>
+                <li>Sea necesario para brindar los servicios</li>
                 <li>Lo requieran obligaciones legales</li>
                 <li>Existan disputas pendientes</li>
               </ul>
@@ -198,7 +188,12 @@ export default function Privacidad() {
             </CardHeader>
             <CardContent>
               <p>
-                Su información puede ser procesada en servidores ubicados fuera de Argentina, específicamente en Estados Unidos, donde operan los proveedores de infraestructura que utiliza esta plataforma: Render (servidor backend) y Neon (base de datos). Dichos proveedores cuentan con políticas de protección de datos compatibles con estándares internacionales. En todos los casos, aplicamos las mismas medidas de protección y cumplimos con las regulaciones aplicables de transferencia internacional de datos conforme al Art. 12 de la Ley 25.326.
+                Su información puede ser procesada en servidores ubicados fuera de Argentina,
+                específicamente en Estados Unidos, donde operan los proveedores de infraestructura
+                que utiliza esta plataforma: Render (servidor backend) y Neon (base de datos).
+                Dichos proveedores cuentan con políticas de protección de datos compatibles con
+                estándares internacionales. En todos los casos, cumplimos con las regulaciones
+                aplicables conforme al Art. 12 de la Ley 25.326.
               </p>
             </CardContent>
           </Card>
@@ -209,9 +204,8 @@ export default function Privacidad() {
             </CardHeader>
             <CardContent>
               <p>
-                Nuestros servicios están dirigidos a personas mayores de 18 años. 
-                No recopilamos intencionalmente información de menores de edad sin 
-                el consentimiento parental apropiado.
+                Nuestros servicios están dirigidos exclusivamente a personas mayores de 18 años.
+                No recopilamos intencionalmente información de menores de edad.
               </p>
             </CardContent>
           </Card>
@@ -222,10 +216,9 @@ export default function Privacidad() {
             </CardHeader>
             <CardContent>
               <p>
-                Podemos actualizar esta política periódicamente. Le notificaremos 
-                sobre cambios importantes por email o mediante avisos en nuestro sitio. 
-                La fecha de "última actualización" indica cuándo fueron realizados 
-                los cambios más recientes.
+                Podemos actualizar esta política periódicamente. Le notificaremos sobre cambios
+                importantes por email o mediante avisos en nuestro sitio. La fecha de
+                "última actualización" indica cuándo fueron realizados los cambios más recientes.
               </p>
             </CardContent>
           </Card>
@@ -236,12 +229,10 @@ export default function Privacidad() {
             </CardHeader>
             <CardContent>
               <p className="mb-4">
-                Para ejercer sus derechos o consultas sobre privacidad:
+                Para consultas sobre privacidad o para ejercer sus derechos:
               </p>
               <ul className="space-y-1">
-                <li>Email: privacidad@servicioshogar.com.ar</li>
-                <li>Teléfono: +54 11 5555-0123</li>
-                <li>Dirección: Av. Corrientes 1234, CABA, Argentina</li>
+                <li>Email: <strong>privacidad@servicioshogar.com.ar</strong></li>
               </ul>
             </CardContent>
           </Card>
