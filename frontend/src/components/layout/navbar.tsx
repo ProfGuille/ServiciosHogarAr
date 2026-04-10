@@ -2,8 +2,6 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
-import LanguageSwitcher from "@/components/ui/language-switcher";
-import { NotificationCenter } from "@/components/notifications";
 import { Button } from "@/components/ui/button";
 import { 
   DropdownMenu, 
@@ -198,12 +196,10 @@ export function Navbar() {
           {/* User Menu & Auth Buttons */}
           <div className="hidden md:block">
             <div className="ml-4 flex items-center md:ml-6 space-x-4">
-              <LanguageSwitcher />
               {isLoading ? (
                 <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
               ) : isAuthenticated ? (
                 <>
-                  <NotificationCenter />
                   <UserMenu />
                 </>
               ) : (
