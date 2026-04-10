@@ -138,10 +138,7 @@ export function AdvancedSearchFilters({
               <SelectItem value="rating">Mejor calificación</SelectItem>
               <SelectItem value="reviews">Más reseñas</SelectItem>
               <SelectItem value="distance">Más cercano</SelectItem>
-              <SelectItem value="price_low">Precio: menor a mayor</SelectItem>
-              <SelectItem value="price_high">Precio: mayor a menor</SelectItem>
               <SelectItem value="experience">Mayor experiencia</SelectItem>
-              <SelectItem value="response_time">Respuesta más rápida</SelectItem>
               <SelectItem value="newest">Más recientes</SelectItem>
             </SelectContent>
           </Select>
