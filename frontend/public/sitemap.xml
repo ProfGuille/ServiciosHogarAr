@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://servicioshogar.com.ar/</loc><priority>1.0</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://servicioshogar.com.ar/buscar</loc><priority>0.9</priority><changefreq>daily</changefreq></url>
+  <url><loc>https://servicioshogar.com.ar/nueva-solicitud</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://servicioshogar.com.ar/como-funciona</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://servicioshogar.com.ar/about</loc><priority>0.6</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://servicioshogar.com.ar/contacto</loc><priority>0.6</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://servicioshogar.com.ar/terminos</loc><priority>0.4</priority><changefreq>yearly</changefreq></url>
+  <url><loc>https://servicioshogar.com.ar/privacidad</loc><priority>0.4</priority><changefreq>yearly</changefreq></url>
+  <url><loc>https://servicioshogar.com.ar/aviso-legal</loc><priority>0.4</priority><changefreq>yearly</changefreq></url>
+</urlset>
