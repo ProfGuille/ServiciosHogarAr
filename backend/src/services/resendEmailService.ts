@@ -187,3 +187,66 @@ export async function sendAdminVerificationNotificationEmail(
     }),
   });
 }
+
+export async function sendContactFormEmail(
+  name: string,
+  email: string,
+  phone: string,
+  subject: string,
+  message: string
+): Promise<void> {
+  await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${process.env.RESEND_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: "ServiciosHogar <administrador@servicioshogar.com.ar>",
+      to: ["administrador@servicioshogar.com.ar"],
+      subject: `Contacto: ${subject || "Sin asunto"}`,
+      html: `
+        <h2>Nuevo mensaje de contacto</h2>
+        <p><strong>Nombre:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Teléfono:</strong> ${phone || "No proporcionado"}</p>
+        <p><strong>Asunto:</strong> ${subject || "Sin asunto"}</p>
+        <hr/>
+        <p><strong>Mensaje:</strong></p>
+        <p>${message.replace(/\n/g, "<br/>")}</p>
+      `,
+    }),
+  });
+}
+
+
+export async function sendContactFormEmail(
+  name: string,
+  email: string,
+  phone: string,
+  subject: string,
+  message: string
+): Promise<void> {
+  await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${process.env.RESEND_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: "ServiciosHogar <administrador@servicioshogar.com.ar>",
+      to: ["administrador@servicioshogar.com.ar"],
+      subject: `Contacto: ${subject || "Sin asunto"}`,
+      html: `
+        <h2>Nuevo mensaje de contacto</h2>
+        <p><strong>Nombre:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Teléfono:</strong> ${phone || "No proporcionado"}</p>
+        <p><strong>Asunto:</strong> ${subject || "Sin asunto"}</p>
+        <hr/>
+        <p><strong>Mensaje:</strong></p>
+        <p>${message.replace(/\n/g, "<br/>")}</p>
+      `,
+    }),
+  });
+}

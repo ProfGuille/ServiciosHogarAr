@@ -9,6 +9,7 @@ import serviceProvidersRoutes from "./serviceProviders.js";
 import createServiceRequestRoutes from "./createServiceRequest.js";
 import serviceRequestsRoutes from "./serviceRequests.js";
 import providerCreditsRoutes from "./providerCredits.js";
+import contactRoutes from "./contact.js";
 
 const router = Router();
 
@@ -22,5 +23,6 @@ router.use("/providers", serviceProvidersRoutes);
 router.use("/service-requests", createServiceRequestRoutes);
 router.use("/service-requests", serviceRequestsRoutes);
 router.use("/provider-credits", providerCreditsRoutes);
+router.use("/contact", contactRoutes);
 
 export default router;
