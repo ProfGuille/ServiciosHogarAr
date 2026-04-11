@@ -7,10 +7,19 @@ import { serviceRequests } from "../shared/schema/serviceRequests.js";
 import { notifyProvidersAboutNewLead } from '../services/leadNotificationHelper.js';
 import { categories } from '../shared/schema/index.js';
 import { eq } from 'drizzle-orm';
+import rateLimit from 'express-rate-limit';
 
 const router = Router();
 
-router.post("/", async (req, res) => {
+const createRequestLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: { error: "Demasiadas solicitudes. Intentá nuevamente en 15 minutos." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+router.post("/", createRequestLimiter, async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith("Bearer ")) {
