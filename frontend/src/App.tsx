@@ -21,7 +21,6 @@ const MyRequests = lazy(() => import('@/pages/my-requests'));
 const Profile = lazy(() => import('@/pages/profile'));
 const Messages = lazy(() => import('@/pages/messages'));
 const AdminDashboard = lazy(() => import('@/pages/admin-dashboard'));
-const AnalyticsDashboard = lazy(() => import('@/pages/analytics-dashboard'));
 const About = lazy(() => import('@/pages/about'));
 const ComoFunciona = lazy(() => import('@/pages/como-funciona'));
 const CentroAyuda = lazy(() => import('@/pages/centro-ayuda'));
@@ -57,7 +56,6 @@ function App() {
         <Route path="/servicio/:id" component={ServiceDetail} />
         <Route path="/nueva-solicitud" component={NewServiceRequest} />
         <Route path="/admin" component={AdminDashboard} />
-        {/* TODO: página rota — proteger con requireRole("admin") antes de reactivar <Route path="/analytics" component={AnalyticsDashboard} /> */}
         <Route path="/about" component={About} />
         <Route path="/como-funciona" component={ComoFunciona} />
         <Route path="/centro-ayuda" component={CentroAyuda} />
