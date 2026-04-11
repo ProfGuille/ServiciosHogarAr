@@ -1,4 +1,5 @@
 import { useParams } from "wouter";
+import { getApiUrl } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
@@ -31,19 +32,19 @@ export default function ServiceDetail() {
 
   const { data: provider, isLoading: providerLoading } = useQuery({
     queryKey: ["/api/providers", id],
-    queryFn: () => fetch(`/api/providers/${id}`).then(res => res.json()),
+    queryFn: () => fetch(`${getApiUrl()}/api/providers/${id}`).then(res => res.json()),
     enabled: !!id,
   });
 
   const { data: providerServices } = useQuery({
     queryKey: ["/api/providers", id, "services"],
-    queryFn: () => fetch(`/api/providers/${id}/services`).then(res => res.json()),
+    queryFn: () => fetch(`${getApiUrl()}/api/providers/${id}/services`).then(res => res.json()),
     enabled: !!id,
   });
 
   const { data: reviews } = useQuery({
     queryKey: ["/api/providers", id, "reviews"],
-    queryFn: () => fetch(`/api/providers/${id}/reviews`).then(res => res.json()),
+    queryFn: () => fetch(`${getApiUrl()}/api/providers/${id}/reviews`).then(res => res.json()),
     enabled: !!id,
   });
 
