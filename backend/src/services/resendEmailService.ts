@@ -219,3 +219,65 @@ export async function sendContactFormEmail(
   });
 }
 
+
+export async function sendCustomerWelcomeEmail(
+  toEmail: string,
+  firstName: string
+): Promise<void> {
+  try {
+    const { data, error } = await resend.emails.send({
+      from: 'ServiciosHogar <administrador@servicioshogar.com.ar>',
+      to: toEmail,
+      subject: '¡Bienvenido a ServiciosHogar! 🏠',
+      html: `
+        <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
+          <h2 style="color:#1d4ed8">¡Hola ${firstName}, bienvenido a ServiciosHogar!</h2>
+          <p>Tu cuenta fue creada con éxito. Ya podés publicar solicitudes de servicio y conectarte con profesionales de confianza en tu zona.</p>
+          <p>Es completamente gratis para vos como cliente.</p>
+          <a href="https://servicioshogar.com.ar/nueva-solicitud" style="display:inline-block;margin:16px 0;padding:12px 24px;background:#1d4ed8;color:#fff;border-radius:6px;text-decoration:none;font-weight:bold">
+            Publicar mi primera solicitud
+          </a>
+          <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0"/>
+          <p style="color:#9ca3af;font-size:12px">ServiciosHogar.com.ar</p>
+        </div>
+      `,
+    });
+    if (error) console.error('❌ Error Resend customer welcome:', error);
+    else console.log('✅ Email bienvenida cliente enviado a', toEmail, '| ID:', data?.id);
+  } catch (err) {
+    console.error('❌ Error enviando email bienvenida cliente:', err);
+  }
+}
+
+export async function sendProviderWelcomeEmail(
+  toEmail: string,
+  firstName: string,
+  businessName: string
+): Promise<void> {
+  try {
+    const { data, error } = await resend.emails.send({
+      from: 'ServiciosHogar <administrador@servicioshogar.com.ar>',
+      to: toEmail,
+      subject: '¡Bienvenido a ServiciosHogar! Tus 10 créditos te esperan 🎉',
+      html: `
+        <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
+          <h2 style="color:#1d4ed8">¡Hola ${firstName}, bienvenido a ServiciosHogar!</h2>
+          <p>Tu cuenta profesional para <strong>${businessName}</strong> fue creada con éxito.</p>
+          <p>Te regalamos <strong>10 créditos</strong> para que puedas ver los datos de contacto de tus primeros clientes sin costo.</p>
+          <p>Cada crédito te permite desbloquear los datos de una solicitud. Revisá las solicitudes disponibles en tu zona desde tu dashboard.</p>
+          <a href="https://servicioshogar.com.ar/dashboard-profesional" style="display:inline-block;margin:16px 0;padding:12px 24px;background:#1d4ed8;color:#fff;border-radius:6px;text-decoration:none;font-weight:bold">
+            Ver solicitudes disponibles
+          </a>
+          <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0"/>
+          <p style="color:#9ca3af;font-size:12px">ServiciosHogar.com.ar</p>
+        </div>
+      `,
+    });
+    if (error) console.error('❌ Error Resend provider welcome:', error);
+    else console.log('✅ Email bienvenida proveedor enviado a', toEmail, '| ID:', data?.id);
+  } catch (err) {
+    console.error('❌ Error enviando email bienvenida proveedor:', err);
+  }
+}
+
+

@@ -8,7 +8,7 @@ import { providerServices } from "../shared/schema/providerServices.js";
 import { eq, sql } from "drizzle-orm";
 import { generateJWTToken, requireAuth } from "../middleware/auth.js";
 import { neon } from "@neondatabase/serverless";
-import { sendPasswordResetEmail } from "../services/resendEmailService.js";
+import { sendPasswordResetEmail, sendCustomerWelcomeEmail, sendProviderWelcomeEmail } from "../services/resendEmailService.js";
 
 const sqlDirect = neon(process.env.DATABASE_URL!);
 
@@ -54,6 +54,7 @@ router.post("/register", async (req: Request, res: Response) => {
     }).returning();
 
     const token = generateJWTToken(created.id, created.email, created.userType);
+    sendCustomerWelcomeEmail(created.email, created.firstName);
 
     res.json({
       message: "Registro exitoso",
@@ -140,7 +141,7 @@ router.post("/register-provider", async (req: Request, res: Response) => {
     }
 
     console.log("=== REGISTER PROVIDER SUCCESS ===");
-    
+    sendProviderWelcomeEmail(user.email, user.firstName, businessName);
     res.status(201).json({ 
       message: 'Proveedor registrado',
       user: { id: user.id, email: user.email }
