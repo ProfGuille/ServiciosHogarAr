@@ -16,70 +16,69 @@ export default function CentroAyuda() {
 
   const faqCategories = [
     {
-      title: "Primeros Pasos",
+      title: "Para clientes",
       questions: [
         {
-          question: "¿Cómo crear una cuenta en ServiciosHogar?",
-          answer: "Puedes registrarte haciendo clic en 'Iniciar Sesión' en la parte superior de la página. Usamos un sistema de autenticación seguro y rápido."
+          question: "Como publico una solicitud de servicio?",
+          answer: "Hace clic en Publicar solicitud, completa la categoria, zona y descripcion del trabajo. Es gratis y podes hacerlo sin registrarte."
         },
         {
-          question: "¿Cómo buscar profesionales en mi zona?",
-          answer: "Ve a la página de Servicios, usa los filtros de ubicación y categoría para encontrar profesionales cerca de ti."
+          question: "Que pasa despues de publicar mi solicitud?",
+          answer: "Los profesionales de tu zona reciben la solicitud. Si les interesa, desbloquean tus datos de contacto y te llaman o escriben directamente."
         },
         {
-          question: "¿Es gratuito usar la plataforma?",
-          answer: "Sí, registrarse y buscar profesionales es completamente gratuito. Solo pagas por los servicios que contratas."
+          question: "Tengo que pagar algo como cliente?",
+          answer: "No. Publicar solicitudes es completamente gratis. El precio del servicio lo acordas directamente con el profesional que elijas."
+        },
+        {
+          question: "Como se que un profesional es confiable?",
+          answer: "Podes ver el perfil del profesional, sus calificaciones y resenas de otros clientes. Los profesionales con el distintivo verificado pasaron por un proceso de verificacion de identidad."
+        },
+        {
+          question: "La plataforma garantiza el servicio?",
+          answer: "ServiciosHogar conecta clientes con profesionales, pero no intermedia en la contratacion ni garantiza el resultado del servicio. Te recomendamos acordar todo por escrito antes de comenzar el trabajo."
         }
       ]
     },
     {
-      title: "Reservas y Servicios",
+      title: "Para profesionales",
       questions: [
         {
-          question: "¿Cómo reservar un servicio?",
-          answer: "Selecciona el profesional, elige fecha y hora, describe tu necesidad y confirma la reserva. Recibirás una confirmación por email."
+          question: "Como funciona el sistema de creditos?",
+          answer: "Cada vez que queres ver los datos de contacto de un cliente (nombre, telefono, email), usas 1 credito. Al registrarte recibis 10 creditos de regalo."
         },
         {
-          question: "¿Puedo modificar o cancelar una reserva?",
-          answer: "Sí, puedes cancelar hasta 24 horas antes sin costo. Para modificaciones, contacta al profesional a través de la plataforma."
+          question: "Como compro mas creditos?",
+          answer: "Desde tu dashboard profesional, en la seccion Comprar creditos. El pago se procesa a traves de Mercado Pago."
         },
         {
-          question: "¿Qué pasa si el profesional no aparece?",
-          answer: "Contáctanos inmediatamente. Nos encargaremos de resolver la situación y encontrar una solución."
+          question: "Como me verifico como profesional?",
+          answer: "Desde tu dashboard profesional podes enviar tu documentacion para verificacion de identidad. Una vez aprobada, tu perfil muestra el distintivo de verificado."
+        },
+        {
+          question: "Que informacion ve el cliente antes de que yo desbloquee?",
+          answer: "El cliente ve solo la descripcion de la solicitud y la zona. Vos ves lo mismo hasta que usas un credito para desbloquear sus datos completos."
+        },
+        {
+          question: "Puedo recuperar un credito si los datos del cliente son invalidos?",
+          answer: "Reportanos el caso desde el formulario de contacto con el ID de la solicitud y lo revisamos manualmente."
         }
       ]
     },
     {
-      title: "Pagos",
+      title: "Cuenta y acceso",
       questions: [
         {
-          question: "¿Qué métodos de pago aceptan?",
-          answer: "Aceptamos Mercado Pago (tarjetas, efectivo, transferencias), transferencia bancaria directa y efectivo al profesional."
+          question: "Como creo una cuenta?",
+          answer: "Hace clic en Registrarse en la parte superior. Podes registrarte como cliente o como profesional segun tu necesidad."
         },
         {
-          question: "¿Cuándo se cobra el servicio?",
-          answer: "El pago se procesa después de que se completa el servicio y ambas partes confirman la satisfacción."
+          question: "Olvide mi contrasena, que hago?",
+          answer: "En la pantalla de login, hace clic en Olvide mi contrasena. Te enviamos un link para restablecerla al email de tu cuenta."
         },
         {
-          question: "¿Hay comisiones adicionales?",
-          answer: "Cobramos una comisión del 10% sobre el precio del servicio. No hay costos ocultos."
-        }
-      ]
-    },
-    {
-      title: "Profesionales",
-      questions: [
-        {
-          question: "¿Cómo verifican a los profesionales?",
-          answer: "Todos pasan por verificación de identidad, antecedentes, certificaciones y referencias comerciales."
-        },
-        {
-          question: "¿Cómo convertirse en profesional verificado?",
-          answer: "Regístrate como profesional, completa el proceso de verificación y espera la aprobación de nuestro equipo."
-        },
-        {
-          question: "¿Qué hacer si tengo problemas con un profesional?",
-          answer: "Usa nuestro sistema de mediación. Contacta soporte y trabajaremos para resolver cualquier inconveniente."
+          question: "Puedo publicar una solicitud sin cuenta?",
+          answer: "Si. Las solicitudes anonimas estan disponibles para clientes que no quieren registrarse. En ese caso, los profesionales veran tus datos al desbloquear la solicitud."
         }
       ]
     },
@@ -87,16 +86,12 @@ export default function CentroAyuda() {
       title: "Seguridad",
       questions: [
         {
-          question: "¿Es seguro dar mi dirección a los profesionales?",
-          answer: "Sí, todos los profesionales están verificados. Solo compartimos la información necesaria para el servicio."
+          question: "Es seguro dar mis datos en la plataforma?",
+          answer: "Toda la informacion viaja cifrada con SSL. Tus datos de contacto solo son visibles para profesionales que usan un credito para desbloquearlos."
         },
         {
-          question: "¿Qué medidas de seguridad implementan?",
-          answer: "Usamos cifrado SSL, verificación de profesionales, pagos seguros y monitoreo continuo de la plataforma."
-        },
-        {
-          question: "¿Cómo reportar actividad sospechosa?",
-          answer: "Contacta inmediatamente a seguridad@servicioshogar.com.ar o usa el chat de soporte."
+          question: "Como reporto un problema o actividad sospechosa?",
+          answer: "Escribinos desde el formulario de contacto en /contacto. Revisamos todos los reportes."
         }
       ]
     }
@@ -112,7 +107,7 @@ export default function CentroAyuda() {
   const filteredCategories = faqCategories.map(category => ({
     ...category,
     questions: category.questions.filter(
-      q => 
+      q =>
         q.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
         q.answer.toLowerCase().includes(searchQuery.toLowerCase())
     )
@@ -121,17 +116,13 @@ export default function CentroAyuda() {
   return (
     <div className="min-h-screen bg-slate-50">
       <Navbar />
-      
+
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-slate-900 mb-4">
-            Centro de Ayuda
-          </h1>
+          <h1 className="text-4xl font-bold text-slate-900 mb-4">Centro de Ayuda</h1>
           <p className="text-xl text-slate-600 max-w-2xl mx-auto mb-8">
-            Encuentra respuestas a las preguntas más frecuentes sobre ServiciosHogar
+            Preguntas frecuentes sobre ServiciosHogar
           </p>
-          
-          {/* Search */}
           <div className="relative max-w-md mx-auto">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5" />
             <Input
@@ -144,57 +135,17 @@ export default function CentroAyuda() {
           </div>
         </div>
 
-        {/* Quick Help Cards */}
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
-          <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer">
-            <CardContent className="p-6">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Search className="h-6 w-6 text-blue-600" />
-              </div>
-              <h3 className="font-semibold mb-2">Buscar Servicios</h3>
-              <p className="text-sm text-slate-600">
-                Aprende cómo encontrar el profesional perfecto para tu necesidad
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer">
-            <CardContent className="p-6">
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <ChevronRight className="h-6 w-6 text-green-600" />
-              </div>
-              <h3 className="font-semibold mb-2">Hacer Reservas</h3>
-              <p className="text-sm text-slate-600">
-                Guía paso a paso para reservar servicios de manera fácil
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer">
-            <CardContent className="p-6">
-              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <ChevronDown className="h-6 w-6 text-purple-600" />
-              </div>
-              <h3 className="font-semibold mb-2">Gestionar Pagos</h3>
-              <p className="text-sm text-slate-600">
-                Todo sobre métodos de pago, facturación y reembolsos
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* FAQ Sections */}
         <div className="space-y-6">
           {filteredCategories.map((category, categoryIndex) => (
             <Card key={categoryIndex}>
-              <CardHeader 
+              <CardHeader
                 className="cursor-pointer"
                 onClick={() => toggleCategory(category.title)}
               >
                 <CardTitle className="flex items-center justify-between">
                   {category.title}
-                  {expandedCategories[category.title] ? 
-                    <ChevronDown className="h-5 w-5" /> : 
+                  {expandedCategories[category.title] ?
+                    <ChevronDown className="h-5 w-5" /> :
                     <ChevronRight className="h-5 w-5" />
                   }
                 </CardTitle>
@@ -204,12 +155,8 @@ export default function CentroAyuda() {
                   <div className="space-y-6">
                     {category.questions.map((faq, faqIndex) => (
                       <div key={faqIndex} className="border-b border-slate-200 last:border-b-0 pb-4 last:pb-0">
-                        <h4 className="font-medium text-slate-900 mb-2">
-                          {faq.question}
-                        </h4>
-                        <p className="text-slate-600 text-sm leading-relaxed">
-                          {faq.answer}
-                        </p>
+                        <h4 className="font-medium text-slate-900 mb-2">{faq.question}</h4>
+                        <p className="text-slate-600 text-sm leading-relaxed">{faq.answer}</p>
                       </div>
                     ))}
                   </div>
@@ -219,29 +166,16 @@ export default function CentroAyuda() {
           ))}
         </div>
 
-        {/* Contact Support */}
         <Card className="mt-12 text-center">
           <CardContent className="p-8">
-            <h2 className="text-2xl font-bold mb-4">
-              ¿No encontraste lo que buscabas?
-            </h2>
-            <p className="text-slate-600 mb-6">
-              Nuestro equipo de soporte está aquí para ayudarte con cualquier pregunta adicional
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a 
-                href="/contacto"
-                className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
-              >
-                Contactar Soporte
-              </a>
-              <a 
-                href="mailto:ayuda@servicioshogar.com.ar"
-                className="px-6 py-3 border border-primary text-primary rounded-lg hover:bg-primary/5 transition-colors"
-              >
-                Enviar Email
-              </a>
-            </div>
+            <h2 className="text-2xl font-bold mb-4">No encontraste lo que buscabas?</h2>
+            <p className="text-slate-600 mb-6">Escribinos y te respondemos a la brevedad.</p>
+            <a
+              href="/contacto"
+              className="px-6 py-3 bg-primary text-white rounded-lg hover:opacity-90 transition-opacity"
+            >
+              Ir al formulario de contacto
+            </a>
           </CardContent>
         </Card>
       </div>

@@ -1,103 +1,120 @@
 import { useEffect } from "react";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Search, UserCheck, Calendar, CreditCard, Star, ArrowRight } from "lucide-react";
+import { ClipboardList, Search, Phone, CreditCard, Star } from "lucide-react";
 
 export default function ComoFunciona() {
   useEffect(() => {
-    document.title = "Cómo Funciona - ServiciosHogar.com.ar";
+    document.title = "Como Funciona - ServiciosHogar.com.ar";
     window.scrollTo(0, 0);
   }, []);
 
-  const steps = [
+  const stepsCliente = [
     {
-      icon: Search,
-      title: "1. Busca el servicio",
-      description: "Busca el profesional que necesitas por categoría o ubicación. Filtra por calificaciones y precios."
+      icon: ClipboardList,
+      title: "1. Publica tu solicitud",
+      description: "Describe el servicio que necesitas: categoria, zona y detalle del trabajo. Es completamente gratis y podes hacerlo sin registrarte.",
     },
     {
-      icon: UserCheck,
-      title: "2. Elige tu profesional",
-      description: "Revisa perfiles, calificaciones y reseñas. Todos nuestros profesionales están verificados."
-    },
-    {
-      icon: Calendar,
-      title: "3. Agenda tu servicio",
-      description: "Selecciona fecha y hora que mejor te convenga. Describe tu necesidad específica."
-    },
-    {
-      icon: CreditCard,
-      title: "4. Paga de forma segura",
-      description: "Múltiples opciones: Mercado Pago, transferencia bancaria o efectivo al profesional."
+      icon: Phone,
+      title: "2. Los profesionales te contactan",
+      description: "Los profesionales interesados desbloquean tus datos y se ponen en contacto con vos directamente para coordinar.",
     },
     {
       icon: Star,
-      title: "5. Califica la experiencia",
-      description: "Ayuda a otros usuarios calificando el servicio recibido y dejando tu reseña."
-    }
+      title: "3. Elegí y califica",
+      description: "Contrata al profesional que mas te convenza y, una vez realizado el trabajo, deja tu calificacion para ayudar a otros usuarios.",
+    },
+  ];
+
+  const stepsProfesional = [
+    {
+      icon: Search,
+      title: "1. Revisa las solicitudes disponibles",
+      description: "Desde tu dashboard profesional podes ver todas las solicitudes publicadas en tu zona y categoria.",
+    },
+    {
+      icon: CreditCard,
+      title: "2. Desbloquea los datos del cliente",
+      description: "Usa un credito para ver el nombre, telefono y email del cliente. Al registrarte recibis 10 creditos de regalo.",
+    },
+    {
+      icon: Phone,
+      title: "3. Contacta al cliente directamente",
+      description: "Coordina el trabajo y el precio directamente con el cliente. ServiciosHogar conecta — vos cerras el trato.",
+    },
   ];
 
   return (
     <div className="min-h-screen bg-slate-50">
       <Navbar />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-slate-900 mb-4">
-            ¿Cómo funciona ServiciosHogar?
+            Como funciona ServiciosHogar?
           </h1>
-          <p className="text-xl text-slate-600 max-w-3xl mx-auto">
-            En 5 simples pasos conectamos tu hogar con profesionales de confianza
+          <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+            Conectamos clientes con profesionales del hogar de forma simple y directa.
           </p>
         </div>
-
-        <div className="grid gap-8 mb-12">
-          {steps.map((step, index) => (
-            <Card key={index} className="overflow-hidden">
-              <CardContent className="p-8">
-                <div className="flex items-center gap-6">
-                  <div className="flex-shrink-0">
-                    <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center">
-                      <step.icon className="h-8 w-8 text-white" />
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold text-slate-900 mb-6">Para clientes</h2>
+          <div className="grid gap-4">
+            {stepsCliente.map((step, index) => (
+              <Card key={index}>
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0 w-12 h-12 bg-primary rounded-full flex items-center justify-center">
+                      <step.icon className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-slate-900 mb-1">{step.title}</h3>
+                      <p className="text-slate-600">{step.description}</p>
                     </div>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-2xl font-semibold text-slate-900 mb-2">
-                      {step.title}
-                    </h3>
-                    <p className="text-slate-600 text-lg">
-                      {step.description}
-                    </p>
-                  </div>
-                  {index < steps.length - 1 && (
-                    <ArrowRight className="h-6 w-6 text-slate-400" />
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-slate-900 mb-4">
-            ¿Listo para empezar?
-          </h2>
-          <p className="text-slate-600 mb-8">
-            Encuentra el profesional perfecto para tu hogar
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <div className="mt-6 text-center">
             <Button size="lg" asChild>
-              <a href="/servicios">Buscar servicios</a>
-            </Button>
-            <Button variant="outline" size="lg" asChild>
-              <a href="/register-provider">Registrarse como profesional</a>
+              <a href="/nueva-solicitud">Publicar una solicitud</a>
             </Button>
           </div>
         </div>
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold text-slate-900 mb-6">Para profesionales</h2>
+          <div className="grid gap-4">
+            {stepsProfesional.map((step, index) => (
+              <Card key={index}>
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0 w-12 h-12 bg-primary rounded-full flex items-center justify-center">
+                      <step.icon className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-slate-900 mb-1">{step.title}</h3>
+                      <p className="text-slate-600">{step.description}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <div className="mt-6 text-center">
+            <Button size="lg" variant="outline" asChild>
+              <a href="/register-provider">Registrarme como profesional</a>
+            </Button>
+          </div>
+        </div>
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
+          <p className="text-blue-800 text-sm">
+            <strong>ServiciosHogar no intermedia pagos.</strong> El precio y la forma de pago se acuerdan directamente entre el cliente y el profesional.
+          </p>
+        </div>
       </div>
-
       <Footer />
     </div>
   );
