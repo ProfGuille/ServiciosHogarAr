@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import Canonical from '@/components/Canonical';
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { Card, CardContent } from "@/components/ui/card";
@@ -49,6 +50,8 @@ export default function ComoFunciona() {
 
   return (
     <div className="min-h-screen bg-slate-50">
+      <Canonical path="/como-funciona" />
+
       <Navbar />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">

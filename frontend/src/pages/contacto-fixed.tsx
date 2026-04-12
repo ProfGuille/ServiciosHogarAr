@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Canonical from '@/components/Canonical';
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -74,6 +75,8 @@ export default function Contacto() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+      <Canonical path="/contacto" />
+
       <Navbar />
       
       {/* Contenido principal con ID para debugging */}
