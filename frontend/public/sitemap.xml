@@ -9,4 +9,7 @@
   <url><loc>https://servicioshogar.com.ar/terminos</loc><priority>0.4</priority><changefreq>yearly</changefreq></url>
   <url><loc>https://servicioshogar.com.ar/privacidad</loc><priority>0.4</priority><changefreq>yearly</changefreq></url>
   <url><loc>https://servicioshogar.com.ar/aviso-legal</loc><priority>0.4</priority><changefreq>yearly</changefreq></url>
+  <url><loc>https://servicioshogar.com.ar/precios</loc><priority>0.6</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://servicioshogar.com.ar/seguridad</loc><priority>0.5</priority><changefreq>yearly</changefreq></url>
+  <url><loc>https://servicioshogar.com.ar/centro-ayuda</loc><priority>0.6</priority><changefreq>monthly</changefreq></url>
 </urlset>
