@@ -289,5 +289,39 @@ router.get("/:id/stats", async (req, res) => {
   }
 });
 
+
+// -----------------------------------------------
+// GET /api/providers/reviews/recent — público
+// -----------------------------------------------
+router.get("/reviews/recent", async (req, res) => {
+  try {
+    const { neon } = await import("@neondatabase/serverless");
+    const sql = neon(process.env.DATABASE_URL!);
+    const rows = await sql`
+      SELECT
+        r.id,
+        r.rating,
+        r.comment,
+        r.created_at,
+        u.first_name AS reviewer_first_name,
+        sp.business_name AS provider_business_name,
+        sc.name AS category_name
+      FROM reviews r
+      LEFT JOIN users u ON u.id = r.reviewer_id::varchar
+      LEFT JOIN service_providers sp ON sp.user_id = r.reviewee_id::varchar
+      LEFT JOIN service_categories sc ON sc.id = sp.category_id
+      WHERE r.is_public = true
+        AND r.comment IS NOT NULL
+        AND r.rating >= 4
+      ORDER BY r.created_at DESC
+      LIMIT 8
+    `;
+    res.json(rows);
+  } catch (err) {
+    console.error("Error en GET /api/providers/reviews/recent:", err);
+    res.status(500).json({ error: "Error interno" });
+  }
+});
+
 export default router;
 
