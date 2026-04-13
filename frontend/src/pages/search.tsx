@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useQuery } from '@tanstack/react-query';
 import { useSearch as useWouterSearch } from 'wouter';
 import { Navbar } from '@/components/layout/navbar';
@@ -412,6 +413,14 @@ export default function Search() {
 
   return (
     <div className="min-h-screen bg-slate-50">
+      <Helmet>
+        <title>Buscar profesionales — ServiciosHogar Argentina</title>
+        <meta property="og:title" content="Buscar profesionales — ServiciosHogar Argentina" />
+        <meta property="og:description" content="Encontrá profesionales de confianza para servicios del hogar en tu zona." />
+        <meta property="og:image" content="/og-image.jpg" />
+        <meta property="og:url" content="https://servicioshogar.com.ar/buscar" />
+        <meta name="twitter:card" content="summary_large_image" />
+      </Helmet>
       <Navbar />
       
       <div className="bg-white border-b sticky top-0 z-40">

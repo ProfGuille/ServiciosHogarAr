@@ -1,4 +1,5 @@
 import { useParams } from "wouter";
+import { Helmet } from 'react-helmet-async';
 import { getApiUrl } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import { Navbar } from "@/components/layout/navbar";
@@ -59,7 +60,15 @@ export default function ServiceDetail() {
   if (!provider) {
     return (
       <div className="min-h-screen bg-slate-50">
-        <Navbar />
+        <Helmet>
+        <title>{ogTitle}</title>
+        <meta property="og:title" content={ogTitle} />
+        <meta property="og:description" content={ogDesc} />
+        <meta property="og:image" content={ogImage} />
+        <meta property="og:url" content={`https://servicioshogar.com.ar/servicio/${id}`} />
+        <meta name="twitter:card" content="summary_large_image" />
+      </Helmet>
+      <Navbar />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <Card>
             <CardContent className="text-center py-12">
@@ -80,6 +89,10 @@ export default function ServiceDetail() {
       </div>
     );
   }
+
+  const ogTitle = provider ? `${provider.businessName} — ServiciosHogar` : 'Profesional — ServiciosHogar';
+  const ogDesc = provider ? `${provider.description?.slice(0, 120) || provider.businessName} en ${provider.city || 'Argentina'}` : '';
+  const ogImage = provider?.profileImageUrl || '/og-image.jpg';
 
   return (
     <div className="min-h-screen bg-slate-50">
