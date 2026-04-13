@@ -65,7 +65,7 @@ export default function Landing() {
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-4xl lg:text-5xl font-bold mb-4 leading-tight">
               Encontrá el profesional que necesitás
-              <span className="block text-blue-200 mt-2">en minutos</span>
+              <span className="block text-blue-200 mt-2">cerca tuyo</span>
             </h1>
 
             <p className="text-lg lg:text-xl mb-10 text-blue-100 max-w-2xl mx-auto">
@@ -90,17 +90,17 @@ export default function Landing() {
                 </div>
               </Link>
               <Link href="/register-provider" className="flex-1">
-                <div className="group cursor-pointer bg-white/10 backdrop-blur-sm rounded-2xl p-8 shadow-2xl hover:bg-white/20 hover:-translate-y-1 transition-all duration-300 h-full flex flex-col items-center text-center border-2 border-orange-400/60 hover:border-orange-400">
-                  <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <div className="group cursor-pointer bg-white/10 backdrop-blur-sm rounded-2xl p-8 shadow-2xl hover:bg-white/20 hover:-translate-y-1 transition-all duration-300 h-full flex flex-col items-center text-center border-2 border-orange-300/50 hover:border-orange-300">
+                  <div className="w-16 h-16 bg-orange-400 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                     <Shield className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-white font-bold text-xl mb-2">Soy profesional</h3>
                   <p className="text-blue-100 text-sm mb-3">Recibí solicitudes de clientes en tu zona y elegís a cuáles responder</p>
-                  <div className="flex items-center gap-1 text-xs text-orange-300 font-semibold mb-4">
+                  <div className="flex items-center gap-1 text-xs text-white/80 font-semibold mb-4">
                     <CheckCircle2 className="h-4 w-4" />
-                    <span>Solo pagás por los clientes que te interesan</span>
+                    <span className="text-white/80">Solo pagás por los clientes que te interesan</span>
                   </div>
-                  <span className="mt-auto inline-flex items-center gap-2 bg-orange-500 text-white px-6 py-2.5 rounded-full font-semibold text-sm border border-orange-400 group-hover:bg-orange-400 transition-all">
+                  <span className="mt-auto inline-flex items-center gap-2 bg-orange-400 text-white px-6 py-2.5 rounded-full font-semibold text-sm border border-orange-300 group-hover:bg-orange-300 transition-all">
                     Registrarme <ArrowRight className="h-4 w-4" />
                   </span>
                 </div>
@@ -176,7 +176,7 @@ export default function Landing() {
           </div>
 
           <div className="text-center mt-12">
-            <Link href="/servicios">
+            <Link href="/buscar">
               <Button variant="outline" size="lg" className="group">
                 Encontrá tu profesional
                 <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
