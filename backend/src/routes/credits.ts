@@ -46,36 +46,14 @@ router.get("/balance", requireAuth, async (req: any, res: Response) => {
 });
 
 router.get("/packages", async (req: Request, res: Response) => {
-  const packages = [
-    {
-      id: "basico",
-      name: "Básico",
-      credits: 10,
-      price: 5000,
-      pricePerCredit: 500,
-      popular: false
-    },
-    {
-      id: "popular",
-      name: "Popular",
-      credits: 50,
-      price: 20000,
-      pricePerCredit: 400,
-      popular: true,
-      savings: "20% de descuento"
-    },
-    {
-      id: "premium",
-      name: "Premium",
-      credits: 100,
-      price: 35000,
-      pricePerCredit: 350,
-      popular: false,
-      savings: "30% de descuento"
-    }
-  ];
-  
-  res.json(packages);
+  try {
+    const { neon } = await import("@neondatabase/serverless");
+    const sql = neon(process.env.DATABASE_URL!);
+    const packages = await sql`SELECT id, nombre, creditos, precio, destacado, activo, orden FROM credit_packages WHERE activo = TRUE ORDER BY orden`;
+    res.json(packages);
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 export default router;

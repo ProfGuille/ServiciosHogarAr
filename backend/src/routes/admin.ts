@@ -472,4 +472,60 @@ router.get("/profile-changes", requireAuth, requireRole("admin"), async (req, re
   }
 });
 
+
+// ============================================
+// CREDIT PACKAGES — gestión de precios
+// ============================================
+
+router.get("/credit-packages", async (_req, res) => {
+  try {
+    const packages = await sql`SELECT id, nombre, creditos, precio, destacado, activo, orden FROM credit_packages ORDER BY orden`;
+    res.json(packages);
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+router.patch("/credit-packages/:id", async (req, res) => {
+  const id = parseInt(req.params.id);
+  if (isNaN(id)) return res.status(400).json({ error: "ID inválido" });
+
+  const { nombre, creditos, precio, destacado, activo } = req.body;
+
+  // Validaciones
+  if (nombre !== undefined && (typeof nombre !== "string" || nombre.trim().length === 0)) {
+    return res.status(400).json({ error: "Nombre inválido" });
+  }
+  if (creditos !== undefined && (!Number.isInteger(creditos) || creditos <= 0)) {
+    return res.status(400).json({ error: "Créditos debe ser entero positivo" });
+  }
+  if (precio !== undefined && (!Number.isInteger(precio) || precio <= 0)) {
+    return res.status(400).json({ error: "Precio debe ser entero positivo" });
+  }
+
+  try {
+    // Si se intenta marcar como destacado, desmarcar el anterior primero
+    if (destacado === true) {
+      await sql`UPDATE credit_packages SET destacado = FALSE WHERE destacado = TRUE`;
+    }
+
+    const [updated] = await sql`
+      UPDATE credit_packages SET
+        nombre    = COALESCE(${nombre ?? null}, nombre),
+        creditos  = COALESCE(${creditos ?? null}, creditos),
+        precio    = COALESCE(${precio ?? null}, precio),
+        destacado = COALESCE(${destacado ?? null}, destacado),
+        activo    = COALESCE(${activo ?? null}, activo),
+        updated_at = NOW()
+      WHERE id = ${id}
+      RETURNING id, nombre, creditos, precio, destacado, activo, orden
+    `;
+
+    if (!updated) return res.status(404).json({ error: "Paquete no encontrado" });
+    res.json(updated);
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 export default router;

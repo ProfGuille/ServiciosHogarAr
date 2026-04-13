@@ -71,6 +71,107 @@ function VerificationActions({ id, onReview }: { id: number; onReview: (args: { 
   );
 }
 
+
+function PreciosTab() {
+  const { toast } = useToast();
+  const { data: paquetes, refetch } = useQuery<any[]>({
+    queryKey: ["admin-credit-packages"],
+    queryFn: async () => {
+      const res = await fetch(`${getApiUrl()}/api/admin/credit-packages`, { headers: getAuthHeaders() });
+      if (!res.ok) throw new Error("Error al cargar paquetes");
+      return res.json();
+    },
+  });
+
+  const [editing, setEditing] = useState<Record<number, any>>({});
+
+  const handleChange = (id: number, field: string, value: any) => {
+    setEditing(prev => ({ ...prev, [id]: { ...prev[id], [field]: value } }));
+  };
+
+  const handleSave = async (id: number) => {
+    const changes = editing[id];
+    if (!changes) return;
+    try {
+      const res = await fetch(`${getApiUrl()}/api/admin/credit-packages/${id}`, {
+        method: "PATCH",
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...changes,
+          creditos: changes.creditos ? parseInt(changes.creditos) : undefined,
+          precio: changes.precio ? parseInt(changes.precio) : undefined,
+        }),
+      });
+      if (!res.ok) throw new Error("Error al guardar");
+      toast({ title: "Paquete actualizado" });
+      setEditing(prev => { const n = {...prev}; delete n[id]; return n; });
+      refetch();
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Paquetes de créditos</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {(paquetes || []).map((p: any) => (
+            <div key={p.id} className="border rounded-lg p-4 grid grid-cols-2 md:grid-cols-5 gap-3 items-end">
+              <div>
+                <Label className="text-xs">Nombre</Label>
+                <Input
+                  defaultValue={p.nombre}
+                  onChange={e => handleChange(p.id, "nombre", e.target.value)}
+                />
+              </div>
+              <div>
+                <Label className="text-xs">Créditos</Label>
+                <Input
+                  type="number"
+                  defaultValue={p.creditos}
+                  min={1}
+                  onChange={e => handleChange(p.id, "creditos", e.target.value)}
+                />
+              </div>
+              <div>
+                <Label className="text-xs">Precio (ARS)</Label>
+                <Input
+                  type="number"
+                  defaultValue={p.precio}
+                  min={1}
+                  onChange={e => handleChange(p.id, "precio", e.target.value)}
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <Label className="text-xs">Destacado</Label>
+                <input
+                  type="checkbox"
+                  defaultChecked={p.destacado}
+                  className="h-5 w-5 mt-1"
+                  onChange={e => handleChange(p.id, "destacado", e.target.checked)}
+                />
+              </div>
+              <Button
+                size="sm"
+                disabled={!editing[p.id]}
+                onClick={() => handleSave(p.id)}
+              >
+                Guardar
+              </Button>
+            </div>
+          ))}
+        </div>
+        <p className="text-xs text-slate-400 mt-4">
+          Los cambios se reflejan inmediatamente en la página /precios.
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function AdminDashboard() {
   const { user, isLoading } = useAuth();
   const { toast } = useToast();
@@ -380,6 +481,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="verifications">Verificaciones</TabsTrigger>
             <TabsTrigger value="auditoria">Auditoría</TabsTrigger>
+            <TabsTrigger value="precios">Precios</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">
@@ -922,6 +1024,10 @@ export default function AdminDashboard() {
                 </Card>
               )}
             </div>
+          </TabsContent>
+
+          <TabsContent value="precios">
+            <PreciosTab />
           </TabsContent>
         </Tabs>
       </div>
