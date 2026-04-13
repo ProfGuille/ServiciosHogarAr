@@ -10,14 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { AlertTriangle, Info } from "lucide-react";
 import { Link } from "wouter";
 
@@ -68,21 +60,9 @@ export function RegistrationForm({ onRegister, isLoading = false }: Registration
       newErrors.password = "La contraseña debe contener al menos una mayúscula, una minúscula y un número";
     }
 
-    // Required legal acceptances
-    if (!formData.termsAccepted) {
-      newErrors.terms = "Debe aceptar los Términos y Condiciones";
-    }
-
-    if (!formData.privacyAccepted) {
-      newErrors.privacy = "Debe aceptar la Política de Privacidad";
-    }
-
-    if (!formData.legalDisclaimerAccepted) {
-      newErrors.legal = "Debe aceptar el Aviso Legal";
-    }
-
-    if (!formData.dataProcessingConsent) {
-      newErrors.dataProcessing = "Debe dar consentimiento para el procesamiento de datos";
+    // Required legal acceptance
+    if (!formData.legalAccepted) {
+      newErrors.legal = "Debe aceptar los términos legales para continuar";
     }
 
     setErrors(newErrors);
@@ -178,97 +158,25 @@ export function RegistrationForm({ onRegister, isLoading = false }: Registration
               </h3>
             </div>
 
-            {/* Terms and Conditions */}
+            {/* Legal acceptance (unified) */}
             <div className="space-y-3">
               <div className="flex items-start space-x-2">
                 <Checkbox
-                  id="terms"
-                  checked={formData.termsAccepted}
-                  onCheckedChange={(checked) => updateField("termsAccepted", !!checked)}
+                  id="legalAccepted"
+                  checked={formData.legalAccepted}
+                  onCheckedChange={(checked) => updateField("legalAccepted", !!checked)}
                 />
                 <div className="text-sm">
-                  <label htmlFor="terms" className="cursor-pointer">
+                  <label htmlFor="legalAccepted" className="cursor-pointer">
                     He leído y acepto los{" "}
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button variant="link" className="p-0 h-auto text-primary underline">
-                          Términos y Condiciones
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-                        <DialogHeader>
-                          <DialogTitle>Términos y Condiciones</DialogTitle>
-                          <DialogDescription>
-                            Por favor, lea atentamente antes de aceptar
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="prose max-w-none text-sm">
-                          <p><strong>IMPORTANTE:</strong> Al aceptar estos términos, usted reconoce que:</p>
-                          <ul>
-                            <li>ServiciosHogar.com.ar es una plataforma de intermediación</li>
-                            <li>No prestamos servicios domésticos directamente</li>
-                            <li>Los contratos se establecen entre cliente y prestador</li>
-                            <li>Limitamos nuestra responsabilidad según la ley argentina</li>
-                          </ul>
-                          <p>Para ver los términos completos: <Link href="/terminos" className="text-primary underline">Términos y Condiciones</Link></p>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                  </label>
-                  {errors.terms && <p className="text-red-500 text-xs mt-1">{errors.terms}</p>}
-                </div>
-              </div>
-
-              {/* Privacy Policy */}
-              <div className="flex items-start space-x-2">
-                <Checkbox
-                  id="privacy"
-                  checked={formData.privacyAccepted}
-                  onCheckedChange={(checked) => updateField("privacyAccepted", !!checked)}
-                />
-                <div className="text-sm">
-                  <label htmlFor="privacy" className="cursor-pointer">
-                    Acepto la{" "}
-                    <Link href="/privacidad" className="text-primary underline">
-                      Política de Privacidad
-                    </Link>{" "}
-                    (Ley 25.326)
-                  </label>
-                  {errors.privacy && <p className="text-red-500 text-xs mt-1">{errors.privacy}</p>}
-                </div>
-              </div>
-
-              {/* Legal Disclaimer */}
-              <div className="flex items-start space-x-2">
-                <Checkbox
-                  id="legal"
-                  checked={formData.legalDisclaimerAccepted}
-                  onCheckedChange={(checked) => updateField("legalDisclaimerAccepted", !!checked)}
-                />
-                <div className="text-sm">
-                  <label htmlFor="legal" className="cursor-pointer">
-                    He leído y entiendo el{" "}
-                    <Link href="/aviso-legal" className="text-primary underline">
-                      Aviso Legal y Descargo de Responsabilidad
-                    </Link>
+                    <Link href="/terminos" className="text-primary underline">Términos y Condiciones</Link>
+                    {", "}la{" "}
+                    <Link href="/privacidad" className="text-primary underline">Política de Privacidad</Link>
+                    {" "}(Ley 25.326) y el{" "}
+                    <Link href="/aviso-legal" className="text-primary underline">Aviso Legal</Link>
+                    {", "}incluyendo el procesamiento de mis datos personales para los fines descritos.
                   </label>
                   {errors.legal && <p className="text-red-500 text-xs mt-1">{errors.legal}</p>}
-                </div>
-              </div>
-
-              {/* Data Processing Consent */}
-              <div className="flex items-start space-x-2">
-                <Checkbox
-                  id="dataProcessing"
-                  checked={formData.dataProcessingConsent}
-                  onCheckedChange={(checked) => updateField("dataProcessingConsent", !!checked)}
-                />
-                <div className="text-sm">
-                  <label htmlFor="dataProcessing" className="cursor-pointer">
-                    <strong>Acepto el procesamiento de mis datos personales</strong> para los fines 
-                    descritos en la Política de Privacidad
-                  </label>
-                  {errors.dataProcessing && <p className="text-red-500 text-xs mt-1">{errors.dataProcessing}</p>}
                 </div>
               </div>
 
