@@ -22,24 +22,15 @@
     <meta name="msapplication-config" content="/browserconfig.xml" />
     
     <!-- iOS Splash Screens -->
-    <link rel="apple-touch-startup-image" href="/icons/splash-2048x2732.png" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
-    <link rel="apple-touch-startup-image" href="/icons/splash-1668x2388.png" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
-    <link rel="apple-touch-startup-image" href="/icons/splash-1536x2048.png" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
-    <link rel="apple-touch-startup-image" href="/icons/splash-1125x2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
-    <link rel="apple-touch-startup-image" href="/icons/splash-1242x2208.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
-    <link rel="apple-touch-startup-image" href="/icons/splash-750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
-    <link rel="apple-touch-startup-image" href="/icons/splash-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+
+
+
+
+
+
     
     <!-- Apple Touch Icons -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
-    <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png" />
-    <link rel="apple-touch-icon" sizes="144x144" href="/icons/icon-144x144.png" />
-    <link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120x120.png" />
-    <link rel="apple-touch-icon" sizes="114x114" href="/icons/icon-114x114.png" />
-    <link rel="apple-touch-icon" sizes="76x76" href="/icons/icon-76x76.png" />
-    <link rel="apple-touch-icon" sizes="72x72" href="/icons/icon-72x72.png" />
-    <link rel="apple-touch-icon" sizes="60x60" href="/icons/icon-60x60.png" />
-    <link rel="apple-touch-icon" sizes="57x57" href="/icons/icon-57x57.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png" />
     
     <!-- Favicon -->
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
@@ -56,7 +47,7 @@
     <meta property="og:type" content="website" />
     <meta property="og:title" content="ServiciosHogar Argentina" />
     <meta property="og:description" content="Tu plataforma de confianza para servicios del hogar en Argentina" />
-    <meta property="og:image" content="/icons/og-image.png" />
+    <meta property="og:image" content="/og-image.jpg" />
     <meta property="og:url" content="https://servicioshogar.com.ar" />
     <meta property="og:site_name" content="ServiciosHogar" />
     
@@ -64,7 +55,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="ServiciosHogar Argentina" />
     <meta name="twitter:description" content="Tu plataforma de confianza para servicios del hogar en Argentina" />
-    <meta name="twitter:image" content="/icons/twitter-card.png" />
+    <meta name="twitter:image" content="/og-image.jpg" />
     
     <!-- Preload Critical Resources -->
     <link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin />
@@ -74,5 +65,12 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-  </body>
+    <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js');
+      });
+    }
+  </script>
+</body>
 </html>
