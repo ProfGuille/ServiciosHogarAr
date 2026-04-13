@@ -61,43 +61,46 @@ export default function Landing() {
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl" />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
           <div className="text-center max-w-4xl mx-auto">
-            <Badge className="mb-6 bg-white/20 text-white border-white/30 px-4 py-2 text-sm font-medium">
-              <Zap className="w-4 h-4 mr-2 inline" />
-              100% gratis para clientes
-            </Badge>
-
-            <h1 className="text-4xl lg:text-6xl font-bold mb-6 leading-tight">
+            <h1 className="text-4xl lg:text-5xl font-bold mb-4 leading-tight">
               Encontrá el profesional que necesitás
               <span className="block text-blue-200 mt-2">en minutos</span>
             </h1>
 
-            <p className="text-xl lg:text-2xl mb-10 text-blue-100 max-w-2xl mx-auto">
-              Pedí presupuestos gratis y compará profesionales verificados cerca tuyo
+            <p className="text-lg lg:text-xl mb-10 text-blue-100 max-w-2xl mx-auto">
+              Conectamos clientes con profesionales verificados cerca tuyo
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-6 justify-center items-stretch mb-8 w-full max-w-2xl mx-auto">
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-stretch mb-8 w-full max-w-3xl mx-auto">
               <Link href="/nueva-solicitud" className="flex-1">
-                <div className="group cursor-pointer bg-white rounded-2xl p-6 shadow-2xl hover:shadow-white/25 hover:-translate-y-1 transition-all duration-300 h-full flex flex-col items-center text-center border-2 border-transparent hover:border-blue-200">
-                  <div className="w-14 h-14 bg-primary rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <UserCheck className="h-7 w-7 text-white" />
+                <div className="group cursor-pointer bg-white rounded-2xl p-8 shadow-2xl hover:-translate-y-1 transition-all duration-300 h-full flex flex-col items-center text-center border-2 border-blue-300 hover:border-primary">
+                  <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <UserCheck className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-primary font-bold text-xl mb-2">Necesito un profesional</h3>
-                  <p className="text-slate-500 text-sm mb-4">Publicá tu solicitud gratis y recibí presupuestos</p>
+                  <p className="text-slate-500 text-sm mb-3">Publicá tu solicitud y recibí presupuestos de profesionales verificados</p>
+                  <div className="flex items-center gap-1 text-xs text-green-600 font-semibold mb-4">
+                    <CheckCircle2 className="h-4 w-4" />
+                    <span>100% gratis para clientes</span>
+                  </div>
                   <span className="mt-auto inline-flex items-center gap-2 bg-primary text-white px-6 py-2.5 rounded-full font-semibold text-sm group-hover:gap-3 transition-all">
                     Solicitar gratis <ArrowRight className="h-4 w-4" />
                   </span>
                 </div>
               </Link>
               <Link href="/register-provider" className="flex-1">
-                <div className="group cursor-pointer bg-white/10 backdrop-blur-sm rounded-2xl p-6 shadow-2xl hover:bg-white/20 hover:-translate-y-1 transition-all duration-300 h-full flex flex-col items-center text-center border-2 border-white/30 hover:border-white/60">
-                  <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <Shield className="h-7 w-7 text-white" />
+                <div className="group cursor-pointer bg-white/10 backdrop-blur-sm rounded-2xl p-8 shadow-2xl hover:bg-white/20 hover:-translate-y-1 transition-all duration-300 h-full flex flex-col items-center text-center border-2 border-orange-400/60 hover:border-orange-400">
+                  <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <Shield className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-white font-bold text-xl mb-2">Soy profesional</h3>
-                  <p className="text-blue-100 text-sm mb-4">Conseguí clientes en tu zona sin comisiones</p>
-                  <span className="mt-auto inline-flex items-center gap-2 bg-white/20 text-white px-6 py-2.5 rounded-full font-semibold text-sm border border-white/40 group-hover:bg-white group-hover:text-primary transition-all">
+                  <p className="text-blue-100 text-sm mb-3">Recibí solicitudes de clientes en tu zona y elegís a cuáles responder</p>
+                  <div className="flex items-center gap-1 text-xs text-orange-300 font-semibold mb-4">
+                    <CheckCircle2 className="h-4 w-4" />
+                    <span>Solo pagás por los clientes que te interesan</span>
+                  </div>
+                  <span className="mt-auto inline-flex items-center gap-2 bg-orange-500 text-white px-6 py-2.5 rounded-full font-semibold text-sm border border-orange-400 group-hover:bg-orange-400 transition-all">
                     Registrarme <ArrowRight className="h-4 w-4" />
                   </span>
                 </div>
@@ -106,15 +109,15 @@ export default function Landing() {
 
             <div className="flex flex-wrap justify-center gap-6 text-sm text-blue-100">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5 text-green-300" />
+                <CheckCircle2 className="h-4 w-4 text-green-300" />
                 <span>Profesionales verificados</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5 text-green-300" />
+                <CheckCircle2 className="h-4 w-4 text-green-300" />
                 <span>Sin costo para clientes</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5 text-green-300" />
+                <CheckCircle2 className="h-4 w-4 text-green-300" />
                 <span>Respuestas rápidas</span>
               </div>
             </div>
