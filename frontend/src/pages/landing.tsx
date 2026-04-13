@@ -90,17 +90,17 @@ export default function Landing() {
                 </div>
               </Link>
               <Link href="/register-provider" className="flex-1">
-                <div className="group cursor-pointer bg-white/10 backdrop-blur-sm rounded-2xl p-8 shadow-2xl hover:bg-white/20 hover:-translate-y-1 transition-all duration-300 h-full flex flex-col items-center text-center border-2 border-orange-300/50 hover:border-orange-300">
-                  <div className="w-16 h-16 bg-orange-400 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <div className="group cursor-pointer bg-white/95 rounded-2xl p-8 shadow-2xl hover:-translate-y-1 transition-all duration-300 h-full flex flex-col items-center text-center border-2 border-slate-200 hover:border-orange-300">
+                  <div className="w-16 h-16 bg-orange-300 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                     <Shield className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-white font-bold text-xl mb-2">Soy profesional</h3>
-                  <p className="text-blue-100 text-sm mb-3">Recibí solicitudes de clientes en tu zona y elegís a cuáles responder</p>
-                  <div className="flex items-center gap-1 text-xs text-white/80 font-semibold mb-4">
+                  <h3 className="text-slate-800 font-bold text-xl mb-2">Soy profesional</h3>
+                  <p className="text-slate-500 text-sm mb-3">Recibí solicitudes de clientes en tu zona y elegís a cuáles responder</p>
+                  <div className="flex items-center gap-1 text-xs text-orange-500 font-semibold mb-4">
                     <CheckCircle2 className="h-4 w-4" />
-                    <span className="text-white/80">Solo pagás por los clientes que te interesan</span>
+                    <span>Solo pagás por los clientes que te interesan</span>
                   </div>
-                  <span className="mt-auto inline-flex items-center gap-2 bg-orange-400 text-white px-6 py-2.5 rounded-full font-semibold text-sm border border-orange-300 group-hover:bg-orange-300 transition-all">
+                  <span className="mt-auto inline-flex items-center gap-2 bg-orange-100 text-orange-700 px-6 py-2.5 rounded-full font-semibold text-sm border border-orange-300 group-hover:bg-orange-200 transition-all">
                     Registrarme <ArrowRight className="h-4 w-4" />
                   </span>
                 </div>
