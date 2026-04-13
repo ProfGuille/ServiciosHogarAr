@@ -129,7 +129,7 @@ export function Navbar() {
           {/* Logo */}
           <div className="flex items-center">
             <Link href={isAuthenticated ? "/dashboard" : "/"} className="flex items-center space-x-2">
-              <img src="/logo.png" alt="ServiciosHogar Argentina" className="h-8 w-auto" />
+              <img src="/logo.png" alt="ServiciosHogar Argentina" className="h-12 w-auto object-contain" />
             </Link>
           </div>
 
