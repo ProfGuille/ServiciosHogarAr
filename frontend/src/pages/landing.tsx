@@ -110,7 +110,7 @@ export default function Landing() {
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-5 w-5 text-green-300" />
-                <span>Respuestas en 24hs</span>
+                <span>Respuestas rápidas</span>
               </div>
             </div>
           </div>
@@ -158,7 +158,7 @@ export default function Landing() {
                         className="w-full justify-center text-xs"
                       >
                         <UserCheck className="w-3 h-3 mr-1" />
-                        Profesionales verificados
+                        Encontrá tu profesional
                       </Badge>
                     </div>
                   </CardContent>
@@ -211,7 +211,7 @@ export default function Landing() {
                 Recibí presupuestos
               </h3>
               <p className="text-slate-600 leading-relaxed">
-                Profesionales verificados te enviarán sus propuestas en 24hs.
+                Los profesionales de tu zona recibirán tu solicitud y podrán contactarte.
               </p>
             </div>
 
@@ -244,7 +244,7 @@ export default function Landing() {
                 Profesionales verificados
               </h3>
               <p className="text-slate-600 text-sm">
-                Todos completan verificación de identidad
+                Muchos cuentan con verificación de identidad
               </p>
             </div>
 

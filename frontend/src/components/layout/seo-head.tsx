@@ -165,7 +165,7 @@ export const SEOConfigs = {
       keywords: "servicios hogar, profesionales argentina, plomería, electricidad, limpieza, carpintería, cotización gratis",
       canonicalUrl: "https://servicioshogar.com.ar",
       ogTitle: "ServiciosHogar.com.ar - Tu Plataforma de Servicios de Confianza",
-      ogDescription: "Conecta con más de 1000 profesionales verificados en Argentina. Servicios de calidad garantizada.",
+      ogDescription: "Encontrá profesionales para servicios del hogar en Argentina. Plomería, electricidad, limpieza y más.",
     }
   },
   

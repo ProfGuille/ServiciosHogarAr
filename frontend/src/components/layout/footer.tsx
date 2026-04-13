@@ -18,7 +18,7 @@ export function Footer() {
       title: "Para Clientes",
       links: [
         { label: "Buscar servicios", href: "/buscar" },
-        { label: "Ver todos los servicios", href: "/servicios" },
+        { label: "Buscar profesionales", href: "/buscar" },
         { label: "Cómo funciona", href: "/como-funciona" },
         { label: "Crear solicitud", href: "/nueva-solicitud" },
       ]
@@ -28,7 +28,7 @@ export function Footer() {
       links: [
         { label: "Registrarse como Profesional", href: "/register-provider" },
         { label: "Cómo funciona", href: "/como-funciona" },
-        { label: "Comprar créditos", href: "/comprar-creditos" },
+        { label: "Precios y créditos", href: "/precios" },
       ]
     },
     {
@@ -42,9 +42,9 @@ export function Footer() {
     {
       title: "Legal",
       links: [
-        { label: "Términos y Condiciones", href: "/legal/terminos" },
-        { label: "Política de Privacidad", href: "/legal/privacidad" },
-        { label: "Aviso Legal", href: "/legal/aviso" },
+        { label: "Términos y Condiciones", href: "/terminos" },
+        { label: "Política de Privacidad", href: "/privacidad" },
+        { label: "Aviso Legal", href: "/aviso-legal" },
         { label: "Seguridad", href: "/seguridad" },
       ]
     }
@@ -111,7 +111,7 @@ export function Footer() {
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="flex items-center space-x-2 text-slate-400 text-sm">
               <Mail className="h-4 w-4" />
-              <span>contacto@servicioshogar.com.ar</span>
+              <span>administrador@servicioshogar.com.ar</span>
             </div>
             <div className="text-slate-400 text-sm">
               © {currentYear} ServiciosHogar.com.ar. Todos los derechos reservados.
