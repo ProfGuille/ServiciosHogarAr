@@ -129,13 +129,7 @@ export function Navbar() {
           {/* Logo */}
           <div className="flex items-center">
             <Link href={isAuthenticated ? "/dashboard" : "/"} className="flex items-center space-x-2">
-              <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
-                <Home className="h-5 w-5 text-primary-foreground" />
-              </div>
-              <span className="font-bold text-xl">ServiciosHogar</span>
-              <Badge variant="secondary" className="hidden sm:inline-flex">
-                Argentina
-              </Badge>
+              <img src="/logo.png" alt="ServiciosHogar Argentina" className="h-8 w-auto" />
             </Link>
           </div>
 
