@@ -31,10 +31,7 @@ interface RegistrationData {
   email: string;
   phone?: string;
   password: string;
-  termsAccepted: boolean;
-  privacyAccepted: boolean;
-  legalDisclaimerAccepted: boolean;
-  dataProcessingConsent: boolean;
+  legalAccepted: boolean;
   marketingConsent: boolean;
 }
 
@@ -44,10 +41,7 @@ export function RegistrationForm({ onRegister, isLoading = false }: Registration
     email: "",
     phone: "",
     password: "",
-    termsAccepted: false,
-    privacyAccepted: false,
-    legalDisclaimerAccepted: false,
-    dataProcessingConsent: false,
+    legalAccepted: false,
     marketingConsent: false,
   });
 
@@ -110,10 +104,7 @@ export function RegistrationForm({ onRegister, isLoading = false }: Registration
     }
   };
 
-  const allRequiredAccepted = formData.termsAccepted && 
-                               formData.privacyAccepted && 
-                               formData.legalDisclaimerAccepted && 
-                               formData.dataProcessingConsent;
+  const allRequiredAccepted = formData.legalAccepted;
 
   return (
     <Card className="max-w-md mx-auto">

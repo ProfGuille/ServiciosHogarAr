@@ -128,7 +128,7 @@ export default function Register() {
             Crear Cuenta
           </h1>
           <p className="text-slate-600">
-            Únete a la plataforma líder en servicios domésticos de Argentina
+            Encontrá profesionales para servicios del hogar en Argentina
           </p>
         </div>
 

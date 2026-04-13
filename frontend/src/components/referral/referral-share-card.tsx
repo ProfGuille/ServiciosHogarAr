@@ -41,7 +41,7 @@ export function ReferralShareCard() {
 
   const shareViaEmail = () => {
     const subject = "Invitación a ServiciosHogar";
-    const body = `¡Hola!\n\nTe invito a unirte a ServiciosHogar, la mejor plataforma para encontrar profesionales de confianza.\n\nRegístrate con mi enlace y obtén créditos gratis: ${shareUrl}\n\n¡Nos vemos allí!`;
+    const body = `¡Hola!\n\nTe invito a unirte a ServiciosHogar, una plataforma para encontrar profesionales de confianza.\n\nRegístrate con mi enlace y obtén créditos gratis: ${shareUrl}\n\n¡Nos vemos allí!`;
     window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
 

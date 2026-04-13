@@ -184,7 +184,7 @@ export const SEOConfigs = {
     identifier: "about",
     customSEO: {
       title: "Acerca de ServiciosHogar.com.ar - Nuestra Historia y Misión",
-      description: "Conoce más sobre ServiciosHogar.com.ar, la plataforma líder en servicios profesionales para el hogar en Argentina. Nuestra misión es conectar clientes con profesionales de confianza.",
+      description: "Conocé ServiciosHogar.com.ar, la plataforma para encontrar profesionales de servicios del hogar en Argentina. Conectamos clientes con profesionales de confianza.",
       keywords: "sobre nosotros, servicioshogar, historia, misión, argentina",
     }
   },
