@@ -77,25 +77,30 @@ export default function Landing() {
               Pedí presupuestos gratis y compará profesionales verificados cerca tuyo
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
-              <Link href="/nueva-solicitud">
-                <Button
-                  size="lg"
-                  className="bg-white text-primary hover:bg-blue-50 px-8 py-6 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all w-full sm:w-auto group"
-                >
-                  Solicitar Profesional Gratis
-                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                </Button>
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-stretch mb-8 w-full max-w-2xl mx-auto">
+              <Link href="/nueva-solicitud" className="flex-1">
+                <div className="group cursor-pointer bg-white rounded-2xl p-6 shadow-2xl hover:shadow-white/25 hover:-translate-y-1 transition-all duration-300 h-full flex flex-col items-center text-center border-2 border-transparent hover:border-blue-200">
+                  <div className="w-14 h-14 bg-primary rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <UserCheck className="h-7 w-7 text-white" />
+                  </div>
+                  <h3 className="text-primary font-bold text-xl mb-2">Necesito un profesional</h3>
+                  <p className="text-slate-500 text-sm mb-4">Publicá tu solicitud gratis y recibí presupuestos</p>
+                  <span className="mt-auto inline-flex items-center gap-2 bg-primary text-white px-6 py-2.5 rounded-full font-semibold text-sm group-hover:gap-3 transition-all">
+                    Solicitar gratis <ArrowRight className="h-4 w-4" />
+                  </span>
+                </div>
               </Link>
-
-              <Link href="/register-provider">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-2 border-white/30 bg-white/10 text-white hover:bg-white hover:text-primary px-8 py-6 text-lg font-semibold backdrop-blur-sm w-full sm:w-auto"
-                >
-                  Soy Profesional
-                </Button>
+              <Link href="/register-provider" className="flex-1">
+                <div className="group cursor-pointer bg-white/10 backdrop-blur-sm rounded-2xl p-6 shadow-2xl hover:bg-white/20 hover:-translate-y-1 transition-all duration-300 h-full flex flex-col items-center text-center border-2 border-white/30 hover:border-white/60">
+                  <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <Shield className="h-7 w-7 text-white" />
+                  </div>
+                  <h3 className="text-white font-bold text-xl mb-2">Soy profesional</h3>
+                  <p className="text-blue-100 text-sm mb-4">Conseguí clientes en tu zona sin comisiones</p>
+                  <span className="mt-auto inline-flex items-center gap-2 bg-white/20 text-white px-6 py-2.5 rounded-full font-semibold text-sm border border-white/40 group-hover:bg-white group-hover:text-primary transition-all">
+                    Registrarme <ArrowRight className="h-4 w-4" />
+                  </span>
+                </div>
               </Link>
             </div>
 
