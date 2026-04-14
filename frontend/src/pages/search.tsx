@@ -185,8 +185,8 @@ export default function Search() {
     if (filters.hasCredits) params.set('hasCredits', 'true');
     if (filters.sortBy && filters.sortBy !== 'relevance') params.set('sortBy', filters.sortBy);
 
-    const newUrl = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
-    navigate(newUrl);
+    const newUrl = `/buscar${params.toString() ? '?' + params.toString() : ''}`;
+    navigate(newUrl, { replace: true });
   }, [filters]);
 
   // Fetch categories for filters with fallback
