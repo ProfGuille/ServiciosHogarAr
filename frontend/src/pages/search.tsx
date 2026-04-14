@@ -1,7 +1,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useQuery } from '@tanstack/react-query';
-import { useSearch as useWouterSearch, useLocation } from 'wouter';
+import { useSearch as useWouterSearch } from 'wouter';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
 import { EnhancedSearchBar } from '@/components/search/enhanced-search-bar';
@@ -102,7 +102,6 @@ interface SearchFilters {
 export default function Search() {
   const { toast } = useToast();
   const urlSearchParams = new URLSearchParams(useWouterSearch());
-  const [, navigate] = useLocation();
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
