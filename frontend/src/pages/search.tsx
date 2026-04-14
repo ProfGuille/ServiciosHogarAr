@@ -186,7 +186,7 @@ export default function Search() {
     if (filters.sortBy && filters.sortBy !== 'relevance') params.set('sortBy', filters.sortBy);
 
     const newUrl = `/buscar${params.toString() ? '?' + params.toString() : ''}`;
-    navigate(newUrl, { replace: true });
+    window.history.replaceState(null, '', newUrl);
   }, [filters]);
 
   // Fetch categories for filters with fallback
