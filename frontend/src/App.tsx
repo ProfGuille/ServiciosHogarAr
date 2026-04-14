@@ -1,5 +1,5 @@
 import { Route, Switch } from 'wouter';
-import React, { lazy, Suspense } from 'react';
+import { lazy, Suspense } from 'react';
 
 const Landing = lazy(() => import('@/pages/landing'));
 const HomePage = lazy(() => import('@/pages/home'));
@@ -33,7 +33,7 @@ const NewServiceRequest = lazy(() => import('@/pages/NewServiceRequest'));
 
 function App() {
   return (
-    <ErrorBoundary><Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
       <Switch>
         <Route path="/" component={Landing} />
         <Route path="/login" component={Login} />
@@ -65,7 +65,7 @@ function App() {
         <Route path="/precios" component={Precios} />
         <Route component={NotFound} />
       </Switch>
-    </Suspense></ErrorBoundary>
+    </Suspense>
   );
 }
 
