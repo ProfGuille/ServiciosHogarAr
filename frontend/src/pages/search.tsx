@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useQuery } from '@tanstack/react-query';
 import { useSearch as useWouterSearch, useLocation } from 'wouter';
@@ -9,7 +9,7 @@ import { AdvancedSearchFilters } from '@/components/search/advanced-search-filte
 import { SearchResults } from '@/components/search/search-results';
 import { SavedSearches } from '@/components/search/saved-searches';
 import { QuickFilters } from '@/components/search/quick-filters';
-import { LeafletMap } from '@/components/maps/LeafletMap';
+const LeafletMap = React.lazy(() => import('@/components/maps/LeafletMap').then(m => ({ default: m.LeafletMap })));
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -678,19 +678,21 @@ export default function Search() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
-                  <LeafletMap
-                    center={
-                      userLocation && filters.useCurrentLocation 
-                        ? [userLocation.lat, userLocation.lng]
-                        : [-34.6037, -58.3816] // Buenos Aires default
-                    }
-                    zoom={filters.radius ? Math.max(10, 16 - Math.log2(filters.radius)) : 13}
-                    providers={processedResults?.data || processedResults?.providers || []}
-                    userLocation={userLocation && filters.useCurrentLocation ? userLocation : undefined}
-                    searchRadius={filters.radius}
-                    onProviderClick={handleProviderClick}
-                    height="600px"
-                  />
+                  <Suspense fallback={<div className="h-[600px] flex items-center justify-center bg-slate-100"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>}>
+                    <LeafletMap
+                      center={
+                        userLocation && filters.useCurrentLocation 
+                          ? [userLocation.lat, userLocation.lng]
+                          : [-34.6037, -58.3816]
+                      }
+                      zoom={filters.radius ? Math.max(10, 16 - Math.log2(filters.radius)) : 13}
+                      providers={processedResults?.data || processedResults?.providers || []}
+                      userLocation={userLocation && filters.useCurrentLocation ? userLocation : undefined}
+                      searchRadius={filters.radius}
+                      onProviderClick={handleProviderClick}
+                      height="600px"
+                    />
+                  </Suspense>
                 </CardContent>
               </Card>
             )}
