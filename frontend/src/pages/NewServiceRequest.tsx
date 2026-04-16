@@ -10,6 +10,7 @@ export default function NewServiceRequest() {
   const [customCity, setCustomCity] = useState('');
   const [address, setAddress] = useState('');
   const [neighborhood, setNeighborhood] = useState('');
+  const [selectedCategoryId, setSelectedCategoryId] = useState('');
 
   const provinces = [
     'Buenos Aires', 'CABA', 'Catamarca', 'Chaco', 'Chubut', 'Córdoba',
@@ -52,6 +53,13 @@ export default function NewServiceRequest() {
     setSelectedCity('');
     setCustomCity('');
   }, [selectedProvince]);
+
+  useEffect(() => {
+    if (categories.length === 0) return;
+    const params = new URLSearchParams(window.location.search);
+    const catId = params.get('categoriaId');
+    if (catId) setSelectedCategoryId(catId);
+  }, [categories]);
 
   useEffect(() => {
     fetch(getApiUrl('/api/categories'))
@@ -144,7 +152,7 @@ export default function NewServiceRequest() {
 
             <div>
               <label className="block text-sm font-medium mb-2">Tipo de servicio *</label>
-              <select name="categoryId" required className="w-full border rounded-lg px-4 py-2">
+              <select name="categoryId" required className="w-full border rounded-lg px-4 py-2" value={selectedCategoryId} onChange={e => setSelectedCategoryId(e.target.value)}>
                 <option value="">Seleccioná un servicio</option>
                 {categories.map(cat => (
                   <option key={cat.id} value={cat.id}>{cat.name}</option>

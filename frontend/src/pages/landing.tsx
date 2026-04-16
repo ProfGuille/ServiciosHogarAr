@@ -141,7 +141,7 @@ export default function Landing() {
             {displayCategories.slice(0, 25).map((category) => (
               <Link
                 key={category.id}
-                href={`/buscar?category=${encodeURIComponent(category.name)}`}
+                href={`/nueva-solicitud?categoriaId=${category.id}`}
               >
                 <Card className="group cursor-pointer transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 border-2 hover:border-primary h-full">
                   <CardContent className="p-0">

@@ -1,0 +1,60 @@
+[33m7cb5877[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m fix: agregar HelmetProvider en main.tsx — corrige crash /buscar en producción
+[33m1de14f8[m fix: limpiar useLocation/navigate de search — restaurar replaceState original
+[33m8eb5ca9[m fix: revertir navigate a replaceState en sync URL de search — corrige loop wouter
+[33m7405fc6[m Revert "debug: ErrorBoundary temporal para identificar crash en /buscar"
+[33mda3ca83[m debug: ErrorBoundary temporal para identificar crash en /buscar
+[33m88476e9[m fix: SW v2 — corrige respondWith undefined en navegaciones SPA
+[33m15db030[m fix: lazy load LeafletMap con Suspense — corrige página en blanco en /buscar
+[33m02efd47[m fix: navigate wouter replace window.location en search — corrige página en blanco
+[33mb35a8e0[m fix: cards hero proveedor fondo blanco/naranja suave, fix historial navegador en /buscar con wouter navigate
+[33m85594c7[m fix: landing — naranja suavizado, 'en minutos' → 'cerca tuyo', botón /servicios → /buscar
+[33m259b861[m feat: hero landing UX mejorado — cards diferenciadas azul/naranja, trust signals integrados, propuesta de valor clara
+[33m63b05c5[m feat: hero landing con cards CTA grandes + logo navbar h-16
+[33m973c8eb[m fix: logo navbar h-12 object-contain para correcta visibilidad
+[33m311adb4[m fix: usar logo.png real en navbar en lugar de ícono Home
+[33med1821e[m feat: consolidar 4 checkboxes legales en 1 en registration-form
+[33m54403c3[m fix: datos falsos landing/footer/seo-head/register, redes sociales pendientes
+[33m5ac79e2[m fix: eliminar datos falsos landing, footer links rotos, seo-head stats inventados
+[33mce9d331[m feat: testimonios reales desde BD — oculto hasta tener reseñas, endpoint /api/providers/reviews/recent
+[33mcdbea08[m feat: precios de créditos editables desde admin — tabla BD + endpoint + UI
+[33ma323889[m feat: OG dinámico en /buscar y /servicio/:id + react-helmet-async
+[33mc5b146e[m feat: PWA completa — íconos, SW, manifest, OG image, apple-touch-icon
+[33m359f8d4[m feat: canonical tags en páginas informativas + HelmetProvider + 404 personalizada
+[33m886c619[m feat: 404 personalizada con CTA + eliminar archive
+[33m159a0ac[m chore: eliminar directorio archive (38 archivos legacy)
+[33mb65138b[m feat: agregar /precios a App.tsx, sitemap.xml y centro-ayuda/seguridad al sitemap
+[33m8958dae[m feat: página /precios con modelo de créditos — sin precios definidos aún
+[33m7d4d5b2[m fix: reescribir páginas informativas con flujo real del negocio
+[33m6fcf511[m feat: emails onboarding bienvenida customer y provider vía Resend
+[33m7029678[m fix: desactivar SW roto + limpiar manifest.json — PWA pendiente logo
+[33m6c7e9a4[m feat: headers de seguridad en vercel.json
+[33m5cd6d92[m fix: usar getApiUrl() en service-detail.tsx
+[33m497566e[m fix: eliminar rutas /mensajes y /servicios sin implementación
+[33m11b0213[m feat: rate limiting en POST /api/service-requests (5 req/15min)
+[33m3a51fa9[m feat: agregar sitemap.xml y robots.txt
+[33m26c69cd[m fix: eliminar páginas legales duplicadas /legal/
+[33m6911310[m fix: eliminar analytics-dashboard roto e import lazy
+[33m5b4d231[m fix: eliminar duplicado sendContactFormEmail + archivos legacy email
+[33md8a8089[m fix: eliminar archivo cat creado por error
+[33m29a00bb[m feat: implementar POST /api/contact con Resend
+[33m4ede6fc[m fix: actualizar documentos legales — modelo créditos, sin datos falsos, Abril 2026
+[33m78b940e[m fix: unificar rutas solicitud — /crear-solicitud eliminada, todo apunta a /nueva-solicitud
+[33m77afbbf[m fix: deshabilitar ruta /analytics (página rota, pendiente proteger con requireRole admin)
+[33m06bdba3[m fix: eliminar campana notificaciones y selector idioma del navbar
+[33m5048cc5[m fix: eliminar sortBy sin backend del Select /buscar (price_low, price_high, response_time)
+[33m2d56b72[m fix: admin dashboard crash — query defensiva profileChanges + texto login genérico
+[33m4c38ea6[m fix: eliminar estimated_budget de admin.ts — DROP COLUMN Neon completado
+[33m65895e3[m feat: tab Auditoría en admin dashboard — provider_profile_changes con endpoint y tabla
+[33m3334f5a[m refactor: reducir sidebar filtros /buscar — w-64, colapsar acordeones, eliminar secciones sin backend
+[33ma06fe44[m feat: endpoints GET /api/providers/:id/reviews y /api/providers/:id/stats
+[33mcb1c7a2[m feat: auditoría cambios de perfil — tabla provider_profile_changes + registro diff por campo
+[33m0471779[m feat: estimatedBudget Fase 2 — eliminar de backend y schema (columna BD intacta)
+[33m7b8cf2d[m feat: badge Sin cuenta registrada en solicitudes anónimas — proveedor informado antes de gastar crédito
+[33m3886ed0[m fix: bloquear providers en POST /api/service-requests — 403 si token válido con role provider
+[33mf9e9eae[m fix: requireAuth + requireRole(admin) en GET /api/admin/requests/:id
+[33m418099c[m feat: botón Actualizar en tab Solicitudes del admin dashboard
+[33m5128a4f[m feat: eliminar campo presupuesto estimado de UI — no aplica al modelo de negocio
+[33ma62440e[m fix: JOIN categories → service_categories en GET /api/admin/requests/:id
+[33mc7837ad[m fix: agregar imports getApiUrl y getAuthHeaders en admin-dashboard — tab Verificaciones cargaba sin token
+[33m29d1852[m fix: renombrar /api/admin/verifications → /api/admin/identity-reviews — evita bloqueo ad-blockers
+[33m3a7a981[m fix: submitVerification usa providerId en lugar de providerProfile?.id — evita undefined en URL
