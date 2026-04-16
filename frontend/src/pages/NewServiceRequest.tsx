@@ -58,7 +58,10 @@ export default function NewServiceRequest() {
     if (categories.length === 0) return;
     const params = new URLSearchParams(window.location.search);
     const catId = params.get('categoriaId');
-    if (catId) setSelectedCategoryId(catId);
+    if (catId) {
+      setSelectedCategoryId(catId);
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
   }, [categories]);
 
   useEffect(() => {
