@@ -146,4 +146,66 @@ export async function checkAndGrantAchievements(userId: string): Promise<void> {
   }
 }
 
+
+// POST /api/achievements/client-ratings — proveedor califica una solicitud
+router.post("/client-ratings", requireAuth, async (req, res) => {
+  try {
+    const { providerId, serviceRequestId, rating } = req.body;
+    const validRatings = ["contact_made", "no_response", "invalid_request"];
+
+    if (!providerId || !serviceRequestId || !rating) {
+      return res.status(400).json({ error: "providerId, serviceRequestId y rating son requeridos" });
+    }
+    if (!validRatings.includes(rating)) {
+      return res.status(400).json({ error: "rating inválido. Valores: contact_made, no_response, invalid_request" });
+    }
+
+    // Verificar que el proveedor desbloqueó esta solicitud
+    const unlockCheck = await sql`
+      SELECT id FROM lead_responses
+      WHERE provider_id = ${parseInt(providerId)} AND service_request_id = ${parseInt(serviceRequestId)}
+    `;
+    if ((unlockCheck as any[]).length === 0) {
+      return res.status(403).json({ error: "Solo podés calificar solicitudes que hayas desbloqueado" });
+    }
+
+    await sql`
+      INSERT INTO client_ratings (provider_id, service_request_id, rating)
+      VALUES (${parseInt(providerId)}, ${parseInt(serviceRequestId)}, ${rating})
+      ON CONFLICT (provider_id, service_request_id) DO UPDATE SET rating = ${rating}
+    `;
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("POST /client-ratings:", error);
+    res.status(500).json({ error: "Error al guardar calificación" });
+  }
+});
+
+// GET /api/achievements/client-ratings/:serviceRequestId — indicador agregado para clientes
+router.get("/client-ratings/:serviceRequestId", async (req, res) => {
+  try {
+    const serviceRequestId = parseInt(req.params.serviceRequestId);
+    const rows = await sql`
+      SELECT rating, COUNT(*) as count
+      FROM client_ratings
+      WHERE service_request_id = ${serviceRequestId}
+      GROUP BY rating
+    `;
+    const counts = { contact_made: 0, no_response: 0, invalid_request: 0, total: 0 };
+    for (const r of rows as any[]) {
+      counts[r.rating as keyof typeof counts] = parseInt(r.count);
+      counts.total += parseInt(r.count);
+    }
+    // Mínimo 3 calificaciones para mostrar (Ley 25.326)
+    if (counts.total < 3) {
+      return res.json({ visible: false });
+    }
+    res.json({ visible: true, ...counts });
+  } catch (error) {
+    console.error("GET /client-ratings/:id:", error);
+    res.status(500).json({ error: "Error al obtener calificaciones" });
+  }
+});
+
 export default router;

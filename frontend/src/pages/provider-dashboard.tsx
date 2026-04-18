@@ -46,6 +46,58 @@ interface Credits {
   totalSpent: number;
 }
 
+
+function ClientRatingSelector({ leadId, providerId }: { leadId: number; providerId: number | null }) {
+  const [selected, setSelected] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+  const { mutate, isPending } = useMutation({
+    mutationFn: async (rating: string) => {
+      const res = await fetch(getApiUrl("/api/achievements/client-ratings"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        body: JSON.stringify({ providerId, serviceRequestId: leadId, rating }),
+      });
+      if (!res.ok) throw new Error("Error al guardar");
+      return res.json();
+    },
+    onSuccess: () => setSaved(true),
+  });
+
+  if (!providerId) return null;
+
+  const options = [
+    { value: "contact_made", label: "✅ Contacto real" },
+    { value: "no_response", label: "⚠️ Sin respuesta" },
+    { value: "invalid_request", label: "❌ Solicitud inválida" },
+  ];
+
+  return (
+    <div className="pt-2 border-t">
+      <p className="text-xs text-muted-foreground mb-2">¿Cómo resultó este contacto?</p>
+      {saved ? (
+        <p className="text-xs text-green-600 font-medium">Calificación guardada ✓</p>
+      ) : (
+        <div className="flex flex-col gap-1">
+          {options.map((o) => (
+            <button
+              key={o.value}
+              disabled={isPending}
+              onClick={() => { setSelected(o.value); mutate(o.value); }}
+              className={`text-xs px-2 py-1 rounded border transition-colors text-left ${
+                selected === o.value
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "border-gray-200 hover:bg-gray-50"
+              }`}
+            >
+              {o.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function ProviderDashboard() {
   const queryClient = useQueryClient();
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
@@ -454,6 +506,7 @@ export default function ProviderDashboard() {
                     <div className="text-xs text-muted-foreground text-center pt-2 border-t">
                       Desbloqueado {format(new Date(lead.unlockedAt!), "PPP 'a las' HH:mm", { locale: es })}
                     </div>
+                    <ClientRatingSelector leadId={lead.id} providerId={providerId} />
                   </CardContent>
                 </Card>
               ))}
