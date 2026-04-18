@@ -172,6 +172,52 @@ function PreciosTab() {
   );
 }
 
+
+function LogrosTab() {
+  const { data: achievements, isLoading } = useQuery<any[]>({
+    queryKey: ["/api/achievements"],
+  });
+
+  if (isLoading) return <div className="text-center py-12">Cargando...</div>;
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Logros disponibles</CardTitle>
+          <CardDescription>Todos los logros del sistema y sus condiciones</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b text-left">
+                <th className="pb-2 pr-4">Nombre</th>
+                <th className="pb-2 pr-4">Categoría</th>
+                <th className="pb-2 pr-4">Puntos</th>
+                <th className="pb-2 pr-4">Rareza</th>
+                <th className="pb-2 pr-4">Condición</th>
+                <th className="pb-2">Valor</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(achievements || []).map((a: any) => (
+                <tr key={a.id} className="border-b hover:bg-muted/30">
+                  <td className="py-2 pr-4 font-medium">{a.name}</td>
+                  <td className="py-2 pr-4">{a.category}</td>
+                  <td className="py-2 pr-4">{a.points}</td>
+                  <td className="py-2 pr-4 capitalize">{a.rarity}</td>
+                  <td className="py-2 pr-4 text-muted-foreground">{a.condition_type || "—"}</td>
+                  <td className="py-2">{a.condition_value ?? "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 export default function AdminDashboard() {
   const { user, isLoading } = useAuth();
   const { toast } = useToast();
@@ -473,7 +519,7 @@ export default function AdminDashboard() {
 
         {/* Main Content */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid grid-cols-7 w-full max-w-3xl">
+          <TabsList className="grid grid-cols-9 w-full max-w-4xl">
             <TabsTrigger value="overview">Resumen</TabsTrigger>
             <TabsTrigger value="providers">Profesionales</TabsTrigger>
             <TabsTrigger value="requests">Solicitudes</TabsTrigger>
@@ -482,6 +528,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="verifications">Verificaciones</TabsTrigger>
             <TabsTrigger value="auditoria">Auditoría</TabsTrigger>
             <TabsTrigger value="precios">Precios</TabsTrigger>
+            <TabsTrigger value="logros">Logros</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">
@@ -1028,6 +1075,9 @@ export default function AdminDashboard() {
 
           <TabsContent value="precios">
             <PreciosTab />
+          </TabsContent>
+          <TabsContent value="logros">
+            <LogrosTab />
           </TabsContent>
         </Tabs>
       </div>
