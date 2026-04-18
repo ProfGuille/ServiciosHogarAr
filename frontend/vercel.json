@@ -31,5 +31,22 @@
         }
       ]
     }
+  ],
+  "redirects": [
+    {
+      "source": "/servicios",
+      "destination": "/buscar",
+      "permanent": true
+    },
+    {
+      "source": "/crear-solicitud",
+      "destination": "/nueva-solicitud",
+      "permanent": true
+    },
+    {
+      "source": "/analytics",
+      "destination": "/admin",
+      "permanent": true
+    }
   ]
 }

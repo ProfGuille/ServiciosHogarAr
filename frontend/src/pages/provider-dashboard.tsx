@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Clock, MapPin, AlertCircle, Phone, MessageCircle, Mail, CreditCard, Send } from "lucide-react";
+import { AchievementGallery } from "@/components/achievements/achievement-gallery";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -302,6 +303,9 @@ export default function ProviderDashboard() {
           </TabsTrigger>
           <TabsTrigger value="perfil">
             Mi Perfil
+          </TabsTrigger>
+          <TabsTrigger value="logros">
+            Mis Logros
           </TabsTrigger>
         </TabsList>
 
@@ -611,6 +615,13 @@ export default function ProviderDashboard() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+        <TabsContent value="logros" className="space-y-4">
+          {user?.id ? (
+            <AchievementGallery userId={user.id} />
+          ) : (
+            <div className="text-center py-12 text-muted-foreground">Cargando logros...</div>
+          )}
         </TabsContent>
       </Tabs>
 
