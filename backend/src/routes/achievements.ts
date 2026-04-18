@@ -92,4 +92,58 @@ router.get("/user/:userId/progress", requireAuth, async (req, res) => {
   }
 });
 
+
+// Función exportable: evalúa y otorga logros a un proveedor
+export async function checkAndGrantAchievements(userId: string): Promise<void> {
+  try {
+    const providerRows = await sql`
+      SELECT sp.id, sp.is_verified, sp.rating, sp.created_at,
+             COUNT(DISTINCT lr.id) AS total_unlocks,
+             COUNT(DISTINCT CASE WHEN lr.created_at > NOW() - INTERVAL '30 days' THEN lr.id END) AS unlocks_30days
+      FROM service_providers sp
+      LEFT JOIN lead_responses lr ON lr.provider_id = sp.id
+      WHERE sp.user_id = ${userId}
+      GROUP BY sp.id
+    `;
+    const provider = (providerRows as any[])[0];
+    if (!provider) return;
+
+    const achievementsRows = await sql`
+      SELECT a.id, a.condition_type, a.condition_value
+      FROM achievements a
+      WHERE a.is_active = true AND a.condition_type IS NOT NULL
+        AND NOT EXISTS (
+          SELECT 1 FROM user_achievements ua
+          WHERE ua.achievement_id = a.id AND ua.user_id = ${userId}
+        )
+    `;
+
+    const monthsActive = Math.floor(
+      (Date.now() - new Date(provider.created_at).getTime()) / (1000 * 60 * 60 * 24 * 30)
+    );
+
+    for (const a of achievementsRows as any[]) {
+      let current = 0;
+      const target = a.condition_value || 1;
+      switch (a.condition_type) {
+        case "unlocks_total":     current = parseInt(provider.total_unlocks); break;
+        case "unlocks_30days":    current = parseInt(provider.unlocks_30days); break;
+        case "identity_verified": current = provider.is_verified ? 1 : 0; break;
+        case "rating_min":        current = Math.round((parseFloat(provider.rating) || 0) * 10); break;
+        case "months_active":     current = monthsActive; break;
+        default: continue;
+      }
+      if (current >= target) {
+        await sql`
+          INSERT INTO user_achievements (user_id, achievement_id, earned_at, progress, progress_max)
+          VALUES (${userId}, ${a.id}, NOW(), ${target}, ${target})
+          ON CONFLICT (user_id, achievement_id) DO NOTHING
+        `;
+      }
+    }
+  } catch (err) {
+    console.error("checkAndGrantAchievements error:", err);
+  }
+}
+
 export default router;

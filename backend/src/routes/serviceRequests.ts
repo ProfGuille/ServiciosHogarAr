@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { checkAndGrantAchievements } from "./achievements.js";
 import { db, sql as neonSql } from "../db.js";
 import { 
   serviceRequests, 
