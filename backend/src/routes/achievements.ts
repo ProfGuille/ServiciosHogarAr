@@ -45,7 +45,7 @@ router.get("/user/:userId/progress", requireAuth, async (req, res) => {
     const providerRows = await sql`
       SELECT sp.id, sp.is_verified, sp.rating, sp.created_at,
              COUNT(DISTINCT lr.id) AS total_unlocks,
-             COUNT(DISTINCT CASE WHEN lr.created_at > NOW() - INTERVAL '30 days' THEN lr.id END) AS unlocks_30days,
+             COUNT(DISTINCT CASE WHEN lr.unlocked_at > NOW() - INTERVAL '30 days' THEN lr.id END) AS unlocks_30days,
              COUNT(DISTINCT r.id) AS total_reviews
       FROM service_providers sp
       LEFT JOIN lead_responses lr ON lr.provider_id = sp.id
@@ -99,7 +99,7 @@ export async function checkAndGrantAchievements(userId: string): Promise<void> {
     const providerRows = await sql`
       SELECT sp.id, sp.is_verified, sp.rating, sp.created_at,
              COUNT(DISTINCT lr.id) AS total_unlocks,
-             COUNT(DISTINCT CASE WHEN lr.created_at > NOW() - INTERVAL '30 days' THEN lr.id END) AS unlocks_30days
+             COUNT(DISTINCT CASE WHEN lr.unlocked_at > NOW() - INTERVAL '30 days' THEN lr.id END) AS unlocks_30days
       FROM service_providers sp
       LEFT JOIN lead_responses lr ON lr.provider_id = sp.id
       WHERE sp.user_id = ${userId}
