@@ -57,13 +57,22 @@ router.get("/user/:userId/progress", requireAuth, async (req, res) => {
     const provider = providerRows[0];
     if (!provider) return res.json([]);
 
-    const achievementsRows = await sql`
-      SELECT a.*, ua.earned_at, ua.progress, ua.progress_max
-      FROM achievements a
-      LEFT JOIN user_achievements ua ON ua.achievement_id = a.id AND ua.user_id = ${userId}
-      WHERE a.is_active = true
-      ORDER BY a.sort_order, a.points ASC
-    `;
+    const isProvider = req.user?.role === "provider";
+    const achievementsRows = isProvider
+      ? await sql`
+          SELECT a.*, ua.earned_at, ua.progress, ua.progress_max
+          FROM achievements a
+          LEFT JOIN user_achievements ua ON ua.achievement_id = a.id AND ua.user_id = ${userId}
+          WHERE a.is_active = true AND a.category IN ('provider', 'platform')
+          ORDER BY a.sort_order, a.points ASC
+        `
+      : await sql`
+          SELECT a.*, ua.earned_at, ua.progress, ua.progress_max
+          FROM achievements a
+          LEFT JOIN user_achievements ua ON ua.achievement_id = a.id AND ua.user_id = ${userId}
+          WHERE a.is_active = true
+          ORDER BY a.sort_order, a.points ASC
+        `;
 
     const monthsActive = Math.floor(
       (Date.now() - new Date(provider.created_at).getTime()) / (1000 * 60 * 60 * 24 * 30)

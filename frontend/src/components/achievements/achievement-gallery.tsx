@@ -89,7 +89,7 @@ export function AchievementGallery({ userId }: AchievementGalleryProps) {
         <Tabs defaultValue="provider" className="w-full">
           <TabsList className="grid grid-cols-5 w-full">
             <TabsTrigger value="all">Todos</TabsTrigger>
-            {Object.entries(categoryNames).map(([key, name]) => (
+            {Object.entries(categoryNames).filter(([key]) => byCategory[key as keyof typeof byCategory]?.length > 0).map(([key, name]) => (
               <TabsTrigger key={key} value={key} className="flex items-center gap-1">
                 {categoryIcons[key as keyof typeof categoryIcons]}
                 <span className="hidden sm:inline">{name}</span>
