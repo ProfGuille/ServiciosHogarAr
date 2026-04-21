@@ -47,8 +47,9 @@ export function AchievementGallery({ userId }: AchievementGalleryProps) {
     special: all.filter(a => a.category === "special"),
   };
   const visibleCategories = Object.entries(byCategory).filter(([, items]) => items.length > 0);
-  const tabCount = visibleCategories.length + 1; // +1 por "Todos"
-  const gridColsClass = tabCount === 2 ? "grid-cols-2" : tabCount === 3 ? "grid-cols-3" : tabCount === 4 ? "grid-cols-4" : "grid-cols-5";
+  const showAllTab = visibleCategories.length > 1;
+  const tabCount = visibleCategories.length + (showAllTab ? 1 : 0);
+  const gridColsClass = tabCount === 1 ? "grid-cols-1" : tabCount === 2 ? "grid-cols-2" : tabCount === 3 ? "grid-cols-3" : tabCount === 4 ? "grid-cols-4" : "grid-cols-5";
 
   const categoryIcons = {
     provider: <Target className="w-4 h-4" />,
@@ -89,9 +90,9 @@ export function AchievementGallery({ userId }: AchievementGalleryProps) {
       </div>
 
       <div className="px-6">
-        <Tabs defaultValue="provider" className="w-full">
+        <Tabs defaultValue={visibleCategories[0]?.[0] ?? "provider"} className="w-full">
           <TabsList className={`grid ${gridColsClass} w-full`}>
-            <TabsTrigger value="all">Todos</TabsTrigger>
+            {showAllTab && <TabsTrigger value="all">Todos</TabsTrigger>}
             {visibleCategories.map(([key]) => (
               <TabsTrigger key={key} value={key} className="flex items-center gap-1">
                 {categoryIcons[key as keyof typeof categoryIcons]}
@@ -100,9 +101,11 @@ export function AchievementGallery({ userId }: AchievementGalleryProps) {
             ))}
           </TabsList>
 
-          <TabsContent value="all" className="mt-6">
-            <AchievementGrid achievements={all} />
-          </TabsContent>
+          {showAllTab && (
+            <TabsContent value="all" className="mt-6">
+              <AchievementGrid achievements={all} />
+            </TabsContent>
+          )}
           {visibleCategories.map(([cat, items]) => (
             <TabsContent key={cat} value={cat} className="mt-6">
               <AchievementGrid achievements={items} />

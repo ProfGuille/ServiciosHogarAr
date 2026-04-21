@@ -43,16 +43,33 @@ router.get("/user/:userId/progress", requireAuth, async (req, res) => {
     const userId = req.params.userId;
 
     const providerRows = await sql`
-      SELECT sp.id, sp.is_verified, sp.rating, sp.created_at,
+      SELECT sp.id, sp.is_verified, sp.rating, sp.created_at, sp.city,
+             sp.description, sp.profile_image_url,
              COUNT(DISTINCT lr.id) AS total_unlocks,
              COUNT(DISTINCT CASE WHEN lr.unlocked_at > NOW() - INTERVAL '30 days' THEN lr.id END) AS unlocks_30days,
-             COUNT(DISTINCT r.id) AS total_reviews
+             COUNT(DISTINCT r.id) AS total_reviews,
+             COUNT(DISTINCT pc.id) AS total_categories,
+             CASE WHEN (sp.description IS NOT NULL AND sp.description != '' AND
+                        sp.city IS NOT NULL AND sp.city != '' AND
+                        sp.profile_image_url IS NOT NULL AND sp.profile_image_url != '' AND
+                        COUNT(DISTINCT pc.id) > 0) THEN 1 ELSE 0 END AS profile_complete
       FROM service_providers sp
       LEFT JOIN lead_responses lr ON lr.provider_id = sp.id
       LEFT JOIN reviews r ON r.reviewee_id = sp.user_id
+      LEFT JOIN provider_categories pc ON pc.provider_id = sp.id
       WHERE sp.user_id = ${userId}
       GROUP BY sp.id
     `;
+    const topZoneRows = await sql`
+      SELECT CASE WHEN sp.user_id = ${userId} THEN 1 ELSE 0 END AS is_top
+      FROM service_providers sp
+      LEFT JOIN lead_responses lr ON lr.provider_id = sp.id
+      WHERE sp.city = (SELECT city FROM service_providers WHERE user_id = ${userId})
+      GROUP BY sp.id, sp.user_id
+      ORDER BY COUNT(lr.id) DESC
+      LIMIT 1
+    `;
+    const isTopZone = topZoneRows[0]?.is_top === 1 ? 1 : 0;
 
     const provider = providerRows[0];
     if (!provider) return res.json([]);
@@ -88,6 +105,8 @@ router.get("/user/:userId/progress", requireAuth, async (req, res) => {
         case "identity_verified": current = provider.is_verified ? 1 : 0; break;
         case "rating_min":        current = Math.round((parseFloat(provider.rating) || 0) * 10); break;
         case "months_active":     current = monthsActive; break;
+        case "profile_complete":  current = parseInt(provider.profile_complete) || 0; break;
+        case "top_zone":          current = isTopZone; break;
         default:                  current = 0;
       }
       const percent_complete = Math.min(100, Math.round((current / max) * 100));
