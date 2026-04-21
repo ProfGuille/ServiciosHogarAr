@@ -18,7 +18,7 @@
   ],
   "rewrites": [
     {
-      "source": "/((?!images|icons|fonts|assets|favicon).*)",
+      "source": "/((?!images|icons|fonts|assets|favicon|servicios|crear-solicitud|analytics).*)",
       "destination": "/index.html"
     }
   ],
