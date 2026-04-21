@@ -46,6 +46,9 @@ export function AchievementGallery({ userId }: AchievementGalleryProps) {
     platform: all.filter(a => a.category === "platform"),
     special: all.filter(a => a.category === "special"),
   };
+  const visibleCategories = Object.entries(byCategory).filter(([, items]) => items.length > 0);
+  const tabCount = visibleCategories.length + 1; // +1 por "Todos"
+  const gridColsClass = tabCount === 2 ? "grid-cols-2" : tabCount === 3 ? "grid-cols-3" : tabCount === 4 ? "grid-cols-4" : "grid-cols-5";
 
   const categoryIcons = {
     provider: <Target className="w-4 h-4" />,
@@ -87,12 +90,12 @@ export function AchievementGallery({ userId }: AchievementGalleryProps) {
 
       <div className="px-6">
         <Tabs defaultValue="provider" className="w-full">
-          <TabsList className="grid grid-cols-5 w-full">
+          <TabsList className={`grid ${gridColsClass} w-full`}>
             <TabsTrigger value="all">Todos</TabsTrigger>
-            {Object.entries(categoryNames).filter(([key]) => byCategory[key as keyof typeof byCategory]?.length > 0).map(([key, name]) => (
+            {visibleCategories.map(([key]) => (
               <TabsTrigger key={key} value={key} className="flex items-center gap-1">
                 {categoryIcons[key as keyof typeof categoryIcons]}
-                <span className="hidden sm:inline">{name}</span>
+                <span className="hidden sm:inline">{categoryNames[key as keyof typeof categoryNames]}</span>
               </TabsTrigger>
             ))}
           </TabsList>
@@ -100,7 +103,7 @@ export function AchievementGallery({ userId }: AchievementGalleryProps) {
           <TabsContent value="all" className="mt-6">
             <AchievementGrid achievements={all} />
           </TabsContent>
-          {Object.entries(byCategory).map(([cat, items]) => (
+          {visibleCategories.map(([cat, items]) => (
             <TabsContent key={cat} value={cat} className="mt-6">
               <AchievementGrid achievements={items} />
             </TabsContent>
