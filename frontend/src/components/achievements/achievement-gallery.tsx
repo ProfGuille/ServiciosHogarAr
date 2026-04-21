@@ -53,13 +53,15 @@ export function AchievementGallery({ userId }: AchievementGalleryProps) {
 
   const categoryIcons = {
     provider: <Target className="w-4 h-4" />,
+    reputation: <Star className="w-4 h-4" />,
     customer: <Trophy className="w-4 h-4" />,
-    platform: <Star className="w-4 h-4" />,
+    platform: <Zap className="w-4 h-4" />,
     special: <Zap className="w-4 h-4" />,
   };
 
   const categoryNames = {
-    provider: "Profesional",
+    provider: "Actividad",
+    reputation: "Reputación",
     customer: "Cliente",
     platform: "Plataforma",
     special: "Especial",
