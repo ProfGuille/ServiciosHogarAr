@@ -38,11 +38,9 @@ export function Navbar() {
   const navigationLinks = isAuthenticated ? [
     { href: "/dashboard", label: t('nav.dashboard') || "Dashboard", icon: LayoutDashboard },
     { href: "/buscar", label: t('nav.search') || "Buscar", icon: Search },
-    { href: "/buscar", label: t('nav.services') || "Servicios", icon: Briefcase },
   ] : [
     { href: "/", label: t('nav.home') || "Inicio", icon: Home },
     { href: "/buscar", label: t('nav.search') || "Buscar", icon: Search },
-    { href: "/buscar", label: t('nav.services') || "Servicios", icon: Briefcase },
   ];
 
   const authenticatedLinks = [
