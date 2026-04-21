@@ -1,4 +1,21 @@
 {
+  "redirects": [
+    {
+      "source": "/servicios",
+      "destination": "/buscar",
+      "permanent": true
+    },
+    {
+      "source": "/crear-solicitud",
+      "destination": "/nueva-solicitud",
+      "permanent": true
+    },
+    {
+      "source": "/analytics",
+      "destination": "/admin",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/((?!images|icons|fonts|assets|favicon).*)",
@@ -30,23 +47,6 @@
           "value": "camera=(), microphone=(), geolocation=()"
         }
       ]
-    }
-  ],
-  "redirects": [
-    {
-      "source": "/servicios",
-      "destination": "/buscar",
-      "permanent": true
-    },
-    {
-      "source": "/crear-solicitud",
-      "destination": "/nueva-solicitud",
-      "permanent": true
-    },
-    {
-      "source": "/analytics",
-      "destination": "/admin",
-      "permanent": true
     }
   ]
 }
