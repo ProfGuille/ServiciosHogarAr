@@ -134,7 +134,7 @@ export function Navbar() {
           {/* Desktop Navigation */}
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-4">
-              {navigationLinks.map((link) => (
+              {!user?.email?.includes('@admin') && navigationLinks.map((link) => (
                 <Link key={link.href} href={link.href}>
                   <Button 
                     variant={isActive(link.href) ? "default" : "ghost"}
