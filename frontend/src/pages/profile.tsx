@@ -134,9 +134,11 @@ export default function Profile() {
                 <CardTitle>Acciones Rápidas</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Button variant="outline" className="w-full" asChild>
-                  <a href="/mis-solicitudes">Ver mis solicitudes</a>
-                </Button>
+                {user.userType !== 'admin' && (
+                  <Button variant="outline" className="w-full" asChild>
+                    <a href="/mis-solicitudes">Ver mis solicitudes</a>
+                  </Button>
+                )}
                 
                 {user.userType === 'provider' && (
                   <Button variant="outline" className="w-full" asChild>
