@@ -588,17 +588,17 @@ export default function Search() {
                         Los servicios de búsqueda están en mantenimiento. Por el momento, puedes navegar directamente a los servicios específicos desde el menú principal.
                       </p>
                       <div className="flex flex-wrap gap-2">
-                        <Link href="/servicios/plomeria">
+                        <Link href="/buscar">
                           <Button variant="outline" size="sm" className="text-orange-700 border-orange-300 hover:bg-orange-100">
                             Ver Plomería
                           </Button>
                         </Link>
-                        <Link href="/servicios/electricidad">
+                        <Link href="/buscar">
                           <Button variant="outline" size="sm" className="text-orange-700 border-orange-300 hover:bg-orange-100">
                             Ver Electricidad
                           </Button>
                         </Link>
-                        <Link href="/servicios">
+                        <Link href="/buscar">
                           <Button variant="outline" size="sm" className="text-orange-700 border-orange-300 hover:bg-orange-100">
                             Ver Todos los Servicios
                           </Button>
@@ -633,7 +633,7 @@ export default function Search() {
                         }}>
                           Solicitar Búsqueda
                         </Button>
-                        <Link href="/servicios">
+                        <Link href="/buscar">
                           <Button variant="outline" size="sm" className="text-blue-700 border-blue-300 hover:bg-blue-100">
                             Ver Otros Servicios
                           </Button>
