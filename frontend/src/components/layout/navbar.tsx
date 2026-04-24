@@ -247,7 +247,7 @@ export function Navbar() {
         {mobileMenuOpen && (
           <div className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t">
-              {navigationLinks.map((link) => (
+              {!user?.email?.includes('@admin') && navigationLinks.map((link) => (
                 <Link key={link.href} href={link.href}>
                   <Button 
                     variant={isActive(link.href) ? "default" : "ghost"}
@@ -259,8 +259,21 @@ export function Navbar() {
                   </Button>
                 </Link>
               ))}
+
+              {isAuthenticated && user?.email?.includes('@admin') && adminLinks.map((link) => (
+                <Link key={link.href} href={link.href}>
+                  <Button
+                    variant={isActive(link.href) ? "default" : "ghost"}
+                    className="w-full justify-start"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <link.icon className="h-4 w-4 mr-2" />
+                    {link.label}
+                  </Button>
+                </Link>
+              ))}
               
-              {isAuthenticated && authenticatedLinks.map((link) => (
+              {isAuthenticated && !user?.email?.includes('@admin') && authenticatedLinks.map((link) => (
                 <Link key={link.href} href={link.href}>
                   <Button 
                     variant={isActive(link.href) ? "default" : "ghost"}
