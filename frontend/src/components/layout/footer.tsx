@@ -1,8 +1,9 @@
 import { Link } from "wouter";
 import { 
   Facebook, 
-  Instagram, 
   Twitter, 
+  MessageCircle,
+  Send,
   Mail, 
   Phone, 
   MapPin,
@@ -77,13 +78,16 @@ export function Footer() {
             
             {/* Social Links */}
             <div className="flex space-x-4">
-              <a href="#" className="text-slate-400 hover:text-white transition-colors">
+              <a href="https://www.facebook.com/sharer/sharer.php?u=https://servicioshogar.com.ar" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors">
                 <Facebook className="h-5 w-5" />
               </a>
-              <a href="#" className="text-slate-400 hover:text-white transition-colors">
-                <Instagram className="h-5 w-5" />
+              <a href="https://wa.me/?text=Encontrá profesionales del hogar en tu zona https://servicioshogar.com.ar" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors">
+                <MessageCircle className="h-5 w-5" />
               </a>
-              <a href="#" className="text-slate-400 hover:text-white transition-colors">
+              <a href="https://t.me/share/url?url=https://servicioshogar.com.ar&text=Encontrá profesionales del hogar en tu zona" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors">
+                <Send className="h-5 w-5" />
+              </a>
+              <a href="https://twitter.com/intent/tweet?url=https://servicioshogar.com.ar&text=Encontrá profesionales del hogar en tu zona" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors">
                 <Twitter className="h-5 w-5" />
               </a>
             </div>
