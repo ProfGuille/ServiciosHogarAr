@@ -129,7 +129,7 @@ export default function Profile() {
             </Card>
 
             {/* Quick Actions */}
-            <Card>
+            {user.userType !== 'admin' && <Card>
               <CardHeader>
                 <CardTitle>Acciones Rápidas</CardTitle>
               </CardHeader>
@@ -152,11 +152,11 @@ export default function Profile() {
                   </Button>
                 )}
                 
-                <Button variant="destructive" className="w-full" onClick={() => window.location.href = "/api/logout"}>
+                <Button variant="destructive" className="w-full" onClick={() => { localStorage.removeItem("token"); localStorage.removeItem("user"); window.location.href = "/login"; }}>
                   Cerrar sesión
                 </Button>
               </CardContent>
-            </Card>
+            </Card>}
           </div>
         </div>
         

@@ -49,7 +49,7 @@ export function Navbar() {
   ];
 
   const adminLinks = [
-    { href: "/admin", label: t('nav.admin') || "Admin", icon: Shield },
+    { href: "/admin", label: "Panel de Administración", icon: Shield },
   ];
 
   const handleLogout = () => {
