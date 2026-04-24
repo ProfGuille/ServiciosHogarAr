@@ -23,6 +23,12 @@ export default function Home() {
   const { user, isLoading } = useAuth();
   const { toast } = useToast();
 
+  useEffect(() => {
+    if (!isLoading && user?.email?.includes('@admin')) {
+      window.location.replace('/admin');
+    }
+  }, [isLoading, user]);
+
   // Si no hay usuario, mostrar mensaje simple (NO redirigir)
   if (isLoading) {
     return (

@@ -91,23 +91,35 @@ export function Navbar() {
               {t('nav.profile') || "Perfil"}
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/dashboard">
-              <LayoutDashboard className="mr-2 h-4 w-4" />
-              Dashboard
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/mis-solicitudes">
-              <FileText className="mr-2 h-4 w-4" />
-              {t('nav.requests') || "Mis solicitudes"}
-            </Link>
-          </DropdownMenuItem>
+          {!user.email?.includes('@admin') && (
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard">
+                <LayoutDashboard className="mr-2 h-4 w-4" />
+                Dashboard
+              </Link>
+            </DropdownMenuItem>
+          )}
+          {!user.email?.includes('@admin') && (
+            <DropdownMenuItem asChild>
+              <Link href="/mis-solicitudes">
+                <FileText className="mr-2 h-4 w-4" />
+                {t('nav.requests') || "Mis solicitudes"}
+              </Link>
+            </DropdownMenuItem>
+          )}
           {user.userType === 'provider' && (
             <DropdownMenuItem asChild>
               <Link href="/dashboard-profesional">
                 <Briefcase className="mr-2 h-4 w-4" />
                 {"Mi Panel"}
+              </Link>
+            </DropdownMenuItem>
+          )}
+          {user.email?.includes('@admin') && (
+            <DropdownMenuItem asChild>
+              <Link href="/admin">
+                <Shield className="mr-2 h-4 w-4" />
+                Panel de administración
               </Link>
             </DropdownMenuItem>
           )}
