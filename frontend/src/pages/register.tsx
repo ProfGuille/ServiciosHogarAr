@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Canonical from '@/components/Canonical';
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { RegistrationForm } from "@/components/auth/registration-form";
@@ -120,6 +121,7 @@ export default function Register() {
 
   return (
     <div className="min-h-screen bg-slate-50">
+      <Canonical path="/register" />
       <Navbar />
       
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
