@@ -91,7 +91,7 @@ export function Navbar() {
               {t('nav.profile') || "Perfil"}
             </Link>
           </DropdownMenuItem>
-          {!user.email?.includes('@admin') && (
+          {!user.userType === 'admin' && (
             <DropdownMenuItem asChild>
               <Link href="/dashboard">
                 <LayoutDashboard className="mr-2 h-4 w-4" />
@@ -99,7 +99,7 @@ export function Navbar() {
               </Link>
             </DropdownMenuItem>
           )}
-          {!user.email?.includes('@admin') && (
+          {!user.userType === 'admin' && (
             <DropdownMenuItem asChild>
               <Link href="/mis-solicitudes">
                 <FileText className="mr-2 h-4 w-4" />
@@ -115,7 +115,7 @@ export function Navbar() {
               </Link>
             </DropdownMenuItem>
           )}
-          {user.email?.includes('@admin') && (
+          {user.userType === 'admin' && (
             <DropdownMenuItem asChild>
               <Link href="/admin">
                 <Shield className="mr-2 h-4 w-4" />
@@ -146,7 +146,7 @@ export function Navbar() {
           {/* Desktop Navigation */}
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-4">
-              {!user?.email?.includes('@admin') && navigationLinks.map((link) => (
+              {!user?.userType === 'admin' && navigationLinks.map((link) => (
                 <Link key={link.href} href={link.href}>
                   <Button 
                     variant={isActive(link.href) ? "default" : "ghost"}
@@ -183,7 +183,7 @@ export function Navbar() {
               )}
 
               {/* Admin link - solo para admins */}
-              {isAuthenticated && user?.email?.includes('@admin') && adminLinks.map((link) => (
+              {isAuthenticated && user?.userType === 'admin' && adminLinks.map((link) => (
                 <Link key={link.href} href={link.href}>
                   <Button 
                     variant={isActive(link.href) ? "default" : "ghost"}
@@ -259,7 +259,7 @@ export function Navbar() {
         {mobileMenuOpen && (
           <div className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t">
-              {!user?.email?.includes('@admin') && navigationLinks.map((link) => (
+              {!user?.userType === 'admin' && navigationLinks.map((link) => (
                 <Link key={link.href} href={link.href}>
                   <Button 
                     variant={isActive(link.href) ? "default" : "ghost"}
@@ -272,7 +272,7 @@ export function Navbar() {
                 </Link>
               ))}
 
-              {isAuthenticated && user?.email?.includes('@admin') && adminLinks.map((link) => (
+              {isAuthenticated && user?.userType === 'admin' && adminLinks.map((link) => (
                 <Link key={link.href} href={link.href}>
                   <Button
                     variant={isActive(link.href) ? "default" : "ghost"}
@@ -285,7 +285,7 @@ export function Navbar() {
                 </Link>
               ))}
               
-              {isAuthenticated && !user?.email?.includes('@admin') && authenticatedLinks.map((link) => (
+              {isAuthenticated && !user?.userType === 'admin' && authenticatedLinks.map((link) => (
                 <Link key={link.href} href={link.href}>
                   <Button 
                     variant={isActive(link.href) ? "default" : "ghost"}

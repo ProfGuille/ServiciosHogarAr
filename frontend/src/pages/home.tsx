@@ -24,7 +24,7 @@ export default function Home() {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (!isLoading && user?.email?.includes('@admin')) {
+    if (!isLoading && user?.userType === 'admin') {
       window.location.replace('/admin');
     }
   }, [isLoading, user]);
