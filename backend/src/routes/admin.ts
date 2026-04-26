@@ -11,6 +11,63 @@ router.use(requireAuth);
 router.use(requireRole("admin"));
 
 // GET /api/admin/stats
+
+router.get("/dashboard-summary", async (req, res) => {
+  try {
+    const [s, providers, requests, m, a] = await Promise.all([
+      Promise.all([
+        sql`SELECT COUNT(*) as count FROM users`,
+        sql`SELECT COUNT(*) as count FROM service_providers`,
+        sql`SELECT COUNT(*) as count FROM service_requests`,
+        sql`SELECT COUNT(*) as count FROM lead_responses`,
+      ]),
+      sql`SELECT id, business_name, city, province, experience_years, is_verified, created_at FROM service_providers ORDER BY is_verified ASC, created_at DESC LIMIT 20`,
+      sql`SELECT id, title, description, city, province, status, is_urgent, created_at FROM service_requests ORDER BY created_at DESC LIMIT 20`,
+      Promise.all([
+        sql`SELECT COUNT(*) FILTER (WHERE is_verified = true) as verified, COUNT(*) as total FROM service_providers`,
+        sql`SELECT COUNT(*) as total, COUNT(*) FILTER (WHERE is_urgent = true) as urgent, COUNT(*) FILTER (WHERE status != 'cancelled') as active FROM service_requests`,
+        sql`SELECT COUNT(DISTINCT service_request_id) as converted FROM lead_responses`,
+      ]),
+      Promise.all([
+        sql`SELECT 'provider' as type, business_name as label, created_at FROM service_providers ORDER BY created_at DESC LIMIT 5`,
+        sql`SELECT 'request' as type, title as label, created_at FROM service_requests ORDER BY created_at DESC LIMIT 5`,
+      ]),
+    ]);
+    const tp = Number(m[0][0].total), tr = Number(m[1][0].total);
+    const activity = [...a[0], ...a[1]]
+      .sort((x: any, y: any) => new Date(y.created_at).getTime() - new Date(x.created_at).getTime())
+      .slice(0, 8);
+    res.json({
+      stats: {
+        totalUsers: Number(s[0][0].count),
+        totalProviders: Number(s[1][0].count),
+        totalRequests: Number(s[2][0].count),
+        totalCompletedJobs: Number(s[3][0].count),
+      },
+      providers: providers.map((p: any) => ({
+        id: p.id, businessName: p.business_name, city: p.city,
+        province: p.province, experienceYears: p.experience_years,
+        isVerified: p.is_verified, createdAt: p.created_at,
+      })),
+      requests,
+      metrics: {
+        verifiedPercent: tp > 0 ? Math.round(Number(m[0][0].verified) / tp * 100) : 0,
+        verifiedCount: Number(m[0][0].verified), totalProviders: tp,
+        conversionPercent: tr > 0 ? Math.round(Number(m[2][0].converted) / tr * 100) : 0,
+        convertedRequests: Number(m[2][0].converted),
+        urgentPercent: tr > 0 ? Math.round(Number(m[1][0].urgent) / tr * 100) : 0,
+        urgentCount: Number(m[1][0].urgent),
+        activePercent: tr > 0 ? Math.round(Number(m[1][0].active) / tr * 100) : 0,
+        activeCount: Number(m[1][0].active), totalRequests: tr,
+      },
+      activity,
+    });
+  } catch (error) {
+    console.error("Error en /api/admin/dashboard-summary:", error);
+    res.status(500).json({ error: "Error al obtener resumen del dashboard" });
+  }
+});
+
 router.get("/stats", async (req, res) => {
   try {
     const [totalUsers] = await sql`SELECT COUNT(*) as count FROM users`;

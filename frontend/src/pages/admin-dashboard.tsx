@@ -324,30 +324,16 @@ export default function AdminDashboard() {
     }
   }, [user, isLoading, toast]);
 
-  const { data: platformStats } = useQuery({
-    queryKey: ["/api/admin/stats"],
+  const { data: dashboardSummary, refetch: refetchRequests } = useQuery({
+    queryKey: ["/api/admin/dashboard-summary"],
     enabled: !!user && user.userType === 'admin',
   });
 
-  const { data: recentProviders } = useQuery({
-    queryKey: ["/api/admin/providers"],
-    enabled: !!user && user.userType === 'admin',
-  });
-
-  const { data: recentRequests, refetch: refetchRequests } = useQuery({
-    queryKey: ["/api/admin/requests"],
-    enabled: !!user && user.userType === 'admin',
-  });
-
-  const { data: metrics } = useQuery({
-    queryKey: ["/api/admin/metrics"],
-    enabled: !!user && user.userType === "admin",
-  });
-
-  const { data: recentActivity } = useQuery({
-    queryKey: ["/api/admin/activity"],
-    enabled: !!user && user.userType === "admin",
-  });
+  const platformStats = (dashboardSummary as any)?.stats;
+  const recentProviders = (dashboardSummary as any)?.providers;
+  const recentRequests = (dashboardSummary as any)?.requests;
+  const metrics = (dashboardSummary as any)?.metrics;
+  const recentActivity = (dashboardSummary as any)?.activity;
 
   const { data: profileChanges } = useQuery({
     queryKey: ["/api/admin/profile-changes"],

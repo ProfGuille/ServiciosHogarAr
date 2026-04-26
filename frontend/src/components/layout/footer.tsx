@@ -60,9 +60,7 @@ export function Footer() {
           {/* Brand Section */}
           <div className="lg:col-span-2">
             <div className="flex items-center space-x-2 mb-6">
-              <div className="h-10 w-10 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-lg">
-                <Home className="h-6 w-6 text-white" />
-              </div>
+              <img src="/logo.png" alt="ServiciosHogar" className="h-10 w-auto" />
               <span className="font-bold text-2xl bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">ServiciosHogar</span>
             </div>
             <p className="text-slate-300 text-base mb-6 max-w-md">
