@@ -222,6 +222,7 @@ export default function AdminDashboard() {
   const { user, isLoading } = useAuth();
   const { toast } = useToast();
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
+  const [activeTab, setActiveTab] = useState("overview");
   const [showCategoryForm, setShowCategoryForm] = useState(false);
   const [editingCategory, setEditingCategory] = useState<ServiceCategory | null>(null);
   const [selectedProvider, setSelectedProvider] = useState<any | null>(null);
@@ -511,7 +512,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Main Content */}
-        <Tabs defaultValue="overview" className="space-y-6">
+        <Tabs defaultValue="overview" className="space-y-6" onValueChange={(v) => setActiveTab(v)}>
           <TabsList className="grid grid-cols-9 w-full max-w-4xl">
             <TabsTrigger value="overview">Resumen</TabsTrigger>
             <TabsTrigger value="providers">Profesionales</TabsTrigger>
@@ -1067,10 +1068,10 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="precios">
-            <PreciosTab />
+            {activeTab === "precios" && <PreciosTab />}
           </TabsContent>
           <TabsContent value="logros">
-            <LogrosTab />
+            {activeTab === "logros" && <LogrosTab />}
           </TabsContent>
         </Tabs>
       </div>
