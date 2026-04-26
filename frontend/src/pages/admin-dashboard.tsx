@@ -227,14 +227,13 @@ export default function AdminDashboard() {
   const [selectedProvider, setSelectedProvider] = useState<any | null>(null);
   const [providerDialogOpen, setProviderDialogOpen] = useState(false);
 
-  const { data: verificationsData, refetch: refetchVerifications } = useQuery({
-    queryKey: ["/api/admin/identity-reviews"],
-    queryFn: async () => {
-      const res = await fetch(getApiUrl("/api/admin/identity-reviews"), { headers: getAuthHeaders() });
-      if (!res.ok) throw new Error("Error al obtener verificaciones");
-      return res.json();
-    },
+  const { data: dashboardFull, refetch: refetchVerifications } = useQuery({
+    queryKey: ["/api/admin/dashboard-full"],
+    enabled: !!user && user.userType === 'admin',
   });
+  const verificationsData = (dashboardFull as any)?.verifications;
+  const profileChanges = (dashboardFull as any)?.profileChanges;
+  const analyticsData = (dashboardFull as any)?.analytics;
 
   const reviewVerificationMutation = useMutation({
     mutationFn: async ({ id, status, adminNotes }: { id: number; status: string; adminNotes: string }) => {
@@ -275,9 +274,7 @@ export default function AdminDashboard() {
   });
 
   const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
-  const { data: analyticsData } = useQuery({
-    queryKey: ["/api/admin/analytics"],
-  });
+
 
     const [requestDialogOpen, setRequestDialogOpen] = useState(false);
 
@@ -335,14 +332,7 @@ export default function AdminDashboard() {
   const metrics = (dashboardSummary as any)?.metrics;
   const recentActivity = (dashboardSummary as any)?.activity;
 
-  const { data: profileChanges } = useQuery({
-    queryKey: ["/api/admin/profile-changes"],
-    queryFn: async () => {
-      const res = await fetch(getApiUrl("/api/admin/profile-changes"), { headers: getAuthHeaders() });
-      if (!res.ok) throw new Error("Error al cargar auditoría");
-      return res.json();
-    },
-  });
+
 
   const { data: categories, refetch: refetchCategories } = useQuery({
     queryKey: ["/api/categories"],
