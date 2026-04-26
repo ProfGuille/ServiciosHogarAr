@@ -79,7 +79,7 @@ router.get("/dashboard-full", async (req, res) => {
         sql`SELECT COUNT(*) FILTER (WHERE unlocked_at >= date_trunc('month', now())) as this_month, COUNT(*) FILTER (WHERE unlocked_at >= date_trunc('month', now() - interval '1 month') AND unlocked_at < date_trunc('month', now())) as last_month, COUNT(*) as total FROM lead_responses`,
       ]),
       sql`SELECT pv.id, pv.provider_id, pv.status, pv.submitted_at, pv.admin_notes, pv.document_urls, sp.business_name, u.email, u.first_name, u.last_name FROM provider_verifications pv JOIN service_providers sp ON sp.id = pv.provider_id JOIN users u ON u.id = sp.user_id WHERE pv.status = 'pending' ORDER BY pv.submitted_at DESC`,
-      sql`SELECT ppc.id, ppc.provider_id, ppc.field_name, ppc.old_value, ppc.new_value, ppc.changed_at, sp.business_name, sp_u.first_name, sp_u.last_name FROM pending_profile_changes ppc JOIN service_providers sp ON ppc.provider_id = sp.id JOIN users sp_u ON sp.user_id = sp_u.id LEFT JOIN users cb_u ON ppc.changed_by = cb_u.id ORDER BY ppc.changed_at DESC LIMIT 50`,
+      sql`SELECT ppc.id, ppc.provider_id, ppc.field_name, ppc.old_value, ppc.new_value, ppc.changed_at, sp.business_name, sp_u.first_name, sp_u.last_name FROM provider_profile_changes ppc JOIN service_providers sp ON ppc.provider_id = sp.id JOIN users sp_u ON sp.user_id = sp_u.id LEFT JOIN users cb_u ON ppc.changed_by = cb_u.id ORDER BY ppc.changed_at DESC LIMIT 50`,
     ]);
 
     const calcDelta = (cur: number, prev: number) => prev === 0 ? (cur > 0 ? 100 : 0) : Math.round(((cur - prev) / prev) * 100);
