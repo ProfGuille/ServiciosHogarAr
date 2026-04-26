@@ -68,39 +68,6 @@ router.get("/dashboard-summary", async (req, res) => {
   }
 });
 
-// GET /api/admin/dashboard-full — extiende summary con analytics + verifications + profile-changes
-router.get("/dashboard-full", async (req, res) => {
-  try {
-    const [analyticsResult, verificationsResult, profileChangesResult] = await Promise.all([
-      Promise.all([
-        sql`SELECT COUNT(*) FILTER (WHERE created_at >= date_trunc('month', now())) as this_month, COUNT(*) FILTER (WHERE created_at >= date_trunc('month', now() - interval '1 month') AND created_at < date_trunc('month', now())) as last_month, COUNT(*) as total FROM users`,
-        sql`SELECT COUNT(*) FILTER (WHERE created_at >= date_trunc('month', now())) as this_month, COUNT(*) FILTER (WHERE created_at >= date_trunc('month', now() - interval '1 month') AND created_at < date_trunc('month', now())) as last_month, COUNT(*) as total FROM service_providers`,
-        sql`SELECT COUNT(*) FILTER (WHERE created_at >= date_trunc('month', now())) as this_month, COUNT(*) FILTER (WHERE created_at >= date_trunc('month', now() - interval '1 month') AND created_at < date_trunc('month', now())) as last_month, COUNT(*) as total FROM service_requests`,
-        sql`SELECT COUNT(*) FILTER (WHERE unlocked_at >= date_trunc('month', now())) as this_month, COUNT(*) FILTER (WHERE unlocked_at >= date_trunc('month', now() - interval '1 month') AND unlocked_at < date_trunc('month', now())) as last_month, COUNT(*) as total FROM lead_responses`,
-      ]),
-      sql`SELECT pv.id, pv.provider_id, pv.status, pv.submitted_at, pv.admin_notes, pv.document_urls, sp.business_name, u.email, u.first_name, u.last_name FROM provider_verifications pv JOIN service_providers sp ON sp.id = pv.provider_id JOIN users u ON u.id = sp.user_id WHERE pv.status = 'pending' ORDER BY pv.submitted_at DESC`,
-      sql`SELECT ppc.id, ppc.provider_id, ppc.field_name, ppc.old_value, ppc.new_value, ppc.changed_at, sp.business_name, sp_u.first_name, sp_u.last_name FROM provider_profile_changes ppc JOIN service_providers sp ON ppc.provider_id = sp.id JOIN users sp_u ON sp.user_id = sp_u.id LEFT JOIN users cb_u ON ppc.changed_by = cb_u.id ORDER BY ppc.changed_at DESC LIMIT 50`,
-    ]);
-
-    const calcDelta = (cur: number, prev: number) => prev === 0 ? (cur > 0 ? 100 : 0) : Math.round(((cur - prev) / prev) * 100);
-    const [u, p, r, lr] = analyticsResult;
-
-    res.json({
-      analytics: {
-        users: { thisMonth: Number(u[0].this_month), lastMonth: Number(u[0].last_month), total: Number(u[0].total), delta: calcDelta(Number(u[0].this_month), Number(u[0].last_month)) },
-        providers: { thisMonth: Number(p[0].this_month), lastMonth: Number(p[0].last_month), total: Number(p[0].total), delta: calcDelta(Number(p[0].this_month), Number(p[0].last_month)) },
-        requests: { thisMonth: Number(r[0].this_month), lastMonth: Number(r[0].last_month), total: Number(r[0].total), delta: calcDelta(Number(r[0].this_month), Number(r[0].last_month)) },
-        unlocks: { thisMonth: Number(lr[0].this_month), lastMonth: Number(lr[0].last_month), total: Number(lr[0].total), delta: calcDelta(Number(lr[0].this_month), Number(lr[0].last_month)) },
-      },
-      verifications: verificationsResult,
-      profileChanges: profileChangesResult,
-    });
-  } catch (error) {
-    console.error("Error en /api/admin/dashboard-full:", error);
-    res.status(500).json({ error: "Error al obtener datos completos" });
-  }
-});
-
 router.get("/stats", async (req, res) => {
   try {
     const [totalUsers] = await sql`SELECT COUNT(*) as count FROM users`;

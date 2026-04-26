@@ -227,13 +227,25 @@ export default function AdminDashboard() {
   const [selectedProvider, setSelectedProvider] = useState<any | null>(null);
   const [providerDialogOpen, setProviderDialogOpen] = useState(false);
 
-  const { data: dashboardFull, refetch: refetchVerifications } = useQuery({
-    queryKey: ["/api/admin/dashboard-full"],
-    enabled: !!user && user.userType === 'admin',
+  const { data: verificationsData, refetch: refetchVerifications } = useQuery({
+    queryKey: ["/api/admin/identity-reviews"],
+    queryFn: async () => {
+      const res = await fetch(getApiUrl("/api/admin/identity-reviews"), { headers: getAuthHeaders() });
+      if (!res.ok) throw new Error("Error al obtener verificaciones");
+      return res.json();
+    },
   });
-  const verificationsData = (dashboardFull as any)?.verifications;
-  const profileChanges = (dashboardFull as any)?.profileChanges;
-  const analyticsData = (dashboardFull as any)?.analytics;
+  const { data: analyticsData } = useQuery({
+    queryKey: ["/api/admin/analytics"],
+  });
+  const { data: profileChanges } = useQuery({
+    queryKey: ["/api/admin/profile-changes"],
+    queryFn: async () => {
+      const res = await fetch(getApiUrl("/api/admin/profile-changes"), { headers: getAuthHeaders() });
+      if (!res.ok) throw new Error("Error al cargar auditoría");
+      return res.json();
+    },
+  });
 
   const reviewVerificationMutation = useMutation({
     mutationFn: async ({ id, status, adminNotes }: { id: number; status: string; adminNotes: string }) => {
