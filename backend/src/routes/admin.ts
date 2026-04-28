@@ -418,6 +418,22 @@ router.patch("/categories/:id", requireAuth, requireRole("admin"), async (req, r
 });
 
 
+
+// DELETE /api/admin/categories/:id
+router.delete("/categories/:id", requireAuth, requireRole("admin"), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [cat] = await sql`
+      DELETE FROM service_categories WHERE id = ${id}
+      RETURNING id
+    `;
+    if (!cat) return res.status(404).json({ error: "Categoria no encontrada" });
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error en DELETE /api/admin/categories/:id:", error);
+    res.status(500).json({ error: "Error al eliminar categoria" });
+  }
+});
 // GET /api/admin/identity-reviews — listar solicitudes de verificación
 router.get("/identity-reviews", requireAuth, requireRole("admin"), async (req, res) => {
   try {

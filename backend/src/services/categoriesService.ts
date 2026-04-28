@@ -1,13 +1,11 @@
-import { db } from "../db.js";
-import { categories } from "../shared/schema/categories.js";
-import { asc } from "drizzle-orm";
+import { sql } from "../db.js";
 
 export const categoriesService = {
   async getAll() {
-    return db
-      .select()
-      .from(categories)
-      .orderBy(asc(categories.name));
+    return sql`
+      SELECT id, name, description, icon, is_active as "isActive", created_at as "createdAt"
+      FROM service_categories
+      ORDER BY name ASC
+    `;
   }
 };
-

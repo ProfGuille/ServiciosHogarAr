@@ -355,7 +355,13 @@ export default function AdminDashboard() {
   // Create category mutation
   const createCategoryMutation = useMutation({
     mutationFn: async (data: { name: string; description: string; icon?: string }) => {
-      return await apiRequest("POST", "/api/categories", data);
+      const res = await fetch(getApiUrl("/api/admin/categories"), {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Error al crear");
+      return res.json();
     },
     onSuccess: () => {
       toast({
@@ -376,8 +382,14 @@ export default function AdminDashboard() {
 
   // Update category mutation
   const updateCategoryMutation = useMutation({
-    mutationFn: async ({ id, ...data }: { id: number; isActive: boolean }) => {
-      return await apiRequest("PATCH", `/api/categories/${id}`, data);
+    mutationFn: async ({ id, ...data }: { id: number; isActive?: boolean; name?: string; description?: string }) => {
+      const res = await fetch(getApiUrl(`/api/admin/categories/${id}`), {
+        method: "PATCH",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Error al actualizar");
+      return res.json();
     },
     onSuccess: () => {
       toast({
@@ -390,6 +402,32 @@ export default function AdminDashboard() {
       toast({
         title: "Error",
         description: "No se pudo actualizar la categoría.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete category mutation
+  const deleteCategoryMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const res = await fetch(getApiUrl(`/api/admin/categories/${id}`), {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      });
+      if (!res.ok) throw new Error("Error al eliminar");
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Categoría eliminada",
+        description: "La categoría se ha eliminado exitosamente.",
+      });
+      refetchCategories();
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar la categoría.",
         variant: "destructive",
       });
     },
@@ -816,6 +854,17 @@ export default function AdminDashboard() {
                             })}
                           >
                             {category.isActive ? "Desactivar" : "Activar"}
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="destructive"
+                            onClick={() => {
+                              if (confirm(`¿Eliminar la categoría "${category.name}"? Esta acción no se puede deshacer.`)) {
+                                deleteCategoryMutation.mutate(category.id);
+                              }
+                            }}
+                          >
+                            Eliminar
                           </Button>
                         </div>
                       </div>
