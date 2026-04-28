@@ -601,4 +601,44 @@ router.patch("/credit-packages/:id", async (req, res) => {
   }
 });
 
+
+// POST /api/admin/credit-packages
+router.post("/credit-packages", async (req, res) => {
+  const { nombre, creditos, precio, destacado } = req.body;
+  if (!nombre || typeof nombre !== "string" || nombre.trim().length === 0)
+    return res.status(400).json({ error: "Nombre requerido" });
+  if (!Number.isInteger(creditos) || creditos <= 0)
+    return res.status(400).json({ error: "Créditos debe ser entero positivo" });
+  if (!Number.isInteger(precio) || precio <= 0)
+    return res.status(400).json({ error: "Precio debe ser entero positivo" });
+  try {
+    if (destacado === true) {
+      await sql`UPDATE credit_packages SET destacado = FALSE WHERE destacado = TRUE`;
+    }
+    const maxOrden = await sql`SELECT COALESCE(MAX(orden), 0) as max FROM credit_packages`;
+    const nextOrden = (maxOrden[0]?.max ?? 0) + 1;
+    const [created] = await sql`
+      INSERT INTO credit_packages (nombre, creditos, precio, destacado, activo, orden)
+      VALUES (${nombre.trim()}, ${creditos}, ${precio}, ${destacado ?? false}, true, ${nextOrden})
+      RETURNING id, nombre, creditos, precio, destacado, activo, orden
+    `;
+    res.status(201).json(created);
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// DELETE /api/admin/credit-packages/:id
+router.delete("/credit-packages/:id", async (req, res) => {
+  const id = parseInt(req.params.id);
+  if (isNaN(id)) return res.status(400).json({ error: "ID inválido" });
+  try {
+    const [deleted] = await sql`DELETE FROM credit_packages WHERE id = ${id} RETURNING id`;
+    if (!deleted) return res.status(404).json({ error: "Paquete no encontrado" });
+    res.json({ success: true });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 export default router;

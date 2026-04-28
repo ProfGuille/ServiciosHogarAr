@@ -74,6 +74,8 @@ function VerificationActions({ id, onReview }: { id: number; onReview: (args: { 
 
 function PreciosTab() {
   const { toast } = useToast();
+  const [showNew, setShowNew] = useState(false);
+  const [newPkg, setNewPkg] = useState({ nombre: "", creditos: "", precio: "", destacado: false });
   const { data: paquetes, refetch } = useQuery<any[]>({
     queryKey: ["admin-credit-packages"],
     queryFn: async () => {
@@ -111,15 +113,92 @@ function PreciosTab() {
     }
   };
 
+  const handleToggleActivo = async (p: any) => {
+    try {
+      const res = await fetch(`${getApiUrl()}/api/admin/credit-packages/${p.id}`, {
+        method: "PATCH",
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ activo: !p.activo }),
+      });
+      if (!res.ok) throw new Error("Error");
+      toast({ title: p.activo ? "Paquete ocultado" : "Paquete activado" });
+      refetch();
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    }
+  };
+
+  const handleDelete = async (p: any) => {
+    if (!confirm(`¿Eliminar el paquete "${p.nombre}"? Esta acción no se puede deshacer.`)) return;
+    try {
+      const res = await fetch(`${getApiUrl()}/api/admin/credit-packages/${p.id}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      });
+      if (!res.ok) throw new Error("Error al eliminar");
+      toast({ title: "Paquete eliminado" });
+      refetch();
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    }
+  };
+
+  const handleCreate = async () => {
+    const creditos = parseInt(newPkg.creditos);
+    const precio = parseInt(newPkg.precio);
+    if (!newPkg.nombre.trim() || isNaN(creditos) || creditos <= 0 || isNaN(precio) || precio <= 0) {
+      toast({ title: "Error", description: "Completá todos los campos correctamente.", variant: "destructive" });
+      return;
+    }
+    try {
+      const res = await fetch(`${getApiUrl()}/api/admin/credit-packages`, {
+        method: "POST",
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre: newPkg.nombre.trim(), creditos, precio, destacado: newPkg.destacado }),
+      });
+      if (!res.ok) throw new Error("Error al crear");
+      toast({ title: "Paquete creado" });
+      setNewPkg({ nombre: "", creditos: "", precio: "", destacado: false });
+      setShowNew(false);
+      refetch();
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    }
+  };
+
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Paquetes de créditos</CardTitle>
+        <Button size="sm" onClick={() => setShowNew(v => !v)}>
+          {showNew ? "Cancelar" : "Nuevo paquete"}
+        </Button>
       </CardHeader>
       <CardContent>
+        {showNew && (
+          <div className="border rounded-lg p-4 mb-4 grid grid-cols-2 md:grid-cols-5 gap-3 items-end bg-slate-50">
+            <div>
+              <Label className="text-xs">Nombre</Label>
+              <Input value={newPkg.nombre} onChange={e => setNewPkg(p => ({ ...p, nombre: e.target.value }))} placeholder="Ej: Premium" />
+            </div>
+            <div>
+              <Label className="text-xs">Créditos</Label>
+              <Input type="number" min={1} value={newPkg.creditos} onChange={e => setNewPkg(p => ({ ...p, creditos: e.target.value }))} />
+            </div>
+            <div>
+              <Label className="text-xs">Precio (ARS)</Label>
+              <Input type="number" min={1} value={newPkg.precio} onChange={e => setNewPkg(p => ({ ...p, precio: e.target.value }))} />
+            </div>
+            <div className="flex flex-col gap-1">
+              <Label className="text-xs">Destacado</Label>
+              <input type="checkbox" checked={newPkg.destacado} className="h-5 w-5 mt-1" onChange={e => setNewPkg(p => ({ ...p, destacado: e.target.checked }))} />
+            </div>
+            <Button size="sm" onClick={handleCreate}>Crear</Button>
+          </div>
+        )}
         <div className="space-y-4">
           {(paquetes || []).map((p: any) => (
-            <div key={p.id} className="border rounded-lg p-4 grid grid-cols-2 md:grid-cols-5 gap-3 items-end">
+            <div key={p.id} className={`border rounded-lg p-4 grid grid-cols-2 md:grid-cols-6 gap-3 items-end ${!p.activo ? "opacity-50" : ""}`}>
               <div>
                 <Label className="text-xs">Nombre</Label>
                 <Input
@@ -154,13 +233,17 @@ function PreciosTab() {
                   onChange={e => handleChange(p.id, "destacado", e.target.checked)}
                 />
               </div>
-              <Button
-                size="sm"
-                disabled={!editing[p.id]}
-                onClick={() => handleSave(p.id)}
-              >
+              <Button size="sm" disabled={!editing[p.id]} onClick={() => handleSave(p.id)}>
                 Guardar
               </Button>
+              <div className="flex gap-1">
+                <Button size="sm" variant="outline" onClick={() => handleToggleActivo(p)}>
+                  {p.activo ? "Ocultar" : "Activar"}
+                </Button>
+                <Button size="sm" variant="destructive" onClick={() => handleDelete(p)}>
+                  Eliminar
+                </Button>
+              </div>
             </div>
           ))}
         </div>
@@ -171,7 +254,6 @@ function PreciosTab() {
     </Card>
   );
 }
-
 
 function LogrosTab() {
   const { data: achievements, isLoading } = useQuery<any[]>({
