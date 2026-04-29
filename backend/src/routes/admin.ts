@@ -298,9 +298,44 @@ router.get("/metrics", async (req, res) => {
 });
 
 
+
+// GET /api/admin/settings
+router.get("/settings", async (_req, res) => {
+  try {
+    const rows = await sql`SELECT value FROM platform_settings WHERE key = 'analytics_start_date'`;
+    res.json({ analyticsStartDate: rows[0]?.value ?? null });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// PATCH /api/admin/settings
+router.patch("/settings", async (req, res) => {
+  try {
+    const { analyticsStartDate } = req.body;
+    if (analyticsStartDate !== null && analyticsStartDate !== undefined) {
+      // Validar formato fecha
+      const d = new Date(analyticsStartDate);
+      if (isNaN(d.getTime())) return res.status(400).json({ error: "Fecha inválida" });
+      await sql`
+        INSERT INTO platform_settings (key, value, updated_at)
+        VALUES ('analytics_start_date', ${analyticsStartDate}, NOW())
+        ON CONFLICT (key) DO UPDATE SET value = ${analyticsStartDate}, updated_at = NOW()
+      `;
+    } else {
+      await sql`DELETE FROM platform_settings WHERE key = 'analytics_start_date'`;
+    }
+    res.json({ success: true });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // GET /api/admin/analytics
 router.get("/analytics", async (req, res) => {
   try {
+    const settingRows = await sql`SELECT value FROM platform_settings WHERE key = 'analytics_start_date'`;
+    const startDate = settingRows[0]?.value ?? '1970-01-01';
     const [users] = await sql`
       SELECT
         COUNT(*) FILTER (WHERE created_at >= date_trunc('month', now())) as this_month,
@@ -308,6 +343,7 @@ router.get("/analytics", async (req, res) => {
                            AND created_at < date_trunc('month', now())) as last_month,
         COUNT(*) as total
       FROM users
+      WHERE created_at >= ${startDate}::date
     `;
     const [providers] = await sql`
       SELECT
@@ -316,6 +352,7 @@ router.get("/analytics", async (req, res) => {
                            AND created_at < date_trunc('month', now())) as last_month,
         COUNT(*) as total
       FROM service_providers
+      WHERE created_at >= ${startDate}::date
     `;
     const [requests] = await sql`
       SELECT
@@ -324,6 +361,7 @@ router.get("/analytics", async (req, res) => {
                            AND created_at < date_trunc('month', now())) as last_month,
         COUNT(*) as total
       FROM service_requests
+      WHERE created_at >= ${startDate}::date
     `;
     const [unlocks] = await sql`
       SELECT
@@ -332,6 +370,7 @@ router.get("/analytics", async (req, res) => {
                            AND unlocked_at < date_trunc('month', now())) as last_month,
         COUNT(*) as total
       FROM lead_responses
+      WHERE unlocked_at >= ${startDate}::date
     `;
     const calcDelta = (current: number, previous: number) => {
       if (previous === 0) return current > 0 ? 100 : 0;

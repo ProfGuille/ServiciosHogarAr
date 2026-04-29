@@ -321,6 +321,24 @@ export default function AdminDashboard() {
   const { data: analyticsData } = useQuery({
     queryKey: ["/api/admin/analytics"],
   });
+  const { data: settingsData, refetch: refetchSettings } = useQuery({
+    queryKey: ["/api/admin/settings"],
+    queryFn: async () => {
+      const res = await fetch(getApiUrl("/api/admin/settings"), { headers: getAuthHeaders() });
+      if (!res.ok) throw new Error("Error");
+      return res.json();
+    },
+  });
+  const [analyticsDateInput, setAnalyticsDateInput] = useState<string>("");
+  const handleSaveAnalyticsDate = async (date: string | null) => {
+    await fetch(getApiUrl("/api/admin/settings"), {
+      method: "PATCH",
+      headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+      body: JSON.stringify({ analyticsStartDate: date }),
+    });
+    refetchSettings();
+    queryClient.invalidateQueries({ queryKey: ["/api/admin/analytics"] });
+  };
   const { data: profileChanges } = useQuery({
     queryKey: ["/api/admin/profile-changes"],
     queryFn: async () => {
@@ -971,6 +989,36 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="analytics">
+            <Card className="mb-4">
+              <CardHeader>
+                <CardTitle className="text-base">Filtro de fecha para analíticas</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap items-end gap-3">
+                  <div>
+                    <p className="text-xs text-slate-500 mb-1">
+                      {settingsData?.analyticsStartDate
+                        ? `Mostrando datos desde: ${settingsData.analyticsStartDate}`
+                        : "Mostrando todos los datos disponibles"}
+                    </p>
+                    <input
+                      type="date"
+                      className="border rounded px-2 py-1 text-sm"
+                      value={analyticsDateInput}
+                      onChange={e => setAnalyticsDateInput(e.target.value)}
+                    />
+                  </div>
+                  <Button size="sm" onClick={() => { if (analyticsDateInput) handleSaveAnalyticsDate(analyticsDateInput); }}>
+                    Guardar fecha de corte
+                  </Button>
+                  {settingsData?.analyticsStartDate && (
+                    <Button size="sm" variant="outline" onClick={() => { setAnalyticsDateInput(""); handleSaveAnalyticsDate(null); }}>
+                      Limpiar filtro
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
             <div className="grid lg:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
