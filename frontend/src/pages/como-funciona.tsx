@@ -87,7 +87,7 @@ export default function ComoFunciona() {
             </Button>
           </div>
         </div>
-        <div className="mb-12">
+        <div className="mb-12" id="proveedores">
           <h2 className="text-2xl font-bold text-slate-900 mb-6">Para profesionales</h2>
           <div className="grid gap-4">
             {stepsProfesional.map((step, index) => (

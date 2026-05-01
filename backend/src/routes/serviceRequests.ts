@@ -7,7 +7,7 @@ import {
   categories,
   providerCredits
 } from "../shared/schema/index.js";
-import { eq, and, notInArray, sql, desc } from "drizzle-orm";
+import { eq, and, notInArray, sql, desc, gte } from "drizzle-orm";
 
 const router = Router();
 
@@ -22,6 +22,10 @@ router.get("/available", async (req, res) => {
         error: "providerId es requerido y debe ser un número válido" 
       });
     }
+
+    // Filtro de fecha de corte para solicitudes visibles
+    const [startDateRow] = await neonSql`SELECT value FROM platform_settings WHERE key = 'marketplace_start_date'` as any[];
+    const marketplaceStartDate = startDateRow?.value || null;
 
     const unlockedLeadIds = await db
       .select({ serviceRequestId: leadResponses.serviceRequestId })
@@ -53,6 +57,9 @@ router.get("/available", async (req, res) => {
           eq(serviceRequests.status, "pending"),
           unlockedIds.length > 0 
             ? notInArray(serviceRequests.id, unlockedIds)
+            : undefined,
+          marketplaceStartDate
+            ? gte(serviceRequests.createdAt, new Date(marketplaceStartDate))
             : undefined
         )
       )
@@ -70,6 +77,9 @@ router.get("/available", async (req, res) => {
           eq(serviceRequests.status, "pending"),
           unlockedIds.length > 0 
             ? notInArray(serviceRequests.id, unlockedIds)
+            : undefined,
+          marketplaceStartDate
+            ? gte(serviceRequests.createdAt, new Date(marketplaceStartDate))
             : undefined
         )
       );
