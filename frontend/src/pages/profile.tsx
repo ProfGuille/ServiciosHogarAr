@@ -90,18 +90,17 @@ export default function Profile() {
                   <p className="text-lg pl-6">{user.email}</p>
                 </div>
                 
+                {user.createdAt && (
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-gray-500" />
                     <label className="text-sm font-medium text-gray-500">Miembro desde</label>
                   </div>
                   <p className="text-lg pl-6">
-                    {user.createdAt 
-                      ? format(new Date(user.createdAt), "MMMM yyyy", { locale: es })
-                      : "Fecha no disponible"
-                    }
+                    {format(new Date(user.createdAt), "MMMM yyyy", { locale: es })}
                   </p>
                 </div>
+                )}
               </CardContent>
             </Card>
           </div>
