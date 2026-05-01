@@ -354,7 +354,7 @@ export default function ProviderDashboard() {
             Mis solicitudes ({unlockedLeads?.total || 0})
           </TabsTrigger>
           <TabsTrigger value="perfil">
-            Mi Perfil
+            Perfil Profesional
           </TabsTrigger>
           <TabsTrigger value="logros">
             Mis Logros

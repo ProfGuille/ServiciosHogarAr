@@ -45,7 +45,10 @@ export function Navbar() {
 
   const authenticatedLinks = [
     { href: "/mis-solicitudes", label: t('nav.requests') || "Solicitudes", icon: FileText },
-    ...(user?.userType === 'provider' ? [{ href: "/dashboard-profesional", label: "Mi Panel", icon: Briefcase }] : []),
+    ...(user?.userType === 'provider' ? [
+      { href: "/dashboard-profesional", label: "Mi Panel", icon: Briefcase },
+      { href: "/perfil", label: "Mi Cuenta", icon: User },
+    ] : []),
   ];
 
   const adminLinks = [
@@ -88,7 +91,7 @@ export function Navbar() {
           <DropdownMenuItem asChild>
             <Link href="/perfil">
               <User className="mr-2 h-4 w-4" />
-              {t('nav.profile') || "Perfil"}
+              {"Mi Cuenta"}
             </Link>
           </DropdownMenuItem>
           {!user.userType === 'admin' && (
