@@ -198,6 +198,7 @@ router.post("/login", async (req: Request, res: Response) => {
         lastName: user.lastName,
         email: user.email,
         userType: user.userType,
+        createdAt: user.createdAt,
         ...(providerId !== null && { providerId }),
       },
       token,
