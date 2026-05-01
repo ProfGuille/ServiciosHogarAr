@@ -20,6 +20,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useToast } from '@/hooks/use-toast';
 import { Link } from 'wouter';
+import { useAuth } from '@/hooks/useAuth';
 
 interface SearchFilters {
   query?: string;
@@ -100,6 +101,11 @@ interface SearchFilters {
   ];
 
 export default function Search() {
+  const { user } = useAuth();
+  if (user?.userType === 'provider') {
+    window.location.replace('/dashboard');
+    return null;
+  }
   const { toast } = useToast();
   const urlSearchParams = new URLSearchParams(useWouterSearch());
   const [showMobileFilters, setShowMobileFilters] = useState(false);

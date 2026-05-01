@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
@@ -46,6 +46,12 @@ export default function CreateRequest() {
   // Redirect if not authenticated
   if (!isAuthenticated) {
     setLocation("/login");
+    return null;
+  }
+
+  // Proveedores no pueden crear solicitudes
+  if (user?.userType === "provider") {
+    setLocation("/dashboard");
     return null;
   }
 

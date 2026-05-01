@@ -7,10 +7,10 @@ import { isAuthenticated, getAuthHeaders, logout } from '@/lib/auth';
 
 interface CreditPackage {
   id: number;
-  name: string;
-  credits: number;
-  price: number;
-  description?: string;
+  nombre: string;
+  creditos: number;
+  precio: number;
+  descripcion?: string;
 }
 
 interface BalanceData {
@@ -154,22 +154,22 @@ export default function ComprarCreditos() {
           {packages.map((pkg) => (
             <Card key={pkg.id} className="flex flex-col">
               <CardHeader>
-                <CardTitle className="text-2xl">{pkg.name}</CardTitle>
-                <CardDescription>{pkg.description}</CardDescription>
+                <CardTitle className="text-2xl">{pkg.nombre}</CardTitle>
+                <CardDescription>{pkg.descripcion}</CardDescription>
               </CardHeader>
               <CardContent className="flex-1">
                 <div className="text-center mb-4">
                   <div className="text-4xl font-bold text-blue-600 mb-2">
-                    {pkg.credits}
+                    {pkg.creditos}
                   </div>
                   <div className="text-sm text-gray-500">créditos</div>
                 </div>
                 <div className="text-center">
                   <div className="text-3xl font-bold text-gray-900">
-                    ${pkg.price.toLocaleString('es-AR')}
+                    ${pkg.precio.toLocaleString('es-AR')}
                   </div>
                   <div className="text-sm text-gray-500 mt-1">
-                    ${(pkg.price / pkg.credits).toFixed(2)} por crédito
+                    ${(pkg.precio / pkg.creditos).toFixed(2)} por crédito
                   </div>
                 </div>
               </CardContent>

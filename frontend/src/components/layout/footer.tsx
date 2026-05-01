@@ -1,4 +1,5 @@
 import { Link } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
 import { 
   Facebook, 
   Twitter, 
@@ -13,22 +14,28 @@ import {
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
+  const { user } = useAuth();
+  const isProvider = user?.userType === "provider";
 
-  const footerSections = [
-    {
-      title: "Para Clientes",
-      links: [
+  const clientLinks = isProvider
+    ? [{ label: "Cómo funciona", href: "/como-funciona" }]
+    : [
         { label: "Buscar servicios", href: "/buscar" },
         { label: "Buscar profesionales", href: "/buscar" },
         { label: "Cómo funciona", href: "/como-funciona" },
         { label: "Crear solicitud", href: "/nueva-solicitud" },
-      ]
+      ];
+
+  const footerSections = [
+    {
+      title: "Para Clientes",
+      links: clientLinks,
     },
     {
       title: "Para Profesionales",
       links: [
         { label: "Registrarse como Profesional", href: "/register-provider" },
-        { label: "Cómo funciona", href: "/como-funciona" },
+        { label: "Cómo funciona para profesionales", href: "/como-funciona#proveedores" },
         { label: "Precios y créditos", href: "/precios" },
       ]
     },
