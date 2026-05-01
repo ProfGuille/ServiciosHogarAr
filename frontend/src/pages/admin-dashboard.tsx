@@ -330,6 +330,15 @@ export default function AdminDashboard() {
     },
   });
   const [analyticsDateInput, setAnalyticsDateInput] = useState<string>("");
+  const [marketplaceDateInput, setMarketplaceDateInput] = useState<string>("");
+  const handleSaveMarketplaceDate = async (date: string | null) => {
+    await fetch(getApiUrl("/api/admin/settings"), {
+      method: "PATCH",
+      headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+      body: JSON.stringify({ marketplaceStartDate: date }),
+    });
+    refetchSettings();
+  };
   const handleSaveAnalyticsDate = async (date: string | null) => {
     await fetch(getApiUrl("/api/admin/settings"), {
       method: "PATCH",
@@ -989,6 +998,37 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="analytics">
+            <Card className="mb-4">
+              <CardHeader>
+                <CardTitle className="text-base">Filtro de fecha — Marketplace (proveedores)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-slate-500 mb-2">Las solicitudes anteriores a esta fecha no serán visibles para los proveedores.</p>
+                <div className="flex flex-wrap items-end gap-3">
+                  <div>
+                    <p className="text-xs text-slate-500 mb-1">
+                      {settingsData?.marketplaceStartDate
+                        ? `Mostrando solicitudes desde: ${settingsData.marketplaceStartDate}`
+                        : "Mostrando todas las solicitudes"}
+                    </p>
+                    <input
+                      type="date"
+                      className="border rounded px-2 py-1 text-sm"
+                      value={marketplaceDateInput}
+                      onChange={e => setMarketplaceDateInput(e.target.value)}
+                    />
+                  </div>
+                  <Button size="sm" onClick={() => { if (marketplaceDateInput) handleSaveMarketplaceDate(marketplaceDateInput); }}>
+                    Guardar fecha de corte
+                  </Button>
+                  {settingsData?.marketplaceStartDate && (
+                    <Button size="sm" variant="outline" onClick={() => { setMarketplaceDateInput(""); handleSaveMarketplaceDate(null); }}>
+                      Limpiar filtro
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
             <Card className="mb-4">
               <CardHeader>
                 <CardTitle className="text-base">Filtro de fecha para analíticas</CardTitle>

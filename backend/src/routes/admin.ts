@@ -302,8 +302,13 @@ router.get("/metrics", async (req, res) => {
 // GET /api/admin/settings
 router.get("/settings", async (_req, res) => {
   try {
-    const rows = await sql`SELECT value FROM platform_settings WHERE key = 'analytics_start_date'`;
-    res.json({ analyticsStartDate: rows[0]?.value ?? null });
+    const rows = await sql`SELECT key, value FROM platform_settings WHERE key IN ('analytics_start_date', 'marketplace_start_date')`;
+    const map: Record<string, string> = {};
+    for (const r of rows) map[r.key] = r.value;
+    res.json({
+      analyticsStartDate: map['analytics_start_date'] ?? null,
+      marketplaceStartDate: map['marketplace_start_date'] ?? null,
+    });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
   }
@@ -312,9 +317,8 @@ router.get("/settings", async (_req, res) => {
 // PATCH /api/admin/settings
 router.patch("/settings", async (req, res) => {
   try {
-    const { analyticsStartDate } = req.body;
+    const { analyticsStartDate, marketplaceStartDate } = req.body;
     if (analyticsStartDate !== null && analyticsStartDate !== undefined) {
-      // Validar formato fecha
       const d = new Date(analyticsStartDate);
       if (isNaN(d.getTime())) return res.status(400).json({ error: "Fecha inválida" });
       await sql`
@@ -322,8 +326,19 @@ router.patch("/settings", async (req, res) => {
         VALUES ('analytics_start_date', ${analyticsStartDate}, NOW())
         ON CONFLICT (key) DO UPDATE SET value = ${analyticsStartDate}, updated_at = NOW()
       `;
-    } else {
+    } else if (analyticsStartDate === null) {
       await sql`DELETE FROM platform_settings WHERE key = 'analytics_start_date'`;
+    }
+    if (marketplaceStartDate !== null && marketplaceStartDate !== undefined) {
+      const d2 = new Date(marketplaceStartDate);
+      if (isNaN(d2.getTime())) return res.status(400).json({ error: "Fecha inválida" });
+      await sql`
+        INSERT INTO platform_settings (key, value, updated_at)
+        VALUES ('marketplace_start_date', ${marketplaceStartDate}, NOW())
+        ON CONFLICT (key) DO UPDATE SET value = ${marketplaceStartDate}, updated_at = NOW()
+      `;
+    } else if (marketplaceStartDate === null) {
+      await sql`DELETE FROM platform_settings WHERE key = 'marketplace_start_date'`;
     }
     res.json({ success: true });
   } catch (e: any) {
