@@ -109,7 +109,7 @@ export default function Precios() {
               </ul>
               <div className="pt-4">
                 <div className="text-3xl font-bold text-slate-900">
-                  {paquetes && paquetes.filter(p => p.activo).length > 0 ? `$${Math.min(...paquetes.filter(p => p.activo).map(p => Math.round(p.precio / p.creditos))).toLocaleString("es-AR")}` : "$5.000"} <span className="text-base font-normal text-slate-500">/ crédito</span>
+                  {paquetes && paquetes.filter(p => p.activo).length > 0 ? `$${Math.max(...paquetes.filter(p => p.activo).map(p => Math.round(p.precio / p.creditos))).toLocaleString("es-AR")}` : "$5.000"} <span className="text-base font-normal text-slate-500">/ crédito</span>
                 </div>
                 <div className="text-sm text-slate-500">o menos con packs</div>
               </div>

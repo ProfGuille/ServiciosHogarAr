@@ -20,24 +20,24 @@ export default function CentroAyuda() {
       title: "Para clientes",
       questions: [
         {
-          question: "Como publico una solicitud de servicio?",
-          answer: "Hace clic en Publicar solicitud, completa la categoria, zona y descripcion del trabajo. Es gratis y podes hacerlo sin registrarte."
+          question: "¿Cómo publico una solicitud de servicio?",
+          answer: "Hacé clic en Publicar solicitud, completá la categoría, zona y descripción del trabajo. Es gratis y podés hacerlo sin registrarte."
         },
         {
-          question: "Que pasa despues de publicar mi solicitud?",
+          question: "¿Qué pasa después de publicar mi solicitud?",
           answer: "Los profesionales de tu zona reciben la solicitud. Si les interesa, desbloquean tus datos de contacto y te llaman o escriben directamente."
         },
         {
-          question: "Tengo que pagar algo como cliente?",
-          answer: "No. Publicar solicitudes es completamente gratis. El precio del servicio lo acordas directamente con el profesional que elijas."
+          question: "¿Tengo que pagar algo como cliente?",
+          answer: "No. Publicar solicitudes es completamente gratis. El precio del servicio lo acordás directamente con el profesional que elijas."
         },
         {
-          question: "Como se que un profesional es confiable?",
-          answer: "Podes ver el perfil del profesional, sus calificaciones y resenas de otros clientes. Los profesionales con el distintivo verificado pasaron por un proceso de verificacion de identidad."
+          question: "¿Cómo sé que un profesional es confiable?",
+          answer: "Podés ver el perfil del profesional, sus calificaciones y reseñas de otros clientes. Los profesionales con el distintivo verificado pasaron por un proceso de verificación de identidad."
         },
         {
-          question: "La plataforma garantiza el servicio?",
-          answer: "ServiciosHogar conecta clientes con profesionales, pero no intermedia en la contratacion ni garantiza el resultado del servicio. Te recomendamos acordar todo por escrito antes de comenzar el trabajo."
+          question: "¿La plataforma garantiza el servicio?",
+          answer: "ServiciosHogar conecta clientes con profesionales, pero no intermedia en la contratación ni garantiza el resultado del servicio. Te recomendamos acordar todo por escrito antes de comenzar el trabajo."
         }
       ]
     },
@@ -45,24 +45,24 @@ export default function CentroAyuda() {
       title: "Para profesionales",
       questions: [
         {
-          question: "Como funciona el sistema de creditos?",
-          answer: "Cada vez que queres ver los datos de contacto de un cliente (nombre, telefono, email), usas 1 credito. Al registrarte recibis 10 creditos de regalo."
+          question: "¿Cómo funciona el sistema de créditos?",
+          answer: "Cada vez que querés ver los datos de contacto de un cliente (nombre, teléfono, email), usás 1 crédito. Al registrarte recibís 10 créditos de regalo."
         },
         {
-          question: "Como compro mas creditos?",
-          answer: "Desde tu dashboard profesional, en la seccion Comprar creditos. El pago se procesa a traves de Mercado Pago."
+          question: "¿Cómo compro más créditos?",
+          answer: "Desde tu dashboard profesional, en la sección Comprar créditos. El pago se procesa a través de Mercado Pago."
         },
         {
-          question: "Como me verifico como profesional?",
-          answer: "Desde tu dashboard profesional podes enviar tu documentacion para verificacion de identidad. Una vez aprobada, tu perfil muestra el distintivo de verificado."
+          question: "¿Cómo me verifico como profesional?",
+          answer: "Desde tu dashboard profesional podés enviar tu documentación para verificación de identidad. Una vez aprobada, tu perfil muestra el distintivo de verificado."
         },
         {
-          question: "Que informacion ve el cliente antes de que yo desbloquee?",
-          answer: "El cliente ve solo la descripcion de la solicitud y la zona. Vos ves lo mismo hasta que usas un credito para desbloquear sus datos completos."
+          question: "¿Qué información ve el cliente antes de que yo desbloquee?",
+          answer: "El cliente ve solo la descripción de la solicitud y la zona. Vos ves lo mismo hasta que usás un crédito para desbloquear sus datos completos."
         },
         {
-          question: "Puedo recuperar un credito si los datos del cliente son invalidos?",
-          answer: "Reportanos el caso desde el formulario de contacto con el ID de la solicitud y lo revisamos manualmente."
+          question: "¿Puedo recuperar un crédito si los datos del cliente son inválidos?",
+          answer: "Reportanos el caso desde el formulario de contacto indicando el ID de la solicitud. Lo revisamos manualmente y, si se confirma que los datos son inválidos, te devolvemos el crédito."
         }
       ]
     },
@@ -70,16 +70,16 @@ export default function CentroAyuda() {
       title: "Cuenta y acceso",
       questions: [
         {
-          question: "Como creo una cuenta?",
-          answer: "Hace clic en Registrarse en la parte superior. Podes registrarte como cliente o como profesional segun tu necesidad."
+          question: "¿Cómo creo una cuenta?",
+          answer: "Hacé clic en Registrarse en la parte superior. Podés registrarte como cliente o como profesional según tu necesidad."
         },
         {
-          question: "Olvide mi contrasena, que hago?",
-          answer: "En la pantalla de login, hace clic en Olvide mi contrasena. Te enviamos un link para restablecerla al email de tu cuenta."
+          question: "¿Olvidé mi contraseña, qué hago?",
+          answer: "En la pantalla de inicio de sesión, hacé clic en Olvidé mi contraseña. Te enviamos un link para restablecerla al email de tu cuenta."
         },
         {
-          question: "Puedo publicar una solicitud sin cuenta?",
-          answer: "Si. Las solicitudes anonimas estan disponibles para clientes que no quieren registrarse. En ese caso, los profesionales veran tus datos al desbloquear la solicitud."
+          question: "¿Puedo publicar una solicitud sin cuenta?",
+          answer: "Sí. Las solicitudes anónimas están disponibles para clientes que no quieren registrarse. En ese caso, los profesionales verán tus datos al desbloquear la solicitud."
         }
       ]
     },
@@ -87,12 +87,12 @@ export default function CentroAyuda() {
       title: "Seguridad",
       questions: [
         {
-          question: "Es seguro dar mis datos en la plataforma?",
-          answer: "Toda la informacion viaja cifrada con SSL. Tus datos de contacto solo son visibles para profesionales que usan un credito para desbloquearlos."
+          question: "¿Es seguro dar mis datos en la plataforma?",
+          answer: "Toda la información viaja cifrada con SSL. Tus datos de contacto solo son visibles para profesionales que usan un crédito para desbloquearlos."
         },
         {
-          question: "Como reporto un problema o actividad sospechosa?",
-          answer: "Escribinos desde el formulario de contacto en /contacto. Revisamos todos los reportes."
+          question: "¿Cómo reporto un problema o actividad sospechosa?",
+          answer: "Escribinos desde el formulario de contacto. Revisamos todos los reportes."
         }
       ]
     }
