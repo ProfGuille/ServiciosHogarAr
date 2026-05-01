@@ -21,7 +21,7 @@ export default function Seguridad() {
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-slate-900 mb-4">Seguridad y Confianza</h1>
           <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-            Estas son las medidas reales que implementamos para proteger tu informacion y la de los profesionales.
+            Estas son las medidas reales que implementamos para proteger tu información y la de los profesionales.
           </p>
         </div>
 
@@ -30,13 +30,13 @@ export default function Seguridad() {
             <CardHeader>
               <CardTitle className="flex items-center gap-3">
                 <Lock className="h-5 w-5 text-primary" />
-                Proteccion de datos personales
+                Protección de datos personales
               </CardTitle>
             </CardHeader>
             <CardContent className="text-slate-600 space-y-2">
               <p>Toda la comunicacion entre tu navegador y nuestros servidores viaja cifrada con SSL/TLS.</p>
-              <p>Las contrasenas se almacenan con hash bcrypt — nunca en texto plano.</p>
-              <p>Cumplimos con la Ley 25.326 de Proteccion de Datos Personales de Argentina.</p>
+              <p>Las contraseñas se almacenan con hash bcrypt — nunca en texto plano.</p>
+              <p>Cumplimos con la Ley 25.326 de Protección de Datos Personales de Argentina.</p>
             </CardContent>
           </Card>
 
@@ -44,13 +44,13 @@ export default function Seguridad() {
             <CardHeader>
               <CardTitle className="flex items-center gap-3">
                 <UserCheck className="h-5 w-5 text-primary" />
-                Verificacion de profesionales
+                Verificación de profesionales
               </CardTitle>
             </CardHeader>
             <CardContent className="text-slate-600 space-y-2">
-              <p>Los profesionales pueden solicitar verificacion de identidad enviando su documentacion al equipo de ServiciosHogar.</p>
+              <p>Los profesionales pueden solicitar verificación de identidad enviando su documentacion al equipo de ServiciosHogar.</p>
               <p>Los perfiles verificados muestran un distintivo visible en su perfil publico.</p>
-              <p>La verificacion es voluntaria — te recomendamos preferir profesionales verificados.</p>
+              <p>La verificación es voluntaria — te recomendamos preferir profesionales verificados.</p>
             </CardContent>
           </Card>
 
@@ -58,11 +58,11 @@ export default function Seguridad() {
             <CardHeader>
               <CardTitle className="flex items-center gap-3">
                 <CreditCard className="h-5 w-5 text-primary" />
-                Pagos seguros via Mercado Pago
+                Pagos seguros vía Mercado Pago
               </CardTitle>
             </CardHeader>
             <CardContent className="text-slate-600 space-y-2">
-              <p>Los profesionales compran creditos a traves de Mercado Pago. ServiciosHogar no almacena datos de tarjetas.</p>
+              <p>Los profesionales compran créditos a través de Mercado Pago. ServiciosHogar no almacena datos de tarjetas.</p>
               <p>El pago por el servicio contratado se acuerda directamente entre el cliente y el profesional — la plataforma no intermedia esa transaccion.</p>
             </CardContent>
           </Card>
@@ -81,8 +81,8 @@ export default function Seguridad() {
                 <h3 className="font-semibold mb-4">Para clientes</h3>
                 <ul className="space-y-3 text-sm text-slate-600">
                   <li className="flex gap-2"><Shield className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />Revisa el perfil y calificaciones del profesional antes de contratarlo.</li>
-                  <li className="flex gap-2"><Shield className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />Preferi profesionales con el distintivo de verificado.</li>
-                  <li className="flex gap-2"><Shield className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />Acorda precio y condiciones antes de que el profesional comience el trabajo.</li>
+                  <li className="flex gap-2"><Shield className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />Preferí profesionales con el distintivo de verificado.</li>
+                  <li className="flex gap-2"><Shield className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />Acordá precio y condiciones antes de que el profesional comience el trabajo.</li>
                   <li className="flex gap-2"><Shield className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />Reporta cualquier comportamiento sospechoso desde el formulario de contacto.</li>
                 </ul>
               </div>

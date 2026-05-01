@@ -179,34 +179,34 @@ export default function Contacto() {
                 <CardContent className="p-6">
                   <h3 className="font-semibold mb-2">¿Cómo verifican a los profesionales?</h3>
                   <p className="text-slate-600 text-sm">
-                    Todos pasan por verificación de identidad, antecedentes y certificaciones profesionales.
+                    La verificación de identidad es voluntaria. Los profesionales que la solicitan envían su documentación al equipo de ServiciosHogar y, si es aprobada, obtienen un distintivo visible en su perfil.
                   </p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardContent className="p-6">
-                  <h3 className="font-semibold mb-2">¿Qué métodos de pago aceptan?</h3>
+                  <h3 className="font-semibold mb-2">¿Cómo se paga el servicio?</h3>
                   <p className="text-slate-600 text-sm">
-                    Mercado Pago, transferencia bancaria y efectivo directo al profesional.
+                    El precio y la forma de pago se acuerdan directamente entre el cliente y el profesional. La plataforma no intermedia el cobro del servicio.
                   </p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardContent className="p-6">
-                  <h3 className="font-semibold mb-2">¿Hay garantía en los servicios?</h3>
+                  <h3 className="font-semibold mb-2">¿ServiciosHogar garantiza los trabajos?</h3>
                   <p className="text-slate-600 text-sm">
-                    Sí, ofrecemos garantía de satisfacción y mediación en caso de problemas.
+                    No. ServiciosHogar es una plataforma de intermediación y no asume responsabilidad por los servicios prestados. Te recomendamos revisar el perfil y calificaciones del profesional antes de contratar.
                   </p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardContent className="p-6">
-                  <h3 className="font-semibold mb-2">¿Puedo cancelar un servicio?</h3>
+                  <h3 className="font-semibold mb-2">¿Qué hago si tuve un problema?</h3>
                   <p className="text-slate-600 text-sm">
-                    Sí, puedes cancelar hasta 24 horas antes sin costo adicional.
+                    Podés reportar cualquier inconveniente desde el formulario de contacto. Revisamos todos los reportes y tomamos las medidas que correspondan.
                   </p>
                 </CardContent>
               </Card>
