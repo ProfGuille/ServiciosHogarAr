@@ -4,6 +4,7 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { RegistrationForm } from "@/components/auth/registration-form";
 import { useToast } from "@/hooks/use-toast";
+import { getApiUrl } from "@/lib/api";
 import { Toaster } from "@/components/ui/toaster";
 
 interface RegistrationData {
@@ -31,7 +32,7 @@ export default function Register() {
     setIsLoading(true);
     
     try {
-      const response = await fetch('/api/users/register', {
+      const response = await fetch(`${getApiUrl()}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
