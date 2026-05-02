@@ -6,7 +6,7 @@ import { Footer } from "@/components/layout/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, CreditCard, Users, Unlock } from "lucide-react";
+import { CheckCircle, CreditCard, Users, Unlock, Building2 } from "lucide-react";
 import { getApiUrl } from "@/lib/api";
 
 interface CreditPackage {
@@ -169,7 +169,21 @@ export default function Precios() {
           </CardContent>
         </Card>
 
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Building2 className="h-5 w-5 text-primary" />
+              Pago por transferencia bancaria
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-slate-600 text-sm">
+            <p>Si preferís pagar por transferencia bancaria, podés contactarnos y te enviamos los datos.</p>
+            <p>
+              <a href="/contacto" className="underline font-medium text-primary">Escribinos</a> indicando el paquete que querés y te coordinamos el pago manual.
+            </p>
+          </CardContent>
+        </Card>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
           <p className="text-blue-800 text-sm">
             ¿Tenés preguntas sobre el modelo de precios?{" "}
             <a href="/contacto" className="underline font-medium">Escribinos</a>.
