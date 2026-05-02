@@ -241,6 +241,46 @@ router.get("/me", requireAuth, async (req: any, res: Response) => {
   }
 });
 
+
+// -----------------------------
+// PATCH /profile — editar nombre/apellido
+// -----------------------------
+router.patch("/profile", requireAuth, async (req: any, res: Response) => {
+  try {
+    const { firstName, lastName } = req.body;
+    if (!firstName?.trim() || !lastName?.trim()) {
+      return res.status(400).json({ error: "Nombre y apellido son requeridos" });
+    }
+    await db.update(users)
+      .set({ firstName: firstName.trim(), lastName: lastName.trim() })
+      .where(eq(users.id, req.user.id));
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("Error en PATCH /profile:", err);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+});
+
+
+// -----------------------------
+// PATCH /profile — editar nombre/apellido
+// -----------------------------
+router.patch("/profile", requireAuth, async (req: any, res: Response) => {
+  try {
+    const { firstName, lastName } = req.body;
+    if (!firstName?.trim() || !lastName?.trim()) {
+      return res.status(400).json({ error: "Nombre y apellido son requeridos" });
+    }
+    await db.update(users)
+      .set({ firstName: firstName.trim(), lastName: lastName.trim() })
+      .where(eq(users.id, req.user.id));
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("Error en PATCH /profile:", err);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+});
+
 // -----------------------------
 // REFRESH TOKEN
 // -----------------------------
