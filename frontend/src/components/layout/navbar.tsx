@@ -184,6 +184,17 @@ export function Navbar() {
                   </Button>
                 </Link>
               )}
+              {isAuthenticated && user?.userType === 'provider' && (
+                <Link href="/perfil">
+                  <Button 
+                    variant={isActive("/perfil") ? "default" : "ghost"}
+                    className="flex items-center space-x-2"
+                  >
+                    <User className="h-4 w-4" />
+                    <span>{"Mi Cuenta"}</span>
+                  </Button>
+                </Link>
+              )}
 
               {/* Admin link - solo para admins */}
               {isAuthenticated && user?.userType === 'admin' && adminLinks.map((link) => (
