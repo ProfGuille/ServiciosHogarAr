@@ -1,6 +1,11 @@
 {
   "redirects": [
     {
+      "source": "/servicios/:query*",
+      "destination": "/buscar/:query*",
+      "permanent": true
+    },
+    {
       "source": "/servicios",
       "destination": "/buscar",
       "permanent": true
