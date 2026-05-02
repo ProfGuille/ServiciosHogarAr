@@ -22,7 +22,9 @@ import {
   Mail,
   Calendar,
   ArrowLeft,
-  MessageCircle
+  MessageCircle,
+  Facebook,
+  Twitter
 } from "lucide-react";
 import { useState } from "react";
 
@@ -180,7 +182,22 @@ export default function ServiceDetail() {
               </CardContent>
             </Card>
 
-            {/* Services Offered */}
+            {/* Compartir */}
+            {provider && (
+              <div className="flex items-center gap-3 flex-wrap">
+                <span className="text-sm text-slate-500">Compartir:</span>
+                <a href={"https://wa.me/?text=${encodeURIComponent('Mir\u00e1 este profesional en ServiciosHogar: ' + provider.businessName + ' https://www.servicioshogar.com.ar/servicio/' + provider.id)}"} target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-green-600 transition-colors" title="Compartir por WhatsApp">
+                  <MessageCircle className="h-5 w-5" />
+                </a>
+                <a href={"https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://www.servicioshogar.com.ar/servicio/' + provider.id)}"} target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-blue-600 transition-colors" title="Compartir en Facebook">
+                  <Facebook className="h-5 w-5" />
+                </a>
+                <a href={"https://twitter.com/intent/tweet?url=${encodeURIComponent('https://www.servicioshogar.com.ar/servicio/' + provider.id)}&text=${encodeURIComponent('Mir\u00e1 este profesional: ' + provider.businessName)}"} target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-sky-500 transition-colors" title="Compartir en X">
+                  <Twitter className="h-5 w-5" />
+                </a>
+              </div>
+            )}
+                        {/* Services Offered */}
             {providerServices && providerServices.length > 0 && (
               <Card>
                 <CardHeader>
