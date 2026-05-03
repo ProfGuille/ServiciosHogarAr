@@ -375,11 +375,12 @@ router.post("/:id/review", async (req: any, res) => {
     `;
     if (existing) return res.status(409).json({ error: "Ya calificaste a este proveedor" });
 
-    const [review] = await neonSql`
+    const reviewResult = await neonSql`
       INSERT INTO reviews (service_request_id, reviewer_id, reviewee_id, rating, comment, is_public, created_at)
       VALUES (${serviceRequestId}, ${customerId}, ${revieweeUserId}, ${rating}, ${comment || null}, true, NOW())
       RETURNING id
-    `;
+    ` as any[];
+    const review = reviewResult[0];
 
     // Actualizar rating promedio del provider (escala 10-50 para logro "Bien Calificado")
     await neonSql`
