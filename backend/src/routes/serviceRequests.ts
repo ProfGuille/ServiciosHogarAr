@@ -24,7 +24,7 @@ router.get("/available", async (req, res) => {
     }
 
     // Filtro de fecha de corte para solicitudes visibles
-    const [startDateRow] = await neonSql`SELECT value FROM platform_settings WHERE key = 'marketplace_start_date'` as any[];
+    const [startDateRow] = (await neonSql`SELECT value FROM platform_settings WHERE key = 'marketplace_start_date'`) as any[];
     const marketplaceStartDate = startDateRow?.value || null;
 
     const unlockedLeadIds = await db
@@ -353,27 +353,27 @@ router.post("/:id/review", async (req: any, res) => {
     }
 
     // Verificar que la solicitud pertenece al customer
-    const [request] = await neonSql`
+    const requestRows = await neonSql`
       SELECT id FROM service_requests WHERE id = ${serviceRequestId} AND customer_id = ${customerId}
-    `;
-    if (!request) return res.status(403).json({ error: "Solicitud no encontrada" });
+    ` as any[];
+    if (!requestRows[0]) return res.status(403).json({ error: "Solicitud no encontrada" });
 
     // Verificar que el provider desbloqueó esta solicitud
-    const [unlock] = await neonSql`
+    const unlockRows = await neonSql`
       SELECT lr.id FROM lead_responses lr
       JOIN service_providers sp ON sp.id = lr.provider_id
       WHERE lr.service_request_id = ${serviceRequestId} AND sp.user_id = ${revieweeUserId}
-    `;
-    if (!unlock) return res.status(403).json({ error: "El proveedor no desbloqueó esta solicitud" });
+    ` as any[];
+    if (!unlockRows[0]) return res.status(403).json({ error: "El proveedor no desbloqueó esta solicitud" });
 
     // Verificar duplicado
-    const [existing] = await neonSql`
+    const existingRows = await neonSql`
       SELECT id FROM reviews
       WHERE service_request_id = ${serviceRequestId}
         AND reviewer_id = ${customerId}
         AND reviewee_id = ${revieweeUserId}
-    `;
-    if (existing) return res.status(409).json({ error: "Ya calificaste a este proveedor" });
+    ` as any[];
+    if (existingRows[0]) return res.status(409).json({ error: "Ya calificaste a este proveedor" });
 
     const reviewResult = await neonSql`
       INSERT INTO reviews (service_request_id, reviewer_id, reviewee_id, rating, comment, is_public, created_at)
@@ -381,6 +381,112 @@ router.post("/:id/review", async (req: any, res) => {
       RETURNING id
     ` as any[];
     const review = reviewResult[0];
+
+    // Actualizar rating promedio del provider (escala 10-50 para logro "Bien Calificado")
+    await neonSql`
+      UPDATE service_providers
+      SET rating = (
+        SELECT ROUND(AVG(r.rating) * 10)
+        FROM reviews r
+        WHERE r.reviewee_id = ${revieweeUserId} AND r.is_public = true
+      )
+      WHERE user_id = ${revieweeUserId}
+    `;
+
+    res.json({ success: true, reviewId: review.id });
+  } catch (err) {
+    console.error("Error POST review:", err);
+    res.status(500).json({ error: "Error al guardar calificación" });
+  }
+});
+
+
+// GET /my — solicitudes del customer autenticado con providers que desbloquearon
+router.get("/my", async (req: any, res) => {
+  try {
+    if (!req.user) return res.status(401).json({ error: "No autenticado" });
+    const customerId = req.user.id;
+    const rows = await neonSql`
+      SELECT
+        sr.id, sr.title, sr.description, sr.city, sr.province, sr.status,
+        sr.created_at, sr.is_urgent, sr.preferred_date, sr.category_id,
+        COALESCE(
+          json_agg(DISTINCT jsonb_build_object(
+            'providerId', sp.id,
+            'userId', sp.user_id,
+            'firstName', u.first_name,
+            'lastName', u.last_name,
+            'profileImage', sp.profile_image_url,
+            'unlockedAt', lr.unlocked_at
+          )) FILTER (WHERE sp.id IS NOT NULL), '[]'
+        ) AS providers,
+        COALESCE(
+          json_agg(DISTINCT jsonb_build_object(
+            'revieweeId', rv.reviewee_id,
+            'rating', rv.rating,
+            'comment', rv.comment
+          )) FILTER (WHERE rv.id IS NOT NULL), '[]'
+        ) AS reviews
+      FROM service_requests sr
+      LEFT JOIN lead_responses lr ON lr.service_request_id = sr.id
+      LEFT JOIN service_providers sp ON sp.id = lr.provider_id
+      LEFT JOIN users u ON u.id = sp.user_id
+      LEFT JOIN reviews rv ON rv.service_request_id = sr.id AND rv.reviewer_id = ${customerId}
+      WHERE sr.customer_id = ${customerId}
+      GROUP BY sr.id
+      ORDER BY sr.created_at DESC
+    `;
+    res.json(rows);
+  } catch (err) {
+    console.error("Error /my:", err);
+    res.status(500).json({ error: "Error al obtener solicitudes" });
+  }
+});
+
+// POST /:id/review — customer califica un provider que desbloqueó su solicitud
+router.post("/:id/review", async (req: any, res) => {
+  try {
+    if (!req.user) return res.status(401).json({ error: "No autenticado" });
+    const customerId = req.user.id;
+    const serviceRequestId = parseInt(req.params.id);
+    const { revieweeUserId, rating, comment } = req.body;
+
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ error: "Rating debe ser entre 1 y 5" });
+    }
+
+    // Verificar que la solicitud pertenece al customer
+    const requestRows = (await neonSql`
+      SELECT id FROM service_requests WHERE id = ${serviceRequestId} AND customer_id = ${customerId}
+    ` as any[]);
+    const request = requestRows[0];
+    if (!request) return res.status(403).json({ error: "Solicitud no encontrada" });
+
+    // Verificar que el provider desbloqueó esta solicitud
+    const unlockRows = (await neonSql`
+      SELECT lr.id FROM lead_responses lr
+      JOIN service_providers sp ON sp.id = lr.provider_id
+      WHERE lr.service_request_id = ${serviceRequestId} AND sp.user_id = ${revieweeUserId}
+    ` as any[]);
+    const unlock = unlockRows[0];
+    if (!unlock) return res.status(403).json({ error: "El proveedor no desbloqueó esta solicitud" });
+
+    // Verificar duplicado
+    const existingRows = (await neonSql`
+      SELECT id FROM reviews
+      WHERE service_request_id = ${serviceRequestId}
+        AND reviewer_id = ${customerId}
+        AND reviewee_id = ${revieweeUserId}
+    ` as any[]);
+    const existing = existingRows[0];
+    if (existing) return res.status(409).json({ error: "Ya calificaste a este proveedor" });
+
+    const reviewRows = (await neonSql`
+      INSERT INTO reviews (service_request_id, reviewer_id, reviewee_id, rating, comment, is_public, created_at)
+      VALUES (${serviceRequestId}, ${customerId}, ${revieweeUserId}, ${rating}, ${comment || null}, true, NOW())
+      RETURNING id
+    ` as any[]);
+    const review = reviewRows[0];
 
     // Actualizar rating promedio del provider (escala 10-50 para logro "Bien Calificado")
     await neonSql`
