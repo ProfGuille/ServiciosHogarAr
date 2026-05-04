@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { requireAuth } from "../middleware/auth.js";
 import { checkAndGrantAchievements } from "./achievements.js";
 import { db, sql as neonSql } from "../db.js";
 import { 
@@ -299,7 +300,7 @@ router.get("/unlocked", async (req, res) => {
 
 
 // GET /my — solicitudes del customer autenticado con providers que desbloquearon
-router.get("/my", async (req: any, res) => {
+router.get("/my", requireAuth, async (req: any, res) => {
   try {
     if (!req.user) return res.status(401).json({ error: "No autenticado" });
     const customerId = req.user.id;
@@ -401,47 +402,6 @@ router.post("/:id/review", async (req: any, res) => {
 });
 
 
-// GET /my — solicitudes del customer autenticado con providers que desbloquearon
-router.get("/my", async (req: any, res) => {
-  try {
-    if (!req.user) return res.status(401).json({ error: "No autenticado" });
-    const customerId = req.user.id;
-    const rows = await neonSql`
-      SELECT
-        sr.id, sr.title, sr.description, sr.city, sr.province, sr.status,
-        sr.created_at, sr.is_urgent, sr.preferred_date, sr.category_id,
-        COALESCE(
-          json_agg(DISTINCT jsonb_build_object(
-            'providerId', sp.id,
-            'userId', sp.user_id,
-            'firstName', u.first_name,
-            'lastName', u.last_name,
-            'profileImage', sp.profile_image_url,
-            'unlockedAt', lr.unlocked_at
-          )) FILTER (WHERE sp.id IS NOT NULL), '[]'
-        ) AS providers,
-        COALESCE(
-          json_agg(DISTINCT jsonb_build_object(
-            'revieweeId', rv.reviewee_id,
-            'rating', rv.rating,
-            'comment', rv.comment
-          )) FILTER (WHERE rv.id IS NOT NULL), '[]'
-        ) AS reviews
-      FROM service_requests sr
-      LEFT JOIN lead_responses lr ON lr.service_request_id = sr.id
-      LEFT JOIN service_providers sp ON sp.id = lr.provider_id
-      LEFT JOIN users u ON u.id = sp.user_id
-      LEFT JOIN reviews rv ON rv.service_request_id = sr.id AND rv.reviewer_id = ${customerId}
-      WHERE sr.customer_id = ${customerId}
-      GROUP BY sr.id
-      ORDER BY sr.created_at DESC
-    `;
-    res.json(rows);
-  } catch (err) {
-    console.error("Error /my:", err);
-    res.status(500).json({ error: "Error al obtener solicitudes" });
-  }
-});
 
 // POST /:id/review — customer califica un provider que desbloqueó su solicitud
 router.post("/:id/review", async (req: any, res) => {
