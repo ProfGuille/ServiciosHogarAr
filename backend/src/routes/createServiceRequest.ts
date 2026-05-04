@@ -29,7 +29,7 @@ router.post("/", createRequestLimiter, async (req, res) => {
         if (decoded.role === "provider") {
           return res.status(403).json({ error: "Los proveedores no pueden crear solicitudes" });
         }
-        customerId = decoded.id || null;
+        customerId = decoded.userId || null;
       } catch (_) {}
     }
     const {
