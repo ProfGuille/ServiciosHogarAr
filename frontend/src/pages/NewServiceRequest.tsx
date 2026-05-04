@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getApiUrl } from '@/lib/api';
+import { getAuthHeaders } from '@/lib/auth';
 
 export default function NewServiceRequest() {
   const [loading, setLoading] = useState(false);
@@ -105,7 +106,7 @@ export default function NewServiceRequest() {
     try {
       const response = await fetch(getApiUrl('/api/service-requests'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() as Record<string, string> },
         body: JSON.stringify(requestData),
       });
 

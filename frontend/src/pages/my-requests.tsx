@@ -10,7 +10,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Clock, CheckCircle, XCircle, AlertCircle, MapPin, Calendar, DollarSign, Plus, Star, User } from "lucide-react";
+import {
+  Clock,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  MapPin,
+  Calendar,
+  DollarSign,
+  Plus,
+  Star,
+  User,
+} from "lucide-react";
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-800",
@@ -21,12 +32,20 @@ const statusColors: Record<string, string> = {
   cancelled: "bg-red-100 text-red-800",
 };
 const statusIcons: Record<string, any> = {
-  pending: Clock, quoted: DollarSign, accepted: CheckCircle,
-  in_progress: Clock, completed: CheckCircle, cancelled: XCircle,
+  pending: Clock,
+  quoted: DollarSign,
+  accepted: CheckCircle,
+  in_progress: Clock,
+  completed: CheckCircle,
+  cancelled: XCircle,
 };
 const statusLabels: Record<string, string> = {
-  pending: "Pendiente", quoted: "Cotizado", accepted: "Aceptado",
-  in_progress: "En progreso", completed: "Completado", cancelled: "Cancelado",
+  pending: "Pendiente",
+  quoted: "Cotizado",
+  accepted: "Aceptado",
+  in_progress: "En progreso",
+  completed: "Completado",
+  cancelled: "Cancelado",
 };
 
 interface Provider {
@@ -60,20 +79,31 @@ function StarRating({ value, onChange }: { value: number; onChange: (v: number) 
   return (
     <div className="flex gap-1">
       {[1, 2, 3, 4, 5].map((star) => (
-        <button key={star} type="button"
+        <button
+          key={star}
+          type="button"
           onClick={() => onChange(star)}
           onMouseEnter={() => setHover(star)}
           onMouseLeave={() => setHover(0)}
-          className="focus:outline-none">
-          <Star className={"h-6 w-6 transition-colors " + ((hover || value) >= star ? "fill-yellow-400 text-yellow-400" : "text-slate-300")} />
+          className="focus:outline-none"
+        >
+          <Star
+            className={"h-6 w-6 transition-colors " + ((hover || value) >= star ? "fill-yellow-400 text-yellow-400" : "text-slate-300")}
+          />
         </button>
       ))}
     </div>
   );
 }
 
-function ProviderRatingSection({ requestId, providers, reviews }: {
-  requestId: number; providers: Provider[]; reviews: Review[];
+function ProviderRatingSection({
+  requestId,
+  providers,
+  reviews,
+}: {
+  requestId: number;
+  providers: Provider[];
+  reviews: Review[];
 }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -82,21 +112,28 @@ function ProviderRatingSection({ requestId, providers, reviews }: {
 
   if (!providers || providers.length === 0) return null;
 
-  const getExisting = (userId: string) => reviews?.find((r) => r.revieweeId === userId) ?? null;
+  const getExistingReview = (userId: string) =>
+    reviews?.find((r) => r.revieweeId === userId) ?? null;
 
   const handleSubmit = async (provider: Provider) => {
     const rating = ratings[provider.userId];
-    if (!rating) { toast({ title: "Seleccioná una calificación", variant: "destructive" }); return; }
+    if (!rating) {
+      toast({ title: "Seleccioná una calificación", variant: "destructive" });
+      return;
+    }
     setSubmitting(provider.userId);
     try {
       const res = await fetch(
         getApiUrl() + "/api/service-requests/" + requestId + "/review",
-        { method: "POST", headers: { "Content-Type": "application/json", ...getAuthHeaders() as Record<string, string> },
-          body: JSON.stringify({ revieweeUserId: provider.userId, rating }) }
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+          body: JSON.stringify({ revieweeUserId: provider.userId, rating }),
+        }
       );
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error al calificar");
-      toast({ title: "Calificación enviada", description: "Gracias por tu opinión." });
+      toast({ title: "¡Calificación enviada!", description: "Gracias por tu opinión." });
       queryClient.invalidateQueries({ queryKey: ["/api/service-requests/my"] });
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -112,31 +149,43 @@ function ProviderRatingSection({ requestId, providers, reviews }: {
       </p>
       <div className="space-y-3">
         {providers.map((provider) => {
-          const existing = getExisting(provider.userId);
+          const existing = getExistingReview(provider.userId);
           return (
             <div key={provider.userId} className="flex items-center justify-between gap-4 bg-slate-50 rounded-lg p-3">
               <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-slate-200 flex items-center justify-center overflow-hidden">
-                  {provider.profileImage
-                    ? <img src={provider.profileImage} alt="" className="h-8 w-8 object-cover" />
-                    : <User className="h-4 w-4 text-slate-500" />}
+                <div className="h-8 w-8 rounded-full bg-slate-200 flex items-center justify-center">
+                  {provider.profileImage ? (
+                    <img src={provider.profileImage} alt="" className="h-8 w-8 rounded-full object-cover" />
+                  ) : (
+                    <User className="h-4 w-4 text-slate-500" />
+                  )}
                 </div>
-                <span className="text-sm font-medium text-slate-800">{provider.firstName} {provider.lastName}</span>
+                <span className="text-sm font-medium text-slate-800">
+                  {provider.firstName} {provider.lastName}
+                </span>
               </div>
               {existing ? (
                 <div className="flex items-center gap-1">
-                  {[1,2,3,4,5].map((s) => (
-                    <Star key={s} className={"h-4 w-4 " + (existing.rating >= s ? "fill-yellow-400 text-yellow-400" : "text-slate-300")} />
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <Star
+                      key={s}
+                      className={"h-4 w-4 " + (existing.rating >= s ? "fill-yellow-400 text-yellow-400" : "text-slate-300")}
+                    />
                   ))}
                   <span className="text-xs text-slate-500 ml-1">Calificado</span>
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  <StarRating value={ratings[provider.userId] || 0}
-                    onChange={(v) => setRatings((prev) => ({ ...prev, [provider.userId]: v }))} />
-                  <Button size="sm" variant="outline"
+                  <StarRating
+                    value={ratings[provider.userId] || 0}
+                    onChange={(v) => setRatings((prev) => ({ ...prev, [provider.userId]: v }))}
+                  />
+                  <Button
+                    size="sm"
+                    variant="outline"
                     disabled={submitting === provider.userId || !ratings[provider.userId]}
-                    onClick={() => handleSubmit(provider)}>
+                    onClick={() => handleSubmit(provider)}
+                  >
                     {submitting === provider.userId ? "..." : "Calificar"}
                   </Button>
                 </div>
@@ -150,7 +199,7 @@ function ProviderRatingSection({ requestId, providers, reviews }: {
 }
 
 export default function MyRequests() {
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -172,7 +221,7 @@ export default function MyRequests() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <Skeleton className="h-10 w-48 mb-8" />
           <div className="space-y-4">
-            {[1,2,3].map((i) => <Skeleton key={i} className="h-32 w-full" />)}
+            {[1, 2, 3].map((i) => <Skeleton key={i} className="h-32 w-full" />)}
           </div>
         </div>
         <Footer />
@@ -189,7 +238,8 @@ export default function MyRequests() {
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold text-slate-900">Mis Solicitudes</h1>
           <Button onClick={() => window.location.href = "/nueva-solicitud"}>
-            <Plus className="h-4 w-4 mr-2" />Nueva solicitud
+            <Plus className="h-4 w-4 mr-2" />
+            Nueva solicitud
           </Button>
         </div>
 
@@ -200,7 +250,8 @@ export default function MyRequests() {
               <h3 className="text-xl font-semibold text-slate-900 mb-2">No tenés solicitudes aún</h3>
               <p className="text-slate-600 mb-6">Creá tu primera solicitud para conectar con profesionales verificados.</p>
               <Button onClick={() => window.location.href = "/nueva-solicitud"}>
-                <Plus className="h-4 w-4 mr-2" />Crear primera solicitud
+                <Plus className="h-4 w-4 mr-2" />
+                Crear primera solicitud
               </Button>
             </CardContent>
           </Card>
@@ -225,7 +276,8 @@ export default function MyRequests() {
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                       <div className="flex items-center text-slate-600">
-                        <MapPin className="w-4 h-4 mr-2" />{request.city}
+                        <MapPin className="w-4 h-4 mr-2" />
+                        {request.city}
                       </div>
                       <div className="flex items-center text-slate-600">
                         <Calendar className="w-4 h-4 mr-2" />
@@ -245,7 +297,11 @@ export default function MyRequests() {
                         <Badge variant="destructive" className="text-xs">Urgente</Badge>
                       </div>
                     )}
-                    <ProviderRatingSection requestId={request.id} providers={request.providers} reviews={request.reviews} />
+                    <ProviderRatingSection
+                      requestId={request.id}
+                      providers={request.providers}
+                      reviews={request.reviews}
+                    />
                   </CardContent>
                 </Card>
               );
@@ -254,7 +310,9 @@ export default function MyRequests() {
         )}
 
         <Card className="mt-8">
-          <CardHeader><CardTitle className="text-lg">¿Cómo funciona?</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-lg">¿Cómo funciona?</CardTitle>
+          </CardHeader>
           <CardContent className="space-y-2 text-sm text-slate-600">
             <p><strong>1.</strong> Creá una solicitud detallada del servicio que necesitás</p>
             <p><strong>2.</strong> Los profesionales verificados verán tu solicitud</p>
