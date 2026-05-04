@@ -22,12 +22,14 @@ const createRequestLimiter = rateLimit({
 router.post("/", createRequestLimiter, async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
+    let customerId: string | null = null;
     if (authHeader && authHeader.startsWith("Bearer ")) {
       try {
         const decoded = jwt.verify(authHeader.slice(7), JWT_SECRET) as any;
         if (decoded.role === "provider") {
           return res.status(403).json({ error: "Los proveedores no pueden crear solicitudes" });
         }
+        customerId = decoded.id || null;
       } catch (_) {}
     }
     const {
@@ -66,6 +68,7 @@ router.post("/", createRequestLimiter, async (req, res) => {
         customerEmail: customerEmail || null,
         preferredDate: preferredDate ? new Date(preferredDate) : null,
         isUrgent: isUrgent || false,
+        customerId: customerId,
         status: 'pending',
       })
       .returning();
