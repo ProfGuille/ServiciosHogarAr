@@ -42,12 +42,12 @@ export const providersService = {
 
     const allowedFields = [
       "businessName",
-      "businessDescription",
+      "description",
       "hourlyRate",
       "experienceYears",
       "city",
       "province",
-      "phone",
+      "phoneNumber",
       "coverageRadiusKm",
     ];
 
@@ -76,8 +76,8 @@ export const providersService = {
       throw new Error("businessName debe ser string");
     }
 
-    if (safeData.businessDescription !== undefined && typeof safeData.businessDescription !== "string") {
-      throw new Error("businessDescription debe ser string");
+if (safeData.description !== undefined && typeof safeData.description !== "string") {
+      throw new Error("description debe ser string");
     }
 
     if (safeData.city !== undefined && typeof safeData.city !== "string") {
@@ -88,8 +88,8 @@ export const providersService = {
       throw new Error("province debe ser string");
     }
 
-    if (safeData.phone !== undefined && typeof safeData.phone !== "string") {
-      throw new Error("phone debe ser string");
+if (safeData.phoneNumber !== undefined && typeof safeData.phoneNumber !== "string") {
+      throw new Error("phoneNumber debe ser string");
     }
 
     if (Object.keys(safeData).length === 0) {
@@ -112,12 +112,12 @@ export const providersService = {
     const current = ((currentRows as any).rows || currentRows)[0] || {};
     const fieldMap: Record<string, string> = {
       businessName: "business_name",
-      businessDescription: "description",
+      description: "description",
       hourlyRate: "hourly_rate",
       experienceYears: "experience_years",
       city: "city",
       province: "province",
-      phone: "phone_number",
+      phoneNumber: "phone_number",
     };
     const [updated] = await db
       .update(serviceProviders)

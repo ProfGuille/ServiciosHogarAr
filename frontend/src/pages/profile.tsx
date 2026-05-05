@@ -160,19 +160,6 @@ export default function Profile() {
           </div>
         </div>
         
-        {/* Achievement Section */}
-        {user.userType === 'provider' && <div className="mt-2 space-y-4">
-          <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-            <Trophy className="h-6 w-6 text-yellow-500" />
-            Mis Logros
-          </h2>
-          <Card>
-            <CardContent className="p-0 pt-6">
-              <AchievementGallery userId={user.id} />
-            </CardContent>
-          </Card>
-        </div>}
-
         {/* Referral Section */}
         <div className="mt-8 space-y-4">
           <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
@@ -184,6 +171,19 @@ export default function Profile() {
             <ReferralHistory />
           </div>
         </div>
+
+        {/* Achievement Section */}
+        {user.userType === 'provider' && <div className="mt-8 space-y-4">
+          <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+            <Trophy className="h-6 w-6 text-yellow-500" />
+            Mis Logros
+          </h2>
+          <Card>
+            <CardContent className="p-0 pt-6">
+              <AchievementGallery userId={user.id} />
+            </CardContent>
+          </Card>
+        </div>}
       </div>
       
       <Footer />

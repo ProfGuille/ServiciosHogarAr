@@ -255,9 +255,9 @@ export default function ProviderDashboard() {
         },
         body: JSON.stringify({
           businessName: profileForm.businessName,
-          businessDescription: profileForm.description,
+          description: profileForm.description,
           hourlyRate: profileForm.hourlyRate ? Number(profileForm.hourlyRate) : undefined,
-          phone: profileForm.phone,
+          phoneNumber: profileForm.phone,
         }),
       });
       if (!res.ok) throw new Error("Error al guardar");

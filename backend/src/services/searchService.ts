@@ -68,6 +68,17 @@ export const searchService = {
       );
     }
 
+    // CATEGORIES FILTER — frontend envía ?categories=1,2,3
+    const categoriesParam = (query as any).categories as string;
+    if (categoriesParam && !categoryId) {
+      const ids = categoriesParam.split(',').map(Number).filter((n: number) => !isNaN(n) && n > 0);
+      if (ids.length > 0) {
+        conditions.push(
+          sql`${serviceProviders.id} IN (SELECT provider_id FROM provider_services WHERE category_id = ANY(ARRAY[${sql.raw(ids.join(','))}]::int[]) AND is_active = true)` as SQL
+        );
+      }
+    }
+
     // LOCATION FILTERS
     if (city) conditions.push(ilike(serviceProviders.city, `%${city}%`));
     if (province) conditions.push(ilike(serviceProviders.province, `%${province}%`));
