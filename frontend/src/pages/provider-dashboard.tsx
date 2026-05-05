@@ -306,13 +306,15 @@ export default function ProviderDashboard() {
 
   const getWhatsAppLink = (phone: string, leadTitle: string) => {
     const message = encodeURIComponent(`Hola! Vi tu solicitud de "${leadTitle}" en ServiciosHogar. Me gustaría enviarte un presupuesto.`);
-    return `https://wa.me/54${phone.replace(/\D/g, "")}?text=${message}`;
+    const waDigits = phone.replace(/\D/g, "").replace(/^54/, "");
+    return `https://wa.me/54${waDigits}?text=${message}`;
   };
 
   const getTelegramLink = (phone: string) => {
     // Telegram usa el número sin el código de país en el username
     // O se puede usar el deep link directo si conocemos el username
-    return `https://t.me/+54${phone.replace(/\D/g, "")}`;
+    const tgDigits = phone.replace(/\D/g, "").replace(/^54/, "");
+    return `https://t.me/+54${tgDigits}`;
   };
 
   return (

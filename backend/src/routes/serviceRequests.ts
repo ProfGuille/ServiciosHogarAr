@@ -267,7 +267,8 @@ router.get("/unlocked", async (req, res) => {
         status: serviceRequests.status,
         createdAt: serviceRequests.createdAt,
         unlockedAt: leadResponses.unlockedAt,
-        creditsSpent: leadResponses.creditsSpent
+        creditsSpent: leadResponses.creditsSpent,
+        hasAccount: sql<boolean>`(${serviceRequests.customerId} IS NOT NULL)`
       })
       .from(leadResponses)
       .innerJoin(serviceRequests, eq(leadResponses.serviceRequestId, serviceRequests.id))
@@ -342,7 +343,7 @@ router.get("/my", requireAuth, async (req: any, res) => {
 });
 
 // POST /:id/review — customer califica un provider que desbloqueó su solicitud
-router.post("/:id/review", async (req: any, res) => {
+router.post("/:id/review", requireAuth, async (req: any, res) => {
   try {
     if (!req.user) return res.status(401).json({ error: "No autenticado" });
     const customerId = req.user.id;

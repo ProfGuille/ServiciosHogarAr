@@ -109,6 +109,7 @@ function ProviderRatingSection({
   const queryClient = useQueryClient();
   const [ratings, setRatings] = useState<Record<string, number>>({});
   const [submitting, setSubmitting] = useState<string | null>(null);
+  const [comments, setComments] = useState<Record<string, string>>({});
 
   if (!providers || providers.length === 0) return null;
 
@@ -128,7 +129,7 @@ function ProviderRatingSection({
         {
           method: "POST",
           headers: { "Content-Type": "application/json", ...getAuthHeaders() },
-          body: JSON.stringify({ revieweeUserId: provider.userId, rating }),
+          body: JSON.stringify({ revieweeUserId: provider.userId, rating, comment: comments[provider.userId] || null }),
         }
       );
       const data = await res.json();
@@ -151,7 +152,7 @@ function ProviderRatingSection({
         {providers.map((provider) => {
           const existing = getExistingReview(provider.userId);
           return (
-            <div key={provider.userId} className="flex items-center justify-between gap-4 bg-slate-50 rounded-lg p-3">
+            <div key={provider.userId} className="flex items-start justify-between gap-4 bg-slate-50 rounded-lg p-3">
               <div className="flex items-center gap-2">
                 <div className="h-8 w-8 rounded-full bg-slate-200 flex items-center justify-center">
                   {provider.profileImage ? (
@@ -165,29 +166,42 @@ function ProviderRatingSection({
                 </span>
               </div>
               {existing ? (
-                <div className="flex items-center gap-1">
-                  {[1, 2, 3, 4, 5].map((s) => (
-                    <Star
-                      key={s}
-                      className={"h-4 w-4 " + (existing.rating >= s ? "fill-yellow-400 text-yellow-400" : "text-slate-300")}
-                    />
-                  ))}
-                  <span className="text-xs text-slate-500 ml-1">Calificado</span>
+                <div className="flex flex-col items-end gap-1">
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Star
+                        key={s}
+                        className={"h-4 w-4 " + (existing.rating >= s ? "fill-yellow-400 text-yellow-400" : "text-slate-300")}
+                      />
+                    ))}
+                    <span className="text-xs text-slate-500 ml-1">Calificado</span>
+                  </div>
+                  {existing.comment && <p className="text-xs text-slate-500 italic text-right max-w-xs">{existing.comment}</p>}
                 </div>
               ) : (
-                <div className="flex items-center gap-2">
-                  <StarRating
-                    value={ratings[provider.userId] || 0}
-                    onChange={(v) => setRatings((prev) => ({ ...prev, [provider.userId]: v }))}
+                <div className="flex flex-col items-end gap-2">
+                  <div className="flex items-center gap-2">
+                    <StarRating
+                      value={ratings[provider.userId] || 0}
+                      onChange={(v) => setRatings((prev) => ({ ...prev, [provider.userId]: v }))}
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={submitting === provider.userId || !ratings[provider.userId]}
+                      onClick={() => handleSubmit(provider)}
+                    >
+                      {submitting === provider.userId ? "..." : "Calificar"}
+                    </Button>
+                  </div>
+                  <textarea
+                    className="text-xs border border-slate-200 rounded p-2 w-48 text-slate-600 resize-none focus:outline-none focus:ring-1 focus:ring-slate-400"
+                    placeholder="Comentario (opcional)"
+                    rows={2}
+                    maxLength={200}
+                    value={comments[provider.userId] || ""}
+                    onChange={(e) => setComments((prev) => ({ ...prev, [provider.userId]: e.target.value }))}
                   />
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={submitting === provider.userId || !ratings[provider.userId]}
-                    onClick={() => handleSubmit(provider)}
-                  >
-                    {submitting === provider.userId ? "..." : "Calificar"}
-                  </Button>
                 </div>
               )}
             </div>
