@@ -221,7 +221,7 @@ export default function Search() {
     if (filters.query) params.set('q', filters.query);
     if (filters.city) params.set('city', filters.city);
     if (filters.province) params.set('province', filters.province);
-    if (filters.categoryIds?.length) params.set('categoryIds', filters.categoryIds.join(','));
+    if (filters.categoryIds?.length) params.set('categories', filters.categoryIds.join(','));
     if (filters.minPrice !== undefined) params.set('minPrice', filters.minPrice.toString());
     if (filters.maxPrice !== undefined) params.set('maxPrice', filters.maxPrice.toString());
     if (filters.minRating !== undefined) params.set('minRating', filters.minRating.toString());
