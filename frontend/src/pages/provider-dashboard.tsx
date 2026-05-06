@@ -47,9 +47,9 @@ interface Credits {
 }
 
 
-function ClientRatingSelector({ leadId, providerId }: { leadId: number; providerId: number | null }) {
-  const [selected, setSelected] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
+function ClientRatingSelector({ leadId, providerId, existingRating }: { leadId: number; providerId: number | null; existingRating?: string | null }) {
+  const [selected, setSelected] = useState<string | null>(existingRating ?? null);
+  const [saved, setSaved] = useState(!!existingRating);
   const { mutate, isPending } = useMutation({
     mutationFn: async (rating: string) => {
       const res = await fetch(getApiUrl("/api/achievements/client-ratings"), {
@@ -508,7 +508,7 @@ export default function ProviderDashboard() {
                     <div className="text-xs text-muted-foreground text-center pt-2 border-t">
                       Desbloqueado {format(new Date(lead.unlockedAt!), "PPP 'a las' HH:mm", { locale: es })}
                     </div>
-                    <ClientRatingSelector leadId={lead.id} providerId={providerId} />
+                    <ClientRatingSelector leadId={lead.id} providerId={providerId} existingRating={lead.clientRating} />
                   </CardContent>
                 </Card>
               ))}

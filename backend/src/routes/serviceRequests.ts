@@ -49,7 +49,8 @@ router.get("/available", async (req, res) => {
         preferredDate: serviceRequests.preferredDate,
         createdAt: serviceRequests.createdAt,
         status: serviceRequests.status,
-        hasAccount: sql<boolean>`(${serviceRequests.customerId} IS NOT NULL)`
+        hasAccount: sql<boolean>`(${serviceRequests.customerId} IS NOT NULL)`,
+        clientRating: sql<string | null>`(SELECT rating FROM client_ratings WHERE provider_id = ${leadResponses.providerId} AND service_request_id = ${serviceRequests.id} LIMIT 1)`
       })
       .from(serviceRequests)
       .leftJoin(categories, eq(serviceRequests.categoryId, categories.id))
@@ -268,7 +269,8 @@ router.get("/unlocked", async (req, res) => {
         createdAt: serviceRequests.createdAt,
         unlockedAt: leadResponses.unlockedAt,
         creditsSpent: leadResponses.creditsSpent,
-        hasAccount: sql<boolean>`(${serviceRequests.customerId} IS NOT NULL)`
+        hasAccount: sql<boolean>`(${serviceRequests.customerId} IS NOT NULL)`,
+        clientRating: sql<string | null>`(SELECT rating FROM client_ratings WHERE provider_id = ${leadResponses.providerId} AND service_request_id = ${serviceRequests.id} LIMIT 1)`
       })
       .from(leadResponses)
       .innerJoin(serviceRequests, eq(leadResponses.serviceRequestId, serviceRequests.id))
