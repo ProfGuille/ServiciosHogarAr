@@ -64,7 +64,7 @@ export const searchService = {
         .where(eq(providerServices.categoryId, parseInt(categoryId as string)))
         .as("cat_sub");
       conditions.push(
-        sql`${serviceProviders.id} IN (SELECT provider_id FROM provider_services WHERE category_id = ${parseInt(categoryId as string)} AND is_active = true)` as SQL
+        sql`${serviceProviders.id} IN (SELECT provider_id FROM provider_categories WHERE category_id = ${parseInt(categoryId as string)})` as SQL
       );
     }
 
@@ -74,7 +74,7 @@ export const searchService = {
       const ids = categoriesParam.split(',').map(Number).filter((n: number) => !isNaN(n) && n > 0);
       if (ids.length > 0) {
         conditions.push(
-          sql`${serviceProviders.id} IN (SELECT provider_id FROM provider_services WHERE category_id = ANY(ARRAY[${sql.raw(ids.join(','))}]::int[]) AND is_active = true)` as SQL
+          sql`${serviceProviders.id} IN (SELECT provider_id FROM provider_categories WHERE category_id = ANY(ARRAY[${sql.raw(ids.join(','))}]::int[]))` as SQL
         );
       }
     }
