@@ -48,6 +48,7 @@ export const providersService = {
       "city",
       "province",
       "phoneNumber",
+      "telegramUsername",
       "coverageRadiusKm",
     ];
 
@@ -91,6 +92,9 @@ if (safeData.description !== undefined && typeof safeData.description !== "strin
 if (safeData.phoneNumber !== undefined && typeof safeData.phoneNumber !== "string") {
       throw new Error("phoneNumber debe ser string");
     }
+    if (safeData.telegramUsername !== undefined && typeof safeData.telegramUsername !== "string") {
+      throw new Error("telegramUsername debe ser string");
+    }
 
     if (Object.keys(safeData).length === 0) {
       throw new Error("No se enviaron campos válidos para actualizar");
@@ -118,6 +122,7 @@ if (safeData.phoneNumber !== undefined && typeof safeData.phoneNumber !== "strin
       city: "city",
       province: "province",
       phoneNumber: "phone_number",
+      telegramUsername: "telegram_username",
     };
     const [updated] = await db
       .update(serviceProviders)

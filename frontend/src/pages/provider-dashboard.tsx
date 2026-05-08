@@ -251,7 +251,7 @@ export default function ProviderDashboard() {
 
   // Estado para edición de perfil
   const [editingProfile, setEditingProfile] = useState(false);
-  const [profileForm, setProfileForm] = useState({ businessName: "", description: "", hourlyRate: "", phone: "" });
+  const [profileForm, setProfileForm] = useState({ businessName: "", description: "", hourlyRate: "", phone: "", telegramUsername: "" });
 
   const handleEditProfile = () => {
     setProfileForm({
@@ -259,6 +259,7 @@ export default function ProviderDashboard() {
       description: providerProfile?.description || "",
       hourlyRate: providerProfile?.hourlyRate || providerProfile?.hourly_rate || "",
       phone: providerProfile?.phoneNumber || providerProfile?.phone_number || "",
+      telegramUsername: providerProfile?.telegramUsername || providerProfile?.telegram_username || "",
     });
     setEditingProfile(true);
   };
@@ -278,6 +279,7 @@ export default function ProviderDashboard() {
           description: profileForm.description,
           hourlyRate: profileForm.hourlyRate ? Number(profileForm.hourlyRate) : undefined,
           phoneNumber: profileForm.phone,
+          telegramUsername: profileForm.telegramUsername || undefined,
         }),
       });
       if (!res.ok) throw new Error("Error al guardar");
@@ -567,6 +569,10 @@ export default function ProviderDashboard() {
                     <label className="text-sm font-medium">Teléfono de contacto</label>
                     <input className="w-full mt-1 px-3 py-2 border rounded-md text-sm" value={profileForm.phone} onChange={e => setProfileForm({...profileForm, phone: e.target.value})} />
                   </div>
+                  <div>
+                    <label className="text-sm font-medium">Usuario de Telegram (sin @)</label>
+                    <input className="w-full mt-1 px-3 py-2 border rounded-md text-sm" placeholder="Ej: juanperez" value={profileForm.telegramUsername} onChange={e => setProfileForm({...profileForm, telegramUsername: e.target.value})} />
+                  </div>
                   <div className="flex gap-2 pt-2">
                     <Button className="flex-1" onClick={handleSaveProfile}>Guardar cambios</Button>
                     <Button variant="outline" className="flex-1" onClick={() => setEditingProfile(false)}>Cancelar</Button>
@@ -589,6 +595,10 @@ export default function ProviderDashboard() {
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Teléfono</span>
                     <span className="font-medium">{providerProfile?.phoneNumber || providerProfile?.phone_number || "—"}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Telegram</span>
+                    <span className="font-medium">{providerProfile?.telegramUsername || providerProfile?.telegram_username ? `@${providerProfile?.telegramUsername || providerProfile?.telegram_username}` : "—"}</span>
                   </div>
                 </div>
               )}
