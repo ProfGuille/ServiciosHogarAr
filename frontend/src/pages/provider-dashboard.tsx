@@ -195,6 +195,26 @@ export default function ProviderDashboard() {
   });
 
 
+  // Query: Stats del proveedor
+  const { data: providerStats } = useQuery<{ rating: number | null; totalReviews: number | null; isVerified: boolean }>({
+    queryKey: ["provider-stats", providerId],
+    enabled: !!providerId,
+    queryFn: async () => {
+      const res = await fetch(getApiUrl(`/api/providers/${providerId}/stats`));
+      if (!res.ok) throw new Error("Error al obtener stats");
+      return res.json();
+    }
+  });
+  // Query: Reseñas del proveedor
+  const { data: providerReviews } = useQuery<{ data: Array<{ id: number; rating: number; comment: string | null; created_at: string }>; total: number }>({
+    queryKey: ["provider-reviews", providerId],
+    enabled: !!providerId,
+    queryFn: async () => {
+      const res = await fetch(getApiUrl(`/api/providers/${providerId}/reviews`));
+      if (!res.ok) throw new Error("Error al obtener reseñas");
+      return res.json();
+    }
+  });
   // Verificación de identidad
   const { data: verificationData } = useQuery({
     queryKey: ["/api/providers/verification"],
@@ -668,6 +688,54 @@ export default function ProviderDashboard() {
                   </Button>
                 </div>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Reputación */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Tu reputación</CardTitle>
+              <CardDescription>Calificaciones recibidas de clientes. No se muestra el nombre del cliente.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {providerStats ? (
+                <div className="flex items-center gap-4 p-3 bg-slate-50 border rounded-lg">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-yellow-500">
+                      {providerStats.rating ? (providerStats.rating / 10).toFixed(1) : "—"}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">sobre 5.0</div>
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {providerStats.totalReviews
+                      ? `${providerStats.totalReviews} calificación${providerStats.totalReviews !== 1 ? "es" : ""} recibida${providerStats.totalReviews !== 1 ? "s" : ""}`
+                      : "Sin calificaciones aún"}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">Cargando...</p>
+              )}
+              {providerReviews && providerReviews.data.length > 0 ? (
+                <div className="space-y-3">
+                  {providerReviews.data.map((r) => (
+                    <div key={r.id} className="border rounded-lg p-3 space-y-1">
+                      <div className="flex items-center justify-between">
+                        <div className="flex gap-0.5">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <span key={i} className={i < Math.round(r.rating / 10) ? "text-yellow-400" : "text-slate-200"}>★</span>
+                          ))}
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(r.created_at).toLocaleDateString("es-AR", { day: "2-digit", month: "short", year: "numeric" })}
+                        </span>
+                      </div>
+                      {r.comment && <p className="text-sm text-slate-600 italic">"{r.comment}"</p>}
+                    </div>
+                  ))}
+                </div>
+              ) : providerStats && providerStats.totalReviews === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-2">Todavía no recibiste calificaciones.</p>
+              ) : null}
             </CardContent>
           </Card>
         </TabsContent>
