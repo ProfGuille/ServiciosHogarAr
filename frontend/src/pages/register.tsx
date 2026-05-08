@@ -47,6 +47,7 @@ export default function Register() {
           legalDisclaimerAccepted: data.legalDisclaimerAccepted,
           dataProcessingConsent: data.dataProcessingConsent,
           marketingConsent: data.marketingConsent,
+          referralCode: localStorage.getItem("referralCode") || undefined,
         }),
       });
 

@@ -308,12 +308,6 @@ export default function ServiceDetail() {
                     Llamar
                   </Button>
                 )}
-                {provider.telegramUsername && (
-                  <Button variant="outline" className="w-full" onClick={() => window.open(`https://t.me/${provider.telegramUsername}`, "_blank")}>
-                    <MessageCircle className="h-4 w-4 mr-2" />
-                    Telegram
-                  </Button>
-                )}
                 
                 {isAuthenticated ? (
                   <Button variant="outline" className="w-full" onClick={() => {

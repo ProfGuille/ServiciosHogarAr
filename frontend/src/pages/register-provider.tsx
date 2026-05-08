@@ -102,7 +102,7 @@ export default function RegisterProvider() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, referralCode: localStorage.getItem("referralCode") || undefined }),
       });
 
       if (!response.ok) {

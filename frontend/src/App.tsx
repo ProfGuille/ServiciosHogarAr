@@ -1,5 +1,5 @@
 import { Route, Switch } from 'wouter';
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 
 const Landing = lazy(() => import('@/pages/landing'));
 const HomePage = lazy(() => import('@/pages/home'));
@@ -32,6 +32,11 @@ const NotFound = lazy(() => import('@/pages/not-found'));
 const NewServiceRequest = lazy(() => import('@/pages/NewServiceRequest'));
 
 function App() {
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get("ref");
+    if (ref) localStorage.setItem("referralCode", ref);
+  }, []);
   return (
     <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
       <Switch>

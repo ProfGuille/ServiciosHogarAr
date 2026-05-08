@@ -15,7 +15,6 @@ export const serviceProviders = pgTable("service_providers", {
   totalReviews: integer("total_reviews").default(0),
   profileImageUrl: varchar("profile_image_url", { length: 512 }),
   phoneNumber: varchar("phone_number", { length: 50 }),
-  telegramUsername: varchar("telegram_username", { length: 100 }),
   address: text("address"),
   city: varchar("city", { length: 100 }),
   province: varchar("province", { length: 100 }),

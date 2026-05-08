@@ -17,6 +17,41 @@ const router = Router();
 // -----------------------------
 // REGISTER
 // -----------------------------
+
+// --------------------------
+// Helper: registrar referido
+// --------------------------
+async function processReferral(referralCode: string | undefined, newUserId: string) {
+  if (!referralCode) return;
+  try {
+    const { neon } = await import("@neondatabase/serverless");
+    const sql = neon(process.env.DATABASE_URL!);
+    const codes = (await sql`
+      SELECT id, user_id FROM referral_codes
+      WHERE code = ${referralCode}
+      AND (expires_at IS NULL OR expires_at > NOW())
+      LIMIT 1
+    `) as any[];
+    if (!codes.length || codes[0].user_id === newUserId) return;
+    const code = codes[0];
+    await sql`
+      INSERT INTO referrals (referrer_id, referred_id, referral_code_id, status, created_at)
+      VALUES (${code.user_id}, ${newUserId}, ${code.id}, 'registered', NOW())
+      ON CONFLICT DO NOTHING
+    `;
+    await sql`
+      INSERT INTO referral_stats (user_id, total_referrals, successful_referrals, total_credits_earned, last_referral_at, updated_at)
+      VALUES (${code.user_id}, 1, 0, 0, NOW(), NOW())
+      ON CONFLICT (user_id) DO UPDATE SET
+        total_referrals = referral_stats.total_referrals + 1,
+        last_referral_at = NOW(),
+        updated_at = NOW()
+    `;
+  } catch (e) {
+    console.error("Error procesando referido:", e);
+  }
+}
+
 router.post("/register", async (req: Request, res: Response) => {
   try {
     const { name, email, password } = req.body;
@@ -54,6 +89,7 @@ router.post("/register", async (req: Request, res: Response) => {
     }).returning();
 
     const token = generateJWTToken(created.id, created.email, created.userType);
+    await processReferral(req.body.referralCode, created.id);
     sendCustomerWelcomeEmail(created.email, created.firstName);
 
     res.json({
@@ -141,6 +177,7 @@ router.post("/register-provider", async (req: Request, res: Response) => {
     }
 
     console.log("=== REGISTER PROVIDER SUCCESS ===");
+    await processReferral(req.body.referralCode, user.id);
     sendProviderWelcomeEmail(user.email, user.firstName, businessName);
     res.status(201).json({ 
       message: 'Proveedor registrado',
