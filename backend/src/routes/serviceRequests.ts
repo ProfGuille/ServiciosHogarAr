@@ -397,69 +397,16 @@ router.post("/:id/review", requireAuth, async (req: any, res) => {
       WHERE user_id = ${revieweeUserId}
     `;
 
-    res.json({ success: true, reviewId: review.id });
-  } catch (err) {
-    console.error("Error POST review:", err);
-    res.status(500).json({ error: "Error al guardar calificación" });
-  }
-});
-
-
-
-// POST /:id/review — customer califica un provider que desbloqueó su solicitud
-router.post("/:id/review", async (req: any, res) => {
-  try {
-    if (!req.user) return res.status(401).json({ error: "No autenticado" });
-    const customerId = req.user.id;
-    const serviceRequestId = parseInt(req.params.id);
-    const { revieweeUserId, rating, comment } = req.body;
-
-    if (!rating || rating < 1 || rating > 5) {
-      return res.status(400).json({ error: "Rating debe ser entre 1 y 5" });
-    }
-
-    // Verificar que la solicitud pertenece al customer
-    const requestRows = (await neonSql`
-      SELECT id FROM service_requests WHERE id = ${serviceRequestId} AND customer_id = ${customerId}
-    ` as any[]);
-    const request = requestRows[0];
-    if (!request) return res.status(403).json({ error: "Solicitud no encontrada" });
-
-    // Verificar que el provider desbloqueó esta solicitud
-    const unlockRows = (await neonSql`
-      SELECT lr.id FROM lead_responses lr
-      JOIN service_providers sp ON sp.id = lr.provider_id
-      WHERE lr.service_request_id = ${serviceRequestId} AND sp.user_id = ${revieweeUserId}
-    ` as any[]);
-    const unlock = unlockRows[0];
-    if (!unlock) return res.status(403).json({ error: "El proveedor no desbloqueó esta solicitud" });
-
-    // Verificar duplicado
-    const existingRows = (await neonSql`
-      SELECT id FROM reviews
-      WHERE service_request_id = ${serviceRequestId}
-        AND reviewer_id = ${customerId}
-        AND reviewee_id = ${revieweeUserId}
-    ` as any[]);
-    const existing = existingRows[0];
-    if (existing) return res.status(409).json({ error: "Ya calificaste a este proveedor" });
-
-    const reviewRows = (await neonSql`
-      INSERT INTO reviews (service_request_id, reviewer_id, reviewee_id, rating, comment, is_public, created_at)
-      VALUES (${serviceRequestId}, ${customerId}, ${revieweeUserId}, ${rating}, ${comment || null}, true, NOW())
-      RETURNING id
-    ` as any[]);
-    const review = reviewRows[0];
-
-    // Actualizar rating promedio del provider (escala 10-50 para logro "Bien Calificado")
+    // Actualizar total_reviews del provider
     await neonSql`
       UPDATE service_providers
-      SET rating = (
-        SELECT ROUND(AVG(r.rating) * 10)
-        FROM reviews r
-        WHERE r.reviewee_id = ${revieweeUserId} AND r.is_public = true
-      )
+      SET total_reviews = (SELECT COUNT(*) FROM reviews WHERE reviewee_id = ${revieweeUserId} AND is_public = true)
       WHERE user_id = ${revieweeUserId}
+    `;
+
+    // Marcar solicitud como completada
+    await neonSql`
+      UPDATE service_requests SET status = 'completed' WHERE id = ${serviceRequestId}
     `;
 
     res.json({ success: true, reviewId: review.id });
@@ -468,5 +415,6 @@ router.post("/:id/review", async (req: any, res) => {
     res.status(500).json({ error: "Error al guardar calificación" });
   }
 });
+
 
 export default router;
