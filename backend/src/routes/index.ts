@@ -12,6 +12,7 @@ import providerCreditsRoutes from "./providerCredits.js";
 import contactRoutes from "./contact.js";
 import achievementsRoutes from "./achievements.js";
 import referralsRoutes from "./referrals.js";
+import searchSuggestionsRoutes from "./search-suggestions.js";
 
 const router = Router();
 
@@ -28,5 +29,6 @@ router.use("/provider-credits", providerCreditsRoutes);
 router.use("/contact", contactRoutes);
 router.use("/achievements", achievementsRoutes);
   router.use("/referrals", referralsRoutes);
+router.use("/search-suggestions", searchSuggestionsRoutes);
 
 export default router;
