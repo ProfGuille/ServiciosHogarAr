@@ -255,6 +255,68 @@ function PreciosTab() {
   );
 }
 
+function ContactosTab() {
+  const { data, isLoading } = useQuery<{ data: any[]; total: number }>({
+    queryKey: ["/api/admin/client-ratings"],
+    queryFn: async () => {
+      const res = await fetch(getApiUrl("/api/admin/client-ratings"), {
+        headers: getAuthHeaders() as Record<string, string>,
+      });
+      if (!res.ok) throw new Error("Error al obtener marcas");
+      return res.json();
+    },
+  });
+  const label: Record<string, string> = {
+    contact_made: "✅ Contacto realizado",
+    no_response: "⚠️ Sin respuesta",
+    invalid_request: "❌ Solicitud inválida",
+  };
+  if (isLoading) return <div className="text-center py-12">Cargando...</div>;
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>Marcas de contacto</CardTitle>
+          <CardDescription>Estado de contacto registrado por proveedores ({data?.total ?? 0} registros)</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {!data?.data?.length ? (
+            <p className="text-sm text-muted-foreground text-center py-6">Sin registros aún.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b text-left text-muted-foreground">
+                    <th className="pb-2 pr-4">Proveedor</th>
+                    <th className="pb-2 pr-4">Solicitud</th>
+                    <th className="pb-2 pr-4">Marca</th>
+                    <th className="pb-2">Fecha</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.data.map((r: any) => (
+                    <tr key={r.id} className="border-b last:border-0">
+                      <td className="py-2 pr-4 font-medium">{r.provider_name || `#${r.provider_id}`}</td>
+                      <td className="py-2 pr-4 text-muted-foreground max-w-xs truncate">{r.request_title || `#${r.request_id}`}</td>
+                      <td className="py-2 pr-4">{label[r.rating] ?? r.rating}</td>
+                      <td className="py-2 text-muted-foreground whitespace-nowrap">
+                        {new Date(r.created_at).toLocaleDateString("es-AR", {
+                          day: "2-digit", month: "short", year: "numeric",
+                          timeZone: "America/Argentina/Buenos_Aires"
+                        })}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 function LogrosTab() {
   const { data: achievements, isLoading } = useQuery<any[]>({
     queryKey: ["/api/achievements"],
@@ -670,6 +732,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="auditoria">Auditoría</TabsTrigger>
             <TabsTrigger value="precios">Precios</TabsTrigger>
             <TabsTrigger value="logros">Logros</TabsTrigger>
+            <TabsTrigger value="contactos">Contactos</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">
@@ -1293,6 +1356,9 @@ export default function AdminDashboard() {
           </TabsContent>
           <TabsContent value="logros">
             {activeTab === "logros" && <LogrosTab />}
+          </TabsContent>
+          <TabsContent value="contactos">
+            {activeTab === "contactos" && <ContactosTab />}
           </TabsContent>
         </Tabs>
       </div>

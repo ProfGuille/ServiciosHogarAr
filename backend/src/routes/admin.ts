@@ -695,4 +695,29 @@ router.delete("/credit-packages/:id", async (req, res) => {
   }
 });
 
+
+// GET /api/admin/client-ratings — marcas de contacto por proveedor
+router.get("/client-ratings", requireAuth, requireRole("admin"), async (_req, res) => {
+  try {
+    const rows = await sql`
+      SELECT
+        cr.id,
+        cr.rating,
+        cr.created_at,
+        sp.business_name AS provider_name,
+        sp.id AS provider_id,
+        sr.title AS request_title,
+        sr.id AS request_id
+      FROM client_ratings cr
+      JOIN service_providers sp ON sp.id = cr.provider_id
+      JOIN service_requests sr ON sr.id = cr.service_request_id
+      ORDER BY cr.created_at DESC
+      LIMIT 100
+    `;
+    res.json({ data: rows, total: rows.length });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 export default router;
