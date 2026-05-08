@@ -42,6 +42,7 @@ export function AchievementGallery({ userId }: AchievementGalleryProps) {
 
   const byCategory = {
     provider: all.filter(a => a.category === "provider"),
+    reputation: all.filter(a => a.category === "reputation"),
     customer: all.filter(a => a.category === "customer"),
     platform: all.filter(a => a.category === "platform"),
     special: all.filter(a => a.category === "special"),

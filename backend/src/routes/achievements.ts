@@ -69,7 +69,7 @@ router.get("/user/:userId/progress", requireAuth, async (req, res) => {
       ORDER BY COUNT(lr.id) DESC
       LIMIT 1
     `;
-    const isTopZone = topZoneRows[0]?.is_top === 1 ? 1 : 0;
+    const isTopZone = Number(topZoneRows[0]?.is_top) === 1 ? 1 : 0;
 
     const provider = providerRows[0];
     if (!provider) return res.json([]);
@@ -80,15 +80,15 @@ router.get("/user/:userId/progress", requireAuth, async (req, res) => {
           SELECT a.*, ua.earned_at, ua.progress, ua.progress_max
           FROM achievements a
           LEFT JOIN user_achievements ua ON ua.achievement_id = a.id AND ua.user_id = ${userId}
-          WHERE a.is_active = true AND a.category IN ('provider', 'platform')
-          ORDER BY a.sort_order, a.points ASC
+          WHERE a.is_active = true
+          ORDER BY a.id ASC
         `
       : await sql`
           SELECT a.*, ua.earned_at, ua.progress, ua.progress_max
           FROM achievements a
           LEFT JOIN user_achievements ua ON ua.achievement_id = a.id AND ua.user_id = ${userId}
           WHERE a.is_active = true
-          ORDER BY a.sort_order, a.points ASC
+          ORDER BY a.id ASC
         `;
 
     const monthsActive = Math.floor(
