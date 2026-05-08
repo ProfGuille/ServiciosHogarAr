@@ -285,10 +285,10 @@ function LogrosTab() {
               {(achievements || []).map((a: any) => (
                 <tr key={a.id} className="border-b hover:bg-muted/30">
                   <td className="py-2 pr-4 font-medium">{a.name}</td>
-                  <td className="py-2 pr-4">{a.category}</td>
-                  <td className="py-2 pr-4">{a.points}</td>
-                  <td className="py-2 pr-4 capitalize">{a.rarity}</td>
-                  <td className="py-2 pr-4 text-muted-foreground">{a.condition_type || "—"}</td>
+                  <td className="py-2 pr-4">{({"provider":"Actividad","reputation":"Reputación","customer":"Cliente","platform":"Plataforma","special":"Especial"})[a.category] ?? a.category}</td>
+                  <td className="py-2 pr-4">{a.points ?? 0} pts</td>
+                  <td className="py-2 pr-4">{({"common":"Común","uncommon":"Poco común","rare":"Raro","epic":"Épico","legendary":"Legendario"})[a.rarity] ?? a.rarity ?? "—"}</td>
+                  <td className="py-2 pr-4 text-muted-foreground">{({"unlocks_total":"Desbloqueos totales","unlocks_30days":"Desbloqueos últimos 30 días","identity_verified":"Identidad verificada","rating_min":"Rating mínimo","months_active":"Meses activo","profile_complete":"Perfil completo","top_zone":"Top de su zona"})[a.condition_type] ?? a.condition_type ?? "—"}</td>
                   <td className="py-2">{a.condition_value ?? "—"}</td>
                 </tr>
               ))}
