@@ -1000,62 +1000,64 @@ export default function AdminDashboard() {
           <TabsContent value="analytics">
             <Card className="mb-4">
               <CardHeader>
-                <CardTitle className="text-base">Filtro de fecha — Marketplace (proveedores)</CardTitle>
+                <CardTitle className="text-base">Filtros de fecha</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-xs text-slate-500 mb-2">Las solicitudes anteriores a esta fecha no serán visibles para los proveedores.</p>
-                <div className="flex flex-wrap items-end gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <p className="text-xs text-slate-500 mb-1">
-                      {settingsData?.marketplaceStartDate
-                        ? `Mostrando solicitudes desde: ${settingsData.marketplaceStartDate}`
-                        : "Mostrando todas las solicitudes"}
-                    </p>
-                    <input
-                      type="date"
-                      className="border rounded px-2 py-1 text-sm"
-                      value={marketplaceDateInput}
-                      onChange={e => setMarketplaceDateInput(e.target.value)}
-                    />
+                    <p className="text-sm font-medium mb-1">Marketplace (proveedores)</p>
+                    <p className="text-xs text-slate-500 mb-2">Las solicitudes anteriores a esta fecha no serán visibles para los proveedores.</p>
+                    <div className="flex flex-wrap items-end gap-2">
+                      <div>
+                        <p className="text-xs text-slate-500 mb-1">
+                          {settingsData?.marketplaceStartDate
+                            ? `Desde: ${settingsData.marketplaceStartDate}`
+                            : "Todas las solicitudes"}
+                        </p>
+                        <input
+                          type="date"
+                          className="border rounded px-2 py-1 text-sm"
+                          value={marketplaceDateInput}
+                          onChange={e => setMarketplaceDateInput(e.target.value)}
+                        />
+                      </div>
+                      <Button size="sm" onClick={() => { if (marketplaceDateInput) handleSaveMarketplaceDate(marketplaceDateInput); }}>
+                        Guardar
+                      </Button>
+                      {settingsData?.marketplaceStartDate && (
+                        <Button size="sm" variant="outline" onClick={() => { setMarketplaceDateInput(""); handleSaveMarketplaceDate(null); }}>
+                          Limpiar
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                  <Button size="sm" onClick={() => { if (marketplaceDateInput) handleSaveMarketplaceDate(marketplaceDateInput); }}>
-                    Guardar fecha de corte
-                  </Button>
-                  {settingsData?.marketplaceStartDate && (
-                    <Button size="sm" variant="outline" onClick={() => { setMarketplaceDateInput(""); handleSaveMarketplaceDate(null); }}>
-                      Limpiar filtro
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="mb-4">
-              <CardHeader>
-                <CardTitle className="text-base">Filtro de fecha para analíticas</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap items-end gap-3">
                   <div>
-                    <p className="text-xs text-slate-500 mb-1">
-                      {settingsData?.analyticsStartDate
-                        ? `Mostrando datos desde: ${settingsData.analyticsStartDate}`
-                        : "Mostrando todos los datos disponibles"}
-                    </p>
-                    <input
-                      type="date"
-                      className="border rounded px-2 py-1 text-sm"
-                      value={analyticsDateInput}
-                      onChange={e => setAnalyticsDateInput(e.target.value)}
-                    />
+                    <p className="text-sm font-medium mb-1">Analíticas</p>
+                    <p className="text-xs text-slate-500 mb-2">Rango de fechas para los gráficos y métricas.</p>
+                    <div className="flex flex-wrap items-end gap-2">
+                      <div>
+                        <p className="text-xs text-slate-500 mb-1">
+                          {settingsData?.analyticsStartDate
+                            ? `Desde: ${settingsData.analyticsStartDate}`
+                            : "Todos los datos"}
+                        </p>
+                        <input
+                          type="date"
+                          className="border rounded px-2 py-1 text-sm"
+                          value={analyticsDateInput}
+                          onChange={e => setAnalyticsDateInput(e.target.value)}
+                        />
+                      </div>
+                      <Button size="sm" onClick={() => { if (analyticsDateInput) handleSaveAnalyticsDate(analyticsDateInput); }}>
+                        Guardar
+                      </Button>
+                      {settingsData?.analyticsStartDate && (
+                        <Button size="sm" variant="outline" onClick={() => { setAnalyticsDateInput(""); handleSaveAnalyticsDate(null); }}>
+                          Limpiar
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                  <Button size="sm" onClick={() => { if (analyticsDateInput) handleSaveAnalyticsDate(analyticsDateInput); }}>
-                    Guardar fecha de corte
-                  </Button>
-                  {settingsData?.analyticsStartDate && (
-                    <Button size="sm" variant="outline" onClick={() => { setAnalyticsDateInput(""); handleSaveAnalyticsDate(null); }}>
-                      Limpiar filtro
-                    </Button>
-                  )}
                 </div>
               </CardContent>
             </Card>
