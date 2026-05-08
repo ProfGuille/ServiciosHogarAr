@@ -1271,7 +1271,7 @@ export default function AdminDashboard() {
                         {profileChanges.map((c: any) => (
                           <tr key={c.id} className="hover:bg-slate-50">
                             <td className="px-4 py-3">{c.business_name || `${c.provider_first} ${c.provider_last}`}</td>
-                            <td className="px-4 py-3 font-mono text-xs text-slate-500">{c.field_name}</td>
+                            <td className="px-4 py-3 text-xs text-slate-500">{({"businessName":"Nombre comercial","description":"Descripción","phoneNumber":"Teléfono","hourlyRate":"Tarifa/hora","experienceYears":"Años exp.","city":"Ciudad","province":"Provincia","coverageRadiusKm":"Radio cobertura"})[c.field_name] ?? c.field_name}</td>
                             <td className="px-4 py-3 text-red-600 max-w-[160px] truncate">{c.old_value ?? "—"}</td>
                             <td className="px-4 py-3 text-green-700 max-w-[160px] truncate">{c.new_value ?? "—"}</td>
                             <td className="px-4 py-3">{c.changed_by_first ? `${c.changed_by_first} ${c.changed_by_last}` : "—"}</td>
