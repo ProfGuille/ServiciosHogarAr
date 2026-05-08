@@ -693,7 +693,7 @@ export default function AdminDashboard() {
                             {item.label}
                           </p>
                           <p className="text-xs text-slate-500">
-                            {new Date(item.created_at).toLocaleDateString("es-AR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                            {new Date(item.created_at).toLocaleString("es-AR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "America/Argentina/Buenos_Aires" })}
                           </p>
                         </div>
                       </div>
@@ -1229,7 +1229,7 @@ export default function AdminDashboard() {
                           <p className="text-sm text-slate-500">{v.email}</p>
                           <p className="text-sm">{v.personType === "fisica" ? "Persona física" : "Persona jurídica"} — {v.documentType} {v.documentNumber}</p>
                           {v.legalRepresentative && <p className="text-sm">Representante: {v.legalRepresentative}</p>}
-                          <p className="text-xs text-slate-400">{new Date(v.createdAt).toLocaleDateString("es-AR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
+                          <p className="text-xs text-slate-400">{new Date(v.createdAt).toLocaleString("es-AR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "America/Argentina/Buenos_Aires" })}</p>
                           {v.adminNotes && <p className="text-sm text-slate-600 mt-1"><strong>Nota:</strong> {v.adminNotes}</p>}
                         </div>
                         <div className="flex flex-col items-end gap-2 min-w-[140px]">
@@ -1275,7 +1275,7 @@ export default function AdminDashboard() {
                             <td className="px-4 py-3 text-red-600 max-w-[160px] truncate">{c.old_value ?? "—"}</td>
                             <td className="px-4 py-3 text-green-700 max-w-[160px] truncate">{c.new_value ?? "—"}</td>
                             <td className="px-4 py-3">{c.changed_by_first ? `${c.changed_by_first} ${c.changed_by_last}` : "—"}</td>
-                            <td className="px-4 py-3 text-slate-400 whitespace-nowrap">{new Date(c.changed_at).toLocaleDateString("es-AR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</td>
+                            <td className="px-4 py-3 text-slate-400 whitespace-nowrap">{new Date(c.changed_at).toLocaleString("es-AR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "America/Argentina/Buenos_Aires" })}</td>
                           </tr>
                         ))}
                       </tbody>
