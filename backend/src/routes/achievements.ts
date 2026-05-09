@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { sendAdminInvalidRequestEmail } from "../services/resendEmailService.js";
 import { requireAuth } from "../middleware/auth.js";
 import { sql } from "../db.js";
 
@@ -203,6 +204,25 @@ router.post("/client-ratings", requireAuth, async (req, res) => {
       ON CONFLICT (provider_id, service_request_id) DO UPDATE SET rating = ${rating}
     `;
 
+    if (rating === "invalid_request") {
+      (async () => {
+        try {
+          const info = (await sql`
+            SELECT sp.business_name, sr.title
+            FROM service_providers sp
+            JOIN service_requests sr ON sr.id = ${parseInt(serviceRequestId)}
+            WHERE sp.id = ${parseInt(providerId)}
+          `) as any[];
+          if (info[0]) {
+            await sendAdminInvalidRequestEmail(
+              info[0].business_name || 'Proveedor',
+              info[0].title,
+              parseInt(serviceRequestId)
+            );
+          }
+        } catch (e) { console.error("sendAdminInvalidRequestEmail:", e); }
+      })();
+    }
     res.json({ success: true });
   } catch (error) {
     console.error("POST /client-ratings:", error);

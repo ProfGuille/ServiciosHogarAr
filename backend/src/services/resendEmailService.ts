@@ -281,3 +281,32 @@ export async function sendProviderWelcomeEmail(
 }
 
 
+
+export async function sendAdminInvalidRequestEmail(
+  providerName: string,
+  requestTitle: string,
+  requestId: number
+): Promise<void> {
+  const adminEmail = process.env.ADMIN_EMAIL || 'administrador@servicioshogar.com.ar';
+  await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${process.env.RESEND_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: "ServiciosHogar <administrador@servicioshogar.com.ar>",
+      to: [adminEmail],
+      subject: `❌ Solicitud inválida reportada — #${requestId}`,
+      html: `
+        <h2>Solicitud marcada como inválida</h2>
+        <p><strong>Proveedor:</strong> ${providerName}</p>
+        <p><strong>Solicitud:</strong> #${requestId} — ${requestTitle}</p>
+        <p>El proveedor marcó esta solicitud como <strong>❌ Inválida</strong>. Verificar si corresponde devolver créditos.</p>
+        <a href="https://servicioshogar.com.ar/admin" style="background:#dc2626;color:white;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;margin-top:12px">
+          Ver en panel admin
+        </a>
+      `,
+    }),
+  });
+}

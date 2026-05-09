@@ -31,6 +31,7 @@ export const serviceRequests = pgTable("service_requests", {
   customerEmail: varchar("customer_email", { length: 255 }),
   neighborhood: varchar("neighborhood", { length: 100 }),
   preferredContactMethods: text("preferred_contact_methods"),
+  telegramUsername: varchar("telegram_username", { length: 100 }),
 });
 
 export type ServiceRequest = InferSelectModel<typeof serviceRequests>;

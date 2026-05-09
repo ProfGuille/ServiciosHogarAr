@@ -11,7 +11,7 @@ export const serviceProviders = pgTable("service_providers", {
   hourlyRate: decimal("hourly_rate", { precision: 10, scale: 2 }),
   isVerified: boolean("is_verified").default(false),
   isActive: boolean("is_active").default(true),
-  rating: decimal("rating", { precision: 3, scale: 2 }),
+  rating: decimal("rating", { precision: 5, scale: 1 }),
   totalReviews: integer("total_reviews").default(0),
   profileImageUrl: varchar("profile_image_url", { length: 512 }),
   phoneNumber: varchar("phone_number", { length: 50 }),

@@ -125,7 +125,7 @@ router.post("/:id/unlock", async (req, res) => {
       WITH lead_check AS (
         SELECT id, status, title, description, customer_first_name, customer_phone, 
                customer_email, preferred_contact_methods, address, neighborhood, 
-               city, province, preferred_date, is_urgent, category_id, created_at
+               city, province, preferred_date, is_urgent, category_id, created_at, telegram_username
         FROM service_requests
         WHERE id = ${leadId} AND status = 'pending'
       ),
@@ -222,7 +222,8 @@ credits_used, credits_spent, unlocked_at)
         preferredDate: leadData.preferred_date,
         isUrgent: leadData.is_urgent,
         categoryId: leadData.category_id,
-        createdAt: leadData.created_at
+        createdAt: leadData.created_at,
+        telegramUsername: leadData.telegram_username
       },
       creditsSpent: 1,
       remainingCredits: leadData.remaining_credits,

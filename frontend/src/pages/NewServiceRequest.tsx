@@ -11,6 +11,7 @@ export default function NewServiceRequest() {
   const [customCity, setCustomCity] = useState('');
   const [address, setAddress] = useState('');
   const [neighborhood, setNeighborhood] = useState('');
+  const [showTelegramInput, setShowTelegramInput] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
 
   const provinces = [
@@ -101,6 +102,7 @@ export default function NewServiceRequest() {
       preferredContactMethods: contactMethods.join(', '),
       preferredDate:           formData.get('preferredDate') || null,
       isUrgent:                formData.get('isUrgent') === 'on',
+      telegramUsername:        formData.get('telegramUsername') || null,
     };
 
     try {
@@ -237,9 +239,17 @@ export default function NewServiceRequest() {
                       <span className="text-sm">WhatsApp</span>
                     </label>
                     <label className="flex items-center">
-                      <input type="checkbox" name="contact_telegram" className="w-4 h-4 mr-2" />
+                      <input type="checkbox" name="contact_telegram" className="w-4 h-4 mr-2"
+                        checked={showTelegramInput} onChange={(e) => setShowTelegramInput(e.target.checked)} />
                       <span className="text-sm">Telegram</span>
                     </label>
+                    {showTelegramInput && (
+                      <div className="ml-6">
+                        <input type="text" name="telegramUsername" maxLength={50}
+                          placeholder="@usuario de Telegram (opcional)"
+                          className="w-full border rounded px-3 py-1.5 text-sm mt-1" />
+                      </div>
+                    )}
                     <label className="flex items-center">
                       <input type="checkbox" name="contact_email" className="w-4 h-4 mr-2" />
                       <span className="text-sm">Email</span>

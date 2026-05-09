@@ -43,6 +43,7 @@ router.post("/", createRequestLimiter, async (req, res) => {
       customerFirstName,
       customerPhone,
       customerEmail,
+      telegramUsername,
       preferredDate,
       isUrgent,
     } = req.body;
@@ -66,6 +67,7 @@ router.post("/", createRequestLimiter, async (req, res) => {
         customerFirstName,
         customerPhone,
         customerEmail: customerEmail || null,
+        telegramUsername: telegramUsername || null,
         preferredDate: preferredDate ? new Date(preferredDate) : null,
         isUrgent: isUrgent || false,
         customerId: customerId,
