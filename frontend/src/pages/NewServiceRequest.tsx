@@ -12,6 +12,12 @@ export default function NewServiceRequest() {
   const [address, setAddress] = useState('');
   const [neighborhood, setNeighborhood] = useState('');
   const [showTelegramInput, setShowTelegramInput] = useState(false);
+  const [wantsAccount, setWantsAccount] = useState(false);
+  const [registerPassword, setRegisterPassword] = useState('');
+  const [acceptsTerms, setAcceptsTerms] = useState(false);
+  const [acceptsMarketing, setAcceptsMarketing] = useState(false);
+  const [registerError, setRegisterError] = useState('');
+  const [accountCreated, setAccountCreated] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
 
   const provinces = [
@@ -105,6 +111,58 @@ export default function NewServiceRequest() {
       telegramUsername:        formData.get('telegramUsername') || null,
     };
 
+    // Registro opcional de cuenta
+    if (wantsAccount) {
+      const emailVal = (formData.get('email') as string) || '';
+      if (!emailVal || !emailVal.includes('@')) {
+        setRegisterError('Necesitás ingresar un email válido para crear una cuenta.');
+        setLoading(false);
+        return;
+      }
+      if (!acceptsTerms) {
+        setRegisterError('Debés aceptar los términos y condiciones para crear una cuenta.');
+        setLoading(false);
+        return;
+      }
+      if (!registerPassword || registerPassword.length < 6) {
+        setRegisterError('La contraseña debe tener al menos 6 caracteres.');
+        setLoading(false);
+        return;
+      }
+      const refCode = localStorage.getItem('referralCode') || undefined;
+      try {
+        const regRes = await fetch(getApiUrl('/api/auth/register'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: formData.get('firstName') as string,
+            email: emailVal,
+            phone: formData.get('phone') as string,
+            password: registerPassword,
+            referralCode: refCode,
+            acceptsMarketing,
+          }),
+        });
+        const regData = await regRes.json();
+        if (!regRes.ok) {
+          const msg = regRes.status === 409
+            ? 'Ese email ya tiene una cuenta. Desmarcar la casilla para continuar sin registrarse.'
+            : (regData.error || 'No se pudo crear la cuenta.');
+          setRegisterError(msg);
+          setLoading(false);
+          return;
+        }
+        if (regData.token) {
+          localStorage.setItem('auth_token', regData.token);
+          setAccountCreated(true);
+        }
+      } catch {
+        setRegisterError('Error de conexión al crear la cuenta. Desmarcar para continuar sin registrarse.');
+        setLoading(false);
+        return;
+      }
+    }
+
     try {
       const response = await fetch(getApiUrl('/api/service-requests'), {
         method: 'POST',
@@ -131,9 +189,17 @@ export default function NewServiceRequest() {
         <div className="max-w-md bg-white rounded-lg shadow-md p-8 text-center">
           <div className="text-6xl mb-4">✅</div>
           <h2 className="text-2xl font-bold mb-2">¡Solicitud enviada!</h2>
-          <p className="text-gray-600 mb-6">
+          <p className="text-gray-600 mb-4">
             Los proveedores verán tu solicitud y te contactarán pronto.
           </p>
+          {accountCreated && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4 text-left">
+              <p className="text-sm text-green-800 font-medium">🎉 Tu cuenta fue creada exitosamente</p>
+              <p className="text-xs text-green-700 mt-1">
+                <a href="/login" className="underline font-medium">Iniciá sesión</a> para ver el estado de tus solicitudes.
+              </p>
+            </div>
+          )}
           <button
             onClick={() => window.location.href = '/'}
             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
@@ -356,6 +422,68 @@ export default function NewServiceRequest() {
               <p className="text-sm text-blue-900">
                 🔒 Los proveedores solo ven tu nombre, teléfono y zona.
               </p>
+            </div>
+
+            <div className="border-t pt-6">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={wantsAccount}
+                  onChange={e => { setWantsAccount(e.target.checked); setRegisterError(''); }}
+                  className="w-4 h-4 mt-0.5 flex-shrink-0"
+                />
+                <div>
+                  <span className="text-sm font-medium">Quiero crear una cuenta para hacer seguimiento de mis solicitudes</span>
+                  <p className="text-xs text-gray-500 mt-0.5">Podrás ver el estado de tus solicitudes y recibir actualizaciones</p>
+                </div>
+              </label>
+
+              {wantsAccount && (
+                <div className="mt-4 space-y-4 pl-7">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Contraseña *</label>
+                    <input
+                      type="password"
+                      value={registerPassword}
+                      onChange={e => setRegisterPassword(e.target.value)}
+                      placeholder="Mínimo 6 caracteres"
+                      className="w-full border rounded-lg px-4 py-2"
+                      autoComplete="new-password"
+                    />
+                  </div>
+                  <div className="space-y-3">
+                    <label className="flex items-start gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={acceptsTerms}
+                        onChange={e => setAcceptsTerms(e.target.checked)}
+                        className="w-4 h-4 mt-0.5 flex-shrink-0"
+                      />
+                      <span className="text-xs text-gray-700">
+                        He leído y acepto los{' '}
+                        <a href="/terminos" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Términos y Condiciones</a>,
+                        la{' '}
+                        <a href="/privacidad" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Política de Privacidad</a>
+                        {' '}(Ley 25.326) y el{' '}
+                        <a href="/aviso-legal" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Aviso Legal</a>,
+                        incluyendo el procesamiento de mis datos personales para los fines descritos.
+                      </span>
+                    </label>
+                    <label className="flex items-start gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={acceptsMarketing}
+                        onChange={e => setAcceptsMarketing(e.target.checked)}
+                        className="w-4 h-4 mt-0.5 flex-shrink-0"
+                      />
+                      <span className="text-xs text-gray-500">(Opcional) Acepto recibir comunicaciones comerciales y promociones</span>
+                    </label>
+                  </div>
+                  {registerError && (
+                    <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">{registerError}</p>
+                  )}
+                </div>
+              )}
             </div>
 
             <button

@@ -36,17 +36,28 @@ async function processReferral(referralCode: string | undefined, newUserId: stri
     const code = codes[0];
     await sql`
       INSERT INTO referrals (referrer_id, referred_id, referral_code_id, status, created_at)
-      VALUES (${code.user_id}, ${newUserId}, ${code.id}, 'registered', NOW())
+      VALUES (${code.user_id}, ${newUserId}, ${code.id}, 'completed', NOW())
       ON CONFLICT DO NOTHING
     `;
     await sql`
       INSERT INTO referral_stats (user_id, total_referrals, successful_referrals, total_credits_earned, last_referral_at, updated_at)
-      VALUES (${code.user_id}, 1, 0, 0, NOW(), NOW())
+      VALUES (${code.user_id}, 1, 1, 1, NOW(), NOW())
       ON CONFLICT (user_id) DO UPDATE SET
         total_referrals = referral_stats.total_referrals + 1,
+        successful_referrals = referral_stats.successful_referrals + 1,
+        total_credits_earned = referral_stats.total_credits_earned + 1,
         last_referral_at = NOW(),
         updated_at = NOW()
     `;
+    // +1 crédito al referente si es proveedor
+    const referrerProviders = (await sql`
+      SELECT id FROM service_providers WHERE user_id = ${code.user_id} LIMIT 1
+    `) as any[];
+    if (referrerProviders.length > 0) {
+      const { providerCreditsService } = await import("../services/providerCreditsService.js");
+      await providerCreditsService.addCredits(referrerProviders[0].id, 1);
+      console.log(`✅ Referido exitoso: +1 crédito al proveedor ${referrerProviders[0].id}`);
+    }
   } catch (e) {
     console.error("Error procesando referido:", e);
   }
@@ -82,6 +93,7 @@ router.post("/register", async (req: Request, res: Response) => {
       firstName: name.split(' ')[0] || name,
       lastName: name.split(' ').slice(1).join(' ') || '',
       email,
+      phone: req.body.phone || null,
       password: hashed,
       userType: 'customer',
       createdAt: new Date(),
@@ -157,19 +169,10 @@ router.post("/register-provider", async (req: Request, res: Response) => {
     // PASO 4: Guardar categorías seleccionadas
     const { serviceCategories } = req.body;
     if (serviceCategories && Array.isArray(serviceCategories) && serviceCategories.length > 0) {
-      const categoryValues = serviceCategories.map((catId: string) => ({
-        providerId: provider.id,
-        categoryId: parseInt(catId),
-        serviceName: "Servicio",
-        price: 0,
-        durationMinutes: 60,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }));
-      for (const catId2 of serviceCategories) {
+        for (const catId2 of serviceCategories) {
         await db.execute(
-          sql`INSERT INTO provider_services (provider_id, category_id, is_active, created_at)
-          VALUES (${provider.id}, ${parseInt(catId2)}, true, NOW())
+          sql`INSERT INTO provider_categories (provider_id, category_id, created_at)
+          VALUES (${provider.id}, ${parseInt(catId2)}, NOW())
           ON CONFLICT DO NOTHING`
         );
       }

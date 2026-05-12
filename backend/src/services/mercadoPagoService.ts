@@ -146,7 +146,10 @@ class MercadoPagoService {
       // 6. Procesar pago si está aprobado
       if (payment.status === 'approved') {
         const result = await this.confirmPurchaseAtomic(purchaseId, String(paymentId));
-        
+
+        // Bonus por primera compra del referido
+        await this.awardFirstPurchaseBonus(result.provider_id);
+
         // Marcar webhook como procesado
         await db
           .update(mercadopagoWebhooks)
@@ -214,6 +217,51 @@ class MercadoPagoService {
     }
 
     return result[0];
+  }
+
+  /**
+   * Bonus primera compra: +1 crédito al referente si aplica
+   * Desacoplado de MP — se puede llamar desde cualquier flujo de pago
+   */
+  private async awardFirstPurchaseBonus(providerId: number): Promise<void> {
+    try {
+      const { neon } = await import("@neondatabase/serverless");
+      const neonSql = neon(process.env.DATABASE_URL!);
+
+      // ¿Es la primera compra completada de este proveedor?
+      const countRows = (await neonSql`
+        SELECT COUNT(*) as total FROM credit_purchases
+        WHERE provider_id = ${providerId} AND status = 'completed'
+      `) as any[];
+      if (parseInt(countRows[0].total) !== 1) return;
+
+      // ¿Tiene referente con status completed?
+      const referrers = (await neonSql`
+        SELECT r.referrer_id, sp.id as referrer_provider_id
+        FROM referrals r
+        JOIN service_providers sp ON sp.user_id = r.referrer_id
+        WHERE r.referred_id = (
+          SELECT user_id FROM service_providers WHERE id = ${providerId} LIMIT 1
+        )
+        AND r.status = 'completed'
+        LIMIT 1
+      `) as any[];
+      if (!referrers.length) return;
+
+      const { providerCreditsService } = await import("./providerCreditsService.js");
+      await providerCreditsService.addCredits(referrers[0].referrer_provider_id, 1);
+
+      await neonSql`
+        UPDATE referral_stats SET
+          total_credits_earned = total_credits_earned + 1,
+          updated_at = NOW()
+        WHERE user_id = ${referrers[0].referrer_id}
+      `;
+
+      console.log("✅ Bonus primera compra: +1 crédito al proveedor " + referrers[0].referrer_provider_id);
+    } catch (e) {
+      console.error("Error en awardFirstPurchaseBonus:", e);
+    }
   }
 
   /**

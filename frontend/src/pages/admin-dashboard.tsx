@@ -722,7 +722,7 @@ export default function AdminDashboard() {
 
         {/* Main Content */}
         <Tabs defaultValue="overview" className="space-y-6" onValueChange={(v) => setActiveTab(v)}>
-          <TabsList className="grid grid-cols-9 w-full max-w-4xl">
+          <TabsList className="grid grid-cols-10 w-full max-w-4xl">
             <TabsTrigger value="overview">Resumen</TabsTrigger>
             <TabsTrigger value="providers">Profesionales</TabsTrigger>
             <TabsTrigger value="requests">Solicitudes</TabsTrigger>
