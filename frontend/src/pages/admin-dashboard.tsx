@@ -732,7 +732,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="auditoria">Auditoría</TabsTrigger>
             <TabsTrigger value="precios">Precios</TabsTrigger>
             <TabsTrigger value="logros">Logros</TabsTrigger>
-            <TabsTrigger value="contactos">Contactos</TabsTrigger>
+            <TabsTrigger value="contactos">Verificación de Clientes</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">

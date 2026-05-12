@@ -642,7 +642,7 @@ export default function ProviderDashboard() {
                 <div className="flex flex-wrap gap-2">
                   {providerCategories.map(cat => (
                     <Badge key={cat.id} variant="secondary" className="text-sm px-3 py-1">
-                      {cat.icon} {cat.name}
+                      {cat.name}
                     </Badge>
                   ))}
                 </div>
