@@ -38,7 +38,7 @@ export function ReferralShareCard() {
     },
   });
 
-  const shareUrl = referralCode ? `${window.location.origin}/register?ref=${referralCode.code}` : "";
+  const shareUrl = referralCode ? `${window.location.origin}/?ref=${referralCode.code}` : "";
 
   const copyToClipboard = () => {
     if (shareUrl) {
