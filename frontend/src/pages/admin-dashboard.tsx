@@ -909,9 +909,7 @@ export default function AdminDashboard() {
                   <Button variant="outline" size="sm" onClick={() => refetchRequests()}>
                     Actualizar
                   </Button>
-                  <Button variant="outline" size="sm">
-                    Ver todas
-                  </Button>
+
                 </div>
               </CardHeader>
               <CardContent>
