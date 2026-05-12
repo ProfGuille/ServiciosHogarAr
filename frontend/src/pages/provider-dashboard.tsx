@@ -216,6 +216,16 @@ export default function ProviderDashboard() {
       return res.json();
     }
   });
+  // Query: Categorías del proveedor
+  const { data: providerCategories } = useQuery<Array<{ id: number; name: string; icon: string }>>({
+    queryKey: ["provider-categories", providerId],
+    enabled: !!providerId,
+    queryFn: async () => {
+      const res = await fetch(getApiUrl(`/api/providers/${providerId}/categories`));
+      if (!res.ok) throw new Error("Error al obtener categorías");
+      return res.json();
+    }
+  });
   // Verificación de identidad
   const { data: verificationData } = useQuery({
     queryKey: ["/api/providers/verification"],
@@ -621,6 +631,26 @@ export default function ProviderDashboard() {
             </CardContent>
           </Card>
 
+          {/* Categorías registradas */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Tus categorías de servicio</CardTitle>
+              <CardDescription>Rubros en los que ofrecés tus servicios</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {providerCategories && providerCategories.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {providerCategories.map(cat => (
+                    <Badge key={cat.id} variant="secondary" className="text-sm px-3 py-1">
+                      {cat.icon} {cat.name}
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">No tenés categorías registradas.</p>
+              )}
+            </CardContent>
+          </Card>
           {/* Verificación de identidad */}
           <Card>
             <CardHeader>

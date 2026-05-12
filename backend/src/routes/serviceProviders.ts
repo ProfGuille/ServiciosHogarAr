@@ -291,6 +291,29 @@ router.get("/:id/stats", async (req, res) => {
 
 
 // -----------------------------------------------
+// -----------------------------------------------
+// GET /api/providers/:id/categories — categorías del proveedor
+// -----------------------------------------------
+router.get("/:id/categories", async (req, res) => {
+  try {
+    const { neon } = await import("@neondatabase/serverless");
+    const sql = neon(process.env.DATABASE_URL!);
+    const providerId = parseInt(req.params.id);
+    if (isNaN(providerId)) return res.status(400).json({ error: "ID inválido" });
+    const rows = (await sql`
+      SELECT sc.id, sc.name, sc.icon
+      FROM provider_categories pc
+      JOIN service_categories sc ON sc.id = pc.category_id
+      WHERE pc.provider_id = ${providerId}
+      ORDER BY sc.name
+    `) as any[];
+    res.json(rows);
+  } catch (err) {
+    console.error("Error GET /:id/categories:", err);
+    res.status(500).json({ error: "Error interno" });
+  }
+});
+// -----------------------------------------------
 // GET /api/providers/reviews/recent — público
 // -----------------------------------------------
 router.get("/reviews/recent", async (req, res) => {
