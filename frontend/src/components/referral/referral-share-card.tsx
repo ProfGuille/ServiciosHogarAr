@@ -20,7 +20,7 @@ export function ReferralShareCard() {
     queryKey: ["/api/referrals/stats"],
   });
 
-  const shareUrl = referralCode ? `${window.location.origin}?ref=${referralCode.code}` : "";
+  const shareUrl = referralCode ? `${window.location.origin}/registro?ref=${referralCode.code}` : "";
 
   const copyToClipboard = () => {
     if (shareUrl) {

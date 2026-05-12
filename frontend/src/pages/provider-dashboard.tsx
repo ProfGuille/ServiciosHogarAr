@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Clock, MapPin, AlertCircle, Phone, MessageCircle, Mail, CreditCard, Send } from "lucide-react";
 import { AchievementGallery } from "@/components/achievements/achievement-gallery";
+import { ReferralShareCard } from "@/components/referral/referral-share-card";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -738,6 +739,7 @@ export default function ProviderDashboard() {
               ) : null}
             </CardContent>
           </Card>
+          <ReferralShareCard />
         </TabsContent>
         <TabsContent value="logros" className="space-y-4">
           {user?.id ? (
