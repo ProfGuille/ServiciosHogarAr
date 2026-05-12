@@ -6,6 +6,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Gift, Copy, Share2, Users, CheckCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
+import { getApiUrl } from "@/lib/api";
+import { getAuthHeaders } from "@/lib/auth";
 
 export function ReferralShareCard() {
   const { toast } = useToast();
@@ -14,10 +16,26 @@ export function ReferralShareCard() {
 
   const { data: referralCode, isLoading: codeLoading } = useQuery({
     queryKey: ["/api/referrals/code"],
+    enabled: !!user,
+    queryFn: async () => {
+      const res = await fetch(getApiUrl("/api/referrals/code"), {
+        headers: { ...getAuthHeaders() as Record<string, string> },
+      });
+      if (!res.ok) throw new Error("Error al obtener código");
+      return res.json();
+    },
   });
 
   const { data: referralStats } = useQuery({
     queryKey: ["/api/referrals/stats"],
+    enabled: !!user,
+    queryFn: async () => {
+      const res = await fetch(getApiUrl("/api/referrals/stats"), {
+        headers: { ...getAuthHeaders() as Record<string, string> },
+      });
+      if (!res.ok) throw new Error("Error al obtener stats");
+      return res.json();
+    },
   });
 
   const shareUrl = referralCode ? `${window.location.origin}/registro?ref=${referralCode.code}` : "";
