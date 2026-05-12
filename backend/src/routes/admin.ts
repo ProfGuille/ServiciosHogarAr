@@ -31,10 +31,12 @@ router.get("/dashboard-summary", async (req, res) => {
       Promise.all([
         sql`SELECT 'provider' as type, business_name as label, created_at FROM service_providers ORDER BY created_at DESC LIMIT 5`,
         sql`SELECT 'request' as type, title as label, created_at FROM service_requests ORDER BY created_at DESC LIMIT 5`,
+        sql`SELECT 'review' as type, CONCAT('Calificación ', rating, '/5') as label, created_at FROM reviews ORDER BY created_at DESC LIMIT 5`,
+        sql`SELECT 'purchase' as type, CONCAT(credits, ' créditos comprados') as label, created_at FROM credit_purchases WHERE status = 'approved' ORDER BY created_at DESC LIMIT 5`,
       ]),
     ]);
     const tp = Number(m[0][0].total), tr = Number(m[1][0].total);
-    const activity = [...a[0], ...a[1]]
+    const activity = [...a[0], ...a[1], ...a[2], ...a[3]]
       .sort((x: any, y: any) => new Date(y.created_at).getTime() - new Date(x.created_at).getTime())
       .slice(0, 8);
     res.json({

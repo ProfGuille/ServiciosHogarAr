@@ -749,10 +749,10 @@ export default function AdminDashboard() {
                   <div className="space-y-4">
                     {recentActivity && recentActivity.length > 0 ? recentActivity.map((item: any, i: number) => (
                       <div key={i} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-                        <div className={`w-2 h-2 rounded-full ${item.type === "provider" ? "bg-green-500" : "bg-blue-500"}`}></div>
+                        <div className={`w-2 h-2 rounded-full ${item.type === "provider" ? "bg-green-500" : item.type === "review" ? "bg-yellow-500" : item.type === "purchase" ? "bg-purple-500" : "bg-blue-500"}`}></div>
                         <div className="flex-1">
                           <p className="text-sm font-medium">
-                            {item.type === "provider" ? "Nuevo profesional: " : "Nueva solicitud: "}
+                            {item.type === "provider" ? "Nuevo profesional: " : item.type === "review" ? "Nueva reseña: " : item.type === "purchase" ? "Compra: " : "Nueva solicitud: "}
                             {item.label}
                           </p>
                           <p className="text-xs text-slate-500">
