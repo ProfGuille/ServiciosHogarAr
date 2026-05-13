@@ -283,7 +283,7 @@ export default function NewServiceRequest() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">{wantsAccount ? "Email (requerido para crear cuenta)" : "Email (opcional)"}</label>
+                  <label className="block text-sm font-medium mb-2">Email (opcional)</label>
                   <input
                     type="email"
                     name="email"
