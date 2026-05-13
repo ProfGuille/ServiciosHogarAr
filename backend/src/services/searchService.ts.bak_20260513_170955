@@ -3,6 +3,7 @@ import { serviceProviders } from "../shared/schema/serviceProviders.js";
 import { providerLocations } from "../shared/schema/providerLocations.js";
 import { users } from "../shared/schema/users.js";
 import { sql, and, or, ilike, gte, lte, desc, asc, eq, inArray, SQL } from "drizzle-orm";
+import { providerServices } from "../shared/schema/providerServices.js";
 import { haversineDistance, calculateBoundingBox } from "../utils/geoUtils.js";
 
 export const searchService = {
@@ -57,6 +58,11 @@ export const searchService = {
 
     // CATEGORY FILTER
     if (categoryId) {
+      const subquery = db
+        .select({ providerId: providerServices.providerId })
+        .from(providerServices)
+        .where(eq(providerServices.categoryId, parseInt(categoryId as string)))
+        .as("cat_sub");
       conditions.push(
         sql`${serviceProviders.id} IN (SELECT provider_id FROM provider_categories WHERE category_id = ${parseInt(categoryId as string)})` as SQL
       );

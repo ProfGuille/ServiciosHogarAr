@@ -176,11 +176,15 @@ export function ReferralShareCard() {
               <>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">Ganás 1 crédito cuando tu referido se registra en la plataforma</span>
+                  <span className="text-sm">El profesional referido recibe 25 créditos al registrarse</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">Ganás 1 crédito adicional cuando tu referido realiza su primera compra de créditos</span>
+                  <span className="text-sm">Tú recibes 100 créditos cuando compra su primer paquete</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm">Bonos especiales de 250 y 500 créditos al alcanzar 5 y 10 referidos</span>
                 </li>
               </>
             ) : (

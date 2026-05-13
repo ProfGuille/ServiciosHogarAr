@@ -38,6 +38,10 @@ export default function CentroAyuda() {
         {
           question: "¿La plataforma garantiza el servicio?",
           answer: "ServiciosHogar conecta clientes con profesionales, pero no intermedia en la contratación ni garantiza el resultado del servicio. Te recomendamos acordar todo por escrito antes de comenzar el trabajo."
+        },
+        {
+          question: "¿Qué beneficio tengo por referir a otros usuarios?",
+          answer: "Si referís a otros usuarios con tu enlace, tus solicitudes de servicio aparecen destacadas con el distintivo 'Cliente referente' para los profesionales y tienen prioridad en el listado de leads disponibles. Esto aumenta las chances de que más profesionales te contacten."
         }
       ]
     },
@@ -63,6 +67,14 @@ export default function CentroAyuda() {
         {
           question: "¿Puedo recuperar un crédito si los datos del cliente son inválidos?",
           answer: "Reportanos el caso desde el formulario de contacto indicando el ID de la solicitud. Lo revisamos manualmente y, si se confirma que los datos son inválidos, te devolvemos el crédito."
+        },
+        {
+          question: "¿Cómo funciona el programa de referidos?",
+          answer: "Desde tu dashboard encontrás tu enlace de referido. Cuando alguien se registra con ese enlace, ganás 1 crédito. Si ese referido es un profesional y realiza su primera compra de créditos, ganás 1 crédito adicional."
+        },
+        {
+          question: "¿Qué es el badge 'Cliente referente'?",
+          answer: "Las solicitudes de clientes que han referido a otros usuarios aparecen con el distintivo 'Cliente referente' en tu listado de leads. Además, esas solicitudes se muestran primero, antes que las demás."
         }
       ]
     },

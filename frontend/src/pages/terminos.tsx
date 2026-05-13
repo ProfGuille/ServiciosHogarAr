@@ -151,6 +151,13 @@ export default function Terminos() {
                 <li>Los créditos no son reembolsables una vez utilizados</li>
                 <li>ServiciosHogar.com.ar no intermedia ni procesa pagos entre clientes y prestadores — esos acuerdos son exclusivamente entre las partes</li>
                 <li>Los créditos no vencen mientras la cuenta esté activa</li>
+                <li>Los créditos pueden obtenerse también a través del programa de referidos</li>
+              </ul>
+              <p className="mt-4 font-medium">Programa de referidos</p>
+              <ul className="list-disc pl-6 space-y-2 mt-2">
+                <li>Al registrarse un usuario con tu enlace de referido, recibís 1 crédito</li>
+                <li>Si ese referido realiza su primera compra de créditos, recibís 1 crédito adicional</li>
+                <li>Los créditos obtenidos por referidos tienen las mismas condiciones que los comprados</li>
               </ul>
             </CardContent>
           </Card>

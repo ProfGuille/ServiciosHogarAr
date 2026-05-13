@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Clock, MapPin, AlertCircle, Star, Phone, MessageCircle, Mail, CreditCard, Send } from "lucide-react";
+import { Clock, MapPin, AlertCircle, Phone, MessageCircle, Mail, CreditCard, Send } from "lucide-react";
 import { AchievementGallery } from "@/components/achievements/achievement-gallery";
 import { ReferralShareCard } from "@/components/referral/referral-share-card";
 import { format } from "date-fns";
@@ -29,7 +29,6 @@ interface Lead {
   categoryName: string;
   isUrgent: boolean;
   hasAccount?: boolean;
-  isReferringClient?: boolean;
   preferredDate: string | null;
   createdAt: string;
   status: string;
@@ -421,12 +420,6 @@ export default function ProviderDashboard() {
                         )}
                         {!lead.hasAccount && (
                           <Badge variant="outline" className="text-yellow-600 border-yellow-400">Sin cuenta registrada</Badge>
-                        )}
-                        {lead.isReferringClient && (
-                          <Badge variant="outline" className="text-amber-600 border-amber-400 flex items-center gap-1">
-                            <Star className="h-3 w-3" />
-                            Cliente referente
-                          </Badge>
                         )}
                       </div>
                     </div>
