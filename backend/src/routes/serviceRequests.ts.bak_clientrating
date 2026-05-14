@@ -51,7 +51,7 @@ router.get("/available", async (req, res) => {
         status: serviceRequests.status,
         hasAccount: sql<boolean>`(${serviceRequests.customerId} IS NOT NULL)`,
         isReferringClient: sql<boolean>`CASE WHEN ${serviceRequests.customerId} IS NOT NULL AND EXISTS (SELECT 1 FROM referral_stats WHERE user_id = ${serviceRequests.customerId} AND successful_referrals > 0) THEN true ELSE false END`,
-        clientRating: sql<string | null>`(SELECT rating FROM client_ratings WHERE provider_id = ${providerId} AND service_request_id = ${serviceRequests.id} LIMIT 1)`
+        clientRating: sql<string | null>`(SELECT rating FROM client_ratings WHERE provider_id = ${leadResponses.providerId} AND service_request_id = ${serviceRequests.id} LIMIT 1)`
       })
       .from(serviceRequests)
       .leftJoin(categories, eq(serviceRequests.categoryId, categories.id))
