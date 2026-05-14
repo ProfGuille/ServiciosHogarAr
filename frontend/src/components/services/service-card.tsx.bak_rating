@@ -72,7 +72,7 @@ export function ServiceCard({ provider }: ServiceCardProps) {
               <div className="flex items-center gap-2 mb-2">
                 <div className="flex items-center gap-1">
                   <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                  <span className="text-sm font-medium">{(Number(provider.rating) / 10).toFixed(1)}</span>
+                  <span className="text-sm font-medium">{provider.rating}</span>
                   <span className="text-xs text-slate-500">
                     ({provider.totalReviews})
                   </span>
