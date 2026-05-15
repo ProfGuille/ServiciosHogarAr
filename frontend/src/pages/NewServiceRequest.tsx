@@ -18,6 +18,7 @@ export default function NewServiceRequest() {
   const [acceptsMarketing, setAcceptsMarketing] = useState(false);
   const [registerError, setRegisterError] = useState('');
   const [accountCreated, setAccountCreated] = useState(false);
+  const isLoggedIn = !!localStorage.getItem('auth_token');
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
 
   const provinces = [
@@ -124,8 +125,8 @@ export default function NewServiceRequest() {
         setLoading(false);
         return;
       }
-      if (!registerPassword || registerPassword.length < 6) {
-        setRegisterError('La contraseña debe tener al menos 6 caracteres.');
+      if (!registerPassword || !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(registerPassword)) {
+        setRegisterError('La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.');
         setLoading(false);
         return;
       }
@@ -424,7 +425,7 @@ export default function NewServiceRequest() {
               </p>
             </div>
 
-            <div className="border-t pt-6">
+            {!isLoggedIn && <div className="border-t pt-6">
               <label className="flex items-start gap-3 cursor-pointer">
                 <input
                   type="checkbox"
@@ -446,7 +447,7 @@ export default function NewServiceRequest() {
                       type="password"
                       value={registerPassword}
                       onChange={e => setRegisterPassword(e.target.value)}
-                      placeholder="Mínimo 6 caracteres"
+                      placeholder="Mínimo 8 caracteres, una mayúscula y un número"
                       className="w-full border rounded-lg px-4 py-2"
                       autoComplete="new-password"
                     />
@@ -484,7 +485,7 @@ export default function NewServiceRequest() {
                   )}
                 </div>
               )}
-            </div>
+            </div>}
 
             <button
               type="submit"

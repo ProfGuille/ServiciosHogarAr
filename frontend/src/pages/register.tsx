@@ -96,7 +96,7 @@ export default function Register() {
 
       // In real implementation, redirect to login or email verification
       setTimeout(() => {
-        window.location.href = "/login"; 
+        window.location.href = "/mis-solicitudes";
       }, 2000);
       
     } catch (error) {
