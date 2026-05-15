@@ -91,19 +91,13 @@ export function ReferralHistory() {
                   key={referral.id}
                   className="border rounded-lg p-4 space-y-3"
                 >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <p className="font-medium truncate">
-                        {getUserName(referral.referredUser)}
-                      </p>
-                      <p className="text-sm text-muted-foreground truncate">
-                        {referral.referredUser.email}
-                      </p>
-                    </div>
-                    <div className="flex-shrink-0">
-                      {getStatusBadge(referral.status)}
-                    </div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="font-medium">{getUserName(referral.referredUser)}</p>
+                    {getStatusBadge(referral.status)}
                   </div>
+                  <p className="text-sm text-muted-foreground">
+                    {referral.referredUser.email}
+                  </p>
                   
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
