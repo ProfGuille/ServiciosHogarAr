@@ -90,7 +90,8 @@ export function EnhancedSearchBar({
     const loadPopularSearches = async () => {
       try {
         const response = await apiRequest('GET', '/api/search-suggestions/popular');
-        setPopularSearches(response.popular || []);
+        const popularData = await response.json();
+        setPopularSearches(popularData.popular || []);
       } catch (error) {
         console.error('Error loading popular searches:', error);
         // Fallback popular searches when API is not available
@@ -125,7 +126,8 @@ export function EnhancedSearchBar({
       setIsLoading(true);
       try {
         const response = await apiRequest('GET', `/api/search-suggestions/autocomplete?q=${encodeURIComponent(debouncedQuery)}`);
-        setSuggestions(response.suggestions || []);
+        const autoData = await response.json();
+        setSuggestions(autoData.suggestions || []);
       } catch (error) {
         console.error('Error fetching suggestions:', error);
         // Fallback suggestions when API is not available
