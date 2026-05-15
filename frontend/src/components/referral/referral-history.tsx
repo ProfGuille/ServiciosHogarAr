@@ -42,13 +42,15 @@ export function ReferralHistory() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "completed":
-        return <Badge variant="default" className="bg-green-600"><CheckCircle className="h-3 w-3 mr-1" />Completado</Badge>;
+        return <Badge variant="default" className="bg-green-600 flex-shrink-0"><CheckCircle className="h-3 w-3 mr-1" />Completado</Badge>;
+      case "registered":
+        return <Badge variant="outline" className="flex-shrink-0"><Clock className="h-3 w-3 mr-1" />Registrado</Badge>;
       case "pending":
-        return <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />Pendiente</Badge>;
+        return <Badge variant="secondary" className="flex-shrink-0"><Clock className="h-3 w-3 mr-1" />Pendiente</Badge>;
       case "expired":
-        return <Badge variant="destructive">Expirado</Badge>;
+        return <Badge variant="destructive" className="flex-shrink-0">Expirado</Badge>;
       default:
-        return <Badge>{status}</Badge>;
+        return <Badge className="flex-shrink-0">{status}</Badge>;
     }
   };
 
@@ -89,16 +91,18 @@ export function ReferralHistory() {
                   key={referral.id}
                   className="border rounded-lg p-4 space-y-3"
                 >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="font-medium">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="font-medium truncate">
                         {getUserName(referral.referredUser)}
                       </p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-muted-foreground truncate">
                         {referral.referredUser.email}
                       </p>
                     </div>
-                    {getStatusBadge(referral.status)}
+                    <div className="flex-shrink-0">
+                      {getStatusBadge(referral.status)}
+                    </div>
                   </div>
                   
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">

@@ -310,3 +310,56 @@ export async function sendAdminInvalidRequestEmail(
     }),
   });
 }
+
+export async function sendAdminStalePendingRequestsEmail(requests: Array<{
+  id: number; title: string; city: string; province: string;
+  isUrgent: boolean; createdAt: string;
+}>) {
+  const rows = requests.map(r =>
+    `<tr>
+      <td style="padding:8px;border-bottom:1px solid #e2e8f0">#${r.id}</td>
+      <td style="padding:8px;border-bottom:1px solid #e2e8f0">${r.title}</td>
+      <td style="padding:8px;border-bottom:1px solid #e2e8f0">${r.city}, ${r.province}</td>
+      <td style="padding:8px;border-bottom:1px solid #e2e8f0">${r.isUrgent ? "🚨 URGENTE" : "Normal"}</td>
+      <td style="padding:8px;border-bottom:1px solid #e2e8f0">${new Date(r.createdAt).toLocaleDateString("es-AR")}</td>
+    </tr>`
+  ).join("");
+
+  const html = `<div style="font-family:sans-serif;max-width:620px;margin:0 auto">
+    <h2 style="color:#dc2626">⚠️ Solicitudes sin respuesta — Seguimiento requerido</h2>
+    <p>Las siguientes solicitudes llevan más de 24hs (normales) o 12hs (urgentes) sin que ningún proveedor las haya desbloqueado:</p>
+    <table style="width:100%;border-collapse:collapse;margin-top:16px">
+      <thead><tr style="background:#f1f5f9">
+        <th style="padding:8px;text-align:left">ID</th>
+        <th style="padding:8px;text-align:left">Solicitud</th>
+        <th style="padding:8px;text-align:left">Ubicación</th>
+        <th style="padding:8px;text-align:left">Tipo</th>
+        <th style="padding:8px;text-align:left">Fecha</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div style="margin-top:24px">
+      <p><strong>Acciones sugeridas:</strong></p>
+      <ul>
+        <li>Verificar si hay proveedores disponibles para esas categorías</li>
+        <li>Evaluar si corresponde desactivar la categoría por falta de cobertura</li>
+        <li>Contactar al cliente para informar la demora</li>
+      </ul>
+      <a href="https://servicioshogar.com.ar/admin" style="background:#2563eb;color:white;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;margin-top:12px">Ver en panel admin</a>
+    </div>
+  </div>`;
+
+  await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${process.env.RESEND_API_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      from: "ServiciosHogar <administrador@servicioshogar.com.ar>",
+      to: ["administrador@servicioshogar.com.ar"],
+      subject: `⚠️ ${requests.length} solicitud${requests.length !== 1 ? "es" : ""} sin respuesta — Acción requerida`,
+      html
+    })
+  });
+}

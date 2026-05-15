@@ -382,6 +382,11 @@ export default function AdminDashboard() {
   });
   const { data: usersData } = useQuery<{ users: any[] }>({
     queryKey: ["/api/admin/users"],
+    queryFn: async () => {
+      const res = await fetch(getApiUrl("/api/admin/users"), { headers: getAuthHeaders() });
+      if (!res.ok) throw new Error("Error al obtener usuarios");
+      return res.json();
+    },
     enabled: activeTab === "usuarios",
   });
 
@@ -624,8 +629,6 @@ export default function AdminDashboard() {
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       pending: { label: "Pendiente", variant: "secondary" as const },
-      quoted: { label: "Cotizado", variant: "default" as const },
-      accepted: { label: "Aceptado", variant: "default" as const },
       in_progress: { label: "En progreso", variant: "default" as const },
       completed: { label: "Completado", variant: "default" as const },
       cancelled: { label: "Cancelado", variant: "destructive" as const },
@@ -1402,9 +1405,27 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <span className="text-slate-500 block">Estado</span>
-                  <Badge variant={selectedRequest.status === "completed" ? "default" : "secondary"}>
-                    {selectedRequest.status}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    {(() => { const s = getStatusBadge(selectedRequest.status); return <Badge variant={s.variant}>{s.label}</Badge>; })()}
+                    <select
+                      className="text-xs border rounded px-2 py-1"
+                      value={selectedRequest.status}
+                      onChange={async (e) => {
+                        const newStatus = e.target.value;
+                        await fetch(getApiUrl(`/api/admin/requests/${selectedRequest.id}/status`), {
+                          method: "PATCH",
+                          headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+                          body: JSON.stringify({ status: newStatus })
+                        });
+                        refetchRequests();
+                      }}
+                    >
+                      <option value="pending">Pendiente</option>
+                      <option value="in_progress">En progreso</option>
+                      <option value="completed">Completado</option>
+                      <option value="cancelled">Cancelado</option>
+                    </select>
+                  </div>
                 </div>
 
                 <div>

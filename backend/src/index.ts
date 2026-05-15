@@ -4,7 +4,8 @@ import cors from "cors";
 import helmet from "helmet";
 import compression from "compression";
 import registerRoutes from "./routes/index.js";
-import { runMigrations, isDatabaseAvailable } from "./db.js";
+import { runMigrations, isDatabaseAvailable, sql as neonSql } from "./db.js";
+import { sendAdminStalePendingRequestsEmail } from "./services/resendEmailService.js";
 
 
 const app = express();
@@ -140,6 +141,42 @@ app.use((err, req, res, next) => {
 async function start() {
   console.log("🔄 Ejecutando migraciones...");
   //   await runMigrations();
+
+async function checkStalePendingRequests() {
+  try {
+    await neonSql`
+      ALTER TABLE service_requests
+      ADD COLUMN IF NOT EXISTS admin_notified_at TIMESTAMPTZ
+    `;
+    const stale = await neonSql`
+      SELECT id, title, city, province, is_urgent, created_at
+      FROM service_requests
+      WHERE status = 'pending'
+        AND admin_notified_at IS NULL
+        AND (
+          (is_urgent = true  AND created_at < NOW() - INTERVAL '12 hours')
+          OR
+          (is_urgent = false AND created_at < NOW() - INTERVAL '24 hours')
+        )
+    ` as any[];
+    if (stale.length > 0) {
+      await sendAdminStalePendingRequestsEmail(stale.map((r: any) => ({
+        id: r.id, title: r.title, city: r.city,
+        province: r.province, isUrgent: r.is_urgent, createdAt: r.created_at
+      })));
+      const ids = stale.map((r: any) => r.id);
+      for (const id of ids) {
+        await neonSql`UPDATE service_requests SET admin_notified_at = NOW() WHERE id = ${id}`;
+      }
+      console.log(`📧 Alerta admin enviada: ${stale.length} solicitudes sin respuesta`);
+    }
+  } catch (err) {
+    console.error("❌ Error en job solicitudes pendientes:", err);
+  }
+}
+setInterval(checkStalePendingRequests, 60 * 60 * 1000);
+setTimeout(checkStalePendingRequests, 10000);
+
   app.listen(PORT, () => {
     console.log(`🚀 Servidor iniciado en puerto ${PORT}`);
   });

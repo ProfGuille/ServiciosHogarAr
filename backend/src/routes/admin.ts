@@ -722,6 +722,27 @@ router.get("/client-ratings", requireAuth, requireRole("admin"), async (_req, re
   }
 });
 
+
+// PATCH /api/admin/requests/:id/status
+router.patch("/requests/:id/status", async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { status } = req.body;
+    const allowed = ['pending', 'in_progress', 'completed', 'cancelled'];
+    if (!allowed.includes(status)) {
+      return res.status(400).json({ error: "Estado inválido" });
+    }
+    const rows = (await sql`
+      UPDATE service_requests SET status = ${status}, admin_notified_at = NULL
+      WHERE id = ${id} RETURNING id
+    `) as any[];
+    if (!rows[0]) return res.status(404).json({ error: "Solicitud no encontrada" });
+    res.json({ success: true });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // GET /api/admin/users
 router.get("/users", async (_req, res) => {
   try {

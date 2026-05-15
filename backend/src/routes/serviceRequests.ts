@@ -131,7 +131,7 @@ router.post("/:id/unlock", async (req, res) => {
                customer_email, preferred_contact_methods, address, neighborhood, 
                city, province, preferred_date, is_urgent, category_id, created_at, telegram_username
         FROM service_requests
-        WHERE id = ${leadId} AND status = 'pending'
+        WHERE id = ${leadId} AND status IN ('pending', 'in_progress')
       ),
       existing_unlock_check AS (
         SELECT id FROM lead_responses 
@@ -176,7 +176,7 @@ credits_used, credits_spent, unlocked_at)
         return res.status(404).json({ error: "Lead no encontrado" });
       }
       
-      if (lead.status !== 'pending') {
+      if (lead.status !== 'pending' && lead.status !== 'in_progress') {
         return res.status(400).json({ error: "Este lead ya no está disponible" });
       }
 
@@ -209,6 +209,13 @@ credits_used, credits_spent, unlocked_at)
     }
 
     const leadData = result[0];
+
+    // Primer unlock: pasar a in_progress
+    await neonSql`
+      UPDATE service_requests
+      SET status = 'in_progress'
+      WHERE id = ${leadId} AND status = 'pending'
+    `;
 
     res.json({
       success: true,
