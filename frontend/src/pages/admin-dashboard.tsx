@@ -380,12 +380,8 @@ export default function AdminDashboard() {
       return res.json();
     },
   });
-  const { data: usersData } = useQuery({
+  const { data: usersData } = useQuery<{ users: any[] }>({
     queryKey: ["/api/admin/users"],
-    queryFn: async () => {
-      const res = await fetch(getApiUrl("/api/admin/users"), { headers: getAuthHeaders() });
-      return res.json();
-    },
     enabled: activeTab === "usuarios",
   });
 
