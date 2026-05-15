@@ -110,6 +110,7 @@ export default function Search() {
   const urlSearchParams = new URLSearchParams(useWouterSearch());
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchBarKey, setSearchBarKey] = useState(0);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const itemsPerPage = 20;
 
@@ -351,6 +352,7 @@ export default function Search() {
   // Handle clearing all filters
   const handleClearAllFilters = () => {
     setFilters({ sortBy: 'relevance' });
+    setSearchBarKey(k => k + 1);
     setCurrentPage(1);
   };
 
@@ -432,6 +434,7 @@ export default function Search() {
       <div className="bg-white border-b sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <EnhancedSearchBar 
+            key={searchBarKey}
             onSearch={handleSearch} 
             initialQuery={filters.query || ''}
             showLocation={true}
