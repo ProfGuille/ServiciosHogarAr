@@ -722,4 +722,20 @@ router.get("/client-ratings", requireAuth, requireRole("admin"), async (_req, re
   }
 });
 
+// GET /api/admin/users
+router.get("/users", async (_req, res) => {
+  try {
+    const rows = (await sql`
+      SELECT id, email, first_name as "firstName", last_name as "lastName",
+             created_at as "createdAt", marketing_consent as "marketingConsent"
+      FROM users
+      ORDER BY created_at DESC
+      LIMIT 500
+    `) as any[];
+    res.json({ users: rows });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 export default router;

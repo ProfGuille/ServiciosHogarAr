@@ -380,6 +380,15 @@ export default function AdminDashboard() {
       return res.json();
     },
   });
+  const { data: usersData } = useQuery({
+    queryKey: ["/api/admin/users"],
+    queryFn: async () => {
+      const res = await fetch(getApiUrl("/api/admin/users"), { headers: getAuthHeaders() });
+      return res.json();
+    },
+    enabled: activeTab === "usuarios",
+  });
+
   const { data: analyticsData } = useQuery({
     queryKey: ["/api/admin/analytics"],
   });
@@ -733,6 +742,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="precios">Precios</TabsTrigger>
             <TabsTrigger value="logros">Logros</TabsTrigger>
             <TabsTrigger value="contactos">Verificación de Clientes</TabsTrigger>
+            <TabsTrigger value="usuarios">Usuarios</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">
