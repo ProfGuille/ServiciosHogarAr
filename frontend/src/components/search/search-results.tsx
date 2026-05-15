@@ -41,6 +41,7 @@ interface SearchResultsProps {
   itemsPerPage: number;
   onPageChange: (page: number) => void;
   showDistance?: boolean;
+  onClear?: () => void;
 }
 
 export function SearchResults({
@@ -50,7 +51,8 @@ export function SearchResults({
   currentPage,
   itemsPerPage,
   onPageChange,
-  showDistance = false
+  showDistance = false,
+  onClear,
 }: SearchResultsProps) {
   const totalPages = Math.ceil(total / itemsPerPage);
 
@@ -89,7 +91,7 @@ export function SearchResults({
             <p className="text-muted-foreground mb-4">
               Intenta ajustar los filtros o cambiar tu búsqueda
             </p>
-            <Button variant="outline" onClick={() => window.location.reload()}>
+            <Button variant="outline" onClick={() => onClear ? onClear() : window.location.reload()}>
               Limpiar filtros
             </Button>
           </div>

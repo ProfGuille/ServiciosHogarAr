@@ -671,6 +671,7 @@ export default function Search() {
                 itemsPerPage={itemsPerPage}
                 onPageChange={handlePageChange}
                 showDistance={filters.useCurrentLocation}
+                onClear={handleClearAllFilters}
               />
             ) : (
               <Card>

@@ -47,10 +47,11 @@ export const searchService = {
 
       conditions.push(
         or(
-          sql`to_tsvector('spanish', COALESCE(${serviceProviders.businessName}, '')) @@ to_tsquery('spanish', ${tsQuery})`,
-          sql`to_tsvector('spanish', COALESCE(${serviceProviders.description}, '')) @@ to_tsquery('spanish', ${tsQuery})`,
+          sql`to_tsvector('spanish', COALESCE(${serviceProviders.businessName}, '')) @@ plainto_tsquery('spanish', ${searchQuery})`,
+          sql`to_tsvector('spanish', COALESCE(${serviceProviders.description}, '')) @@ plainto_tsquery('spanish', ${searchQuery})`,
           ilike(serviceProviders.businessName, `%${searchQuery}%`),
-          ilike(serviceProviders.description, `%${searchQuery}%`)
+          ilike(serviceProviders.description, `%${searchQuery}%`),
+          sql`${serviceProviders.id} IN (SELECT pc.provider_id FROM provider_categories pc JOIN categories c ON c.id = pc.category_id WHERE c.name ILIKE ${`%${searchQuery}%`})`
         ) as SQL
       );
     }
