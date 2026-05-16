@@ -54,6 +54,13 @@ export default function ProviderProfile() {
     enabled: !!id,
   });
 
+  const { data: providerCategories } = useQuery({
+    queryKey: ["/api/providers", id, "categories"],
+    queryFn: () =>
+      fetch(getApiUrl(`/api/providers/${id}/categories`)).then((res) => res.json()),
+    enabled: !!id,
+  });
+
   // Geocodificación por ciudad para el mapa
   const [mapCoords, setMapCoords] = useState<[number, number] | null>(null);
 
@@ -177,7 +184,7 @@ export default function ProviderProfile() {
                       )}
                     </div>
 
-                    {provider.hourlyRate && (
+                    {provider.hourlyRate && !isNaN(Number(provider.hourlyRate)) && Number(provider.hourlyRate) > 0 && (
                       <div className="text-2xl font-bold text-primary mb-4">
                         ${Number(provider.hourlyRate).toLocaleString("es-AR")}{" "}
                         ARS/hora
@@ -185,7 +192,7 @@ export default function ProviderProfile() {
                     )}
 
                     <div className="flex flex-col sm:flex-row gap-3">
-                      <Link href="/nueva-solicitud">
+                      <Link href={`/nueva-solicitud${providerCategories?.[0]?.id ? \`?categoriaId=\${providerCategories[0].id}\` : ""}`}>
                         <Button className="flex-1">
                           <Calendar className="h-4 w-4 mr-2" />
                           Solicitar servicio
@@ -403,7 +410,7 @@ export default function ProviderProfile() {
 
                 <div className="flex items-center gap-3">
                   <Mail className="h-4 w-4 text-slate-400" />
-                  <Link href="/nueva-solicitud">
+                  <Link href={`/nueva-solicitud${providerCategories?.[0]?.id ? \`?categoriaId=\${providerCategories[0].id}\` : ""}`}>
                     <span className="text-slate-700 cursor-pointer hover:text-blue-600 underline">Solicitar servicio</span>
                   </Link>
                 </div>
