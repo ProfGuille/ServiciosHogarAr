@@ -1367,6 +1367,61 @@ export default function AdminDashboard() {
           <TabsContent value="contactos">
             {activeTab === "contactos" && <ContactosTab />}
           </TabsContent>
+
+          <TabsContent value="usuarios">
+            {activeTab === "usuarios" && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <Card>
+                    <CardContent className="p-6">
+                      <p className="text-2xl font-bold">{usersData?.users?.length ?? "—"}</p>
+                      <p className="text-sm text-slate-500 mt-1">Usuarios registrados</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-6">
+                      <p className="text-2xl font-bold">
+                        {usersData?.users?.filter((u: any) => u.marketingConsent).length ?? "—"}
+                      </p>
+                      <p className="text-sm text-slate-500 mt-1">Con consentimiento de marketing</p>
+                    </CardContent>
+                  </Card>
+                </div>
+                <Card>
+                  <CardContent className="p-0">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead className="bg-slate-50 border-b">
+                          <tr>
+                            <th className="text-left p-3 font-medium text-slate-600">Nombre</th>
+                            <th className="text-left p-3 font-medium text-slate-600">Email</th>
+                            <th className="text-left p-3 font-medium text-slate-600">Registro</th>
+                            <th className="text-left p-3 font-medium text-slate-600">Marketing</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {usersData?.users?.map((u: any) => (
+                            <tr key={u.id} className="border-b last:border-0 hover:bg-slate-50">
+                              <td className="p-3">{u.firstName || u.lastName ? `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() : "—"}</td>
+                              <td className="p-3 text-slate-600">{u.email}</td>
+                              <td className="p-3 text-slate-500">
+                                {new Date(u.createdAt).toLocaleDateString("es-AR")}
+                              </td>
+                              <td className="p-3">
+                                {u.marketingConsent
+                                  ? <span className="text-green-600 font-medium">Sí</span>
+                                  : <span className="text-slate-400">No</span>}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </TabsContent>
         </Tabs>
       </div>
 

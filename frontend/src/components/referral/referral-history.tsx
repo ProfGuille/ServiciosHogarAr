@@ -42,9 +42,9 @@ export function ReferralHistory() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "completed":
-        return <Badge variant="default" className="bg-green-600 flex-shrink-0"><CheckCircle className="h-3 w-3 mr-1" />Completado</Badge>;
+        return <Badge variant="default" className="bg-green-600 flex-shrink-0"><CheckCircle className="h-3 w-3 mr-1" />Realizó su primera compra</Badge>;
       case "registered":
-        return <Badge variant="outline" className="flex-shrink-0"><Clock className="h-3 w-3 mr-1" />Registrado</Badge>;
+        return <Badge variant="outline" className="flex-shrink-0"><Clock className="h-3 w-3 mr-1" />Aún no compró créditos</Badge>;
       case "pending":
         return <Badge variant="secondary" className="flex-shrink-0"><Clock className="h-3 w-3 mr-1" />Pendiente</Badge>;
       case "expired":
