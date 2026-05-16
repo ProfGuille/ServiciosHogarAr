@@ -403,6 +403,19 @@ export default function AdminDashboard() {
   });
   const [analyticsDateInput, setAnalyticsDateInput] = useState<string>("");
   const [marketplaceDateInput, setMarketplaceDateInput] = useState<string>("");
+
+  useEffect(() => {
+    if (settingsData?.marketplaceStartDate) {
+      setMarketplaceDateInput(String(settingsData.marketplaceStartDate).split("T")[0]);
+    }
+  }, [settingsData?.marketplaceStartDate]);
+
+  // Sincronizar input con valor guardado en DB al cargar o re-autenticar
+  useEffect(() => {
+    if (settingsData?.marketplaceStartDate) {
+      setMarketplaceDateInput(String(settingsData.marketplaceStartDate).split("T")[0]);
+    }
+  }, [settingsData?.marketplaceStartDate]);
   const handleSaveMarketplaceDate = async (date: string | null) => {
     await fetch(getApiUrl("/api/admin/settings"), {
       method: "PATCH",

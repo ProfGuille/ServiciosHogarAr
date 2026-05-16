@@ -74,6 +74,14 @@ export default function Register() {
 
       const result = await response.json();
 
+      // Guardar sesión (mismo mecanismo que login)
+      if (result.token) {
+        localStorage.setItem('token', result.token);
+      }
+      if (result.user) {
+        localStorage.setItem('user', JSON.stringify(result.user));
+      }
+
       // Log for legal audit trail (client-side)
       console.log("Registration successful with legal compliance:", {
         userId: result.user.id,
@@ -89,15 +97,15 @@ export default function Register() {
       });
 
       toast({
-        title: "¡Cuenta creada exitosamente!",
-        description: "Su cuenta ha sido creada y todos los términos legales han sido registrados correctamente.",
-        duration: 5000,
+        title: "¡Bienvenido/a a ServiciosHogar!",
+        description: "Tu cuenta está lista.",
+        duration: 3000,
       });
 
       // In real implementation, redirect to login or email verification
       setTimeout(() => {
         window.location.href = "/mis-solicitudes";
-      }, 2000);
+      }, 1500);
       
     } catch (error) {
       console.error("Registration error:", error);

@@ -204,21 +204,7 @@ export function SearchResults({
                       </div>
                     )}
 
-                    {/* Response time */}
-                    {provider.avgResponseTime > 0 && (
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                        <span>Responde en ~{Math.round(provider.avgResponseTime)}h</span>
-                      </div>
-                    )}
 
-                    {/* Completed jobs */}
-                    {provider.completedJobs > 0 && (
-                      <div className="flex items-center gap-1">
-                        <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                        <span>{provider.completedJobs} trabajos</span>
-                      </div>
-                    )}
 
                     {/* Available now */}
                     {provider.hasCredits && (
