@@ -188,13 +188,15 @@ export function SearchResults({
                   {/* Stats and features */}
                   <div className="flex flex-wrap items-center gap-4 text-sm">
                     {/* Rating */}
+                    {provider.totalReviews > 0 && (
                     <div className="flex items-center gap-1">
                       <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span className="font-medium">{provider.rating}</span>
+                      <span className="font-medium">{(Number(provider.rating) / 10).toFixed(1)}</span>
                       <span className="text-muted-foreground">
                         ({provider.totalReviews} reseñas)
                       </span>
                     </div>
+                    )}
 
                     {/* Experience */}
                     {provider.experienceYears > 0 && (
@@ -220,7 +222,7 @@ export function SearchResults({
                     <Link href={`/profesional/${provider.id}`}>
                       <Button>Ver perfil</Button>
                     </Link>
-                    <Link href="/nueva-solicitud">
+                    <Link href={"/nueva-solicitud" + (provider.categories?.[0]?.id ? "?categoriaId=" + provider.categories[0].id : "")}>
                       <Button variant="outline">
                         <MessageSquare className="h-4 w-4 mr-2" />
                         Solicitar servicio
