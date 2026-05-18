@@ -192,7 +192,7 @@ export default function ProviderProfile() {
                     )}
 
                     <div className="flex flex-col sm:flex-row gap-3">
-                      <Link href={`/nueva-solicitud${providerCategories?.[0]?.id ? \`?categoriaId=\${providerCategories[0].id}\` : ""}`}>
+                      <Link href={"/nueva-solicitud" + (providerCategories?.[0]?.id ? "?categoriaId=" + providerCategories[0].id : "")}>
                         <Button className="flex-1">
                           <Calendar className="h-4 w-4 mr-2" />
                           Solicitar servicio
@@ -410,7 +410,7 @@ export default function ProviderProfile() {
 
                 <div className="flex items-center gap-3">
                   <Mail className="h-4 w-4 text-slate-400" />
-                  <Link href={`/nueva-solicitud${providerCategories?.[0]?.id ? \`?categoriaId=\${providerCategories[0].id}\` : ""}`}>
+                  <Link href={"/nueva-solicitud" + (providerCategories?.[0]?.id ? "?categoriaId=" + providerCategories[0].id : "")}>
                     <span className="text-slate-700 cursor-pointer hover:text-blue-600 underline">Solicitar servicio</span>
                   </Link>
                 </div>

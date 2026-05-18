@@ -126,8 +126,11 @@ if (safeData.phoneNumber !== undefined && typeof safeData.phoneNumber !== "strin
       .returning();
     for (const [key, dbCol] of Object.entries(fieldMap)) {
       if (safeData[key] !== undefined) {
-        const oldVal = (current[dbCol] !== undefined && current[dbCol] !== null) ? String(current[dbCol]) : "";
-        const newVal = (safeData[key] !== undefined && safeData[key] !== null) ? String(safeData[key]) : "";
+        const numericDbCols = ["hourly_rate", "experience_years", "coverage_radius_km"];
+        const _oldRaw = (current[dbCol] !== undefined && current[dbCol] !== null) ? current[dbCol] : "";
+        const _newRaw = (safeData[key] !== undefined && safeData[key] !== null) ? safeData[key] : "";
+        const oldVal = numericDbCols.includes(dbCol) && _oldRaw !== "" ? String(parseFloat(String(_oldRaw))) : String(_oldRaw);
+        const newVal = numericDbCols.includes(dbCol) && _newRaw !== "" ? String(parseFloat(String(_newRaw))) : String(_newRaw);
         if (oldVal !== newVal) {
           await db.execute(sql`INSERT INTO provider_profile_changes (provider_id, changed_by, field_name, old_value, new_value) VALUES (${id}, ${changedBy || null}, ${key}, ${oldVal}, ${newVal})`);
         }
