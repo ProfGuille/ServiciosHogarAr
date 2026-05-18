@@ -289,7 +289,7 @@ export default function ProviderDashboard() {
           businessName: profileForm.businessName,
           description: profileForm.description,
           hourlyRate: profileForm.hourlyRate ? Number(profileForm.hourlyRate) : undefined,
-          phoneNumber: profileForm.phone,
+          ...(profileForm.phone !== "" ? { phoneNumber: profileForm.phone } : {}),
         }),
       });
       if (!res.ok) throw new Error("Error al guardar");

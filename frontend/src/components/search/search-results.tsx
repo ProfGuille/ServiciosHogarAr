@@ -161,10 +161,10 @@ export function SearchResults({
                     </div>
 
                     {/* Price */}
-                    {provider.hourlyRate && (
+                    {provider.hourlyRate && !isNaN(parseFloat(provider.hourlyRate)) && parseFloat(provider.hourlyRate) > 0 && (
                       <div className="text-right">
                         <p className="text-2xl font-bold">
-                          ${parseFloat(provider.hourlyRate).toLocaleString()}
+                          ${parseFloat(provider.hourlyRate).toLocaleString("es-AR")}
                         </p>
                         <p className="text-sm text-muted-foreground">por hora</p>
                       </div>

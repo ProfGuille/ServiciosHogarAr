@@ -1360,7 +1360,7 @@ export default function AdminDashboard() {
                             <td className="px-4 py-3 text-red-600 max-w-[160px] truncate">{c.old_value ?? "—"}</td>
                             <td className="px-4 py-3 text-green-700 max-w-[160px] truncate">{c.new_value ?? "—"}</td>
                             <td className="px-4 py-3">{c.changed_by_first ? `${c.changed_by_first} ${c.changed_by_last}` : "—"}</td>
-                            <td className="px-4 py-3 text-slate-400 whitespace-nowrap">{new Date(c.changed_at).toLocaleString("es-AR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "America/Argentina/Buenos_Aires" })}</td>
+                            <td className="px-4 py-3 text-slate-400 whitespace-nowrap">{new Date(String(c.changed_at).endsWith("Z") || String(c.changed_at).includes("+") ? c.changed_at : c.changed_at + "Z").toLocaleString("es-AR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "America/Argentina/Buenos_Aires" })}</td>
                           </tr>
                         ))}
                       </tbody>

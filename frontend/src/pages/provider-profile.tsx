@@ -155,10 +155,10 @@ export default function ProviderProfile() {
                     <div className="flex items-center justify-center sm:justify-start gap-2 mb-4">
                       <Star className="h-5 w-5 text-yellow-400 fill-current" />
                       <span className="text-xl font-semibold">
-                        {provider.rating}
+                        {stats?.totalReviews > 0 ? Number(stats.averageRating).toFixed(1) : '—'}
                       </span>
                       <span className="text-slate-500">
-                        ({provider.totalReviews} reseñas)
+                        ({stats?.totalReviews ?? 0} reseñas)
                       </span>
                     </div>
 
@@ -476,29 +476,7 @@ export default function ProviderProfile() {
               </Card>
             )}
 
-            {/* Quick Response */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Respuesta rápida</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary mb-1">
-                    2 hrs
-                  </div>
-                  <p className="text-sm text-slate-600">
-                    Tiempo promedio de respuesta
-                  </p>
-                </div>
 
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-secondary mb-1">
-                    95%
-                  </div>
-                  <p className="text-sm text-slate-600">Tasa de aceptación</p>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>

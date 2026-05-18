@@ -272,16 +272,41 @@ router.get("/:id/stats", async (req, res) => {
   try {
     const { neon } = await import("@neondatabase/serverless");
     const sql = neon(process.env.DATABASE_URL!);
-    const [provider] = await sql`
-      SELECT rating, total_reviews, is_verified
+
+    const [sp] = (await sql`
+      SELECT id, user_id, is_verified
       FROM service_providers
       WHERE id = ${providerId}
-    `;
-    if (!provider) return res.status(404).json({ error: "Proveedor no encontrado" });
+    `) as any[];
+    if (!sp) return res.status(404).json({ error: "Proveedor no encontrado" });
+
+    const [reviewStats] = (await sql`
+      SELECT
+        COUNT(*)::int AS total_reviews,
+        COALESCE(ROUND(AVG(rating)::numeric, 1), 0)::float AS avg_rating
+      FROM reviews
+      WHERE reviewee_id = ${sp.user_id}
+      AND is_public = true
+    `) as any[];
+
+    const [jobStats] = (await sql`
+      SELECT
+        COUNT(*)::int AS total_jobs,
+        COUNT(*) FILTER (
+          WHERE service_request_id IN (
+            SELECT id FROM service_requests WHERE status = 'completed'
+          )
+        )::int AS completed_jobs
+      FROM lead_responses
+      WHERE provider_id = ${sp.id}
+    `) as any[];
+
     res.json({
-      rating: provider.rating,
-      totalReviews: provider.total_reviews,
-      isVerified: provider.is_verified,
+      averageRating: Number(reviewStats.avg_rating),
+      totalReviews: Number(reviewStats.total_reviews),
+      isVerified: sp.is_verified,
+      totalJobs: Number(jobStats.total_jobs),
+      completedJobs: Number(jobStats.completed_jobs),
     });
   } catch (err) {
     console.error("Error en GET /api/providers/:id/stats:", err);
