@@ -115,6 +115,8 @@ export const searchService = {
             phoneNumber: serviceProviders.phoneNumber,
             hourlyRate: serviceProviders.hourlyRate,
             email: users.email,
+            experienceYears: serviceProviders.experienceYears,
+            categories: sql<Array<{id: number; name: string}>>`(SELECT COALESCE(json_agg(json_build_object('id', sc.id, 'name', sc.name)), '[]'::json) FROM provider_categories pc JOIN service_categories sc ON sc.id = pc.category_id WHERE pc.provider_id = ${serviceProviders.id})`,
             latitude: providerLocations.latitude,
             longitude: providerLocations.longitude,
             address: providerLocations.address,
