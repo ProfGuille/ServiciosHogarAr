@@ -363,3 +363,35 @@ export async function sendAdminStalePendingRequestsEmail(requests: Array<{
     })
   });
 }
+
+export async function sendClientUnlockNotificationEmail(
+  toEmail: string,
+  firstName: string,
+  requestTitle: string,
+  neighborhood: string
+): Promise<void> {
+  try {
+    const { data, error } = await resend.emails.send({
+      from: 'ServiciosHogar <administrador@servicioshogar.com.ar>',
+      to: toEmail,
+      subject: '¡Un profesional está interesado en tu solicitud! 🔔',
+      html: `
+        <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
+          <h2 style="color:#1d4ed8">¡Hola ${firstName}!</h2>
+          <p>Un profesional de tu zona vio tu solicitud <strong>"${requestTitle}"</strong> en ${neighborhood} y desbloqueó tus datos de contacto para poder comunicarse con vos.</p>
+          <p>Es posible que te contacte por teléfono o email en las próximas horas.</p>
+          <p style="color:#6b7280;font-size:14px">Si recibís su llamado o mensaje, recordá calificarlo después del servicio. Las reseñas ayudan a otros clientes a elegir mejor.</p>
+          <a href="https://servicioshogar.com.ar/mis-solicitudes" style="display:inline-block;margin:16px 0;padding:12px 24px;background:#1d4ed8;color:#fff;border-radius:6px;text-decoration:none;font-weight:bold">
+            Ver mis solicitudes
+          </a>
+          <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0"/>
+          <p style="color:#9ca3af;font-size:12px">ServiciosHogar.com.ar — Este email fue enviado porque tenés una solicitud activa.</p>
+        </div>
+      `,
+    });
+    if (error) console.error('❌ Error Resend unlock notification:', error);
+    else console.log('✅ Email unlock enviado a cliente', toEmail, '| ID:', data?.id);
+  } catch (err) {
+    console.error('❌ Error enviando email unlock al cliente:', err);
+  }
+}

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { requireAuth } from "../middleware/auth.js";
 import { checkAndGrantAchievements } from "./achievements.js";
+import { sendClientUnlockNotificationEmail } from "../services/resendEmailService.js";
 import { db, sql as neonSql } from "../db.js";
 import { 
   serviceRequests, 
@@ -240,6 +241,16 @@ credits_used, credits_spent, unlocked_at)
       remainingCredits: leadData.remaining_credits,
       unlockedAt: leadData.unlocked_at
     });
+
+    // Notificar al cliente que un proveedor desbloqueó su solicitud
+    if (leadData.customer_email) {
+      sendClientUnlockNotificationEmail(
+        leadData.customer_email,
+        leadData.customer_first_name || 'Cliente',
+        leadData.title,
+        leadData.neighborhood || leadData.city || ''
+      ).catch(err => console.error('❌ Error enviando email unlock:', err));
+    }
 
   } catch (error: any) {
     console.error("❌ Error en POST /api/service-requests/:id/unlock:", error);
