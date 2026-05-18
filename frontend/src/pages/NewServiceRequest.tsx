@@ -19,7 +19,10 @@ export default function NewServiceRequest() {
   const [registerError, setRegisterError] = useState('');
   const [accountCreated, setAccountCreated] = useState(false);
   const isLoggedIn = !!localStorage.getItem('auth_token');
-  const [selectedCategoryId, setSelectedCategoryId] = useState('');
+  const [selectedCategoryId, setSelectedCategoryId] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('categoriaId') || '';
+  });
 
   const provinces = [
     'Buenos Aires', 'CABA', 'Catamarca', 'Chaco', 'Chubut', 'Córdoba',
@@ -68,7 +71,6 @@ export default function NewServiceRequest() {
     const params = new URLSearchParams(window.location.search);
     const catId = params.get('categoriaId');
     if (catId) {
-      setSelectedCategoryId(catId);
       window.scrollTo({ top: 0, behavior: 'instant' });
     }
   }, [categories]);

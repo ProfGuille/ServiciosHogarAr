@@ -263,7 +263,7 @@ export default function ProviderDashboard() {
 
   // Estado para edición de perfil
   const [editingProfile, setEditingProfile] = useState(false);
-  const [profileForm, setProfileForm] = useState({ businessName: "", description: "", hourlyRate: "", phone: "" });
+  const [profileForm, setProfileForm] = useState({ businessName: "", description: "", hourlyRate: "", phone: "", experienceYears: "" });
 
   const handleEditProfile = () => {
     setProfileForm({
@@ -271,6 +271,7 @@ export default function ProviderDashboard() {
       description: providerProfile?.description || "",
       hourlyRate: providerProfile?.hourlyRate || providerProfile?.hourly_rate || "",
       phone: providerProfile?.phoneNumber || providerProfile?.phone_number || "",
+      experienceYears: String(providerProfile?.experienceYears || providerProfile?.experience_years || ""),
     });
     setEditingProfile(true);
   };
@@ -290,6 +291,7 @@ export default function ProviderDashboard() {
           description: profileForm.description,
           hourlyRate: profileForm.hourlyRate ? Number(profileForm.hourlyRate) : undefined,
           ...(profileForm.phone !== "" ? { phoneNumber: profileForm.phone } : {}),
+          ...(profileForm.experienceYears !== "" ? { experienceYears: Number(profileForm.experienceYears) } : {}),
         }),
       });
       if (!res.ok) throw new Error("Error al guardar");
@@ -582,6 +584,10 @@ export default function ProviderDashboard() {
                     <input className="w-full mt-1 px-3 py-2 border rounded-md text-sm" type="number" value={profileForm.hourlyRate} onChange={e => setProfileForm({...profileForm, hourlyRate: e.target.value})} />
                   </div>
                   <div>
+                    <label className="text-sm font-medium">Años de experiencia</label>
+                    <input className="w-full mt-1 px-3 py-2 border rounded-md text-sm" type="number" min="0" max="50" value={profileForm.experienceYears} onChange={e => setProfileForm({...profileForm, experienceYears: e.target.value})} />
+                  </div>
+                  <div>
                     <label className="text-sm font-medium">Teléfono de contacto</label>
                     <input className="w-full mt-1 px-3 py-2 border rounded-md text-sm" value={profileForm.phone} onChange={e => setProfileForm({...profileForm, phone: e.target.value})} />
                   </div>
@@ -603,6 +609,10 @@ export default function ProviderDashboard() {
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Tarifa/hora</span>
                     <span className="font-medium">{providerProfile?.hourlyRate || providerProfile?.hourly_rate ? `$${providerProfile?.hourlyRate || providerProfile?.hourly_rate} ARS` : "—"}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Experiencia</span>
+                    <span className="font-medium">{providerProfile?.experienceYears || providerProfile?.experience_years ? `${providerProfile?.experienceYears || providerProfile?.experience_years} años` : "—"}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Teléfono</span>
