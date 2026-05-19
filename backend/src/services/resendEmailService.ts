@@ -395,3 +395,36 @@ export async function sendClientUnlockNotificationEmail(
     console.error('❌ Error enviando email unlock al cliente:', err);
   }
 }
+
+export async function sendClientReviewReminderEmail(
+  toEmail: string,
+  firstName: string,
+  requestTitle: string
+): Promise<void> {
+  try {
+    const { data, error } = await resend.emails.send({
+      from: 'ServiciosHogar <administrador@servicioshogar.com.ar>',
+      to: toEmail,
+      subject: '¿Cómo te fue con el profesional? Dejá tu reseña ⭐',
+      html: `
+        <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
+          <h2 style="color:#1d4ed8">¡Hola ${firstName}!</h2>
+          <p>Hace unos días un profesional se contactó con vos por tu solicitud <strong>"${requestTitle}"</strong>.</p>
+          <p>¿Pudieron concretar el servicio? Tu opinión ayuda a otros vecinos a elegir mejor.</p>
+          <p>Solo te lleva un minuto calificar al profesional.</p>
+          <a href="https://servicioshogar.com.ar/mis-solicitudes" style="display:inline-block;margin:16px 0;padding:12px 24px;background:#1d4ed8;color:#fff;border-radius:6px;text-decoration:none;font-weight:bold">
+            Calificar al profesional
+          </a>
+          <p style="color:#6b7280;font-size:13px">Si todavía no concretaron el servicio, podés ignorar este mensaje.</p>
+          <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0"/>
+          <p style="color:#9ca3af;font-size:12px">ServiciosHogar.com.ar</p>
+        </div>
+      `,
+    });
+    if (error) console.error('❌ Error Resend review reminder:', error);
+    else console.log('✅ Email recordatorio reseña enviado a', toEmail, '| ID:', data?.id);
+  } catch (err) {
+    console.error('❌ Error enviando recordatorio reseña:', err);
+  }
+}
+

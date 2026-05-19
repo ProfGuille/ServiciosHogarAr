@@ -5,7 +5,7 @@ import helmet from "helmet";
 import compression from "compression";
 import registerRoutes from "./routes/index.js";
 import { runMigrations, isDatabaseAvailable, sql as neonSql } from "./db.js";
-import { sendAdminStalePendingRequestsEmail } from "./services/resendEmailService.js";
+import { sendAdminStalePendingRequestsEmail, sendClientReviewReminderEmail } from "./services/resendEmailService.js";
 
 
 const app = express();
@@ -174,8 +174,51 @@ async function checkStalePendingRequests() {
     console.error("❌ Error en job solicitudes pendientes:", err);
   }
 }
+async function checkReviewReminders() {
+  try {
+    await neonSql`
+      ALTER TABLE lead_responses
+      ADD COLUMN IF NOT EXISTS reminder_sent_at TIMESTAMPTZ
+    `;
+    const pending = await neonSql`
+      SELECT
+        lr.id as lead_response_id,
+        sr.title,
+        u.email,
+        u.first_name
+      FROM lead_responses lr
+      JOIN service_requests sr ON sr.id = lr.service_request_id
+      JOIN users u ON u.id = sr.user_id
+      WHERE lr.unlocked_at < NOW() - INTERVAL '48 hours'
+        AND lr.reminder_sent_at IS NULL
+        AND sr.status = 'in_progress'
+    ` as any[];
+
+    for (const row of pending) {
+      if (!row.email) continue;
+      await sendClientReviewReminderEmail(
+        row.email,
+        row.first_name || 'Cliente',
+        row.title
+      );
+      await neonSql`
+        UPDATE lead_responses
+        SET reminder_sent_at = NOW()
+        WHERE id = ${row.lead_response_id}
+      `;
+    }
+    if (pending.length > 0) {
+      console.log(`📧 Recordatorios reseña enviados: ${pending.length}`);
+    }
+  } catch (err) {
+    console.error("❌ Error en job recordatorios reseña:", err);
+  }
+}
+
 setInterval(checkStalePendingRequests, 60 * 60 * 1000);
 setTimeout(checkStalePendingRequests, 10000);
+setInterval(checkReviewReminders, 60 * 60 * 1000);
+setTimeout(checkReviewReminders, 20000);
 
   app.listen(PORT, () => {
     console.log(`🚀 Servidor iniciado en puerto ${PORT}`);
