@@ -871,7 +871,7 @@ export default function AdminDashboard() {
                               </h3>
                               <div className="flex items-center gap-2 text-sm text-slate-600">
                                 <MapPin className="h-3 w-3" />
-                                {provider.city}, {provider.province}
+                                {provider.location_address || `${provider.city}${provider.province ? ', ' + provider.province : ''}`}
                               </div>
                               <div className="flex items-center gap-2 mt-1">
                                 <Badge variant="outline" className="text-xs">

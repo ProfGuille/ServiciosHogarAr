@@ -21,7 +21,7 @@ router.get("/dashboard-summary", async (req, res) => {
         sql`SELECT COUNT(*) as count FROM service_requests`,
         sql`SELECT COUNT(*) as count FROM lead_responses`,
       ]),
-      sql`SELECT id, business_name, city, province, experience_years, is_verified, created_at FROM service_providers ORDER BY is_verified ASC, created_at DESC LIMIT 20`,
+      sql`SELECT sp.id, sp.business_name, sp.city, sp.province, sp.experience_years, sp.is_verified, sp.created_at, pl.address as location_address FROM service_providers sp LEFT JOIN provider_locations pl ON pl.provider_id = sp.id ORDER BY sp.is_verified ASC, sp.created_at DESC LIMIT 20`,
       sql`SELECT id, title, description, city, province, status, is_urgent, created_at FROM service_requests ORDER BY created_at DESC LIMIT 20`,
       Promise.all([
         sql`SELECT COUNT(*) FILTER (WHERE is_verified = true) as verified, COUNT(*) as total FROM service_providers`,
