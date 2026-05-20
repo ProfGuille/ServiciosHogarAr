@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle, Loader2, AlertCircle } from "lucide-react";
 import { getApiUrl } from "@/lib/api";
+import { LocationPicker } from "@/components/maps/LocationPicker";
 
 interface Category {
   id: number;
@@ -35,6 +36,7 @@ export default function RegisterProvider() {
     marketingConsent: false,
   });
 
+  const [providerLocation, setProviderLocation] = useState<{ lat: number; lng: number; address: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -95,6 +97,10 @@ export default function RegisterProvider() {
       setError('Debés aceptar los términos y condiciones');
       return;
     }
+    if (!providerLocation) {
+      setError('Seleccioná tu ubicación en el mapa');
+      return;
+    }
 
     setLoading(true);
     try {
@@ -110,6 +116,16 @@ export default function RegisterProvider() {
         throw new Error(data.error || 'Error al registrar');
       }
 
+      const regData = await response.json();
+      // Guardar ubicación si tenemos providerId
+      if (regData.providerId && providerLocation) {
+        const token = regData.token;
+        await fetch(getApiUrl(`/api/providers/${regData.providerId}/location`), {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+          body: JSON.stringify({ latitude: providerLocation.lat, longitude: providerLocation.lng }),
+        }).catch(() => {});
+      }
       setSuccess(true);
       setTimeout(() => setLocation('/login'), 5000);
     } catch (err: any) {
@@ -233,14 +249,23 @@ export default function RegisterProvider() {
                     placeholder="Ej: Plomería Buenos Aires"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="city">Ciudad *</Label>
-                  <Input
-                    id="city"
-                    value={formData.city}
-                    onChange={e => setFormData(prev => ({ ...prev, city: e.target.value }))}
-                    placeholder="Ej: Buenos Aires"
+                <div className="md:col-span-2">
+                  <Label>Tu ubicación *</Label>
+                  <p className="text-xs text-gray-500 mb-2">Buscá tu dirección o hacé clic en el mapa</p>
+                  <LocationPicker
+                    onLocationSelect={(loc) => {
+                      setProviderLocation(loc);
+                      const parts = loc.address.split(',');
+                      const city = parts.length > 1 ? parts[parts.length - 3]?.trim() || parts[0].trim() : parts[0].trim();
+                      setFormData(prev => ({ ...prev, city }));
+                    }}
+                    height="220px"
+                    showAddressSearch={true}
+                    placeholder="Buscá tu dirección..."
                   />
+                  {providerLocation && (
+                    <p className="text-xs text-green-600 mt-1">✓ Ubicación seleccionada</p>
+                  )}
                 </div>
               </div>
 
