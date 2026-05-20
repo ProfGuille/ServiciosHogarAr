@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { getAuthHeaders } from "@/lib/auth";
 import { getApiUrl } from "@/lib/api";
+import { fetchWithAuth } from "@/lib/auth";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -223,6 +224,26 @@ export default function MyRequests() {
     }
   }, [isAuthenticated, authLoading, toast]);
 
+  const queryClient = useQueryClient();
+
+  const handleCancel = async (requestId: number) => {
+    if (!confirm("¿Cancelar esta solicitud?")) return;
+    try {
+      const res = await fetchWithAuth(getApiUrl(`/api/service-requests/${requestId}/cancel`), {
+        method: "PATCH",
+      });
+      if (res.ok) {
+        toast({ title: "Solicitud cancelada" });
+        queryClient.invalidateQueries({ queryKey: ["/api/service-requests/my"] });
+      } else {
+        const data = await res.json();
+        toast({ title: "Error", description: data.error || "No se pudo cancelar", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error", description: "No se pudo cancelar la solicitud", variant: "destructive" });
+    }
+  };
+
   const { data: requests, isLoading: requestsLoading } = useQuery<ServiceRequest[]>({
     queryKey: ["/api/service-requests/my"],
     enabled: isAuthenticated,
@@ -281,10 +302,23 @@ export default function MyRequests() {
                         <CardTitle className="text-xl mb-2">{request.title}</CardTitle>
                         <p className="text-slate-600 line-clamp-2">{request.description}</p>
                       </div>
-                      <Badge className={statusColors[request.status] || "bg-slate-100 text-slate-800"}>
-                        <StatusIcon className="w-4 h-4 mr-1" />
-                        {statusLabels[request.status] || request.status}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge className={statusColors[request.status] || "bg-slate-100 text-slate-800"}>
+                          <StatusIcon className="w-4 h-4 mr-1" />
+                          {statusLabels[request.status] || request.status}
+                        </Badge>
+                        {request.status === 'pending' && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-red-500 hover:text-red-700 hover:bg-red-50 h-7 px-2 text-xs"
+                            onClick={() => handleCancel(request.id)}
+                          >
+                            <XCircle className="w-3 h-3 mr-1" />
+                            Cancelar
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent>
