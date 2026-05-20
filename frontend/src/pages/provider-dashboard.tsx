@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Clock, MapPin, AlertCircle, Star, Phone, MessageCircle, Mail, CreditCard, Send } from "lucide-react";
 import { AchievementGallery } from "@/components/achievements/achievement-gallery";
 import { ReferralShareCard } from "@/components/referral/referral-share-card";
+import { LocationPicker } from "@/components/maps/LocationPicker";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -107,6 +108,27 @@ export default function ProviderDashboard() {
   const [activeTab, setActiveTab] = useState("available");
   const [coverageRadius, setCoverageRadius] = useState(10);
   const [savingCoverage, setSavingCoverage] = useState(false);
+  const [providerLocation, setProviderLocation] = useState<{ lat: number; lng: number; address: string } | null>(null);
+  const [savingLocation, setSavingLocation] = useState(false);
+  const [locationSaved, setLocationSaved] = useState(false);
+
+  const handleSaveLocation = async () => {
+    if (!providerId || !providerLocation) return;
+    setSavingLocation(true);
+    setLocationSaved(false);
+    try {
+      const res = await fetch(getApiUrl(`/api/providers/${providerId}/location`), {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        body: JSON.stringify({ latitude: providerLocation.lat, longitude: providerLocation.lng }),
+      });
+      if (res.ok) setLocationSaved(true);
+    } catch (err) {
+      console.error("Error guardando ubicación:", err);
+    } finally {
+      setSavingLocation(false);
+    }
+  };
   const [coverageSaved, setCoverageSaved] = useState(false);
   const [verifForm, setVerifForm] = useState({ personType: "fisica", documentType: "DNI", documentNumber: "", legalRepresentative: "", consentGiven: false });
   const [verifError, setVerifError] = useState("");
@@ -620,6 +642,29 @@ export default function ProviderDashboard() {
                   </div>
                 </div>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Ubicación */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Tu ubicación</CardTitle>
+              <CardDescription>Indicá dónde estás ubicado para que los clientes cercanos puedan encontrarte.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <LocationPicker
+                onLocationSelect={(loc) => { setProviderLocation(loc); setLocationSaved(false); }}
+                height="250px"
+                showAddressSearch={true}
+                placeholder="Buscá tu dirección..."
+              />
+              {providerLocation && (
+                <p className="text-xs text-muted-foreground">📍 {providerLocation.address || `${providerLocation.lat.toFixed(4)}, ${providerLocation.lng.toFixed(4)}`}</p>
+              )}
+              <Button onClick={handleSaveLocation} disabled={savingLocation || !providerLocation} className="w-full">
+                {savingLocation ? "Guardando..." : "Guardar ubicación"}
+              </Button>
+              {locationSaved && <p className="text-sm text-green-600 text-center">✓ Ubicación guardada correctamente</p>}
             </CardContent>
           </Card>
 
