@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import { LatLngExpression, Icon } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -53,6 +53,15 @@ function MapClickHandler({
       onLocationClick(e.latlng.lat, e.latlng.lng);
     },
   });
+  return null;
+}
+
+// Component to fly to a new center when it changes
+function MapCenterUpdater({ center }: { center: LatLngExpression }) {
+  const map = useMap();
+  useEffect(() => {
+    map.flyTo(center, map.getZoom());
+  }, [center, map]);
   return null;
 }
 
@@ -290,6 +299,7 @@ export function LocationPicker({
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
           
+          <MapCenterUpdater center={mapCenter} />
           <MapClickHandler onLocationClick={handleMapClick} />
           
           {selectedLocation && (

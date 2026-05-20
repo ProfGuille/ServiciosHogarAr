@@ -60,7 +60,11 @@ function ClientRatingSelector({ leadId, providerId, existingRating }: { leadId: 
         headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify({ providerId, serviceRequestId: leadId, rating }),
       });
-      if (!res.ok) throw new Error("Error al guardar");
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        console.error("Coverage save failed:", res.status, errBody);
+        throw new Error(errBody.error || `Error ${res.status}`);
+      }
       return res.json();
     },
     onSuccess: () => setSaved(true),
