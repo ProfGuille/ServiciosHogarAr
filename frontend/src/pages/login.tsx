@@ -11,7 +11,8 @@ export default function Login() {
   const [, setLocation] = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const sessionExpired = new URLSearchParams(window.location.search).get('expired') === '1';
+  const [error, setError] = useState(sessionExpired ? 'Tu sesión expiró. Iniciá sesión nuevamente.' : '');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {

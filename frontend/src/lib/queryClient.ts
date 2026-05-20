@@ -49,8 +49,13 @@ export const getQueryFn: <T>(options: {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
 
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      return null;
+    if (res.status === 401) {
+      if (unauthorizedBehavior === "returnNull") return null;
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      document.cookie = 'sessionId=; Max-Age=0; path=/;';
+      window.location.href = '/login?expired=1';
+      throw new Error('Sesión expirada');
     }
 
     await throwIfResNotOk(res);
