@@ -120,6 +120,14 @@ router.get("/:id", async (req, res) => {
     // Sanitizar datos sensibles
     delete provider.phoneNumber;
 
+    // Agregar ubicación real si existe
+    const locRows = (await sql`
+      SELECT latitude, longitude FROM provider_locations WHERE provider_id = ${providerId} LIMIT 1
+    `) as any[];
+    if (locRows[0]) {
+      (provider as any).latitude = locRows[0].latitude;
+      (provider as any).longitude = locRows[0].longitude;
+    }
     res.json(provider);
   } catch (err) {
     console.error("Error:", err);

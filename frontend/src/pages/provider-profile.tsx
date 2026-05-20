@@ -65,7 +65,12 @@ export default function ProviderProfile() {
   const [mapCoords, setMapCoords] = useState<[number, number] | null>(null);
 
   useEffect(() => {
-    if (!provider?.city) return;
+    if (!provider) return;
+    if ((provider as any).latitude && (provider as any).longitude) {
+      setMapCoords([(provider as any).latitude, (provider as any).longitude]);
+      return;
+    }
+    if (!provider.city) return;
     const city = encodeURIComponent(`${provider.city}, ${provider.province || 'Argentina'}, Argentina`);
     fetch(`https://nominatim.openstreetmap.org/search?q=${city}&format=json&limit=1`)
       .then(r => r.json())
@@ -75,7 +80,7 @@ export default function ProviderProfile() {
         }
       })
       .catch(() => {});
-  }, [provider?.city, provider?.province]);
+  }, [provider]);
 
   if (providerLoading) {
     return (

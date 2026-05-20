@@ -158,12 +158,19 @@ if (safeData.phoneNumber !== undefined && typeof safeData.phoneNumber !== "strin
       throw new Error("Coordenadas inválidas");
     }
 
+    // Upsert en provider_locations
+    await db.execute(sql`
+      INSERT INTO provider_locations (provider_id, latitude, longitude)
+      VALUES (${id}, ${latitude}, ${longitude})
+      ON CONFLICT (provider_id) DO UPDATE
+        SET latitude = EXCLUDED.latitude,
+            longitude = EXCLUDED.longitude
+    `);
     const [updated] = await db
       .update(serviceProviders)
-      .set({ updatedAt: new Date() }) // latitude/longitude no existen en BD — pendiente migración
+      .set({ updatedAt: new Date() })
       .where(eq(serviceProviders.id, id))
       .returning();
-
     return updated;
   },
 
