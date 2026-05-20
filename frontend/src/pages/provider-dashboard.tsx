@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
 import { getApiUrl } from "@/lib/api";
-import { getAuthHeaders } from "@/lib/auth";
+import { getAuthHeaders, fetchWithAuth } from "@/lib/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -121,9 +121,9 @@ export default function ProviderDashboard() {
     setSavingLocation(true);
     setLocationSaved(false);
     try {
-      const res = await fetch(getApiUrl(`/api/providers/${providerId}/location`), {
+      const res = await fetchWithAuth(getApiUrl(`/api/providers/${providerId}/location`), {
         method: "PATCH",
-        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ latitude: providerLocation.lat, longitude: providerLocation.lng }),
       });
       if (res.ok) setLocationSaved(true);
@@ -141,13 +141,9 @@ export default function ProviderDashboard() {
     setSavingCoverage(true);
     setCoverageSaved(false);
     try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(getApiUrl(`/api/providers/${providerId}`), {
+      const res = await fetchWithAuth(getApiUrl(`/api/providers/${providerId}`), {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ coverageRadiusKm: coverageRadius }),
       });
       if (!res.ok) throw new Error("Error al guardar");
@@ -305,13 +301,9 @@ export default function ProviderDashboard() {
   const handleSaveProfile = async () => {
     if (!providerId) return;
     try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(getApiUrl(`/api/providers/${providerId}`), {
+      const res = await fetchWithAuth(getApiUrl(`/api/providers/${providerId}`), {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           businessName: profileForm.businessName,
           description: profileForm.description,
