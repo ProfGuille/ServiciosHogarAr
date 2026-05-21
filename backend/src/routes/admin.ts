@@ -14,12 +14,14 @@ router.use(requireRole("admin"));
 
 router.get("/dashboard-summary", async (req, res) => {
   try {
+    const settingRows = await sql`SELECT value FROM platform_settings WHERE key = 'analytics_start_date'`;
+    const startDate = settingRows[0]?.value ?? '1970-01-01';
     const [s, providers, requests, m, a] = await Promise.all([
       Promise.all([
-        sql`SELECT COUNT(*) as count FROM users`,
-        sql`SELECT COUNT(*) as count FROM service_providers`,
-        sql`SELECT COUNT(*) as count FROM service_requests`,
-        sql`SELECT COUNT(*) as count FROM lead_responses`,
+        sql`SELECT COUNT(*) as count FROM users WHERE created_at >= ${startDate}::date`,
+        sql`SELECT COUNT(*) as count FROM service_providers WHERE created_at >= ${startDate}::date`,
+        sql`SELECT COUNT(*) as count FROM service_requests WHERE created_at >= ${startDate}::date`,
+        sql`SELECT COUNT(*) as count FROM lead_responses WHERE unlocked_at IS NOT NULL AND unlocked_at >= ${startDate}::date`,
       ]),
       sql`SELECT sp.id, sp.business_name, sp.city, sp.province, sp.experience_years, sp.is_verified, sp.created_at, pl.address as location_address FROM service_providers sp LEFT JOIN provider_locations pl ON pl.provider_id = sp.id ORDER BY sp.is_verified ASC, sp.created_at DESC LIMIT 20`,
       sql`SELECT id, title, description, city, province, status, is_urgent, created_at FROM service_requests ORDER BY created_at DESC LIMIT 20`,
