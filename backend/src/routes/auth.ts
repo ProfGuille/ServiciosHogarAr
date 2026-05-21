@@ -197,7 +197,10 @@ router.post("/register-provider", async (req: Request, res: Response) => {
     console.error("Error completo:", error);
     console.error("Error message:", error.message);
     console.error("Error stack:", error.stack);
-    res.status(500).json({ error: error.message });
+    if (error.message?.includes("unique") || error.message?.includes("duplicate") || error.code === "23505") {
+      return res.status(400).json({ error: "Ya existe una cuenta registrada con ese email" });
+    }
+    res.status(500).json({ error: "Error al registrar. Verificá que todos los campos sean correctos." });
   }
 });
 
