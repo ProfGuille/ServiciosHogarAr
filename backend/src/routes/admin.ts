@@ -352,42 +352,92 @@ router.patch("/settings", async (req, res) => {
 router.get("/analytics", async (req, res) => {
   try {
     const settingRows = await sql`SELECT value FROM platform_settings WHERE key = 'analytics_start_date'`;
-    const startDate = settingRows[0]?.value ?? '1970-01-01';
+    const rawStartDate = settingRows[0]?.value ?? null;
+
+    // Si hay startDate configurado: delta = [startDate..hoy] vs período equivalente anterior
+    // Si no: delta = mes actual vs mes anterior (comportamiento por defecto)
+    const hasCustomRange = !!rawStartDate;
+    const startDate = rawStartDate ?? '1970-01-01';
+
     const [users] = await sql`
       SELECT
-        COUNT(*) FILTER (WHERE created_at >= date_trunc('month', now())) as this_month,
-        COUNT(*) FILTER (WHERE created_at >= date_trunc('month', now() - interval '1 month')
-                           AND created_at < date_trunc('month', now())) as last_month,
+        COUNT(*) FILTER (WHERE
+          CASE WHEN ${hasCustomRange}
+            THEN created_at >= ${startDate}::date AND created_at <= now()
+            ELSE created_at >= date_trunc('month', now())
+          END
+        ) as this_month,
+        COUNT(*) FILTER (WHERE
+          CASE WHEN ${hasCustomRange}
+            THEN created_at >= (${startDate}::date - (now()::date - ${startDate}::date) * interval '1 day')
+                 AND created_at < ${startDate}::date
+            ELSE created_at >= date_trunc('month', now() - interval '1 month')
+                 AND created_at < date_trunc('month', now())
+          END
+        ) as last_month,
         COUNT(*) as total
       FROM users
       WHERE created_at >= ${startDate}::date
     `;
     const [providers] = await sql`
       SELECT
-        COUNT(*) FILTER (WHERE created_at >= date_trunc('month', now())) as this_month,
-        COUNT(*) FILTER (WHERE created_at >= date_trunc('month', now() - interval '1 month')
-                           AND created_at < date_trunc('month', now())) as last_month,
+        COUNT(*) FILTER (WHERE
+          CASE WHEN ${hasCustomRange}
+            THEN created_at >= ${startDate}::date AND created_at <= now()
+            ELSE created_at >= date_trunc('month', now())
+          END
+        ) as this_month,
+        COUNT(*) FILTER (WHERE
+          CASE WHEN ${hasCustomRange}
+            THEN created_at >= (${startDate}::date - (now()::date - ${startDate}::date) * interval '1 day')
+                 AND created_at < ${startDate}::date
+            ELSE created_at >= date_trunc('month', now() - interval '1 month')
+                 AND created_at < date_trunc('month', now())
+          END
+        ) as last_month,
         COUNT(*) as total
       FROM service_providers
       WHERE created_at >= ${startDate}::date
     `;
     const [requests] = await sql`
       SELECT
-        COUNT(*) FILTER (WHERE created_at >= date_trunc('month', now())) as this_month,
-        COUNT(*) FILTER (WHERE created_at >= date_trunc('month', now() - interval '1 month')
-                           AND created_at < date_trunc('month', now())) as last_month,
+        COUNT(*) FILTER (WHERE
+          CASE WHEN ${hasCustomRange}
+            THEN created_at >= ${startDate}::date AND created_at <= now()
+            ELSE created_at >= date_trunc('month', now())
+          END
+        ) as this_month,
+        COUNT(*) FILTER (WHERE
+          CASE WHEN ${hasCustomRange}
+            THEN created_at >= (${startDate}::date - (now()::date - ${startDate}::date) * interval '1 day')
+                 AND created_at < ${startDate}::date
+            ELSE created_at >= date_trunc('month', now() - interval '1 month')
+                 AND created_at < date_trunc('month', now())
+          END
+        ) as last_month,
         COUNT(*) as total
       FROM service_requests
       WHERE created_at >= ${startDate}::date
     `;
     const [unlocks] = await sql`
       SELECT
-        COUNT(*) FILTER (WHERE unlocked_at >= date_trunc('month', now())) as this_month,
-        COUNT(*) FILTER (WHERE unlocked_at >= date_trunc('month', now() - interval '1 month')
-                           AND unlocked_at < date_trunc('month', now())) as last_month,
+        COUNT(*) FILTER (WHERE
+          CASE WHEN ${hasCustomRange}
+            THEN unlocked_at >= ${startDate}::date AND unlocked_at <= now()
+            ELSE unlocked_at >= date_trunc('month', now())
+          END
+        ) as this_month,
+        COUNT(*) FILTER (WHERE
+          CASE WHEN ${hasCustomRange}
+            THEN unlocked_at >= (${startDate}::date - (now()::date - ${startDate}::date) * interval '1 day')
+                 AND unlocked_at < ${startDate}::date
+            ELSE unlocked_at >= date_trunc('month', now() - interval '1 month')
+                 AND unlocked_at < date_trunc('month', now())
+          END
+        ) as last_month,
         COUNT(*) as total
       FROM lead_responses
-      WHERE unlocked_at >= ${startDate}::date
+      WHERE unlocked_at IS NOT NULL AND unlocked_at >= ${startDate}::date
     `;
     const calcDelta = (current: number, previous: number) => {
       if (previous === 0) return current > 0 ? 100 : 0;
