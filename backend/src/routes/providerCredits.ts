@@ -19,6 +19,7 @@ router.get("/:providerId", async (req, res) => {
       .select({
         currentCredits: providerCredits.currentCredits,
         totalPurchased: providerCredits.totalPurchased,
+        totalUsed: providerCredits.totalUsed,
         providerId: providerCredits.providerId
       })
       .from(providerCredits)
