@@ -152,10 +152,19 @@ export default function RegisterProvider() {
           <Card className="max-w-md w-full">
             <CardContent className="pt-6 text-center">
               <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold mb-2">¡Registro Exitoso!</h2>
-              <p className="text-gray-600 mb-4">
-                Recibirás 10 créditos de bienvenida. Redirigiendo al login...
+              <h2 className="text-2xl font-bold mb-2">¡Bienvenido a ServiciosHogar!</h2>
+              <p className="text-gray-600 mb-2">
+                Tu cuenta fue creada exitosamente.
               </p>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4 text-left">
+                <p className="text-sm font-semibold text-blue-800 mb-2">🎁 Tus 10 créditos de bienvenida ya están acreditados.</p>
+                <ul className="text-sm text-blue-700 space-y-1">
+                  <li>✅ Con cada crédito podés desbloquear los datos de un cliente interesado.</li>
+                  <li>✅ Los clientes te contactarán directamente.</li>
+                  <li>✅ Sin comisiones — cobrás el 100% del trabajo.</li>
+                </ul>
+              </div>
+              <p className="text-sm text-gray-500">Redirigiendo al login en unos segundos...</p>
             </CardContent>
           </Card>
         </div>
@@ -236,6 +245,7 @@ export default function RegisterProvider() {
                     onChange={e => setFormData(prev => ({ ...prev, password: e.target.value }))}
                     placeholder="Mínimo 8 caracteres"
                   />
+                  <p className="text-xs text-slate-500 mt-1">Mínimo 8 caracteres, una mayúscula, una minúscula y un número.</p>
                 </div>
               </div>
 

@@ -204,10 +204,10 @@ export default function NewServiceRequest() {
             </div>
           )}
           <button
-            onClick={() => window.location.href = '/'}
+            onClick={() => window.location.href = '/mis-solicitudes'}
             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
           >
-            Volver al inicio
+            Ver mis solicitudes
           </button>
         </div>
       </div>

@@ -44,7 +44,7 @@ export default function Login() {
       
       // Redirigir según tipo de usuario
       const userType = data.user?.userType;
-      const redirect = userType === 'provider' ? '/dashboard-profesional' : userType === 'admin' ? '/admin' : '/buscar';
+      const redirect = userType === 'provider' ? '/dashboard-profesional' : userType === 'admin' ? '/admin' : '/mis-solicitudes';
       setTimeout(() => { window.location.href = redirect; }, 100);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al iniciar sesión');
