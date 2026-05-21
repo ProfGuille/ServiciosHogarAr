@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { SEOHead } from "@/components/layout/seo-head";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Navbar } from "@/components/layout/navbar";
@@ -55,7 +56,13 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <>
+      <SEOHead customSEO={{
+        title: "ServiciosHogar.com.ar - Tus Servicios para el Hogar",
+        description: "Gestioná tus solicitudes de servicios del hogar en Argentina. Encontrá profesionales verificados cerca tuyo.",
+        canonicalUrl: "https://servicioshogar.com.ar/home",
+      }} />
+      <div className="min-h-screen bg-slate-50">
       <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -156,5 +163,6 @@ export default function Home() {
 
       <Footer />
     </div>
+    </>
   );
 }

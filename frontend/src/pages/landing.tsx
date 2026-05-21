@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { SEOHead } from "@/components/layout/seo-head";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { Link } from "wouter";
@@ -51,6 +52,15 @@ export default function Landing() {
   const displayCategories = categories ?? FALLBACK_CATEGORIES;
 
   return (
+    <>
+      <SEOHead customSEO={{
+        title: "ServiciosHogar.com.ar - Encontrá Profesionales para tu Hogar en Argentina",
+        description: "Conectamos clientes con proveedores verificados de servicios para el hogar en Argentina. Plomería, electricidad, limpieza, carpintería y más. Cotizaciones gratuitas.",
+        keywords: "servicios hogar, profesionales argentina, plomería, electricidad, limpieza, carpintería, cotización gratis",
+        canonicalUrl: "https://servicioshogar.com.ar",
+        ogTitle: "ServiciosHogar.com.ar - Tu Plataforma de Servicios de Confianza",
+        ogDescription: "Encontrá profesionales verificados para servicios del hogar en Argentina.",
+      }} />
     <div className="min-h-screen bg-slate-50">
       <Navbar />
 
@@ -317,5 +327,6 @@ export default function Landing() {
 
       <Footer />
     </div>
+    </>
   );
 }

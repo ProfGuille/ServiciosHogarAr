@@ -1,4 +1,5 @@
 import { useParams, Link } from "wouter";
+import { SEOHead } from "@/components/layout/seo-head";
 import { useState, useEffect } from "react";
 import { LeafletMap } from "@/components/maps/LeafletMap";
 import { getApiUrl } from '@/lib/api';
@@ -116,7 +117,19 @@ export default function ProviderProfile() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <>
+      <SEOHead customSEO={{
+        title: provider?.businessName
+          ? provider.businessName + " - Perfil Profesional | ServiciosHogar.com.ar"
+          : "Perfil Profesional | ServiciosHogar.com.ar",
+        description: provider?.description
+          ? provider.description.slice(0, 155)
+          : "Perfil de proveedor de servicios para el hogar en Argentina.",
+        canonicalUrl: `https://servicioshogar.com.ar/proveedor/${id}`,
+        ogTitle: provider?.businessName || "Perfil Profesional",
+        ogDescription: provider?.description ? provider.description.slice(0, 155) : undefined,
+      }} />
+      <div className="min-h-screen bg-slate-50">
       <Navbar />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -488,5 +501,6 @@ export default function ProviderProfile() {
 
       <Footer />
     </div>
+    </>
   );
 }
