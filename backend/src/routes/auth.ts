@@ -382,7 +382,7 @@ router.post("/reset-password", async (req: Request, res: Response) => {
     const { token, password } = req.body;
 
     if (!token) return res.status(400).json({ error: "Token inválido" });
-    if (!password || password.length < 6)
+    if (!password || password.length < 8 || !/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password))
       return res.status(400).json({ error: "La contraseña debe tener al menos 6 caracteres" });
 
     const result = await sqlDirect`
