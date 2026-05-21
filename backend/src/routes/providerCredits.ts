@@ -34,7 +34,7 @@ router.get("/:providerId", async (req, res) => {
       providerId: credits.providerId,
       currentCredits: credits.currentCredits,
       totalPurchased: credits.totalPurchased,
-      totalSpent: credits.totalPurchased - credits.currentCredits
+      totalSpent: credits.totalUsed
     });
 
   } catch (error) {
