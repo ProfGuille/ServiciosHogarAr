@@ -154,7 +154,8 @@ credits_used, credits_spent, unlocked_at)
       ),
       update_credits AS (
         UPDATE provider_credits
-        SET current_credits = current_credits - 1
+        SET current_credits = current_credits - 1,
+            total_used = total_used + 1
         WHERE provider_id = ${providerIdInt}
           AND EXISTS (SELECT 1 FROM insert_response)
         RETURNING current_credits
