@@ -455,12 +455,12 @@ router.patch("/:id/cancel", requireAuth, async (req, res) => {
 
   try {
     const rows = (await neonSql`
-      SELECT id, status, user_id FROM service_requests WHERE id = ${requestId}
+      SELECT id, status, customer_id FROM service_requests WHERE id = ${requestId}
     `) as any[];
 
     if (!rows[0]) return res.status(404).json({ error: "Solicitud no encontrada" });
 
-    if (rows[0].user_id !== userId) {
+    if (rows[0].customer_id !== userId) {
       return res.status(403).json({ error: "No tenés permiso para cancelar esta solicitud" });
     }
 
@@ -479,37 +479,4 @@ router.patch("/:id/cancel", requireAuth, async (req, res) => {
   }
 });
 
-// Cancelar solicitud (solo el cliente dueño, solo si está pending)
-router.patch("/:id/cancel", requireAuth, async (req, res) => {
-  const requestId = parseInt(req.params.id);
-  const userId = (req as any).user?.id;
 
-  if (!requestId || isNaN(requestId)) {
-    return res.status(400).json({ error: "ID inválido" });
-  }
-
-  try {
-    const rows = (await neonSql`
-      SELECT id, status, user_id FROM service_requests WHERE id = ${requestId}
-    `) as any[];
-
-    if (!rows[0]) return res.status(404).json({ error: "Solicitud no encontrada" });
-
-    if (rows[0].user_id !== userId) {
-      return res.status(403).json({ error: "No tenés permiso para cancelar esta solicitud" });
-    }
-
-    if (rows[0].status !== 'pending') {
-      return res.status(400).json({ error: "Solo podés cancelar solicitudes pendientes" });
-    }
-
-    await neonSql`
-      UPDATE service_requests SET status = 'cancelled' WHERE id = ${requestId}
-    `;
-
-    res.json({ success: true });
-  } catch (error) {
-    console.error("❌ Error cancelando solicitud:", error);
-    res.status(500).json({ error: "Error al cancelar la solicitud" });
-  }
-});
