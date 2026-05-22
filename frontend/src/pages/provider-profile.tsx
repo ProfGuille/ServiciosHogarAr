@@ -202,6 +202,16 @@ export default function ProviderProfile() {
                       )}
                     </div>
 
+                    {providerCategories && providerCategories.length > 0 && (
+                      <div className="flex flex-wrap gap-2 justify-center sm:justify-start mb-3">
+                        {providerCategories.map((cat: { id: number; name: string; icon?: string }) => (
+                          <Badge key={cat.id} variant="secondary" className="bg-blue-50 text-blue-700 border border-blue-200">
+                            {cat.icon && <span className="mr-1">{cat.icon}</span>}
+                            {cat.name}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
                     {provider.hourlyRate && !isNaN(Number(provider.hourlyRate)) && Number(provider.hourlyRate) > 0 && (
                       <div className="text-2xl font-bold text-primary mb-4">
                         ${Number(provider.hourlyRate).toLocaleString("es-AR")}{" "}
@@ -352,7 +362,7 @@ export default function ProviderProfile() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Stats */}
-            {stats && (
+            {stats && stats.totalReviews > 0 && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -363,50 +373,27 @@ export default function ProviderProfile() {
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Users className="h-4 w-4 text-slate-400" />
-                      <span className="text-slate-600">Trabajos totales</span>
-                    </div>
-                    <span className="font-semibold">{stats.totalJobs}</span>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-slate-400" />
-                      <span className="text-slate-600">
-                        Trabajos completados
-                      </span>
-                    </div>
-                    <span className="font-semibold">{stats.completedJobs}</span>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
                       <Star className="h-4 w-4 text-slate-400" />
-                      <span className="text-slate-600">
-                        Calificación promedio
-                      </span>
+                      <span className="text-slate-600">Calificación promedio</span>
                     </div>
-                    <span className="font-semibold">
-                      {stats.averageRating}/5
-                    </span>
+                    <span className="font-semibold">{Number(stats.averageRating).toFixed(1)}/5</span>
                   </div>
-
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Award className="h-4 w-4 text-slate-400" />
-                      <span className="text-slate-600">
-                        Tasa de finalización
-                      </span>
+                      <Users className="h-4 w-4 text-slate-400" />
+                      <span className="text-slate-600">Reseñas recibidas</span>
                     </div>
-                    <span className="font-semibold">
-                      {stats.totalJobs > 0
-                        ? Math.round(
-                            (stats.completedJobs / stats.totalJobs) * 100,
-                          )
-                        : 0}
-                      %
-                    </span>
+                    <span className="font-semibold">{stats.totalReviews}</span>
                   </div>
+                  {stats.completedJobs > 0 && (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-slate-400" />
+                        <span className="text-slate-600">Trabajos completados</span>
+                      </div>
+                      <span className="font-semibold">{stats.completedJobs}</span>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             )}

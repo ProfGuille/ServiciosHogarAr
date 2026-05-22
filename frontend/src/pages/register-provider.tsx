@@ -89,6 +89,13 @@ export default function RegisterProvider() {
       setError('La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número');
       return;
     }
+    if (formData.phone) {
+      const cleanPhone = formData.phone.replace(/[\s\-().+]/g, '');
+      if (!/^\d{6,15}$/.test(cleanPhone)) {
+        setError('El teléfono debe tener entre 6 y 15 dígitos');
+        return;
+      }
+    }
     if (formData.serviceCategories.length === 0) {
       setError('Seleccioná al menos un servicio');
       return;

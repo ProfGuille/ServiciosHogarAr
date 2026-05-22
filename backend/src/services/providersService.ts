@@ -88,8 +88,12 @@ if (safeData.description !== undefined && typeof safeData.description !== "strin
       throw new Error("province debe ser string");
     }
 
-if (safeData.phoneNumber !== undefined && typeof safeData.phoneNumber !== "string") {
-      throw new Error("phoneNumber debe ser string");
+if (safeData.phoneNumber !== undefined) {
+      if (typeof safeData.phoneNumber !== "string") throw new Error("phoneNumber debe ser string");
+      const cleanPhone = safeData.phoneNumber.replace(/[\s\-().+]/g, '');
+      if (cleanPhone.length > 0 && !/^\d{6,15}$/.test(cleanPhone)) {
+        throw new Error("El teléfono debe tener entre 6 y 15 dígitos");
+      }
     }
 
     if (Object.keys(safeData).length === 0) {
