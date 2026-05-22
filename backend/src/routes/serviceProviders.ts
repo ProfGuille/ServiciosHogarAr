@@ -397,5 +397,32 @@ router.get("/reviews/recent", async (req, res) => {
   }
 });
 
+// -----------------------------
+// Verificar si es primero en su provincia
+// -----------------------------
+router.get("/:id/first-in-province", requireAuth, async (req, res) => {
+  const providerId = Number(req.params.id);
+  if (isNaN(providerId)) return res.status(400).json({ error: "ID inválido" });
+  try {
+    const rows = (await sql`
+      SELECT sp.province,
+        (SELECT COUNT(*)::int FROM service_providers
+         WHERE province ILIKE sp.province
+         AND id != ${providerId}
+         AND is_active = true) as others_count
+      FROM service_providers sp
+      WHERE sp.id = ${providerId}
+    `) as any[];
+    if (!rows.length || !rows[0].province) return res.json({ isFirst: false });
+    res.json({
+      isFirst: rows[0].others_count === 0,
+      province: rows[0].province
+    });
+  } catch (err) {
+    console.error("Error en GET /api/providers/:id/first-in-province:", err);
+    res.status(500).json({ error: "Error interno" });
+  }
+});
+
 export default router;
 

@@ -254,18 +254,28 @@ export async function sendCustomerWelcomeEmail(
 export async function sendProviderWelcomeEmail(
   toEmail: string,
   firstName: string,
-  businessName: string
+  businessName: string,
+  firstInProvince?: string
 ): Promise<void> {
+  const bonusBlock = firstInProvince ? `
+    <div style="background:#fefce8;border:1px solid #fde047;border-radius:8px;padding:16px;margin:16px 0">
+      <p style="margin:0;font-weight:bold;color:#854d0e">🏆 ¡Sos el primer profesional de ${firstInProvince} en ServiciosHogar!</p>
+      <p style="margin:8px 0 0;color:#713f12;font-size:14px">Te acreditamos <strong>5 créditos extra</strong> como reconocimiento. Tenés <strong>15 créditos</strong> para arrancar.</p>
+    </div>` : '';
+  const subject = firstInProvince
+    ? `¡Sos el primer profesional de ${firstInProvince} en ServiciosHogar! 🏆`
+    : '¡Bienvenido a ServiciosHogar! Tus 10 créditos te esperan 🎉';
   try {
     const { data, error } = await resend.emails.send({
       from: 'ServiciosHogar <administrador@servicioshogar.com.ar>',
       to: toEmail,
-      subject: '¡Bienvenido a ServiciosHogar! Tus 10 créditos te esperan 🎉',
+      subject,
       html: `
         <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
           <h2 style="color:#1d4ed8">¡Hola ${firstName}, bienvenido a ServiciosHogar!</h2>
           <p>Tu cuenta profesional para <strong>${businessName}</strong> fue creada con éxito.</p>
-          <p>Te regalamos <strong>10 créditos</strong> para que puedas ver los datos de contacto de tus primeros clientes sin costo.</p>
+          ${bonusBlock}
+          <p>Te regalamos <strong>${firstInProvince ? '15' : '10'} créditos</strong> para que puedas ver los datos de contacto de tus primeros clientes sin costo.</p>
           <p>Cada crédito te permite desbloquear los datos de una solicitud. Revisá las solicitudes disponibles en tu zona desde tu dashboard.</p>
           <a href="https://servicioshogar.com.ar/login?redirect=/dashboard-profesional" style="display:inline-block;margin:16px 0;padding:12px 24px;background:#1d4ed8;color:#fff;border-radius:6px;text-decoration:none;font-weight:bold">
             Ver solicitudes disponibles

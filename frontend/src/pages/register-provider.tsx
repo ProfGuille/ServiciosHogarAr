@@ -27,6 +27,7 @@ export default function RegisterProvider() {
     password: '',
     businessName: '',
     city: '',
+    province: '',
     phone: '',
     serviceCategories: [] as string[],
     termsAccepted: false,
@@ -288,9 +289,10 @@ export default function RegisterProvider() {
                   <LocationPicker
                     onLocationSelect={(loc) => {
                       setProviderLocation(loc);
-                      const parts = loc.address.split(',');
-                      const city = parts.length > 1 ? parts[parts.length - 3]?.trim() || parts[0].trim() : parts[0].trim();
-                      setFormData(prev => ({ ...prev, city }));
+                      const parts = loc.address.split(',').map((p: string) => p.trim());
+                      const city = parts.length > 2 ? parts[parts.length - 3] || parts[0] : parts[0];
+                      const province = parts.length > 2 ? parts[parts.length - 2] || '' : '';
+                      setFormData(prev => ({ ...prev, city, province }));
                     }}
                     height="220px"
                     showAddressSearch={true}

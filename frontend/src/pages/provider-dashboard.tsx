@@ -249,6 +249,20 @@ export default function ProviderDashboard() {
       return res.json();
     }
   });
+  // Query: Primero en provincia
+  const { data: firstInProvince } = useQuery<{ isFirst: boolean; province: string } | null>({
+    queryKey: ["provider-first-in-province", providerId],
+    enabled: !!providerId,
+    staleTime: 10 * 60 * 1000,
+    queryFn: async () => {
+      const res = await fetch(getApiUrl(`/api/providers/${providerId}/first-in-province`), {
+        headers: getAuthHeaders()
+      });
+      if (!res.ok) return null;
+      return res.json();
+    }
+  });
+
   // Query: Ubicación del proveedor
   const { data: locationData } = useQuery<{ lat: number; lng: number } | null>({
     queryKey: ["provider-location", providerId],
@@ -393,6 +407,13 @@ export default function ProviderDashboard() {
     <div className="min-h-screen bg-slate-50">
       <Navbar />
       <div className="container mx-auto py-8 px-4">
+      {/* Badge primero en provincia */}
+      {firstInProvince?.isFirst && (
+        <div className="mb-4 flex items-center gap-2 bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-3">
+          <span className="text-xl">🏆</span>
+          <p className="text-sm font-medium text-yellow-800">¡Sos el primer profesional de <strong>{firstInProvince.province}</strong> en ServiciosHogar! Recibiste 5 créditos extra de bienvenida.</p>
+        </div>
+      )}
       {/* Header con créditos */}
       <div className="flex justify-between items-center mb-8">
         <div>

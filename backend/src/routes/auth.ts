@@ -123,7 +123,7 @@ router.post("/register", async (req: Request, res: Response) => {
 // -----------------------------
 router.post("/register-provider", async (req: Request, res: Response) => {
   try {
-    const { name, email, password, businessName, city, phone } = req.body;
+    const { name, email, password, businessName, city, province, phone } = req.body;
     
     console.log("=== REGISTER PROVIDER START ===");
     console.log("Input:", { name, email, businessName, city, phone });
@@ -158,6 +158,7 @@ router.post("/register-provider", async (req: Request, res: Response) => {
       userId: user.id,
       businessName,
       city,
+      province: province || null,
       phoneNumber: phone,
       createdAt: new Date(),
       updatedAt: new Date()
@@ -171,6 +172,28 @@ router.post("/register-provider", async (req: Request, res: Response) => {
       providerId: provider.id,
       currentCredits: 10
     });
+
+    // PASO 3b: Bonus "Primero en tu provincia"
+    let isFirstInProvince = false;
+    if (province) {
+      const existing = (await neonSql`
+        SELECT COUNT(*)::int as count
+        FROM service_providers
+        WHERE province ILIKE ${province}
+        AND id != ${provider.id}
+        AND is_active = true
+      `) as any[];
+      if (existing[0]?.count === 0) {
+        isFirstInProvince = true;
+        await neonSql`
+          UPDATE provider_credits
+          SET current_credits = current_credits + 5,
+              total_purchased = total_purchased + 5
+          WHERE provider_id = ${provider.id}
+        `;
+        console.log("🎉 Primer proveedor en provincia:", province);
+      }
+    }
     
     // PASO 4: Guardar categorías seleccionadas
     const { serviceCategories } = req.body;
@@ -187,7 +210,7 @@ router.post("/register-provider", async (req: Request, res: Response) => {
 
     console.log("=== REGISTER PROVIDER SUCCESS ===");
     await processReferral(req.body.referralCode, user.id);
-    sendProviderWelcomeEmail(user.email, user.firstName, businessName);
+    sendProviderWelcomeEmail(user.email, user.firstName, businessName, isFirstInProvince ? province : undefined);
     res.status(201).json({ 
       message: 'Proveedor registrado',
       user: { id: user.id, email: user.email }
