@@ -81,6 +81,15 @@ export const searchService = {
     // RATING & REVIEWS
     if (minRating) conditions.push(gte(serviceProviders.rating, String(minRating)));
     if (hasReviews === "true") conditions.push(gte(serviceProviders.totalReviews, 1));
+    // PRICE FILTERS
+    if (minPrice) {
+      const min = Number(minPrice);
+      if (!isNaN(min) && min > 0) conditions.push(gte(serviceProviders.hourlyRate, String(min)));
+    }
+    if (maxPrice) {
+      const max = Number(maxPrice);
+      if (!isNaN(max) && max > 0) conditions.push(lte(serviceProviders.hourlyRate, String(max)));
+    }
 
     // VERIFIED
     if (verified === "true") conditions.push(eq(serviceProviders.isVerified, true));

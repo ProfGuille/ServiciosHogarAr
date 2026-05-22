@@ -162,10 +162,7 @@ export default function ServiceDetail() {
                           Verificado
                         </Badge>
                       )}
-                      <Badge variant="outline">
-                        <Shield className="h-3 w-3 mr-1" />
-                        Asegurado
-                      </Badge>
+
                       {provider.experienceYears && (
                         <Badge variant="outline">
                           <Clock className="h-3 w-3 mr-1" />

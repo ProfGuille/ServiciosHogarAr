@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
@@ -146,7 +148,7 @@ export function AdvancedSearchFilters({
 
         <Separator />
 
-        <Accordion type="multiple" defaultValue={["categories"]} className="w-full">
+        <Accordion type="multiple" defaultValue={["categories", "location", "rating"]} className="w-full">
           {/* Location Filter */}
           <AccordionItem value="location">
             <AccordionTrigger>
@@ -178,22 +180,12 @@ export function AdvancedSearchFilters({
 
               <div>
                 <Label>Ciudad</Label>
-                <Select
+                <Input
+                  placeholder="Ej: Buenos Aires"
                   value={localFilters.city || ''}
-                  onValueChange={(value) => updateFilter('city', value || undefined)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Todas las ciudades" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todas las ciudades</SelectItem>
-                    {(facets?.cities || cities).map(city => (
-                      <SelectItem key={city.name} value={city.name}>
-                        {city.name} {city.count && `(${city.count})`}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  onChange={(e) => updateFilter('city', e.target.value || undefined)}
+                  className="mt-1"
+                />
               </div>
 
               <div>
