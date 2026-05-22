@@ -60,6 +60,24 @@ router.patch("/:id", requireAuth, async (req, res) => {
 });
 
 // -----------------------------
+// Obtener ubicación del proveedor (solo dueño)
+// -----------------------------
+router.get("/:id/location", requireAuth, async (req, res) => {
+  const providerId = Number(req.params.id);
+  if (isNaN(providerId)) return res.status(400).json({ error: "ID inválido" });
+  try {
+    await ensureOwnership(req, providerId);
+    const rows = (await sql`
+      SELECT latitude, longitude FROM provider_locations WHERE provider_id = ${providerId} LIMIT 1
+    `) as any[];
+    if (!rows.length) return res.json(null);
+    res.json({ lat: Number(rows[0].latitude), lng: Number(rows[0].longitude) });
+  } catch (err) {
+    console.error("Error:", err);
+    res.status(err.status || 500).json({ error: err.message || "Error interno del servidor" });
+  }
+});
+// -----------------------------
 // Actualizar ubicación (solo dueño)
 // -----------------------------
 router.patch("/:id/location", requireAuth, async (req, res) => {

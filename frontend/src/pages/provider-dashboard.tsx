@@ -249,6 +249,26 @@ export default function ProviderDashboard() {
       return res.json();
     }
   });
+  // Query: Ubicación del proveedor
+  const { data: locationData } = useQuery<{ lat: number; lng: number } | null>({
+    queryKey: ["provider-location", providerId],
+    enabled: !!providerId,
+    queryFn: async () => {
+      const res = await fetch(getApiUrl(`/api/providers/${providerId}/location`), {
+        headers: getAuthHeaders()
+      });
+      if (!res.ok) return null;
+      return res.json();
+    }
+  });
+
+  // Sincronizar locationData con providerLocation si no hay selección manual
+  useEffect(() => {
+    if (locationData && !providerLocation) {
+      setProviderLocation({ lat: locationData.lat, lng: locationData.lng, address: '' });
+    }
+  }, [locationData]);
+
   // Verificación de identidad
   const { data: verificationData } = useQuery({
     queryKey: ["/api/providers/verification"],

@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
@@ -31,6 +32,7 @@ interface ServiceManagementProps {
 
 export function ServiceManagement({ providerId }: ServiceManagementProps) {
   const { toast } = useToast();
+  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingService, setEditingService] = useState<any>(null);
@@ -130,9 +132,7 @@ export function ServiceManagement({ providerId }: ServiceManagementProps) {
   };
 
   const handleDelete = (serviceId: number) => {
-    if (window.confirm("¿Estás seguro de que quieres eliminar este servicio?")) {
-      deleteMutation.mutate(serviceId);
-    }
+    setDeleteConfirmId(serviceId);
   };
 
   const onSubmit = (data: ServiceFormData) => {
@@ -346,5 +346,18 @@ export function ServiceManagement({ providerId }: ServiceManagementProps) {
         )}
       </CardContent>
     </Card>
+
+      <AlertDialog open={deleteConfirmId !== null}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar este servicio?</AlertDialogTitle>
+            <AlertDialogDescription>Esta acción no se puede deshacer.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteConfirmId(null)}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { if (deleteConfirmId !== null) { deleteMutation.mutate(deleteConfirmId); setDeleteConfirmId(null); } }} className="bg-red-600 hover:bg-red-700">Eliminar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
   );
 }

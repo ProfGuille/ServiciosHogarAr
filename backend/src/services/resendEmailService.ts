@@ -368,8 +368,18 @@ export async function sendClientUnlockNotificationEmail(
   toEmail: string,
   firstName: string,
   requestTitle: string,
-  neighborhood: string
+  neighborhood: string,
+  preferredContactMethods?: string[] | null,
+  telegramUsername?: string | null
 ): Promise<void> {
+  const methods: string[] = Array.isArray(preferredContactMethods) && preferredContactMethods.length > 0
+    ? preferredContactMethods
+    : ['phone', 'email'];
+  const methodLabels: Record<string, string> = { phone: 'teléfono', email: 'email', whatsapp: 'WhatsApp', telegram: 'Telegram' };
+  const methodList = methods.map(m => methodLabels[m] || m).join(', ');
+  const telegramNote = methods.includes('telegram') && telegramUsername
+    ? `<p style="color:#374151;font-size:14px">Tu usuario de Telegram: <strong>@${telegramUsername}</strong></p>`
+    : '';
   try {
     const { data, error } = await resend.emails.send({
       from: 'ServiciosHogar <administrador@servicioshogar.com.ar>',
@@ -379,7 +389,8 @@ export async function sendClientUnlockNotificationEmail(
         <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
           <h2 style="color:#1d4ed8">¡Hola ${firstName}!</h2>
           <p>Un profesional de tu zona vio tu solicitud <strong>"${requestTitle}"</strong> en ${neighborhood} y desbloqueó tus datos de contacto para poder comunicarse con vos.</p>
-          <p>Es posible que te contacte por teléfono o email en las próximas horas.</p>
+          <p>Te va a contactar por <strong>${methodList}</strong> en las próximas horas.</p>
+          ${telegramNote}
           <p style="color:#6b7280;font-size:14px">Si recibís su llamado o mensaje, recordá calificarlo después del servicio. Las reseñas ayudan a otros clientes a elegir mejor.</p>
           <a href="https://servicioshogar.com.ar/login?redirect=/mis-solicitudes" style="display:inline-block;margin:16px 0;padding:12px 24px;background:#1d4ed8;color:#fff;border-radius:6px;text-decoration:none;font-weight:bold">
             Ver mis solicitudes

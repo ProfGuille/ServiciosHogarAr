@@ -29,6 +29,12 @@ router.get("/available", async (req, res) => {
     const [startDateRow] = (await neonSql`SELECT value FROM platform_settings WHERE key = 'marketplace_start_date'`) as any[];
     const marketplaceStartDate = startDateRow?.value || null;
 
+    // Categorías del proveedor para priorizar leads relevantes
+    const providerCatRows = (await neonSql`
+      SELECT category_id FROM provider_categories WHERE provider_id = ${providerId}
+    `) as any[];
+    const providerCategoryIds = providerCatRows.map((r: any) => r.category_id as number);
+
     const unlockedLeadIds = await db
       .select({ serviceRequestId: leadResponses.serviceRequestId })
       .from(leadResponses)
@@ -68,6 +74,9 @@ router.get("/available", async (req, res) => {
         )
       )
       .orderBy(
+        providerCategoryIds.length > 0
+          ? sql`CASE WHEN ${serviceRequests.categoryId} = ANY(ARRAY[${sql.raw(providerCategoryIds.join(','))}]::int[]) THEN 0 ELSE 1 END ASC`
+          : sql`1`,
         sql`CASE WHEN ${serviceRequests.customerId} IS NOT NULL AND EXISTS (SELECT 1 FROM referral_stats WHERE user_id = ${serviceRequests.customerId} AND successful_referrals > 0) THEN 1 ELSE 0 END DESC`,
         desc(serviceRequests.createdAt)
       )
@@ -249,7 +258,9 @@ credits_used, credits_spent, unlocked_at)
         leadData.customer_email,
         leadData.customer_first_name || 'Cliente',
         leadData.title,
-        leadData.neighborhood || leadData.city || ''
+        leadData.neighborhood || leadData.city || '',
+        leadData.preferred_contact_methods,
+        leadData.telegram_username
       ).catch(err => console.error('❌ Error enviando email unlock:', err));
     }
 

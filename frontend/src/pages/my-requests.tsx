@@ -8,6 +8,7 @@ import { fetchWithAuth } from "@/lib/auth";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -108,6 +109,7 @@ function ProviderRatingSection({
 }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [cancelConfirmId, setCancelConfirmId] = useState<number | null>(null);
   const [ratings, setRatings] = useState<Record<string, number>>({});
   const [submitting, setSubmitting] = useState<string | null>(null);
   const [comments, setComments] = useState<Record<string, string>>({});
@@ -213,6 +215,23 @@ function ProviderRatingSection({
   );
 }
 
+function CancelConfirmDialog({ open, onConfirm, onCancel }: { open: boolean; onConfirm: () => void; onCancel: () => void }) {
+  return (
+    <AlertDialog open={open}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>¿Cancelar esta solicitud?</AlertDialogTitle>
+          <AlertDialogDescription>Esta acción no se puede deshacer. La solicitud quedará cancelada.</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={onCancel}>Volver</AlertDialogCancel>
+          <AlertDialogAction onClick={onConfirm} className="bg-red-600 hover:bg-red-700">Cancelar solicitud</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
 export default function MyRequests() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
@@ -226,8 +245,26 @@ export default function MyRequests() {
 
   const queryClient = useQueryClient();
 
+  const handleCancelConfirmed = async (requestId: number) => {
+    setCancelConfirmId(null);
+    try {
+      const res = await fetchWithAuth(getApiUrl(`/api/service-requests/${requestId}/cancel`), {
+        method: "PATCH",
+      });
+      if (res.ok) {
+        toast({ title: "Solicitud cancelada" });
+        queryClient.invalidateQueries({ queryKey: ["/api/service-requests/my"] });
+      } else {
+        const data = await res.json();
+        toast({ title: "Error", description: data.error || "No se pudo cancelar", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error", description: "No se pudo cancelar la solicitud", variant: "destructive" });
+    }
+  };
   const handleCancel = async (requestId: number) => {
-    if (!confirm("¿Cancelar esta solicitud?")) return;
+    setCancelConfirmId(requestId);
+    return;
     try {
       const res = await fetchWithAuth(getApiUrl(`/api/service-requests/${requestId}/cancel`), {
         method: "PATCH",
@@ -371,6 +408,11 @@ export default function MyRequests() {
         </Card>
       </div>
       <Footer />
+      <CancelConfirmDialog
+        open={cancelConfirmId !== null}
+        onConfirm={() => cancelConfirmId !== null && handleCancelConfirmed(cancelConfirmId)}
+        onCancel={() => setCancelConfirmId(null)}
+      />
     </div>
   );
 }
