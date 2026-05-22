@@ -44,11 +44,13 @@ export async function sendLeadNotificationViaResend(
               <p>📝 Descripción: ${leadData.descriptionPreview}</p>
               <p>🕐 Fecha: ${new Date(leadData.createdAt).toLocaleString('es-AR')}</p>
             </div>
+            <p style="font-size:14px;color:#555">Para ver los datos completos y desbloquear el contacto del cliente, ingresá a tu dashboard:</p>
             <center>
               <a href="https://servicioshogar.com.ar/login?redirect=/dashboard-profesional" class="cta-button">
-                Ver Lead en Dashboard
+                Ver solicitud y desbloquear datos
               </a>
             </center>
+            <p style="font-size:12px;color:#999;text-align:center">Este lead estará disponible mientras tenga estado pendiente. Los primeros en desbloquear tienen ventaja.</p>
             <div class="footer">
               <p>ServiciosHogar.com.ar</p>
             </div>

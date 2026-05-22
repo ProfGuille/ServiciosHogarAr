@@ -4,21 +4,146 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
-import { ServiceSearch } from "@/components/services/service-search";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
+import { getApiUrl } from "@/lib/api";
 import { 
   Clock, 
   CheckCircle, 
   AlertCircle, 
   Calendar,
   MapPin,
-  User,
-  Star,
-  ArrowRight
+  Plus,
+  Search,
+  ArrowRight,
+  FileText
 } from "lucide-react";
+
+const statusLabels: Record<string, string> = {
+  pending: "Pendiente",
+  in_progress: "En proceso",
+  completed: "Completado",
+  cancelled: "Cancelado",
+  quoted: "Con presupuesto",
+};
+const statusColors: Record<string, string> = {
+  pending: "bg-yellow-100 text-yellow-800",
+  in_progress: "bg-blue-100 text-blue-800",
+  completed: "bg-green-100 text-green-800",
+  cancelled: "bg-red-100 text-red-800",
+  quoted: "bg-purple-100 text-purple-800",
+};
+
+function CustomerDashboard() {
+  const { data: requests, isLoading } = useQuery<any[]>({
+    queryKey: ["/api/service-requests/my"],
+  });
+
+  const active = requests?.filter(r => r.status !== 'completed' && r.status !== 'cancelled') || [];
+  const recent = requests?.slice(0, 3) || [];
+
+  return (
+    <div className="grid lg:grid-cols-3 gap-8">
+      <div className="lg:col-span-2 space-y-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Mis solicitudes activas
+            </CardTitle>
+            <Button variant="ghost" size="sm" onClick={() => window.location.href = "/mis-solicitudes"}>
+              Ver todas <ArrowRight className="h-4 w-4 ml-1" />
+            </Button>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="space-y-3">
+                {[1,2,3].map(i => <Skeleton key={i} className="h-16 w-full" />)}
+              </div>
+            ) : active.length === 0 ? (
+              <div className="text-center py-8 text-slate-500">
+                <FileText className="h-10 w-10 mx-auto mb-3 opacity-30" />
+                <p className="mb-4">No tenés solicitudes activas</p>
+                <Button onClick={() => window.location.href = "/nueva-solicitud"}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Crear primera solicitud
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {active.slice(0, 4).map((req: any) => (
+                  <div key={req.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border hover:bg-slate-100 transition-colors cursor-pointer" onClick={() => window.location.href = "/mis-solicitudes"}>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-slate-900 truncate">{req.title}</p>
+                      <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
+                        <MapPin className="h-3 w-3" />{req.city}
+                      </p>
+                    </div>
+                    <Badge className={`ml-3 shrink-0 ${(statusColors)[req.status] || "bg-slate-100 text-slate-700"}`}>
+                      {(statusLabels)[req.status] || req.status}
+                    </Badge>
+                  </div>
+                ))}
+                {active.length > 4 && (
+                  <Button variant="ghost" className="w-full text-slate-500" onClick={() => window.location.href = "/mis-solicitudes"}>
+                    Ver {active.length - 4} más
+                  </Button>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Acciones rápidas</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button className="w-full" onClick={() => window.location.href = "/nueva-solicitud"}>
+              <Plus className="h-4 w-4 mr-2" />
+              Nueva solicitud
+            </Button>
+            <Button variant="outline" className="w-full" onClick={() => window.location.href = "/buscar"}>
+              <Search className="h-4 w-4 mr-2" />
+              Buscar profesionales
+            </Button>
+            <Button variant="outline" className="w-full" onClick={() => window.location.href = "/mis-solicitudes"}>
+              <FileText className="h-4 w-4 mr-2" />
+              Mis solicitudes
+            </Button>
+          </CardContent>
+        </Card>
+
+        {requests && requests.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium text-slate-600">Resumen</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-600">Total solicitudes</span>
+                <span className="font-semibold">{requests.length}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-600">Activas</span>
+                <span className="font-semibold text-blue-600">{active.length}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-600">Completadas</span>
+                <span className="font-semibold text-green-600">{requests.filter((r:any) => r.status === 'completed').length}</span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function Home() {
   const { user, isLoading } = useAuth();
@@ -78,87 +203,7 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="mb-12">
-          <ServiceSearch />
-        </div>
-
-        <div className="grid lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-8">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="h-5 w-5" />
-                  Dashboard
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-slate-600">
-                  Contenido del dashboard para {user.userType === 'provider' ? 'proveedores' : 'clientes'}
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Acciones rápidas</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {user.userType === 'customer' ? (
-                  <>
-                    <Button className="w-full" size="sm" onClick={() => window.location.href = "/nueva-solicitud"}>
-                      <Calendar className="h-4 w-4 mr-2" />
-                      Nueva solicitud
-                    </Button>
-                    <Button variant="outline" className="w-full" size="sm" onClick={() => window.location.href = "/buscar"}>
-                      <User className="h-4 w-4 mr-2" />
-                      Buscar profesionales
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Button className="w-full" size="sm" onClick={() => window.location.href = "/perfil"}>
-                      <User className="h-4 w-4 mr-2" />
-                      Mi perfil
-                    </Button>
-                    {user.userType === 'provider' && (
-                      <Button variant="outline" className="w-full" size="sm" onClick={() => window.location.href = "/dashboard-profesional"}>
-                        <Calendar className="h-4 w-4 mr-2" />
-                        Ver dashboard profesional
-                      </Button>
-                    )}
-                    {user.userType === 'admin' && (
-                      <Button variant="outline" className="w-full" size="sm" onClick={() => window.location.href = "/admin"}>
-                        Panel de administración
-                      </Button>
-                    )}
-                  </>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>En números</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">10,000+</div>
-                  <p className="text-sm text-slate-600">Servicios completados</p>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">2,500+</div>
-                  <p className="text-sm text-slate-600">Profesionales activos</p>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">4.8/5</div>
-                  <p className="text-sm text-slate-600">Calificación promedio</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+        <CustomerDashboard />
       </div>
 
       <Footer />

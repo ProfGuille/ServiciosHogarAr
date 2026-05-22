@@ -23,6 +23,7 @@ interface CreateRequestForm {
   description: string;
   categoryId: string;
   city: string;
+  province: string;
   estimatedBudget: string;
   isUrgent: boolean;
   preferredDate: Date | undefined;
@@ -38,6 +39,7 @@ export default function CreateRequest() {
     description: "",
     categoryId: "",
     city: "",
+    province: "",
     estimatedBudget: "",
     isUrgent: false,
     preferredDate: undefined,
@@ -112,6 +114,7 @@ export default function CreateRequest() {
       description: form.description,
       categoryId: parseInt(form.categoryId),
       city: form.city,
+      province: form.province,
       estimatedBudget: form.estimatedBudget ? parseFloat(form.estimatedBudget) : null,
       isUrgent: form.isUrgent,
       preferredDate: form.preferredDate?.toISOString(),
@@ -124,9 +127,12 @@ export default function CreateRequest() {
     setForm(prev => ({ ...prev, [field]: value }));
   };
 
-  const argentineCities = [
-    "Buenos Aires", "Córdoba", "Rosario", "Mendoza", "La Plata", "Tucumán",
-    "Mar del Plata", "Salta", "Santa Fe", "San Juan", "Resistencia", "Neuquén"
+  const argProvinces = [
+    "Buenos Aires", "CABA", "Catamarca", "Chaco", "Chubut", "Córdoba",
+    "Corrientes", "Entre Ríos", "Formosa", "Jujuy", "La Pampa", "La Rioja",
+    "Mendoza", "Misiones", "Neuquén", "Río Negro", "Salta", "San Juan",
+    "San Luis", "Santa Cruz", "Santa Fe", "Santiago del Estero",
+    "Tierra del Fuego", "Tucumán"
   ];
 
   return (
@@ -193,21 +199,32 @@ export default function CreateRequest() {
                 </p>
               </div>
 
-              {/* City */}
-              <div>
-                <Label>Ciudad *</Label>
-                <Select value={form.city} onValueChange={(value) => updateForm("city", value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona tu ciudad" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {argentineCities.map((city) => (
-                      <SelectItem key={city} value={city}>
-                        {city}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              {/* City + Province */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="city">Ciudad *</Label>
+                  <Input
+                    id="city"
+                    placeholder="Ej: Buenos Aires"
+                    value={form.city}
+                    onChange={(e) => updateForm("city", e.target.value)}
+                    maxLength={80}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="province">Provincia</Label>
+                  <Input
+                    id="province"
+                    placeholder="Ej: Buenos Aires"
+                    value={form.province}
+                    onChange={(e) => updateForm("province", e.target.value)}
+                    list="province-list"
+                    maxLength={80}
+                  />
+                  <datalist id="province-list">
+                    {argProvinces.map((p) => <option key={p} value={p} />)}
+                  </datalist>
+                </div>
               </div>
 
 
