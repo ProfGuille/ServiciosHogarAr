@@ -12,6 +12,8 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const sessionExpired = new URLSearchParams(window.location.search).get('expired') === '1';
+  const redirectParam = new URLSearchParams(window.location.search).get('redirect');
+  const safeRedirect = redirectParam && redirectParam.startsWith('/') ? redirectParam : null;
   const [error, setError] = useState(sessionExpired ? 'Tu sesión expiró. Iniciá sesión nuevamente.' : '');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -44,7 +46,8 @@ export default function Login() {
       
       // Redirigir según tipo de usuario
       const userType = data.user?.userType;
-      const redirect = userType === 'provider' ? '/dashboard-profesional' : userType === 'admin' ? '/admin' : '/mis-solicitudes';
+      const defaultRedirect = userType === 'provider' ? '/dashboard-profesional' : userType === 'admin' ? '/admin' : '/mis-solicitudes';
+      const redirect = safeRedirect || defaultRedirect;
       setTimeout(() => { window.location.href = redirect; }, 100);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al iniciar sesión');

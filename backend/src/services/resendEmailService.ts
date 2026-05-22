@@ -45,7 +45,7 @@ export async function sendLeadNotificationViaResend(
               <p>🕐 Fecha: ${new Date(leadData.createdAt).toLocaleString('es-AR')}</p>
             </div>
             <center>
-              <a href="https://servicioshogar.com.ar/dashboard-profesional" class="cta-button">
+              <a href="https://servicioshogar.com.ar/login?redirect=/dashboard-profesional" class="cta-button">
                 Ver Lead en Dashboard
               </a>
             </center>
@@ -265,7 +265,7 @@ export async function sendProviderWelcomeEmail(
           <p>Tu cuenta profesional para <strong>${businessName}</strong> fue creada con éxito.</p>
           <p>Te regalamos <strong>10 créditos</strong> para que puedas ver los datos de contacto de tus primeros clientes sin costo.</p>
           <p>Cada crédito te permite desbloquear los datos de una solicitud. Revisá las solicitudes disponibles en tu zona desde tu dashboard.</p>
-          <a href="https://servicioshogar.com.ar/dashboard-profesional" style="display:inline-block;margin:16px 0;padding:12px 24px;background:#1d4ed8;color:#fff;border-radius:6px;text-decoration:none;font-weight:bold">
+          <a href="https://servicioshogar.com.ar/login?redirect=/dashboard-profesional" style="display:inline-block;margin:16px 0;padding:12px 24px;background:#1d4ed8;color:#fff;border-radius:6px;text-decoration:none;font-weight:bold">
             Ver solicitudes disponibles
           </a>
           <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0"/>
@@ -381,7 +381,7 @@ export async function sendClientUnlockNotificationEmail(
           <p>Un profesional de tu zona vio tu solicitud <strong>"${requestTitle}"</strong> en ${neighborhood} y desbloqueó tus datos de contacto para poder comunicarse con vos.</p>
           <p>Es posible que te contacte por teléfono o email en las próximas horas.</p>
           <p style="color:#6b7280;font-size:14px">Si recibís su llamado o mensaje, recordá calificarlo después del servicio. Las reseñas ayudan a otros clientes a elegir mejor.</p>
-          <a href="https://servicioshogar.com.ar/mis-solicitudes" style="display:inline-block;margin:16px 0;padding:12px 24px;background:#1d4ed8;color:#fff;border-radius:6px;text-decoration:none;font-weight:bold">
+          <a href="https://servicioshogar.com.ar/login?redirect=/mis-solicitudes" style="display:inline-block;margin:16px 0;padding:12px 24px;background:#1d4ed8;color:#fff;border-radius:6px;text-decoration:none;font-weight:bold">
             Ver mis solicitudes
           </a>
           <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0"/>
@@ -412,7 +412,7 @@ export async function sendClientReviewReminderEmail(
           <p>Hace unos días un profesional se contactó con vos por tu solicitud <strong>"${requestTitle}"</strong>.</p>
           <p>¿Pudieron concretar el servicio? Tu opinión ayuda a otros vecinos a elegir mejor.</p>
           <p>Solo te lleva un minuto calificar al profesional.</p>
-          <a href="https://servicioshogar.com.ar/mis-solicitudes" style="display:inline-block;margin:16px 0;padding:12px 24px;background:#1d4ed8;color:#fff;border-radius:6px;text-decoration:none;font-weight:bold">
+          <a href="https://servicioshogar.com.ar/login?redirect=/mis-solicitudes" style="display:inline-block;margin:16px 0;padding:12px 24px;background:#1d4ed8;color:#fff;border-radius:6px;text-decoration:none;font-weight:bold">
             Calificar al profesional
           </a>
           <p style="color:#6b7280;font-size:13px">Si todavía no concretaron el servicio, podés ignorar este mensaje.</p>

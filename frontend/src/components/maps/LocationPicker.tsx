@@ -291,7 +291,7 @@ export function LocationPicker({
       <div className="relative" style={{ height }}>
         <MapContainer
           center={mapCenter}
-          zoom={15}
+          zoom={initialLocation ? 15 : 11}
           style={{ height: '100%', width: '100%', borderRadius: '8px' }}
         >
           <TileLayer

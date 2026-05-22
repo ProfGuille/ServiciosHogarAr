@@ -597,19 +597,16 @@ export default function Search() {
                         Los servicios de búsqueda están en mantenimiento. Por el momento, puedes navegar directamente a los servicios específicos desde el menú principal.
                       </p>
                       <div className="flex flex-wrap gap-2">
+                        {displayCategories.slice(0, 4).map((cat: { id: number; name: string }) => (
+                          <Link key={cat.id} href={`/buscar?categories=${cat.id}`}>
+                            <Button variant="outline" size="sm" className="text-orange-700 border-orange-300 hover:bg-orange-100">
+                              Ver {cat.name}
+                            </Button>
+                          </Link>
+                        ))}
                         <Link href="/buscar">
                           <Button variant="outline" size="sm" className="text-orange-700 border-orange-300 hover:bg-orange-100">
-                            Ver Plomería
-                          </Button>
-                        </Link>
-                        <Link href="/buscar">
-                          <Button variant="outline" size="sm" className="text-orange-700 border-orange-300 hover:bg-orange-100">
-                            Ver Electricidad
-                          </Button>
-                        </Link>
-                        <Link href="/buscar">
-                          <Button variant="outline" size="sm" className="text-orange-700 border-orange-300 hover:bg-orange-100">
-                            Ver Todos los Servicios
+                            Ver Todos
                           </Button>
                         </Link>
                       </div>
@@ -634,19 +631,15 @@ export default function Search() {
                       </p>
                       <div className="flex flex-wrap gap-2">
                         <Button variant="outline" size="sm" className="text-blue-700 border-blue-300 hover:bg-blue-100" onClick={() => {
-                          // In a real app, this would trigger an admin notification
-                          toast({
-                            title: "Solicitud registrada",
-                            description: `Te contactaremos pronto con profesionales de ${filters.query} en tu área.`,
-                          });
+                          setFilters(prev => ({ ...prev, query: '', categoryIds: [] }));
                         }}>
-                          Solicitar Búsqueda
+                          Limpiar búsqueda
                         </Button>
-                        <Link href="/buscar">
-                          <Button variant="outline" size="sm" className="text-blue-700 border-blue-300 hover:bg-blue-100">
-                            Ver Otros Servicios
-                          </Button>
-                        </Link>
+                        <Button variant="outline" size="sm" className="text-blue-700 border-blue-300 hover:bg-blue-100" onClick={() => {
+                          window.location.href = '/crear-solicitud';
+                        }}>
+                          Publicar solicitud
+                        </Button>
                       </div>
                     </div>
                   </div>

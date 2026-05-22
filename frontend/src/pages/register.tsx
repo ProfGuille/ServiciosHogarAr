@@ -98,14 +98,14 @@ export default function Register() {
 
       toast({
         title: "¡Bienvenido/a a ServiciosHogar!",
-        description: "Tu cuenta está lista.",
-        duration: 3000,
+        description: "Tu cuenta está lista. Ahora podés publicar tu primera solicitud y recibir presupuestos de profesionales en tu zona.",
+        duration: 5000,
       });
 
       // In real implementation, redirect to login or email verification
       setTimeout(() => {
         window.location.href = "/mis-solicitudes";
-      }, 1500);
+      }, 2500);
       
     } catch (error) {
       console.error("Registration error:", error);

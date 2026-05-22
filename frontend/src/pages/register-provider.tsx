@@ -85,8 +85,8 @@ export default function RegisterProvider() {
       setError('Por favor completá todos los campos obligatorios');
       return;
     }
-    if (formData.password.length < 8) {
-      setError('La contraseña debe tener al menos 8 caracteres');
+    if (formData.password.length < 8 || !/[A-Z]/.test(formData.password) || !/[a-z]/.test(formData.password) || !/[0-9]/.test(formData.password)) {
+      setError('La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número');
       return;
     }
     if (formData.serviceCategories.length === 0) {
@@ -245,7 +245,23 @@ export default function RegisterProvider() {
                     onChange={e => setFormData(prev => ({ ...prev, password: e.target.value }))}
                     placeholder="Mínimo 8 caracteres"
                   />
-                  <p className="text-xs text-slate-500 mt-1">Mínimo 8 caracteres, una mayúscula, una minúscula y un número.</p>
+                  {formData.password.length > 0 && (
+                    <div className="mt-2 space-y-1">
+                      {[
+                        { ok: formData.password.length >= 8, label: 'Mínimo 8 caracteres' },
+                        { ok: /[A-Z]/.test(formData.password), label: 'Una mayúscula' },
+                        { ok: /[a-z]/.test(formData.password), label: 'Una minúscula' },
+                        { ok: /[0-9]/.test(formData.password), label: 'Un número' },
+                      ].map(({ ok, label }) => (
+                        <p key={label} className={`text-xs flex items-center gap-1 ${ok ? 'text-green-600' : 'text-slate-400'}`}>
+                          <span>{ok ? '✓' : '○'}</span> {label}
+                        </p>
+                      ))}
+                    </div>
+                  )}
+                  {formData.password.length === 0 && (
+                    <p className="text-xs text-slate-500 mt-1">Mínimo 8 caracteres, una mayúscula, una minúscula y un número.</p>
+                  )}
                 </div>
               </div>
 
