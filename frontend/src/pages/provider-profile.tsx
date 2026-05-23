@@ -63,6 +63,20 @@ export default function ProviderProfile() {
   });
 
   // Geocodificación por ciudad para el mapa
+  const provinceCoords: Record<string, [number, number]> = {
+    'Buenos Aires': [-36.6769, -60.5581], 'CABA': [-34.6037, -58.3816],
+    'Córdoba': [-31.4135, -64.1811], 'Santa Fe': [-31.6333, -60.7000],
+    'Mendoza': [-32.8908, -68.8272], 'Tucumán': [-26.8083, -65.2176],
+    'Salta': [-24.7859, -65.4117], 'Misiones': [-27.3671, -55.8967],
+    'Chaco': [-27.4515, -59.0243], 'Corrientes': [-27.4806, -58.8341],
+    'Entre Ríos': [-31.7333, -60.5333], 'Santiago del Estero': [-27.7951, -64.2615],
+    'San Juan': [-31.5375, -68.5364], 'San Luis': [-33.2960, -66.3356],
+    'La Rioja': [-29.4131, -66.8558], 'Catamarca': [-28.4696, -65.7852],
+    'Jujuy': [-24.1858, -65.2995], 'Formosa': [-26.1775, -58.1781],
+    'Neuquén': [-38.9516, -68.0591], 'Río Negro': [-40.8135, -63.0000],
+    'Chubut': [-43.3002, -65.1023], 'Santa Cruz': [-51.6230, -69.2168],
+    'Tierra del Fuego': [-54.8019, -68.3030], 'La Pampa': [-36.6148, -64.2839],
+  };
   const [mapCoords, setMapCoords] = useState<[number, number] | null>(null);
 
   useEffect(() => {
@@ -71,16 +85,22 @@ export default function ProviderProfile() {
       setMapCoords([(provider as any).latitude, (provider as any).longitude]);
       return;
     }
-    if (!provider.city) return;
+    if (!provider.city && !provider.province) return;
     const city = encodeURIComponent(`${provider.city}, ${provider.province || 'Argentina'}, Argentina`);
     fetch(`https://nominatim.openstreetmap.org/search?q=${city}&format=json&limit=1`)
       .then(r => r.json())
       .then(data => {
         if (data && data[0]) {
           setMapCoords([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
+        } else {
+          const prov = provider.province as string;
+          if (prov && provinceCoords[prov]) setMapCoords(provinceCoords[prov]);
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        const prov = provider.province as string;
+        if (prov && provinceCoords[prov]) setMapCoords(provinceCoords[prov]);
+      });
   }, [provider]);
 
   if (providerLoading) {
