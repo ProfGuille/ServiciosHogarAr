@@ -184,14 +184,15 @@ export default function Consejos() {
 
         {/* CTA */}
         <div className="mt-12 text-center">
-          {tab === "clientes" ? (
+          {tab === "clientes" && user?.userType !== 'provider' && (
             <>
               <p className="text-slate-600 mb-4">¿Listo para encontrar el profesional ideal?</p>
               <Button size="lg" onClick={() => window.location.href = user?.userType === 'customer' ? "/nueva-solicitud" : "/register"}>
                 {user?.userType === 'customer' ? 'Publicar una solicitud' : 'Registrarme como cliente'}
               </Button>
             </>
-          ) : (
+          )}
+          {tab === "profesionales" && user?.userType !== 'customer' && (
             <>
               <p className="text-slate-600 mb-4">¿Querés llegar a más clientes en tu zona?</p>
               <Button size="lg" onClick={() => window.location.href = user?.userType === 'provider' ? "/dashboard-profesional" : "/register-provider"}>

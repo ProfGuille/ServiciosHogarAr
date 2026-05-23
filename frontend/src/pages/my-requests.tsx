@@ -109,7 +109,6 @@ function ProviderRatingSection({
 }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [cancelConfirmId, setCancelConfirmId] = useState<number | null>(null);
   const [ratings, setRatings] = useState<Record<string, number>>({});
   const [submitting, setSubmitting] = useState<string | null>(null);
   const [comments, setComments] = useState<Record<string, string>>({});
@@ -244,6 +243,7 @@ export default function MyRequests() {
   }, [isAuthenticated, authLoading, toast]);
 
   const queryClient = useQueryClient();
+  const [cancelConfirmId, setCancelConfirmId] = useState<number | null>(null);
 
   const handleCancelConfirmed = async (requestId: number) => {
     setCancelConfirmId(null);
