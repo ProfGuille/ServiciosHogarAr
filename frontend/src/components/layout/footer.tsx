@@ -43,6 +43,7 @@ export function Footer() {
       title: "Ayuda",
       links: [
         { label: "Centro de ayuda", href: "/centro-ayuda" },
+        { label: "Consejos útiles", href: "/consejos" },
         { label: "Contacto", href: "/contacto" },
         { label: "Sobre nosotros", href: "/about" },
       ]

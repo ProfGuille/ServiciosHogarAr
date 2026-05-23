@@ -28,6 +28,7 @@ const Privacidad = lazy(() => import('@/pages/privacidad'));
 const AvisoLegal = lazy(() => import('@/pages/aviso-legal'));
 const Seguridad = lazy(() => import('@/pages/seguridad'));
 const Precios = lazy(() => import('@/pages/precios'));
+const Consejos = lazy(() => import('@/pages/consejos'));
 const NotFound = lazy(() => import('@/pages/not-found'));
 const NewServiceRequest = lazy(() => import('@/pages/NewServiceRequest'));
 
@@ -68,6 +69,7 @@ function App() {
         <Route path="/aviso-legal" component={AvisoLegal} />
         <Route path="/seguridad" component={Seguridad} />
         <Route path="/precios" component={Precios} />
+        <Route path="/consejos" component={Consejos} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>
