@@ -37,7 +37,7 @@ const statusColors: Record<string, string> = {
   quoted: "bg-purple-100 text-purple-800",
 };
 
-function CustomerDashboard() {
+function CustomerDashboard({ user }: { user: any }) {
   const { data: requests, isLoading } = useQuery<any[]>({
     queryKey: ["/api/service-requests/my"],
   });
@@ -47,6 +47,17 @@ function CustomerDashboard() {
 
   return (
     <div className="grid lg:grid-cols-3 gap-8">
+      {user?.userType === 'customer' && !user?.city && (
+        <div className="lg:col-span-3 bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <MapPin className="h-5 w-5 text-blue-600 shrink-0" />
+            <p className="text-sm text-blue-800">Completá tu ciudad y provincia para que los profesionales te encuentren más fácil.</p>
+          </div>
+          <Button size="sm" variant="outline" className="shrink-0 border-blue-300 text-blue-700 hover:bg-blue-100" onClick={() => window.location.href = "/nueva-solicitud"}>
+            Completar ahora
+          </Button>
+        </div>
+      )}
       <div className="lg:col-span-2 space-y-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
@@ -203,7 +214,7 @@ export default function Home() {
           </p>
         </div>
 
-        <CustomerDashboard />
+        <CustomerDashboard user={user} />
       </div>
 
       <Footer />

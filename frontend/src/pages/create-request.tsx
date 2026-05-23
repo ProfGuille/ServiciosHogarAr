@@ -38,12 +38,23 @@ export default function CreateRequest() {
     title: "",
     description: "",
     categoryId: "",
-    city: "",
-    province: "",
+    city: (user as any)?.city || "",
+    province: (user as any)?.province || "",
     estimatedBudget: "",
     isUrgent: false,
     preferredDate: undefined,
   });
+
+  // Precargar ubicación desde perfil cuando user esté disponible
+  useEffect(() => {
+    if (user) {
+      setForm(prev => ({
+        ...prev,
+        city: prev.city || (user as any).city || "",
+        province: prev.province || (user as any).province || "",
+      }));
+    }
+  }, [user]);
 
   // Redirect if not authenticated
   if (!isAuthenticated) {
@@ -82,6 +93,22 @@ export default function CreateRequest() {
       return response.json();
     },
     onSuccess: () => {
+      // Guardar ubicación en perfil del usuario para futuros formularios
+      if (form.city || form.province) {
+        const token = localStorage.getItem('token');
+        fetch(`${import.meta.env.VITE_API_URL || 'https://api.servicioshogar.com.ar'}/api/auth/location`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+          body: JSON.stringify({ city: form.city, province: form.province }),
+        }).then(() => {
+          // Actualizar localStorage con nueva ubicación
+          const cached = localStorage.getItem('user');
+          if (cached) {
+            const u = JSON.parse(cached);
+            localStorage.setItem('user', JSON.stringify({ ...u, city: form.city, province: form.province }));
+          }
+        }).catch(() => {});
+      }
       toast({
         title: "¡Solicitud creada!",
         description: "Tu solicitud ha sido publicada. Los profesionales podrán contactarte pronto.",

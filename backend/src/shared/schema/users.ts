@@ -11,7 +11,10 @@ export const users = pgTable('users', {
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
   phone: varchar('phone', { length: 50 }),
-  password: varchar('password', { length: 255 })
+  password: varchar('password', { length: 255 }),
+  city: varchar('city', { length: 100 }),
+  province: varchar('province', { length: 100 }),
+  neighborhood: varchar('neighborhood', { length: 100 })
 });
 
 export type User = InferSelectModel<typeof users>;
