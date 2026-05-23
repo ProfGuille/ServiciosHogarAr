@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { SEOHead } from "@/components/layout/seo-head";
@@ -49,7 +50,7 @@ const clientTips = [
   {
     icon: Star,
     title: "Calificá después del servicio",
-    body: "Tu reseña ayuda a otros clientes a elegir mejor y premia a los profesionales honestos. Tomá 2 minutos para dejar tu experiencia en la plataforma.",
+    body: "Tu reseña ayuda a otros clientes a tomar mejores decisiones y pone en valor a los profesionales con mejores resultados. Tomá 2 minutos para dejar tu experiencia en la plataforma.",
     color: "bg-pink-50 border-pink-200 text-pink-700",
     iconColor: "text-pink-600",
   },
@@ -59,14 +60,14 @@ const providerTips = [
   {
     icon: Camera,
     title: "Mostrá tu trabajo con fotos reales",
-    body: "Las fotos de trabajos anteriores generan confianza inmediata. Subí imágenes del antes y después, trabajos terminados y detalles de calidad. Un perfil con fotos recibe hasta 3 veces más consultas.",
+    body: "Las fotos de trabajos anteriores generan confianza inmediata. Mostrá trabajos anteriores cuando hables con el cliente: fotos del antes y después, detalles de calidad. La evidencia visual genera confianza inmediata.",
     color: "bg-blue-50 border-blue-200 text-blue-700",
     iconColor: "text-blue-600",
   },
   {
     icon: MessageSquare,
     title: "Respondé rápido y con claridad",
-    body: "El tiempo de respuesta es clave. Cuando desbloqueás un lead, contactá al cliente dentro de las primeras horas. Un mensaje claro y profesional marca la diferencia frente a la competencia.",
+    body: "El tiempo de respuesta es clave. Cuando desbloqueás una solicitud, contactá al cliente dentro de las primeras horas. Un mensaje claro y profesional marca la diferencia frente a la competencia.",
     color: "bg-green-50 border-green-200 text-green-700",
     iconColor: "text-green-600",
   },
@@ -109,6 +110,7 @@ const providerTips = [
 
 export default function Consejos() {
   const [tab, setTab] = useState<Tab>("clientes");
+  const { user } = useAuth();
   const tips = tab === "clientes" ? clientTips : providerTips;
 
   return (
@@ -185,15 +187,15 @@ export default function Consejos() {
           {tab === "clientes" ? (
             <>
               <p className="text-slate-600 mb-4">¿Listo para encontrar el profesional ideal?</p>
-              <Button size="lg" onClick={() => window.location.href = "/nueva-solicitud"}>
-                Publicar una solicitud
+              <Button size="lg" onClick={() => window.location.href = user?.userType === 'customer' ? "/nueva-solicitud" : "/register"}>
+                {user?.userType === 'customer' ? 'Publicar una solicitud' : 'Registrarme como cliente'}
               </Button>
             </>
           ) : (
             <>
               <p className="text-slate-600 mb-4">¿Querés llegar a más clientes en tu zona?</p>
-              <Button size="lg" onClick={() => window.location.href = "/register-provider"}>
-                Registrarme como profesional
+              <Button size="lg" onClick={() => window.location.href = user?.userType === 'provider' ? "/dashboard-profesional" : "/register-provider"}>
+                {user?.userType === 'provider' ? 'Ir a mi dashboard' : 'Registrarme como profesional'}
               </Button>
             </>
           )}

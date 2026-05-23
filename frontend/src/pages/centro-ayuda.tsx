@@ -41,7 +41,7 @@ export default function CentroAyuda() {
         },
         {
           question: "¿Qué beneficio tengo por referir a otros usuarios?",
-          answer: "Si referís a otros usuarios con tu enlace, tus solicitudes de servicio aparecen destacadas con el distintivo 'Cliente referente' para los profesionales y tienen prioridad en el listado de leads disponibles. Esto aumenta las chances de que más profesionales te contacten."
+          answer: "Si referís a otros usuarios con tu enlace, tus solicitudes de servicio aparecen destacadas con el distintivo 'Cliente referente' para los profesionales y tienen prioridad en el listado de solicitudes disponibles. Esto aumenta las chances de que más profesionales te contacten."
         }
       ]
     },
@@ -74,7 +74,7 @@ export default function CentroAyuda() {
         },
         {
           question: "¿Qué es el badge 'Cliente referente'?",
-          answer: "Las solicitudes de clientes que han referido a otros usuarios aparecen con el distintivo 'Cliente referente' en tu listado de leads. Además, esas solicitudes se muestran primero, antes que las demás."
+          answer: "Las solicitudes de clientes que han referido a otros usuarios aparecen con el distintivo 'Cliente referente' en tu listado de solicitudes. Además, esas solicitudes se muestran primero, antes que las demás."
         }
       ]
     },
