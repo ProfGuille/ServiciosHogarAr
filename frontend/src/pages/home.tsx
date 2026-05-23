@@ -46,6 +46,31 @@ function CustomerDashboard({ user }: { user: any }) {
     enabled: !!user,
   });
   const hasLocation = userProfile?.city || user?.city;
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [locationForm, setLocationForm] = useState({ city: '', province: '', neighborhood: '' });
+  const [savingLocation, setSavingLocation] = useState(false);
+
+  const saveLocation = async () => {
+    if (!locationForm.city) return;
+    setSavingLocation(true);
+    try {
+      const token = localStorage.getItem('token');
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://api.servicioshogar.com.ar';
+      await fetch(`${apiUrl}/api/auth/location`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify(locationForm),
+      });
+      const cached = localStorage.getItem('user');
+      if (cached) {
+        const u = JSON.parse(cached);
+        localStorage.setItem('user', JSON.stringify({ ...u, ...locationForm }));
+      }
+      setShowLocationModal(false);
+      window.location.reload();
+    } catch {}
+    setSavingLocation(false);
+  };
 
   const active = requests?.filter(r => r.status !== 'completed' && r.status !== 'cancelled') || [];
   const recent = requests?.slice(0, 3) || [];
@@ -58,7 +83,7 @@ function CustomerDashboard({ user }: { user: any }) {
             <MapPin className="h-5 w-5 text-blue-600 shrink-0" />
             <p className="text-sm text-blue-800">Completá tu ciudad y provincia para que los profesionales te encuentren más fácil.</p>
           </div>
-          <Button size="sm" variant="outline" className="shrink-0 border-blue-300 text-blue-700 hover:bg-blue-100" onClick={() => window.location.href = "/nueva-solicitud"}>
+          <Button size="sm" variant="outline" className="shrink-0 border-blue-300 text-blue-700 hover:bg-blue-100" onClick={() => setShowLocationModal(true)}>
             Completar ahora
           </Button>
         </div>
@@ -157,6 +182,38 @@ function CustomerDashboard({ user }: { user: any }) {
           </Card>
         )}
       </div>
+      {/* Modal ubicación */}
+      {showLocationModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+            <h3 className="text-lg font-semibold text-slate-900 mb-1">Tu ubicación</h3>
+            <p className="text-sm text-slate-500 mb-4">Esta información ayuda a los profesionales a encontrarte más fácil.</p>
+            <div className="space-y-3">
+              <div>
+                <label className="text-sm font-medium text-slate-700">Ciudad *</label>
+                <input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: Buenos Aires" value={locationForm.city} onChange={e => setLocationForm(p => ({...p, city: e.target.value}))} />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-slate-700">Provincia</label>
+                <input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: Buenos Aires" value={locationForm.province} onChange={e => setLocationForm(p => ({...p, province: e.target.value}))} list="province-list-home" />
+                <datalist id="province-list-home">
+                  {["Buenos Aires","CABA","Córdoba","Santa Fe","Mendoza","Tucumán","Salta","Misiones","Chaco","Corrientes","Entre Ríos","Santiago del Estero","San Juan","San Luis","La Rioja","Catamarca","Jujuy","Formosa","Neuquén","Río Negro","Chubut","Santa Cruz","Tierra del Fuego","La Pampa"].map(p => <option key={p} value={p} />)}
+                </datalist>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-slate-700">Barrio / Localidad</label>
+                <input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: Palermo" value={locationForm.neighborhood} onChange={e => setLocationForm(p => ({...p, neighborhood: e.target.value}))} />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-5">
+              <Button variant="outline" className="flex-1" onClick={() => setShowLocationModal(false)}>Ahora no</Button>
+              <Button className="flex-1" disabled={!locationForm.city || savingLocation} onClick={saveLocation}>
+                {savingLocation ? 'Guardando...' : 'Guardar'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
