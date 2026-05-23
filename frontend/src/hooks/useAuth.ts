@@ -5,22 +5,20 @@ import { getApiUrl } from "@/lib/api";
 export function useAuth() {
   const { data: user, isLoading } = useQuery({
     queryKey: ["auth", "user"],
-    queryFn: async () => {
+    queryFn: () => {
       if (!checkAuth()) return null;
       const cached = getUser();
       if (!cached) return null;
+      // Refrescar createdAt en background si falta, sin bloquear
       if (!cached.createdAt) {
-        try {
-          const token = getToken();
-          const res = await fetch(getApiUrl('/api/auth/me'), {
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          });
-          if (res.ok) {
-            const fresh = await res.json();
-            localStorage.setItem('user', JSON.stringify({ ...cached, ...fresh }));
-            return { ...cached, ...fresh };
-          }
-        } catch {}
+        const token = getToken();
+        fetch(getApiUrl('/api/auth/me'), {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }).then(res => {
+          if (res.ok) return res.json();
+        }).then(fresh => {
+          if (fresh) localStorage.setItem('user', JSON.stringify({ ...cached, ...fresh }));
+        }).catch(() => {});
       }
       return cached;
     },
