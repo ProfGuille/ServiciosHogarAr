@@ -41,13 +41,18 @@ function CustomerDashboard({ user }: { user: any }) {
   const { data: requests, isLoading } = useQuery<any[]>({
     queryKey: ["/api/service-requests/my"],
   });
+  const { data: userProfile } = useQuery<any>({
+    queryKey: ["/api/auth/me"],
+    enabled: !!user,
+  });
+  const hasLocation = userProfile?.city || user?.city;
 
   const active = requests?.filter(r => r.status !== 'completed' && r.status !== 'cancelled') || [];
   const recent = requests?.slice(0, 3) || [];
 
   return (
     <div className="grid lg:grid-cols-3 gap-8">
-      {user?.userType === 'customer' && !user?.city && (
+      {user?.userType === 'customer' && !hasLocation && (
         <div className="lg:col-span-3 bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <MapPin className="h-5 w-5 text-blue-600 shrink-0" />
