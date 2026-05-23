@@ -17,25 +17,11 @@ export function ReferralShareCard() {
   const { data: referralCode, isLoading: codeLoading } = useQuery({
     queryKey: ["/api/referrals/code"],
     enabled: !!user,
-    queryFn: async () => {
-      const res = await fetch(getApiUrl("/api/referrals/code"), {
-        headers: { ...getAuthHeaders() as Record<string, string> },
-      });
-      if (!res.ok) throw new Error("Error al obtener código");
-      return res.json();
-    },
   });
 
   const { data: referralStats } = useQuery({
     queryKey: ["/api/referrals/stats"],
     enabled: !!user,
-    queryFn: async () => {
-      const res = await fetch(getApiUrl("/api/referrals/stats"), {
-        headers: { ...getAuthHeaders() as Record<string, string> },
-      });
-      if (!res.ok) throw new Error("Error al obtener stats");
-      return res.json();
-    },
   });
 
   const shareUrl = referralCode ? `${window.location.origin}/?ref=${referralCode.code}` : "";
