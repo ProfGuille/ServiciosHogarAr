@@ -323,14 +323,12 @@ router.get("/me", requireAuth, async (req: any, res: Response) => {
 router.patch("/location", requireAuth, async (req: any, res: Response) => {
   try {
     const { city, province, neighborhood } = req.body;
-    await db.update(users)
-      .set({
-        city: city || null,
-        province: province || null,
-        neighborhood: neighborhood || null,
-        updatedAt: new Date()
-      })
-      .where(eq(users.id, req.user.id));
+    const userId = req.user.id;
+    console.log("PATCH /location — userId:", userId, "body:", { city, province, neighborhood });
+    await neonSql`
+      UPDATE users SET city = ${city || null}, province = ${province || null}, neighborhood = ${neighborhood || null}, updated_at = NOW()
+      WHERE id = ${userId}
+    `;
     res.json({ success: true });
   } catch (err) {
     console.error("Error en PATCH /location:", err);
@@ -357,26 +355,6 @@ router.patch("/profile", requireAuth, async (req: any, res: Response) => {
 });
 
 
-// -----------------------------
-// PATCH /location — guardar ubicación del cliente
-// -----------------------------
-router.patch("/location", requireAuth, async (req: any, res: Response) => {
-  try {
-    const { city, province, neighborhood } = req.body;
-    await db.update(users)
-      .set({
-        city: city || null,
-        province: province || null,
-        neighborhood: neighborhood || null,
-        updatedAt: new Date()
-      })
-      .where(eq(users.id, req.user.id));
-    res.json({ success: true });
-  } catch (err) {
-    console.error("Error en PATCH /location:", err);
-    res.status(500).json({ error: "Error interno del servidor" });
-  }
-});
 // -----------------------------
 // PATCH /profile — editar nombre/apellido
 // -----------------------------
