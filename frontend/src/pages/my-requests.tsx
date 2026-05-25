@@ -256,6 +256,7 @@ export default function MyRequests() {
       const cached = localStorage.getItem('user');
       if (cached) localStorage.setItem('user', JSON.stringify({ ...JSON.parse(cached), ...locationForm }));
       setShowLocationModal(false);
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       window.location.reload();
     } catch {}
     setSavingLocation(false);
