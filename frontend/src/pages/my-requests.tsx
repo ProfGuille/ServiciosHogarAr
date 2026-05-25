@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { getApiUrl } from "@/lib/api";
+import { getApiUrl } from "@/lib/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -233,6 +235,31 @@ function CancelConfirmDialog({ open, onConfirm, onCancel }: { open: boolean; onC
 
 export default function MyRequests() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { data: userProfile } = useQuery<any>({
+    queryKey: ["/api/auth/me"],
+    enabled: isAuthenticated,
+  });
+  const hasLocation = userProfile?.city || (user as any)?.city;
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [locationForm, setLocationForm] = useState({ city: '', province: '', neighborhood: '' });
+  const [savingLocation, setSavingLocation] = useState(false);
+  const saveLocation = async () => {
+    if (!locationForm.city) return;
+    setSavingLocation(true);
+    try {
+      const token = localStorage.getItem('token');
+      await fetch(getApiUrl('/api/auth/location'), {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify(locationForm),
+      });
+      const cached = localStorage.getItem('user');
+      if (cached) localStorage.setItem('user', JSON.stringify({ ...JSON.parse(cached), ...locationForm }));
+      setShowLocationModal(false);
+      window.location.reload();
+    } catch {}
+    setSavingLocation(false);
+  };
   const { toast } = useToast();
 
   useEffect(() => {
@@ -407,6 +434,92 @@ export default function MyRequests() {
           </CardContent>
         </Card>
       </div>
+      {/* Banner ubicación */}
+      {user?.userType === 'customer' && isAuthenticated && userProfile && !hasLocation && (
+        <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-6 md:w-96 bg-blue-600 text-white rounded-xl shadow-lg px-4 py-3 flex items-center justify-between gap-3 z-40">
+          <div className="flex items-center gap-2 min-w-0">
+            <MapPin className="h-5 w-5 shrink-0" />
+            <p className="text-sm">Completá tu ubicación para facilitar el contacto con profesionales.</p>
+          </div>
+          <button onClick={() => setShowLocationModal(true)} className="shrink-0 bg-white text-blue-600 text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-blue-50">
+            Completar
+          </button>
+        </div>
+      )}
+      {showLocationModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+            <h3 className="text-lg font-semibold text-slate-900 mb-1">Tu ubicación</h3>
+            <p className="text-sm text-slate-500 mb-4">Esta información ayuda a los profesionales a encontrarte más fácil.</p>
+            <div className="space-y-3">
+              <div>
+                <label className="text-sm font-medium text-slate-700">Ciudad *</label>
+                <input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: Buenos Aires" value={locationForm.city} onChange={e => setLocationForm(p => ({...p, city: e.target.value}))} />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-slate-700">Provincia</label>
+                <input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: Buenos Aires" value={locationForm.province} onChange={e => setLocationForm(p => ({...p, province: e.target.value}))} list="province-list-myr" />
+                <datalist id="province-list-myr">
+                  {["Buenos Aires","CABA","Córdoba","Santa Fe","Mendoza","Tucumán","Salta","Misiones","Chaco","Corrientes","Entre Ríos","Santiago del Estero","San Juan","San Luis","La Rioja","Catamarca","Jujuy","Formosa","Neuquén","Río Negro","Chubut","Santa Cruz","Tierra del Fuego","La Pampa"].map(p => <option key={p} value={p} />)}
+                </datalist>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-slate-700">Barrio / Localidad</label>
+                <input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: Palermo" value={locationForm.neighborhood} onChange={e => setLocationForm(p => ({...p, neighborhood: e.target.value}))} />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-5">
+              <Button variant="outline" className="flex-1" onClick={() => setShowLocationModal(false)}>Ahora no</Button>
+              <Button className="flex-1" disabled={!locationForm.city || savingLocation} onClick={saveLocation}>
+                {savingLocation ? 'Guardando...' : 'Guardar'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Banner ubicación */}
+      {user?.userType === 'customer' && isAuthenticated && userProfile && !hasLocation && (
+        <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-6 md:w-96 bg-blue-600 text-white rounded-xl shadow-lg px-4 py-3 flex items-center justify-between gap-3 z-40">
+          <div className="flex items-center gap-2 min-w-0">
+            <MapPin className="h-5 w-5 shrink-0" />
+            <p className="text-sm">Completá tu ubicación para facilitar el contacto con profesionales.</p>
+          </div>
+          <button onClick={() => setShowLocationModal(true)} className="shrink-0 bg-white text-blue-600 text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-blue-50">
+            Completar
+          </button>
+        </div>
+      )}
+      {showLocationModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+            <h3 className="text-lg font-semibold text-slate-900 mb-1">Tu ubicación</h3>
+            <p className="text-sm text-slate-500 mb-4">Esta información ayuda a los profesionales a encontrarte más fácil.</p>
+            <div className="space-y-3">
+              <div>
+                <label className="text-sm font-medium text-slate-700">Ciudad *</label>
+                <input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: Buenos Aires" value={locationForm.city} onChange={e => setLocationForm(p => ({...p, city: e.target.value}))} />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-slate-700">Provincia</label>
+                <input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: Buenos Aires" value={locationForm.province} onChange={e => setLocationForm(p => ({...p, province: e.target.value}))} list="province-list-myr" />
+                <datalist id="province-list-myr">
+                  {["Buenos Aires","CABA","Córdoba","Santa Fe","Mendoza","Tucumán","Salta","Misiones","Chaco","Corrientes","Entre Ríos","Santiago del Estero","San Juan","San Luis","La Rioja","Catamarca","Jujuy","Formosa","Neuquén","Río Negro","Chubut","Santa Cruz","Tierra del Fuego","La Pampa"].map(p => <option key={p} value={p} />)}
+                </datalist>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-slate-700">Barrio / Localidad</label>
+                <input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: Palermo" value={locationForm.neighborhood} onChange={e => setLocationForm(p => ({...p, neighborhood: e.target.value}))} />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-5">
+              <Button variant="outline" className="flex-1" onClick={() => setShowLocationModal(false)}>Ahora no</Button>
+              <Button className="flex-1" disabled={!locationForm.city || savingLocation} onClick={saveLocation}>
+                {savingLocation ? 'Guardando...' : 'Guardar'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
       <Footer />
       <CancelConfirmDialog
         open={cancelConfirmId !== null}
