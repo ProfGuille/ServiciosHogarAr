@@ -31,6 +31,10 @@ interface CreateRequestForm {
 
 export default function CreateRequest() {
   const { user, isAuthenticated } = useAuth();
+  const { data: userProfile } = useQuery<any>({
+    queryKey: ["/api/auth/me"],
+    enabled: isAuthenticated,
+  });
   const { toast } = useToast();
   const [, setLocation] = useLocation();
 
@@ -45,16 +49,17 @@ export default function CreateRequest() {
     preferredDate: undefined,
   });
 
-  // Precargar ubicación desde perfil cuando user esté disponible
+  // Precargar ubicación desde perfil cuando userProfile esté disponible
   useEffect(() => {
-    if (user) {
+    const source = userProfile || user;
+    if (source) {
       setForm(prev => ({
         ...prev,
-        city: prev.city || (user as any).city || "",
-        province: prev.province || (user as any).province || "",
+        city: prev.city || (source as any).city || "",
+        province: prev.province || (source as any).province || "",
       }));
     }
-  }, [user]);
+  }, [userProfile, user]);
 
   // Redirect if not authenticated
   if (!isAuthenticated) {
