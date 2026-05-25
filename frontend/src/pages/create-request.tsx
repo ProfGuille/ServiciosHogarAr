@@ -38,15 +38,32 @@ export default function CreateRequest() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
 
-  const [form, setForm] = useState<CreateRequestForm>({
-    title: "",
-    description: "",
-    categoryId: "",
-    city: (user as any)?.city || "",
-    province: (user as any)?.province || "",
-    estimatedBudget: "",
-    isUrgent: false,
-    preferredDate: undefined,
+  const [form, setForm] = useState<CreateRequestForm>(() => {
+    try {
+      const cached = localStorage.getItem('user');
+      const u = cached ? JSON.parse(cached) : null;
+      return {
+        title: "",
+        description: "",
+        categoryId: "",
+        city: u?.city || "",
+        province: u?.province || "",
+        estimatedBudget: "",
+        isUrgent: false,
+        preferredDate: undefined,
+      };
+    } catch {
+      return {
+        title: "",
+        description: "",
+        categoryId: "",
+        city: "",
+        province: "",
+        estimatedBudget: "",
+        isUrgent: false,
+        preferredDate: undefined,
+      };
+    }
   });
 
   // Precargar ubicación desde perfil cuando userProfile esté disponible
