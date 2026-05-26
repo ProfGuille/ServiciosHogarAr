@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { User, Mail, Phone, MapPin, Calendar, Trophy, Gift } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { getApiUrl } from "@/lib/api";
 import { AchievementGallery } from "@/components/achievements/achievement-gallery";
 import { ReferralShareCard } from "@/components/referral/referral-share-card";
 import { ReferralHistory } from "@/components/referral/referral-history";
@@ -17,6 +18,17 @@ export default function Profile() {
   const { data: userProfile } = useQuery<any>({
     queryKey: ["/api/auth/me"],
     enabled: isAuthenticated,
+  });
+
+  const providerId = (user as any)?.providerId ?? null;
+  const { data: providerProfile } = useQuery<any>({
+    queryKey: ["provider-profile-card", providerId],
+    enabled: !!providerId && (user as any)?.userType === "provider",
+    queryFn: async () => {
+      const res = await fetch(getApiUrl(`/api/providers/${providerId}`));
+      if (!res.ok) return null;
+      return res.json();
+    },
   });
 
   if (isLoading) {
@@ -189,6 +201,29 @@ export default function Profile() {
         </div>
 
         {/* Achievement Section */}
+        {user.userType === 'provider' && providerProfile && (
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-primary" />
+                Ubicación y cobertura
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm text-slate-700">
+              {providerProfile.city && providerProfile.province ? (
+                <p><span className="font-medium">Ubicación:</span> {providerProfile.city}, {providerProfile.province}</p>
+              ) : (
+                <p className="text-amber-600">Sin ubicación configurada</p>
+              )}
+              {providerProfile.coverageRadiusKm && (
+                <p><span className="font-medium">Radio de cobertura:</span> {providerProfile.coverageRadiusKm} km</p>
+              )}
+              <Button variant="outline" size="sm" className="mt-2" onClick={() => window.location.href = "/dashboard-profesional"}>
+                Actualizar en Mi Panel
+              </Button>
+            </CardContent>
+          </Card>
+        )}
         {user.userType === 'provider' && <div className="mt-8 space-y-4">
           <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
             <Trophy className="h-6 w-6 text-yellow-500" />
