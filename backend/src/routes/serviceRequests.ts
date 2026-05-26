@@ -9,7 +9,7 @@ import {
   categories,
   providerCredits
 } from "../shared/schema/index.js";
-import { eq, and, notInArray, sql, desc, gte } from "drizzle-orm";
+import { eq, and, notInArray, inArray, sql, desc, gte } from "drizzle-orm";
 
 const router = Router();
 
@@ -64,7 +64,7 @@ router.get("/available", async (req, res) => {
       .leftJoin(categories, eq(serviceRequests.categoryId, categories.id))
       .where(
         and(
-          eq(serviceRequests.status, "pending"),
+          inArray(serviceRequests.status, ["pending", "in_progress"]),
           unlockedIds.length > 0 
             ? notInArray(serviceRequests.id, unlockedIds)
             : undefined,
@@ -90,7 +90,7 @@ router.get("/available", async (req, res) => {
       .from(serviceRequests)
       .where(
         and(
-          eq(serviceRequests.status, "pending"),
+          inArray(serviceRequests.status, ["pending", "in_progress"]),
           unlockedIds.length > 0 
             ? notInArray(serviceRequests.id, unlockedIds)
             : undefined,
