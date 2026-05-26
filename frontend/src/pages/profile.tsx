@@ -210,8 +210,8 @@ export default function Profile() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-slate-700">
-              {providerProfile.city && providerProfile.province ? (
-                <p><span className="font-medium">Ubicación:</span> {providerProfile.city}, {providerProfile.province}</p>
+              {(providerProfile.city || providerProfile.province) ? (
+                <p><span className="font-medium">Ubicación:</span> {[providerProfile.city, providerProfile.province].filter(Boolean).join(', ')}</p>
               ) : (
                 <p className="text-amber-600">Sin ubicación configurada</p>
               )}
