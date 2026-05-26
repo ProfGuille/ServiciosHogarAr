@@ -6,11 +6,17 @@ export default function NewServiceRequest() {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
-  const [selectedProvince, setSelectedProvince] = useState('');
-  const [selectedCity, setSelectedCity] = useState('');
+  const [selectedProvince, setSelectedProvince] = useState(() => {
+    try { const u = JSON.parse(localStorage.getItem('user') || '{}'); return u.province || ''; } catch { return ''; }
+  });
+  const [selectedCity, setSelectedCity] = useState(() => {
+    try { const u = JSON.parse(localStorage.getItem('user') || '{}'); return u.city || ''; } catch { return ''; }
+  });
   const [customCity, setCustomCity] = useState('');
   const [address, setAddress] = useState('');
-  const [neighborhood, setNeighborhood] = useState('');
+  const [neighborhood, setNeighborhood] = useState(() => {
+    try { const u = JSON.parse(localStorage.getItem('user') || '{}'); return u.neighborhood || ''; } catch { return ''; }
+  });
   const [showTelegramInput, setShowTelegramInput] = useState(false);
   const [wantsAccount, setWantsAccount] = useState(false);
   const [registerPassword, setRegisterPassword] = useState('');
