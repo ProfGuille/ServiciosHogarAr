@@ -690,6 +690,7 @@ export default function ProviderDashboard() {
             </CardHeader>
             <CardContent className="space-y-4">
               <LocationPicker
+                initialLocation={locationData ?? undefined}
                 onLocationSelect={(loc) => { setProviderLocation(loc); setLocationSaved(false); }}
                 height="250px"
                 showAddressSearch={true}
