@@ -1,4 +1,5 @@
 import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +14,10 @@ import { ReferralHistory } from "@/components/referral/referral-history";
 
 export default function Profile() {
   const { user, isAuthenticated, isLoading } = useAuth();
+  const { data: userProfile } = useQuery<any>({
+    queryKey: ["/api/auth/me"],
+    enabled: isAuthenticated,
+  });
 
   if (isLoading) {
     return (
@@ -102,6 +107,17 @@ export default function Profile() {
                     }
                   </p>
                 </div>
+                {userProfile?.city && (
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-gray-500" />
+                      <label className="text-sm font-medium text-gray-500">Ubicación</label>
+                    </div>
+                    <p className="text-lg pl-6">
+                      {[userProfile.neighborhood, userProfile.city, userProfile.province].filter(Boolean).join(', ')}
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

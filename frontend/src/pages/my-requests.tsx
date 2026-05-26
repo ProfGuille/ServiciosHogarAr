@@ -464,24 +464,24 @@ export default function MyRequests() {
             <p className="text-sm text-slate-500 mb-4">Esta información ayuda a los profesionales a encontrarte más fácil.</p>
             <div className="space-y-3">
               <div>
-                <label className="text-sm font-medium text-slate-700">Ciudad *</label>
-                <input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: Buenos Aires" value={locationForm.city} onChange={e => setLocationForm(p => ({...p, city: e.target.value}))} />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-slate-700">Provincia</label>
+                <label className="text-sm font-medium text-slate-700">Provincia *</label>
                 <input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: Buenos Aires" value={locationForm.province} onChange={e => setLocationForm(p => ({...p, province: e.target.value}))} list="province-list-myr" />
                 <datalist id="province-list-myr">
                   {["Buenos Aires","CABA","Córdoba","Santa Fe","Mendoza","Tucumán","Salta","Misiones","Chaco","Corrientes","Entre Ríos","Santiago del Estero","San Juan","San Luis","La Rioja","Catamarca","Jujuy","Formosa","Neuquén","Río Negro","Chubut","Santa Cruz","Tierra del Fuego","La Pampa"].map(p => <option key={p} value={p} />)}
                 </datalist>
               </div>
               <div>
+                <label className="text-sm font-medium text-slate-700">Ciudad *</label>
+                <input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: Salta" value={locationForm.city} onChange={e => setLocationForm(p => ({...p, city: e.target.value}))} />
+              </div>
+              <div>
                 <label className="text-sm font-medium text-slate-700">Barrio / Localidad</label>
-                <input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: Palermo" value={locationForm.neighborhood} onChange={e => setLocationForm(p => ({...p, neighborhood: e.target.value}))} />
+                <input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: Centro" value={locationForm.neighborhood} onChange={e => setLocationForm(p => ({...p, neighborhood: e.target.value}))} />
               </div>
             </div>
             <div className="flex gap-3 mt-5">
               <Button variant="outline" className="flex-1" onClick={() => setShowLocationModal(false)}>Ahora no</Button>
-              <Button className="flex-1" disabled={!locationForm.city || savingLocation} onClick={saveLocation}>
+              <Button className="flex-1" disabled={!locationForm.province || savingLocation} onClick={saveLocation}>
                 {savingLocation ? 'Guardando...' : 'Guardar'}
               </Button>
             </div>
@@ -507,24 +507,24 @@ export default function MyRequests() {
             <p className="text-sm text-slate-500 mb-4">Esta información ayuda a los profesionales a encontrarte más fácil.</p>
             <div className="space-y-3">
               <div>
-                <label className="text-sm font-medium text-slate-700">Ciudad *</label>
-                <input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: Buenos Aires" value={locationForm.city} onChange={e => setLocationForm(p => ({...p, city: e.target.value}))} />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-slate-700">Provincia</label>
+                <label className="text-sm font-medium text-slate-700">Provincia *</label>
                 <input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: Buenos Aires" value={locationForm.province} onChange={e => setLocationForm(p => ({...p, province: e.target.value}))} list="province-list-myr" />
                 <datalist id="province-list-myr">
                   {["Buenos Aires","CABA","Córdoba","Santa Fe","Mendoza","Tucumán","Salta","Misiones","Chaco","Corrientes","Entre Ríos","Santiago del Estero","San Juan","San Luis","La Rioja","Catamarca","Jujuy","Formosa","Neuquén","Río Negro","Chubut","Santa Cruz","Tierra del Fuego","La Pampa"].map(p => <option key={p} value={p} />)}
                 </datalist>
               </div>
               <div>
+                <label className="text-sm font-medium text-slate-700">Ciudad *</label>
+                <input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: Salta" value={locationForm.city} onChange={e => setLocationForm(p => ({...p, city: e.target.value}))} />
+              </div>
+              <div>
                 <label className="text-sm font-medium text-slate-700">Barrio / Localidad</label>
-                <input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: Palermo" value={locationForm.neighborhood} onChange={e => setLocationForm(p => ({...p, neighborhood: e.target.value}))} />
+                <input className="mt-1 w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: Centro" value={locationForm.neighborhood} onChange={e => setLocationForm(p => ({...p, neighborhood: e.target.value}))} />
               </div>
             </div>
             <div className="flex gap-3 mt-5">
               <Button variant="outline" className="flex-1" onClick={() => setShowLocationModal(false)}>Ahora no</Button>
-              <Button className="flex-1" disabled={!locationForm.city || savingLocation} onClick={saveLocation}>
+              <Button className="flex-1" disabled={!locationForm.province || savingLocation} onClick={saveLocation}>
                 {savingLocation ? 'Guardando...' : 'Guardar'}
               </Button>
             </div>
