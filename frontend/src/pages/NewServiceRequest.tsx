@@ -67,7 +67,12 @@ export default function NewServiceRequest() {
 
   const availableCities = selectedProvince ? (citiesByProvince[selectedProvince] ?? []) : [];
 
+  const isFirstRender = useState(true);
   useEffect(() => {
+    if (isFirstRender[0]) {
+      isFirstRender[1](false);
+      return;
+    }
     setSelectedCity('');
     setCustomCity('');
   }, [selectedProvince]);
