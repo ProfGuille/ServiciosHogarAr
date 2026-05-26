@@ -253,8 +253,18 @@ export default function MyRequests() {
         headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify(locationForm),
       });
-      const cached = localStorage.getItem('user');
-      if (cached) localStorage.setItem('user', JSON.stringify({ ...JSON.parse(cached), ...locationForm }));
+      // Actualizar localStorage con datos frescos del servidor
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://api.servicioshogar.com.ar';
+      const meRes = await fetch(`${apiUrl}/api/auth/me`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (meRes.ok) {
+        const fresh = await meRes.json();
+        localStorage.setItem('user', JSON.stringify(fresh));
+      } else {
+        const cached = localStorage.getItem('user');
+        if (cached) localStorage.setItem('user', JSON.stringify({ ...JSON.parse(cached), ...locationForm }));
+      }
       setShowLocationModal(false);
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       window.location.reload();
