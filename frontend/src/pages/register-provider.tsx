@@ -298,8 +298,8 @@ export default function RegisterProvider() {
                     onLocationSelect={(loc) => {
                       setProviderLocation(loc);
                       const parts = loc.address.split(',').map((p: string) => p.trim());
-                      const city = parts.length > 2 ? parts[parts.length - 3] || parts[0] : parts[0];
-                      const province = parts.length > 2 ? parts[parts.length - 2] || '' : '';
+                      const city = loc.city || '';
+                      const province = loc.state || '';
                       setFormData(prev => ({ ...prev, city, province }));
                     }}
                     height="220px"
