@@ -109,6 +109,14 @@ export default function RegisterProvider() {
       setError('Seleccioná tu ubicación en el mapa');
       return;
     }
+    if (!formData.city) {
+      setError('No pudimos detectar tu ciudad. Buscá tu dirección completa en el mapa (incluí calle y número).');
+      return;
+    }
+    if (!formData.province) {
+      setError('No pudimos detectar tu provincia. Buscá tu dirección completa en el mapa (incluí calle y número).');
+      return;
+    }
 
     setLoading(true);
     try {
