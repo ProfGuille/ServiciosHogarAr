@@ -177,40 +177,6 @@ export default function ProviderDashboard() {
   });
 
 
-  // Verificación de identidad
-  const { data: verificationData } = useQuery({
-    queryKey: ["/api/providers/verification"],
-    queryFn: async () => {
-      const res = await fetch(getApiUrl(`/api/providers/${providerProfile?.id}/verification`), {
-        headers: getAuthHeaders()
-      });
-      if (res.status === 404) return null;
-      if (!res.ok) throw new Error("Error al obtener verificacion");
-      return res.json();
-    },
-    enabled: !!providerProfile?.id,
-  });
-
-  const submitVerificationMutation = useMutation({
-    mutationFn: async (data: typeof verifForm) => {
-      const res = await fetch(getApiUrl(`/api/providers/${providerId}/verification`), {
-        method: "POST",
-        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-      });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Error al enviar solicitud");
-      }
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/providers/verification"] });
-      setVerifError("");
-    },
-    onError: (err: Error) => setVerifError(err.message),
-  });
-
   // Estado para edición de perfil
 
 
