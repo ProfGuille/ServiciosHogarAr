@@ -67,7 +67,7 @@ export default function Profile() {
     }
   });
 
-  const { data: locationData } = useQuery<{ lat: number; lng: number } | null>({
+  const { data: locationData } = useQuery<{ lat: number; lng: number; address?: string } | null>({
     queryKey: ["provider-location", providerId],
     enabled: !!providerId && (user as any)?.userType === "provider",
     queryFn: async () => {
@@ -105,7 +105,7 @@ export default function Profile() {
 
   useEffect(() => {
     if (locationData && !providerLocation) {
-      setProviderLocation({ lat: locationData.lat, lng: locationData.lng, address: "" });
+      setProviderLocation({ lat: locationData.lat, lng: locationData.lng, address: locationData.address || "" });
     }
   }, [locationData]);
 
@@ -176,7 +176,7 @@ export default function Profile() {
       const res = await fetchWithAuth(getApiUrl(`/api/providers/${providerId}/location`), {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ latitude: providerLocation.lat, longitude: providerLocation.lng }),
+        body: JSON.stringify({ latitude: providerLocation.lat, longitude: providerLocation.lng, address: providerLocation.address || null, city: (providerLocation as any).city || null, province: (providerLocation as any).state || null }),
       });
       if (res.ok) setLocationSaved(true);
     } catch (err) {
@@ -407,6 +407,12 @@ export default function Profile() {
                       <span className="text-muted-foreground">Telefono</span>
                       <span className="font-medium">{providerProfile?.phoneNumber || providerProfile?.phone_number || "—"}</span>
                     </div>
+                    {locationData?.address && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Direccion</span>
+                        <span className="font-medium max-w-xs text-right">{locationData.address}</span>
+                      </div>
+                    )}
                   </div>
                 )}
               </CardContent>
@@ -436,15 +442,6 @@ export default function Profile() {
                 <CardDescription>Indica donde estas ubicado para que los clientes cercanos puedan encontrarte.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {(providerProfile?.city || providerProfile?.province) && (
-                  <div className="flex items-center gap-2 p-3 bg-slate-50 border rounded-md text-sm">
-                    <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <span className="text-slate-700">
-                      <span className="font-medium">Ubicacion actual: </span>
-                      {[providerProfile.city, providerProfile.province].filter(Boolean).join(", ")}
-                    </span>
-                  </div>
-                )}
                 <LocationPicker
                   initialLocation={locationData ?? undefined}
                   onLocationSelect={(loc) => { setProviderLocation(loc); setLocationSaved(false); }}
