@@ -275,9 +275,6 @@ export default function ProviderDashboard() {
           <TabsTrigger value="unlocked">
             Mis solicitudes ({unlockedLeads?.total || 0})
           </TabsTrigger>
-          <TabsTrigger value="logros">
-            Mis Logros
-          </TabsTrigger>
         </TabsList>
 
         {/* Tab: Leads Disponibles */}
