@@ -414,6 +414,24 @@ export default function Profile() {
 
             <Card>
               <CardHeader>
+                <CardTitle>Tus categorias de servicio</CardTitle>
+                <CardDescription>Rubros en los que ofrecés tus servicios</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {providerCategories && providerCategories.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {providerCategories.map(cat => (
+                      <Badge key={cat.id} variant="secondary" className="text-sm px-3 py-1">{cat.name}</Badge>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No tenes categorias registradas.</p>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
                 <CardTitle>Tu ubicacion</CardTitle>
                 <CardDescription>Indica donde estas ubicado para que los clientes cercanos puedan encontrarte.</CardDescription>
               </CardHeader>
@@ -461,23 +479,6 @@ export default function Profile() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Tus categorias de servicio</CardTitle>
-                <CardDescription>Rubros en los que ofrecés tus servicios</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {providerCategories && providerCategories.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
-                    {providerCategories.map(cat => (
-                      <Badge key={cat.id} variant="secondary" className="text-sm px-3 py-1">{cat.name}</Badge>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">No tenes categorias registradas.</p>
-                )}
-              </CardContent>
-            </Card>
 
             <Card>
               <CardHeader>
