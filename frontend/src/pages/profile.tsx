@@ -436,6 +436,15 @@ export default function Profile() {
                 <CardDescription>Indica donde estas ubicado para que los clientes cercanos puedan encontrarte.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                {(providerProfile?.city || providerProfile?.province) && (
+                  <div className="flex items-center gap-2 p-3 bg-slate-50 border rounded-md text-sm">
+                    <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <span className="text-slate-700">
+                      <span className="font-medium">Ubicacion actual: </span>
+                      {[providerProfile.city, providerProfile.province].filter(Boolean).join(", ")}
+                    </span>
+                  </div>
+                )}
                 <LocationPicker
                   initialLocation={locationData ?? undefined}
                   onLocationSelect={(loc) => { setProviderLocation(loc); setLocationSaved(false); }}
