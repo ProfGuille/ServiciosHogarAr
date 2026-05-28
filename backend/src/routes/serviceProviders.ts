@@ -68,10 +68,10 @@ router.get("/:id/location", requireAuth, async (req, res) => {
   try {
     await ensureOwnership(req, providerId);
     const rows = (await sql`
-      SELECT latitude, longitude FROM provider_locations WHERE provider_id = ${providerId} LIMIT 1
+      SELECT latitude, longitude, address FROM provider_locations WHERE provider_id = ${providerId} LIMIT 1
     `) as any[];
     if (!rows.length) return res.json(null);
-    res.json({ lat: Number(rows[0].latitude), lng: Number(rows[0].longitude) });
+    res.json({ lat: Number(rows[0].latitude), lng: Number(rows[0].longitude), address: rows[0].address || null });
   } catch (err) {
     console.error("Error:", err);
     res.status(err.status || 500).json({ error: err.message || "Error interno del servidor" });
@@ -87,12 +87,15 @@ router.patch("/:id/location", requireAuth, async (req, res) => {
   try {
     await ensureOwnership(req, providerId);
 
-    const { latitude, longitude } = req.body;
+    const { latitude, longitude, address, city, province } = req.body;
 
     const updated = await providersService.updateLocation(
       providerId,
       Number(latitude),
-      Number(longitude)
+      Number(longitude),
+      address,
+      city,
+      province
     );
 
     res.json(updated);

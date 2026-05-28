@@ -146,7 +146,7 @@ if (safeData.phoneNumber !== undefined) {
   // ---------------------------------------------------------
   // Actualizar ubicación
   // ---------------------------------------------------------
-  async updateLocation(id: number, latitude: number, longitude: number) {
+  async updateLocation(id: number, latitude: number, longitude: number, address?: string, city?: string, province?: string) {
     if (!id || id <= 0) {
       throw new Error("ID de proveedor inválido");
     }
@@ -164,12 +164,21 @@ if (safeData.phoneNumber !== undefined) {
 
     // Upsert en provider_locations
     await db.execute(sql`
-      INSERT INTO provider_locations (provider_id, latitude, longitude)
-      VALUES (${id}, ${latitude}, ${longitude})
+      INSERT INTO provider_locations (provider_id, latitude, longitude, address)
+      VALUES (${id}, ${latitude}, ${longitude}, ${address || null})
       ON CONFLICT (provider_id) DO UPDATE
         SET latitude = EXCLUDED.latitude,
-            longitude = EXCLUDED.longitude
+            longitude = EXCLUDED.longitude,
+            address = EXCLUDED.address
     `);
+    if (city || province) {
+      await db.execute(sql`
+        UPDATE service_providers
+        SET city = COALESCE(${city || null}, city),
+            province = COALESCE(${province || null}, province)
+        WHERE id = ${id}
+      `);
+    }
     const [updated] = await db
       .update(serviceProviders)
       .set({ updatedAt: new Date() })
