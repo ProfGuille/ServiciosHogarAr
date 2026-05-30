@@ -65,6 +65,15 @@ function MapCenterUpdater({ center }: { center: LatLngExpression }) {
   return null;
 }
 
+
+function MapViewUpdater({ center, zoom }: { center: [number, number]; zoom: number }) {
+  const map = useMap();
+  useEffect(() => {
+    map.setView(center, zoom);
+  }, [center, zoom]);
+  return null;
+}
+
 export function LocationPicker({
   onLocationSelect,
   initialLocation,
@@ -310,6 +319,7 @@ export function LocationPicker({
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
+          <MapViewUpdater center={mapCenter} zoom={selectedLocation ? 15 : 11} />
           
           <MapCenterUpdater center={mapCenter} />
           <MapClickHandler onLocationClick={handleMapClick} />

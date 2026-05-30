@@ -180,7 +180,13 @@ export default function Profile() {
           const street = (providerLocation as any).street;
           const suburb = (providerLocation as any).suburb;
           const state = (providerLocation as any).state;
-          const cleanAddress = [street, suburb, state].filter(Boolean).join(', ');
+          const displayName = providerLocation.address || '';
+          const numMatch = displayName.match(/^(\d+),\s*/);
+          const houseNum = numMatch ? numMatch[1] : '';
+          const streetWithNum = street && houseNum && !street.includes(houseNum)
+            ? street + ' ' + houseNum
+            : street;
+          const cleanAddress = [streetWithNum, suburb, state].filter(Boolean).join(', ');
           return {
             latitude: providerLocation.lat,
             longitude: providerLocation.lng,
