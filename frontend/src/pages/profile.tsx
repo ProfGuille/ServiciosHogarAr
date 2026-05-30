@@ -191,7 +191,11 @@ export default function Profile() {
         })()),
 
       });
-      if (res.ok) setLocationSaved(true);
+      if (res.ok) {
+        setLocationSaved(true);
+        queryClient.invalidateQueries({ queryKey: ["provider-location", providerId] });
+        refetchProfile();
+      }
     } catch (err) {
       console.error("Error guardando ubicacion:", err);
     } finally {
