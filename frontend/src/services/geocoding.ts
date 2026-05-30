@@ -217,6 +217,7 @@ class GeocodingService {
           [address.road, address.house_number].filter(Boolean).join(' ') : 
           undefined,
         city: address.city || address.municipality || address.suburb || address.neighbourhood,
+        suburb: address.suburb || address.neighbourhood || address.quarter || undefined,
         state: address.state && !/^[A-Z]\d{4}[A-Z]{0,3}$/.test(address.state.trim()) ? address.state : (address.city || address.municipality || undefined),
         country: address.country,
         postcode: address.postcode,
@@ -235,6 +236,7 @@ class GeocodingService {
           [address.road, address.house_number].filter(Boolean).join(' ') : 
           undefined,
         city: address.city || address.municipality || address.suburb || address.neighbourhood,
+        suburb: address.suburb || address.neighbourhood || address.quarter || undefined,
         state: address.state && !/^[A-Z]\d{4}[A-Z]{0,3}$/.test(address.state.trim()) ? address.state : (address.city || address.municipality || undefined),
         country: address.country,
         postcode: address.postcode,

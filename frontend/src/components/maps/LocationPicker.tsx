@@ -28,7 +28,7 @@ Icon.Default.mergeOptions({
 });
 
 interface LocationPickerProps {
-  onLocationSelect: (location: { lat: number; lng: number; address: string; city?: string; state?: string }) => void;
+  onLocationSelect: (location: { lat: number; lng: number; address: string; city?: string; state?: string; street?: string; suburb?: string }) => void;
   initialLocation?: { lat: number; lng: number };
   height?: string;
   showAddressSearch?: boolean;
@@ -147,6 +147,8 @@ export function LocationPicker({
         address: result.displayName,
         city: result.address?.city,
         state: result.address?.state,
+        street: result.address?.street,
+        suburb: (result.address as any)?.suburb,
       };
       
       setSelectedLocation(location);
@@ -192,6 +194,8 @@ export function LocationPicker({
         address: result.displayName,
         city: result.address?.city,
         state: result.address?.state,
+        street: result.address?.street,
+        suburb: (result.address as any)?.suburb,
       };
       
       setSelectedLocation(selectedLoc);

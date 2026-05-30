@@ -176,7 +176,20 @@ export default function Profile() {
       const res = await fetchWithAuth(getApiUrl(`/api/providers/${providerId}/location`), {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ latitude: providerLocation.lat, longitude: providerLocation.lng, address: providerLocation.address || null, city: (providerLocation as any).city || null, province: (providerLocation as any).state || null }),
+        body: JSON.stringify((() => {
+          const street = (providerLocation as any).street;
+          const suburb = (providerLocation as any).suburb;
+          const state = (providerLocation as any).state;
+          const cleanAddress = [street, suburb, state].filter(Boolean).join(', ');
+          return {
+            latitude: providerLocation.lat,
+            longitude: providerLocation.lng,
+            address: cleanAddress || providerLocation.address || null,
+            city: (providerLocation as any).city || null,
+            province: state || null,
+          };
+        })()),
+
       });
       if (res.ok) setLocationSaved(true);
     } catch (err) {
