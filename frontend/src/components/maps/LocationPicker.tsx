@@ -173,6 +173,8 @@ export function LocationPicker({
       address: result.displayName,
       city: result.address?.city,
       state: result.address?.state,
+      street: result.address?.street,
+      suburb: (result.address as any)?.suburb,
     };
     
     setSelectedLocation(location);
