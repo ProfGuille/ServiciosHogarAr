@@ -1,114 +1,67 @@
 import { Router } from 'express';
 import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
+import { v2 as cloudinary } from 'cloudinary';
+import { requireAuth } from '../middleware/auth.js';
+import { neon } from '@neondatabase/serverless';
 
 const router = Router();
 
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadDir = path.join(process.cwd(), 'uploads', 'photos');
-    // Create directory if it doesn't exist
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const ext = path.extname(file.originalname);
-    cb(null, `photo-${uniqueSuffix}${ext}`);
-  }
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+const sql = neon(process.env.DATABASE_URL!);
+
+// Multer en memoria — no guarda en disco
 const upload = multer({
-  storage,
-  limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
-  },
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
     } else {
-      cb(new Error('Only image files are allowed'));
+      cb(new Error('Solo se permiten imágenes'));
     }
   }
 });
 
-// Upload single photo
-router.post('/photo', upload.single('photo'), (req, res) => {
+// POST /api/upload/profile-image — sube foto de perfil del proveedor
+router.post('/profile-image', requireAuth, upload.single('photo'), async (req: any, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'No file uploaded' });
-    }
+    if (!req.file) return res.status(400).json({ error: 'No se recibió imagen' });
 
-    // In production, you would upload to cloud storage (AWS S3, Cloudinary, etc.)
-    // For now, we'll return a local URL
-    const photoUrl = `/uploads/photos/${req.file.filename}`;
-
-    res.json({
-      success: true,
-      url: photoUrl,
-      filename: req.file.filename,
-      size: req.file.size
+    // Subir a Cloudinary como stream desde buffer
+    const result = await new Promise<any>((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        {
+          folder: 'servicioshogar/profiles',
+          transformation: [
+            { width: 400, height: 400, crop: 'fill', gravity: 'face' },
+            { quality: 'auto', fetch_format: 'auto' }
+          ]
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+      stream.end(req.file!.buffer);
     });
 
+    // Guardar URL en service_providers
+    const userId = req.user.id;
+    await sql`
+      UPDATE service_providers
+      SET profile_image_url = ${result.secure_url}, updated_at = NOW()
+      WHERE user_id = ${userId}
+    `;
+
+    res.json({ success: true, url: result.secure_url });
   } catch (error) {
-    console.error('Photo upload error:', error);
-    res.status(500).json({ 
-      error: 'Failed to upload photo',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    });
-  }
-});
-
-// Upload multiple photos
-router.post('/photos', upload.array('photos', 4), (req, res) => {
-  try {
-    if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
-      return res.status(400).json({ error: 'No files uploaded' });
-    }
-
-    const photoUrls = req.files.map(file => ({
-      url: `/uploads/photos/${file.filename}`,
-      filename: file.filename,
-      size: file.size
-    }));
-
-    res.json({
-      success: true,
-      photos: photoUrls
-    });
-
-  } catch (error) {
-    console.error('Photos upload error:', error);
-    res.status(500).json({ 
-      error: 'Failed to upload photos',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    });
-  }
-});
-
-// Delete photo
-router.delete('/photo/:filename', (req, res) => {
-  try {
-    const { filename } = req.params;
-    const filePath = path.join(process.cwd(), 'uploads', 'photos', filename);
-
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-      res.json({ success: true, message: 'Photo deleted' });
-    } else {
-      res.status(404).json({ error: 'Photo not found' });
-    }
-
-  } catch (error) {
-    console.error('Photo deletion error:', error);
-    res.status(500).json({ 
-      error: 'Failed to delete photo',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    });
+    console.error('Error subiendo imagen de perfil:', error);
+    res.status(500).json({ error: 'Error al subir la imagen' });
   }
 });
 

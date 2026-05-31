@@ -373,6 +373,57 @@ export default function Profile() {
           <div className="mt-8 space-y-6">
 
             <Card>
+              <CardHeader>
+                <CardTitle>Foto de perfil</CardTitle>
+                <CardDescription>Tu foto es lo primero que ven los clientes</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-6">
+                  <div className="w-24 h-24 rounded-full bg-slate-100 border-2 border-slate-200 overflow-hidden flex items-center justify-center flex-shrink-0">
+                    {providerProfile?.profileImageUrl || providerProfile?.profile_image_url ? (
+                      <img src={providerProfile?.profileImageUrl || providerProfile?.profile_image_url} alt="Foto de perfil" className="w-full h-full object-cover" />
+                    ) : (
+                      <User className="h-10 w-10 text-slate-400" />
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <label className="cursor-pointer">
+                      <span className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-md text-sm font-medium hover:bg-slate-50 transition-colors">
+                        Subir foto
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          const formData = new FormData();
+                          formData.append("photo", file);
+                          try {
+                            const res = await fetch(getApiUrl("/api/upload/profile-image"), {
+                              method: "POST",
+                              headers: getAuthHeaders(),
+                              body: formData,
+                            });
+                            if (res.ok) {
+                              refetchProfile();
+                            } else {
+                              alert("Error al subir la imagen. Intentá de nuevo.");
+                            }
+                          } catch {
+                            alert("Error al subir la imagen. Intentá de nuevo.");
+                          }
+                        }}
+                      />
+                    </label>
+                    <p className="text-xs text-muted-foreground">JPG, PNG o WebP. Máximo 5MB.</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                   <CardTitle>Datos de tu negocio</CardTitle>

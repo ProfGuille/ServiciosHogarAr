@@ -1,4 +1,5 @@
 import { Router } from "express";
+import uploadRoutes from "./upload.js";
 import authRoutes from "./auth.js";
 import creditsRoutes from "./credits.js";
 import paymentsMPRoutes from "./payments-mp.js";
@@ -23,6 +24,7 @@ router.use("/categories", categoriesRoutes);
 router.use("/admin", adminRoutes);
 router.use("/search", searchRoutes);
 router.use("/providers", serviceProvidersRoutes);
+router.use("/upload", uploadRoutes);
 router.use("/service-requests", createServiceRequestRoutes);
 router.use("/service-requests", serviceRequestsRoutes);
 router.use("/provider-credits", providerCreditsRoutes);
