@@ -130,6 +130,56 @@ router.patch("/:id/online", requireAuth, async (req, res) => {
 // -----------------------------
 // Obtener proveedor por ID (público)
 // -----------------------------
+
+// -----------------------------
+// GET /api/providers/slug/:slug
+// Busca proveedor por slug generado desde business_name + city
+// -----------------------------
+function generateSlug(businessName: string, city: string): string {
+  return (businessName + "-" + city)
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+router.get("/slug/:slug", async (req, res) => {
+  const { slug } = req.params;
+  try {
+    const providers = (await sql`
+      SELECT * FROM service_providers
+      WHERE is_active = true
+    `) as any[];
+
+    const match = providers.find((p: any) => {
+      if (!p.business_name || !p.city) return false;
+      return generateSlug(p.business_name, p.city) === slug;
+    });
+
+    if (!match) return res.status(404).json({ error: "Proveedor no encontrado" });
+
+    delete match.phone_number;
+
+    const locRows = (await sql`
+      SELECT latitude, longitude FROM provider_locations WHERE provider_id = ${match.id} LIMIT 1
+    `) as any[];
+
+    if (locRows[0]) {
+      const seed = match.id;
+      const latOffset = ((seed * 7) % 11 - 5) * 0.0018;
+      const lngOffset = ((seed * 13) % 11 - 5) * 0.0018;
+      match.latitude = (parseFloat(locRows[0].latitude) + latOffset).toFixed(6);
+      match.longitude = (parseFloat(locRows[0].longitude) + lngOffset).toFixed(6);
+    }
+
+    res.json(match);
+  } catch (err) {
+    console.error("Error en GET /api/providers/slug/:slug:", err);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+});
+
 router.get("/:id", async (req, res) => {
   const providerId = Number(req.params.id);
   if (isNaN(providerId)) return res.status(400).json({ error: "ID inválido" });

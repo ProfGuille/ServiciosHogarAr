@@ -10,6 +10,7 @@ const Register = lazy(() => import('@/pages/register'));
 const RegisterProvider = lazy(() => import('@/pages/register-provider'));
 const ProviderDashboard = lazy(() => import('@/pages/provider-dashboard'));
 const ProviderProfile = lazy(() => import('@/pages/provider-profile'));
+const ProviderSlug = lazy(() => import('@/pages/provider-slug'));
 const ComprarCreditos = lazy(() => import('@/pages/comprar-creditos'));
 const CompraExitosa = lazy(() => import('@/pages/compra-exitosa'));
 const CompraFallida = lazy(() => import('@/pages/compra-fallida'));
@@ -58,6 +59,7 @@ function App() {
         <Route path="/compra-pendiente" component={CompraPendiente} />
         <Route path="/buscar" component={Search} />
         <Route path="/servicio/:id" component={ServiceDetail} />
+        <Route path="/profesionales/:slug" component={ProviderSlug} />
         <Route path="/nueva-solicitud" component={NewServiceRequest} />
         <Route path="/admin" component={AdminDashboard} />
         <Route path="/about" component={About} />
