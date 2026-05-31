@@ -49,17 +49,17 @@ export default function ProviderSlug() {
   });
 
   const { data: stats } = useQuery({
-    queryKey: ["/api/providers", id, "stats"],
+    queryKey: ["/api/providers", provider?.id, "stats"],
     queryFn: () =>
-      fetch(getApiUrl(`/api/providers/${id}/stats`)).then((res) => res.json()),
-    enabled: !!id,
+      fetch(getApiUrl(`/api/providers/${provider?.id}/stats`)).then((res) => res.json()),
+    enabled: !!provider?.id,
   });
 
   const { data: providerCategories } = useQuery({
-    queryKey: ["/api/providers", id, "categories"],
+    queryKey: ["/api/providers", provider?.id, "categories"],
     queryFn: () =>
-      fetch(getApiUrl(`/api/providers/${id}/categories`)).then((res) => res.json()),
-    enabled: !!id,
+      fetch(getApiUrl(`/api/providers/${provider?.id}/categories`)).then((res) => res.json()),
+    enabled: !!provider?.id,
   });
 
   // Geocodificación por ciudad para el mapa
