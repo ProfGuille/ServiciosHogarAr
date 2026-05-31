@@ -181,8 +181,10 @@ export default function Profile() {
           const suburb = (providerLocation as any).suburb;
           const state = (providerLocation as any).state;
           const displayName = providerLocation.address || '';
+          const houseNumber = (providerLocation as any).houseNumber;
           const numMatch = displayName.match(/^(\d+),\s*/);
-          const houseNum = numMatch ? numMatch[1] : '';
+          const houseNumFallback = numMatch ? numMatch[1] : '';
+          const houseNum = houseNumber || houseNumFallback;
           const streetWithNum = street && houseNum && !street.includes(houseNum)
             ? street + ' ' + houseNum
             : street;
@@ -252,8 +254,8 @@ export default function Profile() {
           <Card>
             <CardHeader><CardTitle>Acceso requerido</CardTitle></CardHeader>
             <CardContent>
-              <p className="text-gray-600 mb-4">Debes iniciar sesion para ver tu perfil.</p>
-              <Button onClick={() => window.location.href = "/api/login"}>Iniciar sesion</Button>
+              <p className="text-gray-600 mb-4">Debés iniciar sesión para ver tu perfil.</p>
+              <Button onClick={() => window.location.href = "/api/login"}>Iniciar sesión</Button>
             </CardContent>
           </Card>
         </div>
@@ -274,7 +276,7 @@ export default function Profile() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <User className="h-5 w-5" />
-                  Informacion Personal
+                  Información Personal
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -310,7 +312,7 @@ export default function Profile() {
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-gray-500" />
-                      <label className="text-sm font-medium text-gray-500">Ubicacion</label>
+                      <label className="text-sm font-medium text-gray-500">Ubicación</label>
                     </div>
                     <p className="text-lg pl-6">
                       {[userProfile.neighborhood, userProfile.city, userProfile.province].filter(Boolean).join(", ")}
@@ -341,7 +343,7 @@ export default function Profile() {
 
             {user.userType !== "admin" && (
               <Card>
-                <CardHeader><CardTitle>Acciones Rapidas</CardTitle></CardHeader>
+                <CardHeader><CardTitle>Acciones Rápidas</CardTitle></CardHeader>
                 <CardContent className="space-y-2">
                   {user.userType === "customer" && (
                     <Button variant="outline" className="w-full" asChild>
@@ -355,11 +357,11 @@ export default function Profile() {
                   )}
                   {user.userType === "admin" && (
                     <Button variant="outline" className="w-full" asChild>
-                      <a href="/admin">Panel de Administracion</a>
+                      <a href="/admin">Panel de Administración</a>
                     </Button>
                   )}
                   <Button variant="destructive" className="w-full" onClick={() => { localStorage.removeItem("token"); localStorage.removeItem("user"); window.location.href = "/login"; }}>
-                    Cerrar sesion
+                    Cerrar sesión
                   </Button>
                 </CardContent>
               </Card>
@@ -374,7 +376,7 @@ export default function Profile() {
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                   <CardTitle>Datos de tu negocio</CardTitle>
-                  <CardDescription>Informacion que ven los clientes en tu perfil publico</CardDescription>
+                  <CardDescription>Información que ven los clientes en tu perfil público</CardDescription>
                 </div>
                 {!editingProfile && (
                   <Button size="sm" variant="outline" onClick={handleEditProfile}>Editar</Button>
@@ -388,7 +390,7 @@ export default function Profile() {
                       <input className="w-full mt-1 px-3 py-2 border rounded-md text-sm" value={profileForm.businessName} onChange={e => setProfileForm({...profileForm, businessName: e.target.value})} />
                     </div>
                     <div>
-                      <label className="text-sm font-medium">Descripcion</label>
+                      <label className="text-sm font-medium">Descripción</label>
                       <textarea className="w-full mt-1 px-3 py-2 border rounded-md text-sm" rows={3} value={profileForm.description} onChange={e => setProfileForm({...profileForm, description: e.target.value})} />
                     </div>
                     <div>
@@ -396,11 +398,11 @@ export default function Profile() {
                       <input className="w-full mt-1 px-3 py-2 border rounded-md text-sm" type="number" value={profileForm.hourlyRate} onChange={e => setProfileForm({...profileForm, hourlyRate: e.target.value})} />
                     </div>
                     <div>
-                      <label className="text-sm font-medium">Anos de experiencia</label>
+                      <label className="text-sm font-medium">Años de experiencia</label>
                       <input className="w-full mt-1 px-3 py-2 border rounded-md text-sm" type="number" min="0" max="50" value={profileForm.experienceYears} onChange={e => setProfileForm({...profileForm, experienceYears: e.target.value})} />
                     </div>
                     <div>
-                      <label className="text-sm font-medium">Telefono de contacto</label>
+                      <label className="text-sm font-medium">Teléfono de contacto</label>
                       <input className="w-full mt-1 px-3 py-2 border rounded-md text-sm" value={profileForm.phone} onChange={e => setProfileForm({...profileForm, phone: e.target.value})} />
                     </div>
                     <div className="flex gap-2 pt-2">
@@ -415,7 +417,7 @@ export default function Profile() {
                       <span className="font-medium">{providerProfile?.businessName || providerProfile?.business_name || "—"}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Descripcion</span>
+                      <span className="text-muted-foreground">Descripción</span>
                       <span className="font-medium max-w-xs text-right">{providerProfile?.description || "—"}</span>
                     </div>
                     <div className="flex justify-between">
@@ -427,7 +429,7 @@ export default function Profile() {
                       <span className="font-medium">{providerProfile?.experienceYears || providerProfile?.experience_years ? `${providerProfile?.experienceYears || providerProfile?.experience_years} anos` : "—"}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Telefono</span>
+                      <span className="text-muted-foreground">Teléfono</span>
                       <span className="font-medium">{providerProfile?.phoneNumber || providerProfile?.phone_number || "—"}</span>
                     </div>
                     {locationData?.address && (
@@ -443,7 +445,7 @@ export default function Profile() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Tus categorias de servicio</CardTitle>
+                <CardTitle>Tus categorías de servicio</CardTitle>
                 <CardDescription>Rubros en los que ofrecés tus servicios</CardDescription>
               </CardHeader>
               <CardContent>
@@ -454,15 +456,15 @@ export default function Profile() {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">No tenes categorias registradas.</p>
+                  <p className="text-sm text-muted-foreground">No tenés categorías registradas.</p>
                 )}
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>Tu ubicacion</CardTitle>
-                <CardDescription>Indica donde estas ubicado para que los clientes cercanos puedan encontrarte.</CardDescription>
+                <CardTitle>Tu ubicación</CardTitle>
+                <CardDescription>Indicá dónde estás ubicado para que los clientes cercanos puedan encontrarte.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <LocationPicker
@@ -470,7 +472,7 @@ export default function Profile() {
                   onLocationSelect={(loc) => { setProviderLocation(loc); setLocationSaved(false); }}
                   height="250px"
                   showAddressSearch={true}
-                  placeholder="Busca tu direccion..."
+                  placeholder="Buscá tu dirección..."
                 />
                 {providerLocation && (
                   <p className="text-xs text-muted-foreground">
@@ -478,9 +480,9 @@ export default function Profile() {
                   </p>
                 )}
                 <Button onClick={handleSaveLocation} disabled={savingLocation || !providerLocation} className="w-full">
-                  {savingLocation ? "Guardando..." : "Guardar ubicacion"}
+                  {savingLocation ? "Guardando..." : "Guardar ubicación"}
                 </Button>
-                {locationSaved && <p className="text-sm text-green-600 text-center">Ubicacion guardada correctamente</p>}
+                {locationSaved && <p className="text-sm text-green-600 text-center">Ubicación guardada correctamente</p>}
               </CardContent>
             </Card>
 
@@ -511,19 +513,19 @@ export default function Profile() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Verificacion de identidad</CardTitle>
-                <CardDescription>Obtene el distintivo de proveedor verificado para generar mas confianza.</CardDescription>
+                <CardTitle>Verificación de identidad</CardTitle>
+                <CardDescription>Obtené el distintivo de proveedor verificado para generar más confianza.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {verificationData?.status === "approved" && (
                   <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
-                    <span className="text-green-700 font-medium">Identidad verificada</span>
+                    <span className="text-green-700 font-medium">✓ Identidad verificada</span>
                   </div>
                 )}
                 {verificationData?.status === "pending" && (
                   <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                    <p className="text-amber-700 text-sm font-medium">Solicitud en revision</p>
-                    <p className="text-amber-600 text-xs mt-1">Tu solicitud fue recibida y esta siendo revisada por nuestro equipo.</p>
+                    <p className="text-amber-700 text-sm font-medium">Solicitud en revisión</p>
+                    <p className="text-amber-600 text-xs mt-1">Tu solicitud fue recibida y está siendo revisada por nuestro equipo.</p>
                   </div>
                 )}
                 {verificationData?.status === "rejected" && (
@@ -538,12 +540,12 @@ export default function Profile() {
                       <label className="text-sm font-medium">Tipo de persona</label>
                       <select className="w-full mt-1 px-3 py-2 border rounded-md text-sm" value={verifForm.personType}
                         onChange={e => setVerifForm({...verifForm, personType: e.target.value, documentType: e.target.value === "fisica" ? "DNI" : "CUIT"})}>
-                        <option value="fisica">Persona fisica</option>
-                        <option value="juridica">Persona juridica (empresa)</option>
+                        <option value="fisica">Persona física</option>
+                        <option value="juridica">Persona jurídica (empresa)</option>
                       </select>
                     </div>
                     <div>
-                      <label className="text-sm font-medium">{verifForm.personType === "fisica" ? "Numero de DNI" : "CUIT"}</label>
+                      <label className="text-sm font-medium">{verifForm.personType === "fisica" ? "Número de DNI" : "CUIT"}</label>
                       <input className="w-full mt-1 px-3 py-2 border rounded-md text-sm"
                         placeholder={verifForm.personType === "fisica" ? "Ej: 30123456" : "Ej: 20-30123456-7"}
                         value={verifForm.documentNumber}
@@ -558,13 +560,13 @@ export default function Profile() {
                           onChange={e => setVerifForm({...verifForm, legalRepresentative: e.target.value})} />
                       </div>
                     )}
-                    <div className="flex items-start gap-2 p-3 bg-slate-50 border rounded-lg">
+                    <div className="flex items-★t gap-2 p-3 bg-slate-50 border rounded-lg">
                       <input type="checkbox" id="consent" className="mt-1"
                         checked={verifForm.consentGiven}
                         onChange={e => setVerifForm({...verifForm, consentGiven: e.target.checked})} />
                       <label htmlFor="consent" className="text-xs text-slate-600">
-                        Acepto que ServiciosHogar.com.ar almacene mi numero de documento con fines de verificacion de identidad, conforme a la{" "}
-                        <a href="/privacidad" className="underline text-blue-600" target="_blank" rel="noreferrer">Politica de Privacidad</a>.
+                        Acepto que ServiciosHogar.com.ar almacene mi número de documento con fines de verificación de identidad, conforme a la{" "}
+                        <a href="/privacidad" className="underline text-blue-600" target="_blank" rel="noreferrer">Política de Privacidad</a>.
                       </label>
                     </div>
                     {verifError && <p className="text-sm text-red-600">{verifError}</p>}
@@ -572,7 +574,7 @@ export default function Profile() {
                       className="w-full"
                       disabled={!verifForm.documentNumber || !verifForm.consentGiven || submitVerificationMutation.isPending}
                       onClick={() => submitVerificationMutation.mutate(verifForm)}>
-                      {submitVerificationMutation.isPending ? "Enviando..." : "Solicitar verificacion"}
+                      {submitVerificationMutation.isPending ? "Enviando..." : "Solicitar verificación"}
                     </Button>
                   </div>
                 )}
@@ -581,7 +583,7 @@ export default function Profile() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Tu reputacion</CardTitle>
+                <CardTitle>Tu reputación</CardTitle>
                 <CardDescription>Calificaciones recibidas de clientes. No se muestra el nombre del cliente.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -595,8 +597,8 @@ export default function Profile() {
                     </div>
                     <div className="text-sm text-muted-foreground">
                       {(providerReviews?.data?.length ?? 0) > 0
-                        ? providerReviews!.data.length + " calificacion" + (providerReviews!.data.length !== 1 ? "es" : "") + " recibida" + (providerReviews!.data.length !== 1 ? "s" : "")
-                        : "Sin calificaciones aun"}
+                        ? providerReviews!.data.length + " calificación" + (providerReviews!.data.length !== 1 ? "es" : "") + " recibida" + (providerReviews!.data.length !== 1 ? "s" : "")
+                        : "Sin calificaciones aún"}
                     </div>
                   </div>
                 ) : (
@@ -609,7 +611,7 @@ export default function Profile() {
                         <div className="flex items-center justify-between">
                           <div className="flex gap-0.5">
                             {Array.from({ length: 5 }).map((_, i) => (
-                              <span key={i} className={i < r.rating ? "text-yellow-400" : "text-slate-200"}>star</span>
+                              <span key={i} className={i < r.rating ? "text-yellow-400" : "text-slate-200"}>★</span>
                             ))}
                           </div>
                           <span className="text-xs text-muted-foreground">
@@ -621,7 +623,7 @@ export default function Profile() {
                     ))}
                   </div>
                 ) : (providerReviews?.data?.length ?? 0) === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-2">Todavia no recibiste calificaciones.</p>
+                  <p className="text-sm text-muted-foreground text-center py-2">Todavía no recibiste calificaciones.</p>
                 ) : null}
               </CardContent>
             </Card>
