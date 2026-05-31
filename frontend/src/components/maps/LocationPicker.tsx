@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import { LatLngExpression, Icon } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -90,6 +90,7 @@ export function LocationPicker({
   } = useGeolocation();
 
   const [selectedLocation, setSelectedLocation] = useState<SelectedLocation | null>(null);
+  const userTypedQueryRef = useRef('');
   const [mapCenter, setMapCenter] = useState<LatLngExpression>(
     initialLocation ? [initialLocation.lat, initialLocation.lng] : [-34.6037, -58.3816] // Buenos Aires default
   );
@@ -192,7 +193,7 @@ export function LocationPicker({
     setSearchQuery(result.displayName);
     setSearchResults([]);
     onLocationSelect(location);
-  }, [onLocationSelect, searchQuery]);
+  }, [onLocationSelect]);
 
   // Get current GPS location
   const handleGetCurrentLocation = useCallback(async () => {
@@ -246,7 +247,7 @@ export function LocationPicker({
                 <Input
                   placeholder={placeholder}
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => { setSearchQuery(e.target.value); userTypedQueryRef.current = e.target.value; }}
                   className="pl-9"
                 />
                 {isSearching && (
