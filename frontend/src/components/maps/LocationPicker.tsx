@@ -192,7 +192,7 @@ export function LocationPicker({
     setSearchQuery(result.displayName);
     setSearchResults([]);
     onLocationSelect(location);
-  }, [onLocationSelect]);
+  }, [onLocationSelect, searchQuery]);
 
   // Get current GPS location
   const handleGetCurrentLocation = useCallback(async () => {
