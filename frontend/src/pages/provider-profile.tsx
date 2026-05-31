@@ -421,14 +421,7 @@ export default function ProviderProfile() {
                 <CardTitle>Información de contacto</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {provider.phoneNumber && (
-                  <div className="flex items-center gap-3">
-                    <Phone className="h-4 w-4 text-slate-400" />
-                    <span className="text-slate-700">
-                      {provider.phoneNumber}
-                    </span>
-                  </div>
-                )}
+
 
                 <div className="flex items-center gap-3">
                   <Mail className="h-4 w-4 text-slate-400" />
@@ -437,18 +430,12 @@ export default function ProviderProfile() {
                   </Link>
                 </div>
 
-                {provider.address && (
+                {(provider.city || provider.province) && (
                   <div className="flex items-start gap-3">
                     <MapPin className="h-4 w-4 text-slate-400 mt-0.5" />
-                    <div className="text-slate-700">
-                      <div>{provider.address}</div>
-                      <div>
-                        {provider.city}, {provider.province}
-                      </div>
-                      {provider.postalCode && (
-                        <div>CP: {provider.postalCode}</div>
-                      )}
-                    </div>
+                    <span className="text-slate-700">
+                      {[provider.city, provider.province].filter(Boolean).join(", ")}
+                    </span>
                   </div>
                 )}
               </CardContent>
