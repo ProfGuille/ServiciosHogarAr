@@ -426,7 +426,7 @@ export default function Profile() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Experiencia</span>
-                      <span className="font-medium">{providerProfile?.experienceYears || providerProfile?.experience_years ? `${providerProfile?.experienceYears || providerProfile?.experience_years} anos` : "—"}</span>
+                      <span className="font-medium">{providerProfile?.experienceYears || providerProfile?.experience_years ? `${providerProfile?.experienceYears || providerProfile?.experience_years} años` : "—"}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Teléfono</span>

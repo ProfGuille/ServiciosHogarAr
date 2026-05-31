@@ -1557,7 +1557,7 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <span className="text-slate-500 block">Experiencia</span>
-                  <span className="font-medium">{selectedProvider.experienceYears} anos</span>
+                  <span className="font-medium">{selectedProvider.experienceYears} años</span>
                 </div>
                 <div>
                   <span className="text-slate-500 block">Tarifa/hora</span>
