@@ -128,7 +128,7 @@ export default function CentroAyuda() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <Canonical path="/centro-ayuda" />
+      <Canonical path="/centro-ayuda" title="Centro de ayuda — ServiciosHogarAr" description="Preguntas frecuentes y soporte para clientes y proveedores de ServiciosHogarAr. Encontrá respuestas rápidas sobre solicitudes, créditos y pagos." />
 
       <Navbar />
 

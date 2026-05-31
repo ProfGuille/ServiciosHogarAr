@@ -50,7 +50,7 @@ export default function ComoFunciona() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <Canonical path="/como-funciona" />
+      <Canonical path="/como-funciona" title="Cómo funciona ServiciosHogarAr — Encontrá profesionales para tu hogar" description="Publicá tu solicitud gratis, recibí contactos de profesionales verificados cerca tuyo y elegí el mejor. Plomeros, electricistas, pintores y más en Argentina." />
 
       <Navbar />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

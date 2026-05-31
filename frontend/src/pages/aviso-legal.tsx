@@ -13,7 +13,7 @@ export default function AvisoLegal() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <Canonical path="/aviso-legal" />
+      <Canonical path="/aviso-legal" title="Aviso legal — ServiciosHogarAr" description="Términos legales y condiciones de uso de ServiciosHogarAr, plataforma de servicios para el hogar en Argentina." />
 
       <Navbar />
       
