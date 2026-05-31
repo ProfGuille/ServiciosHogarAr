@@ -146,8 +146,12 @@ router.get("/:id", async (req, res) => {
       SELECT latitude, longitude FROM provider_locations WHERE provider_id = ${providerId} LIMIT 1
     `) as any[];
     if (locRows[0]) {
-      (provider as any).latitude = locRows[0].latitude;
-      (provider as any).longitude = locRows[0].longitude;
+      // Anonimizar coordenadas: offset deterministico de ~400m para no revelar ubicacion exacta
+      const seed = providerId;
+      const latOffset = ((seed * 7) % 11 - 5) * 0.0018;
+      const lngOffset = ((seed * 13) % 11 - 5) * 0.0018;
+      (provider as any).latitude = (parseFloat(locRows[0].latitude) + latOffset).toFixed(6);
+      (provider as any).longitude = (parseFloat(locRows[0].longitude) + lngOffset).toFixed(6);
     }
     res.json(provider);
   } catch (err) {
