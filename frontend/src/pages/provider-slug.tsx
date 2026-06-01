@@ -172,7 +172,7 @@ export default function ProviderSlug() {
                 <div className="flex flex-col sm:flex-row items-start gap-6">
                   <Avatar className="w-24 h-24 mx-auto sm:mx-0">
                     <AvatarImage
-                      src={provider.profileImageUrl || undefined}
+                      src={provider.profileImageUrl || provider.profile_image_url || undefined}
                       alt={provider.businessName || "Profesional"}
                     />
                     <AvatarFallback className="text-2xl">
