@@ -33,12 +33,15 @@ async function ensureOwnership(req, providerId) {
 router.get("/:id/services", async (req, res) => {
   const id = Number(req.params.id);
   if (isNaN(id)) return res.status(400).json({ error: "ID inválido" });
-
   try {
-    const services = await providersService.getServices(id);
+    const services = (await sql`
+      SELECT id, provider_id, category_id, custom_service_name, description, base_price, is_active, created_at
+      FROM provider_services
+      WHERE provider_id = ${id} AND is_active = true
+    `) as any[];
     res.json(services);
   } catch (err) {
-    console.error("Error:", err);
+    console.error("Error en GET /:id/services:", err);
     res.status(500).json({ error: "Error interno del servidor" });
   }
 });
