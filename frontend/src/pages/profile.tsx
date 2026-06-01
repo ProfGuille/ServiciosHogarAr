@@ -401,9 +401,13 @@ export default function Profile() {
                           const formData = new FormData();
                           formData.append("photo", file);
                           try {
-                            const res = await fetch(getApiUrl("/api/upload/profile-image"), {
+                            const authHeaders = getAuthHeaders();
+                          // No enviar Content-Type — el browser lo setea solo con el boundary de FormData
+                          const uploadHeaders: Record<string, string> = {};
+                          if (authHeaders.Authorization) uploadHeaders.Authorization = authHeaders.Authorization;
+                          const res = await fetch(getApiUrl("/api/upload/profile-image"), {
                               method: "POST",
-                              headers: getAuthHeaders(),
+                              headers: uploadHeaders,
                               body: formData,
                             });
                             if (res.ok) {
