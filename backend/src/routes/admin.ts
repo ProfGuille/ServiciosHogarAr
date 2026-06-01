@@ -710,6 +710,36 @@ router.patch("/credit-packages/:id", async (req, res) => {
 });
 
 
+// POST /api/admin/providers/:id/assign-credits
+router.post("/providers/:id/assign-credits", async (req, res) => {
+  const providerId = parseInt(req.params.id);
+  const { credits, reason } = req.body;
+
+  if (isNaN(providerId) || providerId <= 0)
+    return res.status(400).json({ error: "ID de proveedor inválido" });
+  if (!Number.isInteger(credits) || credits <= 0)
+    return res.status(400).json({ error: "La cantidad de créditos debe ser un número entero positivo" });
+
+  try {
+    // Upsert: crear registro si no existe, sumar si existe
+    const result = (await sql`
+      INSERT INTO provider_credits (provider_id, current_credits, total_purchased, total_used, updated_at)
+      VALUES (${providerId}, ${credits}, ${credits}, 0, NOW())
+      ON CONFLICT (provider_id) DO UPDATE
+      SET current_credits  = provider_credits.current_credits + ${credits},
+          total_purchased  = provider_credits.total_purchased + ${credits},
+          updated_at       = NOW()
+      RETURNING provider_id, current_credits, total_purchased
+    `) as any[];
+
+    console.log(\`[ADMIN] Créditos asignados: proveedor \${providerId}, cantidad \${credits}, motivo: \${reason || "sin motivo"}\`);
+    res.json({ success: true, ...result[0] });
+  } catch (err) {
+    console.error("Error en POST /api/admin/providers/:id/assign-credits:", err);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+});
+
 // POST /api/admin/credit-packages
 router.post("/credit-packages", async (req, res) => {
   const { nombre, creditos, precio, destacado } = req.body;
