@@ -732,7 +732,7 @@ router.post("/providers/:id/assign-credits", async (req, res) => {
       RETURNING provider_id, current_credits, total_purchased
     `) as any[];
 
-    console.log(\`[ADMIN] Créditos asignados: proveedor \${providerId}, cantidad \${credits}, motivo: \${reason || "sin motivo"}\`);
+    console.log("[ADMIN] Créditos asignados: proveedor " + providerId + ", cantidad " + credits + ", motivo: " + (reason || "sin motivo"));
     res.json({ success: true, ...result[0] });
   } catch (err) {
     console.error("Error en POST /api/admin/providers/:id/assign-credits:", err);
