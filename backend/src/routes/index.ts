@@ -17,6 +17,8 @@ import searchSuggestionsRoutes from "./search-suggestions.js";
 
 const router = Router();
 
+router.get("/health", (_req, res) => res.json({ status: "ok" }));
+
 router.use("/auth", authRoutes);
 router.use("/credits", creditsRoutes);
 router.use("/payments/mp", paymentsMPRoutes);
