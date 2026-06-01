@@ -133,10 +133,11 @@ router.patch("/:id/online", requireAuth, async (req, res) => {
 
 // -----------------------------
 // GET /api/providers/slug/:slug
-// Busca proveedor por slug generado desde business_name + city
+// Busca proveedor por slug: categoria-ciudad-id
+// Formato: "aire-acondicionado-buenos-aires-42"
 // -----------------------------
-function generateSlug(businessName: string, city: string): string {
-  return (businessName + "-" + city)
+function normalizeSlugPart(text: string): string {
+  return text
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
@@ -147,33 +148,53 @@ function generateSlug(businessName: string, city: string): string {
 router.get("/slug/:slug", async (req, res) => {
   const { slug } = req.params;
   try {
-    const providers = (await sql`
-      SELECT * FROM service_providers
-      WHERE is_active = true
-    `) as any[];
+    // Extraer ID del final del slug (ej: "aire-acondicionado-buenos-aires-42" → 42)
+    const parts = slug.split("-");
+    const lastPart = parts[parts.length - 1];
+    const idFromSlug = parseInt(lastPart);
 
-    const match = providers.find((p: any) => {
-      if (!p.business_name || !p.city) return false;
-      return generateSlug(p.business_name, p.city) === slug;
-    });
+    if (!isNaN(idFromSlug)) {
+      // Buscar por ID directamente
+      const rows = (await sql`
+        SELECT * FROM service_providers WHERE id = ${idFromSlug} AND is_active = true LIMIT 1
+      `) as any[];
 
-    if (!match) return res.status(404).json({ error: "Proveedor no encontrado" });
+      if (rows[0]) {
+        const provider = rows[0];
+        delete provider.phone_number;
 
-    delete match.phone_number;
+        const locRows = (await sql`
+          SELECT latitude, longitude FROM provider_locations WHERE provider_id = ${provider.id} LIMIT 1
+        `) as any[];
 
-    const locRows = (await sql`
-      SELECT latitude, longitude FROM provider_locations WHERE provider_id = ${match.id} LIMIT 1
-    `) as any[];
+        if (locRows[0]) {
+          const seed = provider.id;
+          const latOffset = ((seed * 7) % 11 - 5) * 0.0018;
+          const lngOffset = ((seed * 13) % 11 - 5) * 0.0018;
+          provider.latitude = (parseFloat(locRows[0].latitude) + latOffset).toFixed(6);
+          provider.longitude = (parseFloat(locRows[0].longitude) + lngOffset).toFixed(6);
+        }
 
-    if (locRows[0]) {
-      const seed = match.id;
-      const latOffset = ((seed * 7) % 11 - 5) * 0.0018;
-      const lngOffset = ((seed * 13) % 11 - 5) * 0.0018;
-      match.latitude = (parseFloat(locRows[0].latitude) + latOffset).toFixed(6);
-      match.longitude = (parseFloat(locRows[0].longitude) + lngOffset).toFixed(6);
+        // Obtener categoría principal para validar slug
+        const catRows = (await sql`
+          SELECT sc.name FROM provider_categories pc
+          JOIN service_categories sc ON sc.id = pc.category_id
+          WHERE pc.provider_id = ${provider.id}
+          ORDER BY sc.name ASC LIMIT 1
+        `) as any[];
+
+        const category = catRows[0]?.name || "";
+        const city = provider.city || "";
+        const expectedSlug = normalizeSlugPart(category) + "-" + normalizeSlugPart(city) + "-" + provider.id;
+
+        // Agregar slug canónico a la respuesta para que el frontend pueda redirigir si es necesario
+        provider.canonicalSlug = expectedSlug;
+
+        return res.json(provider);
+      }
     }
 
-    res.json(match);
+    return res.status(404).json({ error: "Proveedor no encontrado" });
   } catch (err) {
     console.error("Error en GET /api/providers/slug/:slug:", err);
     res.status(500).json({ error: "Error interno del servidor" });

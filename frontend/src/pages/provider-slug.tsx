@@ -1,4 +1,4 @@
-import { useParams, Link } from "wouter";
+import { useParams, Link, useLocation } from "wouter";
 import { SEOHead } from "@/components/layout/seo-head";
 import { useState, useEffect } from "react";
 import { LeafletMap } from "@/components/maps/LeafletMap";
@@ -27,12 +27,20 @@ import {
 
 export default function ProviderSlug() {
   const { slug } = useParams();
+  const [, navigate] = useLocation();
 
   const { data: provider, isLoading: providerLoading } = useQuery({
     queryKey: ["/api/providers/slug", slug],
     queryFn: () => fetch(getApiUrl(`/api/providers/slug/${slug}`)).then((res) => res.json()),
     enabled: !!slug,
   });
+
+  // Redirigir al slug canónico si el slug actual no es el correcto
+  useEffect(() => {
+    if (provider?.canonicalSlug && slug !== provider.canonicalSlug) {
+      navigate("/profesionales/" + provider.canonicalSlug, { replace: true });
+    }
+  }, [provider?.canonicalSlug, slug, navigate]);
 
   const { data: providerServices } = useQuery({
     queryKey: ["/api/providers", provider?.id, "services"],
@@ -145,7 +153,7 @@ export default function ProviderSlug() {
         description: provider?.description
           ? provider.description.slice(0, 155)
           : "Perfil de proveedor de servicios para el hogar en Argentina.",
-        canonicalUrl: `https://servicioshogar.com.ar/profesionales/${slug}`,
+        canonicalUrl: `https://servicioshogar.com.ar/profesionales/${provider?.canonicalSlug || slug}`,
         ogTitle: provider?.businessName || "Perfil Profesional",
         ogDescription: provider?.description ? provider.description.slice(0, 155) : undefined,
       }} />
