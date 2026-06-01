@@ -372,6 +372,13 @@ export default function AdminDashboard() {
   const [editingCategory, setEditingCategory] = useState<ServiceCategory | null>(null);
   const [selectedProvider, setSelectedProvider] = useState<any | null>(null);
   const [assignCredits, setAssignCredits] = useState({ providerId: "", credits: "", reason: "", result: "" });
+  const { data: adminProviders } = useQuery({
+    queryKey: ["/api/admin/providers-list"],
+    queryFn: async () => {
+      const res = await fetch(getApiUrl("/api/admin/providers"), { headers: getAuthHeaders() });
+      return res.json();
+    },
+  });
   const [providerDialogOpen, setProviderDialogOpen] = useState(false);
 
   const { data: verificationsData, refetch: refetchVerifications } = useQuery({
@@ -932,14 +939,19 @@ export default function AdminDashboard() {
               <CardContent>
                 <div className="flex flex-col gap-3 max-w-md">
                   <div>
-                    <label className="text-sm font-medium">ID del proveedor</label>
-                    <Input
-                      type="number"
-                      min={1}
-                      placeholder="Ej: 9"
+                    <label className="text-sm font-medium">Proveedor</label>
+                    <select
+                      className="w-full border rounded-md px-3 py-2 text-sm"
                       value={assignCredits.providerId}
                       onChange={e => setAssignCredits(a => ({ ...a, providerId: e.target.value }))}
-                    />
+                    >
+                      <option value="">Seleccioná un proveedor...</option>
+                      {(adminProviders || []).map((p: any) => (
+                        <option key={p.id} value={String(p.id)}>
+                          {p.businessName} — {p.city} (id: {p.id})
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <div>
                     <label className="text-sm font-medium">Cantidad de créditos</label>
