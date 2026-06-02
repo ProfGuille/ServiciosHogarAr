@@ -223,6 +223,7 @@ export default function Profile() {
       });
       if (!res.ok) throw new Error("Error al guardar");
       setCoverageSaved(true);
+      queryClient.invalidateQueries({ queryKey: ["provider-profile", providerId] });
       setTimeout(() => setCoverageSaved(false), 3000);
     } catch {
       alert("Error al guardar la zona de cobertura");
