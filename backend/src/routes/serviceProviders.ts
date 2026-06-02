@@ -235,6 +235,9 @@ router.get("/:id", async (req, res) => {
       (provider as any).latitude = (parseFloat(locRows[0].latitude) + latOffset).toFixed(6);
       (provider as any).longitude = (parseFloat(locRows[0].longitude) + lngOffset).toFixed(6);
     }
+    // Agregar coverageRadiusKm (no está en schema Drizzle)
+    const covRows = (await sql`SELECT coverage_radius_km FROM service_providers WHERE id = ${providerId} LIMIT 1`) as any[];
+    if (covRows[0]) (provider as any).coverageRadiusKm = covRows[0].coverage_radius_km;
     res.json(provider);
   } catch (err) {
     console.error("Error:", err);
