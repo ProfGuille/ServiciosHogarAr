@@ -54,6 +54,14 @@ router.patch("/:id", requireAuth, async (req, res) => {
   if (isNaN(providerId)) return res.status(400).json({ error: "ID inválido" });
 
   try {
+    // coverageRadiusKm: SQL directo (db.execute con Drizzle falla silenciosamente)
+    if (req.body.coverageRadiusKm !== undefined && Object.keys(req.body).length === 1) {
+      const radius = Number(req.body.coverageRadiusKm);
+      if (isNaN(radius) || radius < 0) return res.status(400).json({ error: "Radio de cobertura inválido" });
+      await sql`UPDATE service_providers SET coverage_radius_km = ${radius}, updated_at = NOW() WHERE id = ${providerId}`;
+      const rows = (await sql`SELECT id, coverage_radius_km FROM service_providers WHERE id = ${providerId} LIMIT 1`) as any[];
+      return res.json({ id: providerId, coverageRadiusKm: rows[0]?.coverage_radius_km });
+    }
     const updated = await providersService.updateProfile(providerId, req.body, (req as any).user?.id);
     res.json(updated);
   } catch (err) {
