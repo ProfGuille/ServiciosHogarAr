@@ -760,7 +760,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="verifications">Verificaciones</TabsTrigger>
             <TabsTrigger value="auditoria">Auditoría</TabsTrigger>
-            <TabsTrigger value="precios">Precios</TabsTrigger>
+            <TabsTrigger value="precios">Precios y Créditos</TabsTrigger>
             <TabsTrigger value="logros">Logros</TabsTrigger>
             <TabsTrigger value="contactos">Verificación de Clientes</TabsTrigger>
             <TabsTrigger value="usuarios">Usuarios</TabsTrigger>
@@ -928,82 +928,7 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
 
-            <Card className="mt-6">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CreditCard className="h-5 w-5" />
-                  Asignar créditos manualmente
-                </CardTitle>
-                <CardDescription>Asigná créditos gratis a un proveedor (bienvenida, compensación, etc.)</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col gap-3 max-w-md">
-                  <div>
-                    <label className="text-sm font-medium">Proveedor</label>
-                    <select
-                      className="w-full border rounded-md px-3 py-2 text-sm"
-                      value={assignCredits.providerId}
-                      onChange={e => setAssignCredits(a => ({ ...a, providerId: e.target.value }))}
-                    >
-                      <option value="">Seleccioná un proveedor...</option>
-                      {(adminProviders || []).map((p: any) => (
-                        <option key={p.id} value={String(p.id)}>
-                          {p.businessName} — {p.city} (id: {p.id})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium">Cantidad de créditos</label>
-                    <Input
-                      type="number"
-                      min={1}
-                      placeholder="Ej: 2"
-                      value={assignCredits.credits}
-                      onChange={e => setAssignCredits(a => ({ ...a, credits: e.target.value }))}
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium">Motivo (opcional)</label>
-                    <Input
-                      placeholder="Ej: bienvenida, compensación"
-                      value={assignCredits.reason}
-                      onChange={e => setAssignCredits(a => ({ ...a, reason: e.target.value }))}
-                    />
-                  </div>
-                  {assignCredits.result && (
-                    <p className={`text-sm font-medium ${assignCredits.result.startsWith("✅") ? "text-green-600" : "text-red-600"}`}>
-                      {assignCredits.result}
-                    </p>
-                  )}
-                  <Button
-                    onClick={async () => {
-                      const providerId = parseInt(assignCredits.providerId);
-                      const credits = parseInt(assignCredits.credits);
-                      if (isNaN(providerId) || providerId <= 0) return setAssignCredits(a => ({ ...a, result: "❌ ID de proveedor inválido" }));
-                      if (isNaN(credits) || credits <= 0) return setAssignCredits(a => ({ ...a, result: "❌ Cantidad de créditos inválida" }));
-                      try {
-                        const res = await fetch(`${getApiUrl()}/api/admin/providers/${providerId}/assign-credits`, {
-                          method: "POST",
-                          headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
-                          body: JSON.stringify({ credits, reason: assignCredits.reason }),
-                        });
-                        const data = await res.json();
-                        if (res.ok) {
-                          setAssignCredits({ providerId: "", credits: "", reason: "", result: `✅ Asignados ${credits} créditos. Saldo actual: ${data.current_credits}` });
-                        } else {
-                          setAssignCredits(a => ({ ...a, result: `❌ ${data.error}` }));
-                        }
-                      } catch {
-                        setAssignCredits(a => ({ ...a, result: "❌ Error de conexión" }));
-                      }
-                    }}
-                  >
-                    Asignar créditos
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+
           </TabsContent>
 
           <TabsContent value="requests">
@@ -1459,6 +1384,82 @@ export default function AdminDashboard() {
 
           <TabsContent value="precios">
             {activeTab === "precios" && <PreciosTab />}
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CreditCard className="h-5 w-5" />
+                  Asignar créditos manualmente
+                </CardTitle>
+                <CardDescription>Asigná créditos gratis a un proveedor (bienvenida, compensación, etc.)</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col gap-3 max-w-md">
+                  <div>
+                    <label className="text-sm font-medium">Proveedor</label>
+                    <select
+                      className="w-full border rounded-md px-3 py-2 text-sm"
+                      value={assignCredits.providerId}
+                      onChange={e => setAssignCredits(a => ({ ...a, providerId: e.target.value }))}
+                    >
+                      <option value="">Seleccioná un proveedor...</option>
+                      {(adminProviders || []).map((p: any) => (
+                        <option key={p.id} value={String(p.id)}>
+                          {p.businessName} — {p.city} (id: {p.id})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Cantidad de créditos</label>
+                    <Input
+                      type="number"
+                      min={1}
+                      placeholder="Ej: 2"
+                      value={assignCredits.credits}
+                      onChange={e => setAssignCredits(a => ({ ...a, credits: e.target.value }))}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Motivo (opcional)</label>
+                    <Input
+                      placeholder="Ej: bienvenida, compensación"
+                      value={assignCredits.reason}
+                      onChange={e => setAssignCredits(a => ({ ...a, reason: e.target.value }))}
+                    />
+                  </div>
+                  {assignCredits.result && (
+                    <p className={`text-sm font-medium ${assignCredits.result.startsWith("✅") ? "text-green-600" : "text-red-600"}`}>
+                      {assignCredits.result}
+                    </p>
+                  )}
+                  <Button
+                    onClick={async () => {
+                      const providerId = parseInt(assignCredits.providerId);
+                      const credits = parseInt(assignCredits.credits);
+                      if (isNaN(providerId) || providerId <= 0) return setAssignCredits(a => ({ ...a, result: "❌ ID de proveedor inválido" }));
+                      if (isNaN(credits) || credits <= 0) return setAssignCredits(a => ({ ...a, result: "❌ Cantidad de créditos inválida" }));
+                      try {
+                        const res = await fetch(`${getApiUrl()}/api/admin/providers/${providerId}/assign-credits`, {
+                          method: "POST",
+                          headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+                          body: JSON.stringify({ credits, reason: assignCredits.reason }),
+                        });
+                        const data = await res.json();
+                        if (res.ok) {
+                          setAssignCredits({ providerId: "", credits: "", reason: "", result: `✅ Asignados ${credits} créditos. Saldo actual: ${data.current_credits}` });
+                        } else {
+                          setAssignCredits(a => ({ ...a, result: `❌ ${data.error}` }));
+                        }
+                      } catch {
+                        setAssignCredits(a => ({ ...a, result: "❌ Error de conexión" }));
+                      }
+                    }}
+                  >
+                    Asignar créditos
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
           <TabsContent value="logros">
             {activeTab === "logros" && <LogrosTab />}
