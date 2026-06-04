@@ -24,7 +24,7 @@ export const CATEGORY_IMAGES: Record<string, string> = {
   'Durlock':                '/images/services/durlock.jpg',
   'Automatización':         '/images/services/automatizacion.jpg',
   'Energía Solar':          '/images/services/energia_solar.jpg',
-  'Impresión 3D':           '/images/services/automatizacion.jpg',
+  'Impresión 3D':           '/images/services/impresion_3d.jpg',
 };
 
 export const DEFAULT_CATEGORY_IMAGE = '/images/services/pequenos_arreglos.jpg';
