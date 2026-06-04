@@ -24,7 +24,7 @@ export default function NewServiceRequest() {
   const [acceptsMarketing, setAcceptsMarketing] = useState(false);
   const [registerError, setRegisterError] = useState('');
   const [accountCreated, setAccountCreated] = useState(false);
-  const isLoggedIn = !!localStorage.getItem('token');
+  const isLoggedIn = !!localStorage.getItem('auth_token');
   const [selectedCategoryId, setSelectedCategoryId] = useState(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get('categoriaId') || '';
@@ -167,7 +167,7 @@ export default function NewServiceRequest() {
           return;
         }
         if (regData.token) {
-          localStorage.setItem('token', regData.token);
+          localStorage.setItem('auth_token', regData.token);
           setAccountCreated(true);
         }
       } catch {
