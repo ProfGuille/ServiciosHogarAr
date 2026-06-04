@@ -3,6 +3,7 @@ import { SEOHead } from "@/components/layout/seo-head";
 import { useState, useEffect } from "react";
 import { LeafletMap } from "@/components/maps/LeafletMap";
 import { getApiUrl } from '@/lib/api';
+import { CategoryIcon } from "@/lib/categoryIcon";
 import { useQuery } from "@tanstack/react-query";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
@@ -231,7 +232,7 @@ export default function ProviderSlug() {
                       <div className="flex flex-wrap gap-2 justify-center sm:justify-start mb-3">
                         {providerCategories.map((cat: { id: number; name: string; icon?: string }) => (
                           <Badge key={cat.id} variant="secondary" className="bg-blue-50 text-blue-700 border border-blue-200">
-                            {cat.icon && <span className="mr-1">{cat.icon}</span>}
+                            {cat.icon && <CategoryIcon name={cat.icon} />}
                             {cat.name}
                           </Badge>
                         ))}
