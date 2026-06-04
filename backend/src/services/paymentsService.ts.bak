@@ -1,5 +1,6 @@
 import { db } from "../db.js";
 import { creditPurchases } from "../shared/schema/creditPurchases.js";
+import { providerCreditsService } from "./providerCreditsService.js";
 import { eq } from "drizzle-orm";
 
 export const paymentsService = {
@@ -31,6 +32,26 @@ export const paymentsService = {
     return purchase || null;
   },
 
+  /**
+   * LEGACY: Mantener para compatibilidad pero ya NO se usa
+   * El nuevo flujo usa acreditar_creditos_atomico() directamente
+   */
+  async confirmPurchase(purchaseId: number) {
+    const [purchase] = await db
+      .select()
+      .from(creditPurchases)
+      .where(eq(creditPurchases.id, purchaseId));
+
+    if (!purchase) throw new Error("Compra no encontrada");
+
+    await providerCreditsService.addCredits(
+      purchase.providerId,
+      purchase.credits,
+      purchase.id
+    );
+
+    return true;
+  },
 
   async failPurchase(purchaseId: number) {
     await db

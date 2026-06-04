@@ -12,7 +12,7 @@ export const providerCreditsService = {
     return row?.currentCredits ?? 0;
   },
 
-  async addCredits(providerId: number, amount: number, purchaseId?: number, isPurchase: boolean = false) {
+  async addCredits(providerId: number, amount: number, purchaseId?: number) {
     const [existing] = await db
       .select()
       .from(providerCredits)
@@ -20,7 +20,7 @@ export const providerCreditsService = {
 
     if (existing) {
       const newAmount = existing.currentCredits + amount;
-      const newTotal = isPurchase ? existing.totalPurchased + amount : existing.totalPurchased;
+      const newTotal = existing.totalPurchased + amount;
       
       await db
         .update(providerCredits)
@@ -35,7 +35,7 @@ export const providerCreditsService = {
       await db.insert(providerCredits).values({
         providerId,
         currentCredits: amount,
-        totalPurchased: isPurchase ? amount : 0,
+        totalPurchased: amount,
         totalUsed: 0
       });
     }

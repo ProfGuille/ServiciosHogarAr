@@ -100,7 +100,17 @@ if (safeData.phoneNumber !== undefined) {
       throw new Error("No se enviaron campos válidos para actualizar");
     }
 
-
+    // coverageRadiusKm requiere SQL directo (columna no está en schema Drizzle)
+    if (safeData.coverageRadiusKm !== undefined) {
+      const radius = safeData.coverageRadiusKm;
+      delete safeData.coverageRadiusKm;
+      await db.execute(sql`UPDATE service_providers SET coverage_radius_km = ${radius} WHERE id = ${id}`);
+      if (Object.keys(safeData).length === 0) {
+        const result = await db.execute(sql`SELECT * FROM service_providers WHERE id = ${id} LIMIT 1`);
+        const rows = (result as any).rows || result;
+        return rows[0] || { id, updated: true };
+      }
+    }
 
     const currentRows = await db.execute(sql`SELECT * FROM service_providers WHERE id = ${id} LIMIT 1`);
     const current = ((currentRows as any).rows || currentRows)[0] || {};
@@ -112,7 +122,6 @@ if (safeData.phoneNumber !== undefined) {
       city: "city",
       province: "province",
       phoneNumber: "phone_number",
-      coverageRadiusKm: "coverage_radius_km",
     };
     const [updated] = await db
       .update(serviceProviders)

@@ -19,6 +19,7 @@ export const serviceProviders = pgTable("service_providers", {
   city: varchar("city", { length: 100 }),
   province: varchar("province", { length: 100 }),
   postalCode: varchar("postal_code", { length: 20 }),
+  coverageRadiusKm: integer("coverage_radius_km"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow()
 });
