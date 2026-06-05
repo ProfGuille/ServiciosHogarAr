@@ -4,7 +4,7 @@ import cors from "cors";
 import helmet from "helmet";
 import compression from "compression";
 import registerRoutes from "./routes/index.js";
-import { runMigrations, isDatabaseAvailable, sql as neonSql } from "./db.js";
+import { runMigrations, sql as neonSql } from "./db.js";
 import { sendAdminStalePendingRequestsEmail, sendClientReviewReminderEmail } from "./services/resendEmailService.js";
 
 
@@ -98,13 +98,11 @@ app.get("/api/info", (req, res) => {
   });
 });
 
-app.get("/api/health", (req, res) => {
-  const dbStatus = isDatabaseAvailable() ? "connected" : "disconnected";
-  res.status(dbStatus === "connected" ? 200 : 503).json({
-    status: dbStatus === "connected" ? "ok" : "error",
+app.get("/api/health", (_req, res) => {
+  res.json({
+    status: "ok",
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || "development",
-    database: dbStatus,
   });
 });
 
