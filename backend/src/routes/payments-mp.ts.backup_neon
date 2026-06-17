@@ -5,7 +5,7 @@ import { requireAuth } from "../middleware/auth.js";
 import { db } from "../db.js";
 import { serviceProviders } from "../shared/schema/serviceProviders.js";
 import { eq } from "drizzle-orm";
-import { sql } from "../db.js";
+import { neon } from "@neondatabase/serverless";
 
 const router = Router();
 
@@ -52,6 +52,7 @@ router.post("/create", requireAuth, async (req: any, res) => {
     const providerId = provider.id;
 
     // Resolver credits y amount desde credit_packages
+    const sql = neon(process.env.DATABASE_URL!);
     const pkgRows = (await sql`SELECT id, nombre, creditos, precio FROM credit_packages WHERE id = ${packageId} AND activo = TRUE LIMIT 1`) as any[];
     if (!pkgRows.length) {
       return res.status(404).json({ error: "Paquete no encontrado" });

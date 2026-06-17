@@ -1,9 +1,10 @@
 import { Router } from "express";
 import { requireAuth, requireRole } from "../middleware/auth.js";
-import { sql } from "../db.js";
+import { neon } from "@neondatabase/serverless";
 import { sendVerificationResultEmail } from "../services/resendEmailService.js";
 
 const router = Router();
+const sql = neon(process.env.DATABASE_URL!);
 
 // Middleware: solo admin
 router.use(requireAuth);

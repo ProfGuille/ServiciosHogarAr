@@ -1,8 +1,9 @@
 import { Router } from "express";
+import { sql } from "../db.js";
 import { providersService } from "../services/providersService.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
 import { sendAdminVerificationNotificationEmail } from "../services/resendEmailService.js";
-import { db, sql } from "../db.js";
+import { db } from "../db.js";
 import { serviceProviders } from "../shared/schema/serviceProviders.js";
 import { eq } from "drizzle-orm";
 
@@ -351,6 +352,8 @@ router.get("/:id/reviews", async (req, res) => {
   const providerId = Number(req.params.id);
   if (isNaN(providerId)) return res.status(400).json({ error: "ID inválido" });
   try {
+    const { neon } = await import("@neondatabase/serverless");
+    const sql = neon(process.env.DATABASE_URL!);
     const rows = await sql`
       SELECT r.id, r.rating, r.comment, r.created_at,
              u.first_name AS reviewer_first_name
@@ -377,6 +380,8 @@ router.get("/:id/stats", async (req, res) => {
   const providerId = Number(req.params.id);
   if (isNaN(providerId)) return res.status(400).json({ error: "ID inválido" });
   try {
+    const { neon } = await import("@neondatabase/serverless");
+    const sql = neon(process.env.DATABASE_URL!);
 
     const [sp] = (await sql`
       SELECT id, user_id, is_verified
@@ -426,6 +431,8 @@ router.get("/:id/stats", async (req, res) => {
 // -----------------------------------------------
 router.get("/:id/categories", async (req, res) => {
   try {
+    const { neon } = await import("@neondatabase/serverless");
+    const sql = neon(process.env.DATABASE_URL!);
     const providerId = parseInt(req.params.id);
     if (isNaN(providerId)) return res.status(400).json({ error: "ID inválido" });
     const rows = (await sql`
@@ -446,6 +453,8 @@ router.get("/:id/categories", async (req, res) => {
 // -----------------------------------------------
 router.get("/reviews/recent", async (req, res) => {
   try {
+    const { neon } = await import("@neondatabase/serverless");
+    const sql = neon(process.env.DATABASE_URL!);
     const rows = await sql`
       SELECT
         r.id,

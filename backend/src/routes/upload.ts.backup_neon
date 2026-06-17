@@ -2,7 +2,7 @@ import { Router } from 'express';
 import multer from 'multer';
 import { v2 as cloudinary } from 'cloudinary';
 import { requireAuth } from '../middleware/auth.js';
-import { sql } from '../db.js';
+import { neon } from '@neondatabase/serverless';
 
 const router = Router();
 
@@ -12,6 +12,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+const sql = neon(process.env.DATABASE_URL!);
 
 // Multer en memoria — no guarda en disco
 const upload = multer({

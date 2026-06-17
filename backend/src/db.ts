@@ -1,6 +1,7 @@
 import "dotenv/config";
-import { drizzle } from "drizzle-orm/neon-http";
-import { neon } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { sql as drizzleSql } from "drizzle-orm";
+import { Pool } from "pg";
 import * as schema from "./shared/schema/index.js";
 
 const DATABASE_URL = process.env.DATABASE_URL;
@@ -9,20 +10,16 @@ if (!DATABASE_URL) {
   throw new Error("DATABASE_URL no está definida en las variables de entorno");
 }
 
-let sql: ReturnType<typeof neon>;
+const pool = new Pool({
+  connectionString: DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
+});
 
-try {
-  sql = neon(DATABASE_URL);
-} catch (error) {
-  console.error("❌ Error al crear cliente Neon:", error);
-  throw error;
-}
-
-export const db = drizzle(sql, { schema });
+export const db = drizzle(pool, { schema });
 
 export async function isDatabaseAvailable(): Promise<boolean> {
   try {
-    await sql`SELECT 1`;
+    await pool.query("SELECT 1");
     return true;
   } catch (error) {
     console.error("❌ Error al conectar con la base de datos:", error);
@@ -30,7 +27,7 @@ export async function isDatabaseAvailable(): Promise<boolean> {
   }
 }
 
-import { migrate } from "drizzle-orm/neon-http/migrator";
+import { migrate } from "drizzle-orm/node-postgres/migrator";
 
 export async function runMigrations() {
   try {
@@ -42,5 +39,12 @@ export async function runMigrations() {
   }
 }
 
-// Exportar sql para queries directos (necesario para operaciones atómicas)
-export { sql };
+// Tagged template sql compatible con neon: await sql`SELECT...` retorna rows[]
+export async function sql(strings: TemplateStringsArray, ...values: any[]): Promise<any[]> {
+  const query = drizzleSql(strings, ...values);
+  const result = await db.execute(query);
+  return (result as any).rows ?? (result as any) ?? [];
+}
+
+// sql.raw para compatibilidad con Drizzle orderBy/where
+sql.raw = (str: string) => drizzleSql.raw(str);

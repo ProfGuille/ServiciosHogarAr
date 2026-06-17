@@ -195,9 +195,11 @@ router.post("/register-provider", async (req: Request, res: Response) => {
     const { serviceCategories } = req.body;
     if (serviceCategories && Array.isArray(serviceCategories) && serviceCategories.length > 0) {
         for (const catId2 of serviceCategories) {
-        await dbSql`INSERT INTO provider_categories (provider_id, category_id, created_at)
+        await db.execute(
+          dbSql`INSERT INTO provider_categories (provider_id, category_id, created_at)
           VALUES (${provider.id}, ${parseInt(catId2)}, NOW())
-          ON CONFLICT DO NOTHING`;
+          ON CONFLICT DO NOTHING`
+        );
       }
       console.log("Categorías guardadas:", serviceCategories.length);
     }

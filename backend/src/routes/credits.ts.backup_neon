@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { db, sql } from "../db.js";
+import { db } from "../db.js";
 import { providerCredits } from "../shared/schema/providerCredits.js";
 import { serviceProviders } from "../shared/schema/serviceProviders.js";
 import { users } from "../shared/schema/users.js";
@@ -47,6 +47,8 @@ router.get("/balance", requireAuth, async (req: any, res: Response) => {
 
 router.get("/packages", async (req: Request, res: Response) => {
   try {
+    const { neon } = await import("@neondatabase/serverless");
+    const sql = neon(process.env.DATABASE_URL!);
     const packages = await sql`SELECT id, nombre, creditos, precio, destacado, activo, orden FROM credit_packages WHERE activo = TRUE ORDER BY orden`;
     res.json(packages);
   } catch (e: any) {

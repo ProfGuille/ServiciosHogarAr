@@ -14,11 +14,11 @@
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^1.0.1",
     "@types/bcrypt": "^6.0.0",
     "@types/cookie-parser": "^1.4.9",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",
+    "@types/pg": "^8.20.0",
     "@types/web-push": "^3.6.4",
     "axios": "^1.13.4",
     "bcrypt": "^5.1.1",
@@ -46,6 +46,7 @@
     "openid-client": "^6.6.2",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
+    "pg": "^8.21.0",
     "resend": "^6.9.1",
     "socket.io": "^4.8.1",
     "web-push": "^3.6.7",

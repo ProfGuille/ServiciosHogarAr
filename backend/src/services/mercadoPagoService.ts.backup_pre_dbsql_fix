@@ -225,15 +225,18 @@ class MercadoPagoService {
    */
   private async awardFirstPurchaseBonus(providerId: number): Promise<void> {
     try {
+      const { neon } = await import("@neondatabase/serverless");
+      const neonSql = neon(process.env.DATABASE_URL!);
+
       // ¿Es la primera compra completada de este proveedor?
-      const countRows = (await sql`
+      const countRows = (await neonSql`
         SELECT COUNT(*) as total FROM credit_purchases
         WHERE provider_id = ${providerId} AND status = 'completed'
       `) as any[];
       if (parseInt(countRows[0].total) !== 1) return;
 
       // ¿Tiene referente con status completed?
-      const referrers = (await sql`
+      const referrers = (await neonSql`
         SELECT r.referrer_id, sp.id as referrer_provider_id
         FROM referrals r
         JOIN service_providers sp ON sp.user_id = r.referrer_id
@@ -248,7 +251,7 @@ class MercadoPagoService {
       const { providerCreditsService } = await import("./providerCreditsService.js");
       await providerCreditsService.addCredits(referrers[0].referrer_provider_id, 1);
 
-      await sql`
+      await neonSql`
         UPDATE referral_stats SET
           total_credits_earned = total_credits_earned + 1,
           updated_at = NOW()

@@ -7,9 +7,11 @@ import { providerCredits } from "../shared/schema/providerCredits.js";
 import { providerServices } from "../shared/schema/providerServices.js";
 import { eq, sql } from "drizzle-orm";
 import { generateJWTToken, requireAuth } from "../middleware/auth.js";
-import { sql as dbSql } from "../db.js";
+import { neon } from "@neondatabase/serverless";
+const neonSql = neon(process.env.DATABASE_URL!);
 import { sendPasswordResetEmail, sendCustomerWelcomeEmail, sendProviderWelcomeEmail } from "../services/resendEmailService.js";
 
+const sqlDirect = neon(process.env.DATABASE_URL!);
 
 const router = Router();
 
@@ -23,7 +25,9 @@ const router = Router();
 async function processReferral(referralCode: string | undefined, newUserId: string) {
   if (!referralCode) return;
   try {
-    const codes = (await dbSql`
+    const { neon } = await import("@neondatabase/serverless");
+    const sql = neon(process.env.DATABASE_URL!);
+    const codes = (await sql`
       SELECT id, user_id FROM referral_codes
       WHERE code = ${referralCode}
       AND (expires_at IS NULL OR expires_at > NOW())
@@ -31,12 +35,12 @@ async function processReferral(referralCode: string | undefined, newUserId: stri
     `) as any[];
     if (!codes.length || codes[0].user_id === newUserId) return;
     const code = codes[0];
-    await dbSql`
+    await sql`
       INSERT INTO referrals (referrer_id, referred_id, referral_code_id, status, created_at)
       VALUES (${code.user_id}, ${newUserId}, ${code.id}, 'completed', NOW())
       ON CONFLICT DO NOTHING
     `;
-    await dbSql`
+    await sql`
       INSERT INTO referral_stats (user_id, total_referrals, successful_referrals, total_credits_earned, last_referral_at, updated_at)
       VALUES (${code.user_id}, 1, 1, 1, NOW(), NOW())
       ON CONFLICT (user_id) DO UPDATE SET
@@ -47,7 +51,7 @@ async function processReferral(referralCode: string | undefined, newUserId: stri
         updated_at = NOW()
     `;
     // +1 crédito al referente si es proveedor
-    const referrerProviders = (await dbSql`
+    const referrerProviders = (await sql`
       SELECT id FROM service_providers WHERE user_id = ${code.user_id} LIMIT 1
     `) as any[];
     if (referrerProviders.length > 0) {
@@ -99,7 +103,7 @@ router.post("/register", async (req: Request, res: Response) => {
 
     const token = generateJWTToken(created.id, created.email, created.userType);
     const marketingConsent = req.body.marketingConsent ?? false;
-    await dbSql`UPDATE users SET marketing_consent = ${marketingConsent} WHERE id = ${created.id}`;
+    await neonSql`UPDATE users SET marketing_consent = ${marketingConsent} WHERE id = ${created.id}`;
     await processReferral(req.body.referralCode, created.id);
     sendCustomerWelcomeEmail(created.email, created.firstName);
 
@@ -172,7 +176,7 @@ router.post("/register-provider", async (req: Request, res: Response) => {
     // PASO 3b: Bonus "Primero en tu provincia"
     let isFirstInProvince = false;
     if (province) {
-      const existing = (await dbSql`
+      const existing = (await neonSql`
         SELECT COUNT(*)::int as count
         FROM service_providers
         WHERE province ILIKE ${province}
@@ -181,7 +185,7 @@ router.post("/register-provider", async (req: Request, res: Response) => {
       `) as any[];
       if (existing[0]?.count === 0) {
         isFirstInProvince = true;
-        await dbSql`
+        await neonSql`
           UPDATE provider_credits
           SET current_credits = current_credits + 5,
               total_purchased = total_purchased + 5
@@ -195,9 +199,11 @@ router.post("/register-provider", async (req: Request, res: Response) => {
     const { serviceCategories } = req.body;
     if (serviceCategories && Array.isArray(serviceCategories) && serviceCategories.length > 0) {
         for (const catId2 of serviceCategories) {
-        await dbSql`INSERT INTO provider_categories (provider_id, category_id, created_at)
+        await db.execute(
+          sql`INSERT INTO provider_categories (provider_id, category_id, created_at)
           VALUES (${provider.id}, ${parseInt(catId2)}, NOW())
-          ON CONFLICT DO NOTHING`;
+          ON CONFLICT DO NOTHING`
+        );
       }
       console.log("Categorías guardadas:", serviceCategories.length);
     }
@@ -322,7 +328,7 @@ router.patch("/location", requireAuth, async (req: any, res: Response) => {
     const { city, province, neighborhood } = req.body;
     const userId = req.user.id;
     console.log("PATCH /location — userId:", userId, "body:", { city, province, neighborhood });
-    await dbSql`
+    await neonSql`
       UPDATE users SET city = ${city || null}, province = ${province || null}, neighborhood = ${neighborhood || null}, updated_at = NOW()
       WHERE id = ${userId}
     `;
@@ -396,14 +402,14 @@ router.post("/forgot-password", async (req: Request, res: Response) => {
     if (!email || !email.includes("@"))
       return res.status(400).json({ error: "Email inválido" });
 
-    const result = await dbSql`SELECT id FROM users WHERE email = ${email} LIMIT 1`;
+    const result = await sqlDirect`SELECT id FROM users WHERE email = ${email} LIMIT 1`;
     if (result.length === 0)
       return res.json({ message: "Si el email existe, recibirás un link en breve." });
 
     const token = crypto.randomUUID();
     const expires = new Date(Date.now() + 60 * 60 * 1000);
 
-    await dbSql`
+    await sqlDirect`
       UPDATE users
       SET reset_token = ${token}, reset_token_expires = ${expires}
       WHERE email = ${email}
@@ -429,7 +435,7 @@ router.post("/reset-password", async (req: Request, res: Response) => {
     if (!password || password.length < 8 || !/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password))
       return res.status(400).json({ error: "La contraseña debe tener al menos 6 caracteres" });
 
-    const result = await dbSql`
+    const result = await sqlDirect`
       SELECT id, reset_token_expires
       FROM users
       WHERE reset_token = ${token}
@@ -445,7 +451,7 @@ router.post("/reset-password", async (req: Request, res: Response) => {
 
     const hashed = await bcrypt.hash(password, 10);
 
-    await dbSql`
+    await sqlDirect`
       UPDATE users
       SET password = ${hashed}, reset_token = NULL, reset_token_expires = NULL, updated_at = NOW()
       WHERE id = ${user.id}

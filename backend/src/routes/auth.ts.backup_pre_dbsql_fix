@@ -23,7 +23,7 @@ const router = Router();
 async function processReferral(referralCode: string | undefined, newUserId: string) {
   if (!referralCode) return;
   try {
-    const codes = (await dbSql`
+    const codes = (await sql`
       SELECT id, user_id FROM referral_codes
       WHERE code = ${referralCode}
       AND (expires_at IS NULL OR expires_at > NOW())
@@ -31,12 +31,12 @@ async function processReferral(referralCode: string | undefined, newUserId: stri
     `) as any[];
     if (!codes.length || codes[0].user_id === newUserId) return;
     const code = codes[0];
-    await dbSql`
+    await sql`
       INSERT INTO referrals (referrer_id, referred_id, referral_code_id, status, created_at)
       VALUES (${code.user_id}, ${newUserId}, ${code.id}, 'completed', NOW())
       ON CONFLICT DO NOTHING
     `;
-    await dbSql`
+    await sql`
       INSERT INTO referral_stats (user_id, total_referrals, successful_referrals, total_credits_earned, last_referral_at, updated_at)
       VALUES (${code.user_id}, 1, 1, 1, NOW(), NOW())
       ON CONFLICT (user_id) DO UPDATE SET
@@ -47,7 +47,7 @@ async function processReferral(referralCode: string | undefined, newUserId: stri
         updated_at = NOW()
     `;
     // +1 crédito al referente si es proveedor
-    const referrerProviders = (await dbSql`
+    const referrerProviders = (await sql`
       SELECT id FROM service_providers WHERE user_id = ${code.user_id} LIMIT 1
     `) as any[];
     if (referrerProviders.length > 0) {
@@ -195,9 +195,11 @@ router.post("/register-provider", async (req: Request, res: Response) => {
     const { serviceCategories } = req.body;
     if (serviceCategories && Array.isArray(serviceCategories) && serviceCategories.length > 0) {
         for (const catId2 of serviceCategories) {
-        await dbSql`INSERT INTO provider_categories (provider_id, category_id, created_at)
+        await db.execute(
+          sql`INSERT INTO provider_categories (provider_id, category_id, created_at)
           VALUES (${provider.id}, ${parseInt(catId2)}, NOW())
-          ON CONFLICT DO NOTHING`;
+          ON CONFLICT DO NOTHING`
+        );
       }
       console.log("Categorías guardadas:", serviceCategories.length);
     }
