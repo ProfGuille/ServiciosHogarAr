@@ -1,13 +1,14 @@
-import { pgTable, serial, integer, varchar, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, serial, integer, varchar, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { InferSelectModel } from "drizzle-orm";
 
 export const analyticsEvents = pgTable('analytics_events', {
   id: serial('id').primaryKey(),
-  userId: integer('user_id'),
-  event: varchar('event', { length: 128 }),
-  eventType: varchar('event_type', { length: 64 }), // Campo agregado
+  eventType: varchar('event_type', { length: 64 }).notNull(),
+  userId: varchar('user_id'),
+  providerId: integer('provider_id'),
+  metadata: jsonb('metadata'),
   createdAt: timestamp('created_at').defaultNow(),
-  // ...otros campos que tengas...
 });
 
 export type AnalyticsEvent = InferSelectModel<typeof analyticsEvents>;
+export type InsertAnalyticsEvent = typeof analyticsEvents.$inferInsert;

@@ -66,7 +66,7 @@ export class PushService {
     }
   }
 
-  async sendToUser(userId: number, payload: PushNotificationPayload): Promise<void> {
+  async sendToUser(userId: string, payload: PushNotificationPayload): Promise<void> {
     if (!this.isConfigured) {
       console.warn('Push service not configured, skipping user notification');
       return;
@@ -134,7 +134,7 @@ export class PushService {
   }
 
   // Predefined notification templates
-  async sendBookingConfirmation(userId: number, data: {
+  async sendBookingConfirmation(userId: string, data: {
     serviceName: string;
     providerName: string;
     scheduledDate: string;
@@ -171,7 +171,7 @@ export class PushService {
     await this.sendToUser(userId, payload);
   }
 
-  async sendBookingReminder(userId: number, data: {
+  async sendBookingReminder(userId: string, data: {
     serviceName: string;
     hoursUntil: number;
     bookingId: number;
@@ -202,7 +202,7 @@ export class PushService {
     await this.sendToUser(userId, payload);
   }
 
-  async sendNewMessage(userId: number, data: {
+  async sendNewMessage(userId: string, data: {
     senderName: string;
     messagePreview: string;
     conversationId: number;
@@ -237,7 +237,7 @@ export class PushService {
     await this.sendToUser(userId, payload);
   }
 
-  private async getUserPreferences(userId: number) {
+  private async getUserPreferences(userId: string) {
     const prefs = await db
       .select()
       .from(notificationPreferences)
@@ -248,7 +248,7 @@ export class PushService {
   }
 
   // Subscribe a user to push notifications
-  async subscribe(userId: number, subscription: {
+  async subscribe(userId: string, subscription: {
     endpoint: string;
     keys: {
       p256dh: string;

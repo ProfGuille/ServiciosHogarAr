@@ -1,10 +1,10 @@
-import { pgTable, serial, integer, varchar, timestamp, text, boolean } from "drizzle-orm/pg-core";
+import { pgTable, serial, varchar, timestamp, text, boolean } from "drizzle-orm/pg-core";
 import { InferSelectModel } from "drizzle-orm";
 
 // Push notification subscriptions for web push
 export const pushSubscriptions = pgTable('push_subscriptions', {
   id: serial('id').primaryKey(),
-  userId: integer('user_id').notNull(),
+  userId: varchar('user_id').notNull(),
   endpoint: text('endpoint').notNull(),
   p256dhKey: text('p256dh_key').notNull(),
   authKey: text('auth_key').notNull(),

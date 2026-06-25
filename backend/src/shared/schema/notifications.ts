@@ -3,7 +3,7 @@ import { InferSelectModel } from "drizzle-orm";
 
 export const notifications = pgTable('notifications', {
   id: serial('id').primaryKey(),
-  userId: integer('user_id').notNull(),
+  userId: varchar('user_id').notNull(),
   title: varchar('title', { length: 256 }).notNull(),
   content: text('content').notNull(),
   type: varchar('type', { length: 50 }).notNull(), // booking, message, payment, reminder, system
@@ -27,7 +27,7 @@ export type InsertNotification = typeof notifications.$inferInsert;
 // User notification preferences
 export const notificationPreferences = pgTable('notification_preferences', {
   id: serial('id').primaryKey(),
-  userId: integer('user_id').notNull(),
+  userId: varchar('user_id').notNull(),
   // Email preferences
   emailBookingConfirmation: boolean('email_booking_confirmation').default(true),
   emailBookingReminder: boolean('email_booking_reminder').default(true),

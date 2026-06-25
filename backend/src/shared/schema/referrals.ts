@@ -1,15 +1,17 @@
 import { pgTable, serial, integer, varchar, timestamp } from "drizzle-orm/pg-core";
 import { InferSelectModel } from "drizzle-orm";
 
-// Tabla de referrals
 export const referrals = pgTable('referrals', {
   id: serial('id').primaryKey(),
-  referrerId: integer('referrer_id').notNull(),
-  refereeId: integer('referee_id').notNull(),
-  code: varchar('code', { length: 32 }),
+  referrerId: varchar('referrer_id').notNull(),
+  referredId: varchar('referred_id'),
+  referralCodeId: integer('referral_code_id'),
+  status: varchar('status', { length: 32 }).default('pending'),
+  rewardCredits: integer('reward_credits').default(0),
+  rewardType: varchar('reward_type', { length: 64 }),
+  completedAt: timestamp('completed_at'),
   createdAt: timestamp('created_at').defaultNow(),
 });
 
-// Tipos para selección e inserción
 export type Referral = InferSelectModel<typeof referrals>;
 export type InsertReferral = typeof referrals.$inferInsert;
