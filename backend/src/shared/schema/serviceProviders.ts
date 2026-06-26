@@ -21,7 +21,9 @@ export const serviceProviders = pgTable("service_providers", {
   postalCode: varchar("postal_code", { length: 20 }),
   coverageRadiusKm: integer("coverage_radius_km"),
   createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow()
+  updatedAt: timestamp("updated_at").defaultNow(),
+  responseTimeHours: integer("response_time_hours"),
+  completionRate: integer("completion_rate"),
 });
 
 export type ServiceProvider = InferSelectModel<typeof serviceProviders>;

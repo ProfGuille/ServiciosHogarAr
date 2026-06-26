@@ -1,4 +1,4 @@
-import { pgTable, serial, integer, varchar, boolean, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, serial, integer, varchar, boolean, jsonb, text } from "drizzle-orm/pg-core";
 import { InferInsertModel, InferSelectModel } from "drizzle-orm";
 
 export const achievements = pgTable('achievements', {
@@ -8,4 +8,10 @@ export const achievements = pgTable('achievements', {
   description: varchar('description', { length: 256 }),
   isActive: boolean('is_active').notNull().default(true),
   criteria: jsonb('criteria'),
+  category: varchar('category', { length: 64 }),
+  points: integer('points'),
+  icon: varchar('icon', { length: 128 }),
+  rarity: varchar('rarity', { length: 32 }),
+  conditionType: varchar('condition_type', { length: 64 }),
+  conditionValue: integer('condition_value'),
 });

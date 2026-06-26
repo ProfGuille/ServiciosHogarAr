@@ -1,4 +1,4 @@
-import { pgTable, varchar, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, varchar, timestamp, boolean } from "drizzle-orm/pg-core";
 import { InferSelectModel } from "drizzle-orm";
 
 export const users = pgTable('users', {
@@ -14,7 +14,8 @@ export const users = pgTable('users', {
   password: varchar('password', { length: 255 }),
   city: varchar('city', { length: 100 }),
   province: varchar('province', { length: 100 }),
-  neighborhood: varchar('neighborhood', { length: 100 })
+  neighborhood: varchar('neighborhood', { length: 100 }),
+  marketingConsent: boolean('marketing_consent').default(false),
 });
 
 export type User = InferSelectModel<typeof users>;
