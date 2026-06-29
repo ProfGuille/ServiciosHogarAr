@@ -1,5 +1,5 @@
 import { db } from "../db.js";
-import { serviceCategories } from "../shared/schema/serviceCategories.js";
+import { categories } from "../shared/schema/categories.js";
 
 const newCategories = [
   { name: "Gasista", description: "Instalación y reparación de gas, calefones, termotanques, estufas", icon: "flame" },
@@ -22,7 +22,7 @@ async function seedCategories() {
   console.log("Starting category seeding...");
   try {
     for (const category of newCategories) {
-      await db.insert(serviceCategories).values(category).onConflictDoNothing();
+      await db.insert(categories).values(category).onConflictDoNothing();
       console.log(`Added category: ${category.name}`);
     }
     console.log("Category seeding completed successfully!");

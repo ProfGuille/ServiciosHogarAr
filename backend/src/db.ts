@@ -13,8 +13,10 @@ if (!DATABASE_URL) {
 const pool = new Pool({
   connectionString: DATABASE_URL,
   ssl: { rejectUnauthorized: false },
-  family: 4,
-});
+  // family: 4 fuerza IPv4 en Render (Supabase pooler). Cast necesario porque
+  // @types/pg no declara esta propiedad aunque Node.js la soporta en runtime.
+  ...({ family: 4 } as object),
+} as any);
 
 export const db = drizzle(pool, { schema });
 
