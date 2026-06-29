@@ -1,9 +1,9 @@
-import { pgTable, serial, integer, varchar, boolean } from "drizzle-orm/pg-core";
+import { pgTable, serial, varchar, integer, boolean } from "drizzle-orm/pg-core";
 
 // Tabla de rewards por referral
 export const referralRewards = pgTable('referral_rewards', {
   id: serial('id').primaryKey(),
-  userId: integer('user_id').notNull(),
+  userId: varchar('user_id', { length: 255 }).notNull(),
   rewardAmount: integer('reward_amount').notNull(),
   rewardType: varchar('reward_type', { length: 32 }),
   creditAmount: integer('credit_amount').default(0),

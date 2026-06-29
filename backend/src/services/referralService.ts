@@ -17,7 +17,7 @@ export async function getActiveReferralRewards() {
  * Inserta una recompensa de referral.
  */
 export async function insertReferralReward(params: {
-  userId: number;
+  userId: string;
   amount: number;
   creditAmount: number;
 }) {
