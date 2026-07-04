@@ -4,7 +4,7 @@ import cors from "cors";
 import helmet from "helmet";
 import compression from "compression";
 import registerRoutes from "./routes/index.js";
-import { runMigrations, sql as neonSql } from "./db.js";
+import { runMigrations, sql as dbSql } from "./db.js";
 import { sendAdminStalePendingRequestsEmail, sendClientReviewReminderEmail } from "./services/resendEmailService.js";
 
 
@@ -142,11 +142,11 @@ async function start() {
 
 async function checkStalePendingRequests() {
   try {
-    await neonSql`
+    await dbSql`
       ALTER TABLE service_requests
       ADD COLUMN IF NOT EXISTS admin_notified_at TIMESTAMPTZ
     `;
-    const stale = await neonSql`
+    const stale = await dbSql`
       SELECT id, title, city, province, is_urgent, created_at
       FROM service_requests
       WHERE status = 'pending'
@@ -164,7 +164,7 @@ async function checkStalePendingRequests() {
       })));
       const ids = stale.map((r: any) => r.id);
       for (const id of ids) {
-        await neonSql`UPDATE service_requests SET admin_notified_at = NOW() WHERE id = ${id}`;
+        await dbSql`UPDATE service_requests SET admin_notified_at = NOW() WHERE id = ${id}`;
       }
       console.log(`📧 Alerta admin enviada: ${stale.length} solicitudes sin respuesta`);
     }
@@ -174,11 +174,11 @@ async function checkStalePendingRequests() {
 }
 async function checkReviewReminders() {
   try {
-    await neonSql`
+    await dbSql`
       ALTER TABLE lead_responses
       ADD COLUMN IF NOT EXISTS reminder_sent_at TIMESTAMPTZ
     `;
-    const pending = await neonSql`
+    const pending = await dbSql`
       SELECT
         lr.id as lead_response_id,
         sr.title,
@@ -199,7 +199,7 @@ async function checkReviewReminders() {
         row.first_name || 'Cliente',
         row.title
       );
-      await neonSql`
+      await dbSql`
         UPDATE lead_responses
         SET reminder_sent_at = NOW()
         WHERE id = ${row.lead_response_id}

@@ -1,16 +1,16 @@
 import { Router } from "express";
 import { requireAuth } from "../middleware/auth.js";
-import { db, sql as neonSql } from "../db.js";
+import { db, sql as dbSql } from "../db.js";
 const router = Router();
 
 // GET /api/referrals/code — obtiene o crea el código del usuario autenticado
 router.get("/code", requireAuth, async (req: any, res) => {
   try {
     const userId = req.user.id.toString();
-    let codes = await neonSql`SELECT * FROM referral_codes WHERE user_id = ${userId} LIMIT 1` as any[];
+    let codes = await dbSql`SELECT * FROM referral_codes WHERE user_id = ${userId} LIMIT 1` as any[];
     if (codes.length === 0) {
       const code = "REF" + Math.random().toString(36).substring(2, 8).toUpperCase();
-      codes = await neonSql`
+      codes = await dbSql`
         INSERT INTO referral_codes (user_id, code, created_at)
         VALUES (${userId}, ${code}, NOW())
         RETURNING *
@@ -27,7 +27,7 @@ router.get("/code", requireAuth, async (req: any, res) => {
 router.get("/stats", requireAuth, async (req: any, res) => {
   try {
     const userId = req.user.id.toString();
-    const stats = await neonSql`SELECT * FROM referral_stats WHERE user_id = ${userId} LIMIT 1` as any[];
+    const stats = await dbSql`SELECT * FROM referral_stats WHERE user_id = ${userId} LIMIT 1` as any[];
     if (stats.length === 0) {
       return res.json({ totalReferrals: 0, successfulReferrals: 0, totalCreditsEarned: 0 });
     }
@@ -47,7 +47,7 @@ router.get("/stats", requireAuth, async (req: any, res) => {
 router.get("/history", requireAuth, async (req: any, res) => {
   try {
     const userId = req.user.id.toString();
-    const rows = await neonSql`
+    const rows = await dbSql`
       SELECT r.id, r.status, r.reward_credits, r.reward_type, r.completed_at, r.created_at,
              u.id as referred_user_id, u.first_name, u.last_name, u.email
       FROM referrals r

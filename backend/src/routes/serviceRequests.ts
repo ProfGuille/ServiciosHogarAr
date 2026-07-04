@@ -2,7 +2,7 @@ import { Router } from "express";
 import { requireAuth } from "../middleware/auth.js";
 import { checkAndGrantAchievements } from "./achievements.js";
 import { sendClientUnlockNotificationEmail } from "../services/resendEmailService.js";
-import { db, sql as neonSql } from "../db.js";
+import { db, sql as dbSql } from "../db.js";
 import { 
   serviceRequests, 
   leadResponses, 
@@ -26,11 +26,11 @@ router.get("/available", async (req, res) => {
     }
 
     // Filtro de fecha de corte para solicitudes visibles
-    const [startDateRow] = (await neonSql`SELECT value FROM platform_settings WHERE key = 'marketplace_start_date'`) as any[];
+    const [startDateRow] = (await dbSql`SELECT value FROM platform_settings WHERE key = 'marketplace_start_date'`) as any[];
     const marketplaceStartDate = startDateRow?.value || null;
 
     // Categorías del proveedor para priorizar leads relevantes
-    const providerCatRows = (await neonSql`
+    const providerCatRows = (await dbSql`
       SELECT category_id FROM provider_categories WHERE provider_id = ${providerId}
     `) as any[];
     const providerCategoryIds = providerCatRows.map((r: any) => r.category_id as number);
@@ -135,7 +135,7 @@ router.post("/:id/unlock", async (req, res) => {
 
   try {
     // Operación atómica usando CTE (Common Table Expression)
-    const result = await neonSql`
+    const result = await dbSql`
       WITH lead_check AS (
         SELECT id, status, title, description, customer_first_name, customer_phone, 
                customer_email, preferred_contact_methods, address, neighborhood, 
@@ -181,7 +181,7 @@ credits_used, credits_spent, unlocked_at)
 
     if ((result as any[]).length === 0) {
       // Determinar qué falló
-      const [lead] = (await neonSql`SELECT id, status FROM service_requests WHERE id = ${leadId}`) as any[];
+      const [lead] = (await dbSql`SELECT id, status FROM service_requests WHERE id = ${leadId}`) as any[];
       
       if (!lead) {
         return res.status(404).json({ error: "Lead no encontrado" });
@@ -191,7 +191,7 @@ credits_used, credits_spent, unlocked_at)
         return res.status(400).json({ error: "Este lead ya no está disponible" });
       }
 
-      const [existing] = (await neonSql`
+      const [existing] = (await dbSql`
         SELECT id FROM lead_responses 
         WHERE service_request_id = ${leadId} AND provider_id = ${providerIdInt}
       `) as any[];
@@ -200,7 +200,7 @@ credits_used, credits_spent, unlocked_at)
         return res.status(400).json({ error: "Ya desbloqueaste este lead anteriormente" });
       }
 
-      const [credits] = (await neonSql`
+      const [credits] = (await dbSql`
         SELECT current_credits FROM provider_credits WHERE provider_id = ${providerIdInt}
       `) as any[];
       
@@ -222,7 +222,7 @@ credits_used, credits_spent, unlocked_at)
     const leadData = result[0];
 
     // Primer unlock: pasar a in_progress
-    await neonSql`
+    await dbSql`
       UPDATE service_requests
       SET status = 'in_progress'
       WHERE id = ${leadId} AND status = 'pending'
@@ -343,7 +343,7 @@ router.get("/my", requireAuth, async (req: any, res) => {
   try {
     if (!req.user) return res.status(401).json({ error: "No autenticado" });
     const customerId = req.user.id;
-    const rows = await neonSql`
+    const rows = await dbSql`
       SELECT
         sr.id, sr.title, sr.description, sr.city, sr.province, sr.status,
         sr.created_at, sr.is_urgent, sr.preferred_date, sr.category_id,
@@ -393,13 +393,13 @@ router.post("/:id/review", requireAuth, async (req: any, res) => {
     }
 
     // Verificar que la solicitud pertenece al customer
-    const requestRows = await neonSql`
+    const requestRows = await dbSql`
       SELECT id FROM service_requests WHERE id = ${serviceRequestId} AND customer_id = ${customerId}
     ` as any[];
     if (!requestRows[0]) return res.status(403).json({ error: "Solicitud no encontrada" });
 
     // Verificar que el provider desbloqueó esta solicitud
-    const unlockRows = await neonSql`
+    const unlockRows = await dbSql`
       SELECT lr.id FROM lead_responses lr
       JOIN service_providers sp ON sp.id = lr.provider_id
       WHERE lr.service_request_id = ${serviceRequestId} AND sp.user_id = ${revieweeUserId}
@@ -407,7 +407,7 @@ router.post("/:id/review", requireAuth, async (req: any, res) => {
     if (!unlockRows[0]) return res.status(403).json({ error: "El proveedor no desbloqueó esta solicitud" });
 
     // Verificar duplicado
-    const existingRows = await neonSql`
+    const existingRows = await dbSql`
       SELECT id FROM reviews
       WHERE service_request_id = ${serviceRequestId}
         AND reviewer_id = ${customerId}
@@ -415,7 +415,7 @@ router.post("/:id/review", requireAuth, async (req: any, res) => {
     ` as any[];
     if (existingRows[0]) return res.status(409).json({ error: "Ya calificaste a este proveedor" });
 
-    const reviewResult = await neonSql`
+    const reviewResult = await dbSql`
       INSERT INTO reviews (service_request_id, reviewer_id, reviewee_id, rating, comment, is_public, created_at)
       VALUES (${serviceRequestId}, ${customerId}, ${revieweeUserId}, ${rating}, ${comment || null}, true, NOW())
       RETURNING id
@@ -423,7 +423,7 @@ router.post("/:id/review", requireAuth, async (req: any, res) => {
     const review = reviewResult[0];
 
     // Actualizar rating promedio del provider (escala 10-50 para logro "Bien Calificado")
-    await neonSql`
+    await dbSql`
       UPDATE service_providers
       SET rating = (
         SELECT ROUND(AVG(r.rating) * 10)
@@ -434,14 +434,14 @@ router.post("/:id/review", requireAuth, async (req: any, res) => {
     `;
 
     // Actualizar total_reviews del provider
-    await neonSql`
+    await dbSql`
       UPDATE service_providers
       SET total_reviews = (SELECT COUNT(*) FROM reviews WHERE reviewee_id = ${revieweeUserId} AND is_public = true)
       WHERE user_id = ${revieweeUserId}
     `;
 
     // Marcar solicitud como completada
-    await neonSql`
+    await dbSql`
       UPDATE service_requests SET status = 'completed' WHERE id = ${serviceRequestId}
     `;
 
@@ -465,7 +465,7 @@ router.patch("/:id/cancel", requireAuth, async (req, res) => {
   }
 
   try {
-    const rows = (await neonSql`
+    const rows = (await dbSql`
       SELECT id, status, customer_id FROM service_requests WHERE id = ${requestId}
     `) as any[];
 
@@ -479,7 +479,7 @@ router.patch("/:id/cancel", requireAuth, async (req, res) => {
       return res.status(400).json({ error: "Solo podés cancelar solicitudes pendientes" });
     }
 
-    await neonSql`
+    await dbSql`
       UPDATE service_requests SET status = 'cancelled' WHERE id = ${requestId}
     `;
 
