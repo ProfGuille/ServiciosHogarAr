@@ -191,7 +191,14 @@ router.get("/slug/:slug", async (req, res) => {
 
         // Agregar slug canónico a la respuesta para que el frontend pueda redirigir si es necesario
         provider.canonicalSlug = expectedSlug;
-
+        provider.businessName = provider.business_name;
+        provider.isVerified = provider.is_verified;
+        provider.experienceYears = provider.experience_years;
+        provider.hourlyRate = provider.hourly_rate;
+        provider.serviceAreas = provider.service_areas;
+        provider.profileImageUrl = provider.profile_image_url;
+        provider.totalReviews = provider.total_reviews;
+        provider.coverageRadiusKm = provider.coverage_radius_km;
         return res.json(provider);
       }
     }
