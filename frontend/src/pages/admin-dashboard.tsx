@@ -463,7 +463,7 @@ export default function AdminDashboard() {
     },
     onSuccess: () => {
       refetchVerifications();
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/providers"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/providers-list"] });
     }
   });
 
@@ -481,7 +481,7 @@ export default function AdminDashboard() {
         title: data.isVerified ? "Proveedor verificado" : "Verificacion removida",
         description: data.isVerified ? "El profesional fue verificado exitosamente." : "Se removio la verificacion.",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/providers"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/providers-list"] });
       if (selectedProvider) setSelectedProvider((prev: any) => ({ ...prev, isVerified: data.isVerified }));
     },
     onError: () => {
