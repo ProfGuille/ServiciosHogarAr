@@ -1,7 +1,10 @@
 import { Router } from "express";
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret";
+if (!process.env.JWT_SECRET) {
+  throw new Error("JWT_SECRET no está definido. El servidor no puede arrancar sin esta variable.");
+}
+const JWT_SECRET = process.env.JWT_SECRET!;
 import { db } from "../db.js";
 import { serviceRequests } from "../shared/schema/serviceRequests.js";
 import { notifyProvidersAboutNewLead } from '../services/leadNotificationHelper.js';

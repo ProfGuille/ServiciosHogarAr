@@ -20,7 +20,10 @@ declare global {
   }
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret";
+if (!process.env.JWT_SECRET) {
+  throw new Error("JWT_SECRET no está definido. El servidor no puede arrancar sin esta variable.");
+}
+const JWT_SECRET = process.env.JWT_SECRET!;
 
 // -----------------------------
 // AUTH MIDDLEWARE PRINCIPAL

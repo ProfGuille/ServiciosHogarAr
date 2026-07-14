@@ -29,7 +29,10 @@ export function setupWebSocket(server: HttpServer) {
         return next(new Error('Authentication error'));
       }
 
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret') as any;
+      if (!process.env.JWT_SECRET) {
+        return next(new Error('Server misconfiguration'));
+      }
+      const decoded = jwt.verify(token, process.env.JWT_SECRET) as any;
       socket.userId = decoded.userId;
       socket.userRole = decoded.role || 'client';
       
