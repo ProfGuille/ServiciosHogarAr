@@ -425,7 +425,7 @@ export default function Profile() {
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                   <CardTitle>Datos de tu negocio</CardTitle>
-                  <CardDescription>Información que ven los clientes en tu perfil público</CardDescription>
+                  <CardDescription>Datos privados — solo se comparten con un cliente cuando te desbloquea con créditos</CardDescription>
                 </div>
                 {!editingProfile && (
                   <Button size="sm" variant="outline" onClick={handleEditProfile}>Editar</Button>
