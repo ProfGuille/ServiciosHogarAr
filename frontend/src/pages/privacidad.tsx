@@ -191,12 +191,12 @@ export default function Privacidad() {
             </CardHeader>
             <CardContent>
               <p>
-                Su información puede ser procesada en servidores ubicados fuera de Argentina,
-                específicamente en Estados Unidos, donde operan los proveedores de infraestructura
-                que utiliza esta plataforma: Render (servidor backend) y Neon (base de datos).
-                Dichos proveedores cuentan con políticas de protección de datos compatibles con
-                estándares internacionales. En todos los casos, cumplimos con las regulaciones
-                aplicables conforme al Art. 12 de la Ley 25.326.
+                Su información puede ser procesada en servidores ubicados fuera de Argentina:
+                el servidor backend opera en Estados Unidos (Render, región Oregon), y la base
+                de datos opera en Brasil (Supabase, región San Pablo). Dichos proveedores cuentan
+                con políticas de protección de datos compatibles con estándares internacionales.
+                En todos los casos, cumplimos con las regulaciones aplicables conforme al Art. 12
+                de la Ley 25.326.
               </p>
             </CardContent>
           </Card>
