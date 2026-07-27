@@ -126,7 +126,7 @@ export default function Terminos() {
                 <li>ServiciosHogar.com.ar actúa como intermediario tecnológico y no verifica de forma exhaustiva la totalidad de la información declarada por los proveedores.</li>
                 <li>El distintivo de <strong>proveedor verificado</strong> acredita únicamente que el proveedor completó el proceso de verificación de identidad. No constituye garantía de calidad ni idoneidad profesional.</li>
                 <li>La plataforma no se responsabiliza por daños derivados de información falsa o inexacta publicada por proveedores, en tanto actúe con diligencia ante las denuncias recibidas.</li>
-                <li>Cualquier usuario que detecte información falsa puede denunciarlo a <strong>contacto@servicioshogar.com.ar</strong>. Nos comprometemos a investigar y, de corresponder, suspender o dar de baja al proveedor infractor.</li>
+                <li>Cualquier usuario que detecte información falsa puede denunciarlo a <strong>administrador@servicioshogar.com.ar</strong>. Nos comprometemos a investigar y, de corresponder, suspender o dar de baja al proveedor infractor.</li>
                 <li>Nos reservamos el derecho de remover perfiles que incurran en falsedad de datos, sin previo aviso y sin derecho a reembolso de créditos adquiridos.</li>
               </ul>
               <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
@@ -227,7 +227,7 @@ export default function Terminos() {
                 Para consultas sobre estos términos:
               </p>
               <ul className="space-y-1">
-                <li>Email: <strong>contacto@servicioshogar.com.ar</strong></li>
+                <li>Email: <strong>administrador@servicioshogar.com.ar</strong></li>
               </ul>
             </CardContent>
           </Card>

@@ -142,7 +142,7 @@ export default function Privacidad() {
               <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <h4 className="font-semibold text-blue-800 mb-2">Ejercicio de Derechos</h4>
                 <p className="text-blue-700 text-sm">
-                  Para ejercer estos derechos, contacte a: <strong>contacto@servicioshogar.com.ar</strong>
+                  Para ejercer estos derechos, contacte a: <strong>administrador@servicioshogar.com.ar</strong>
                   <br />Responderemos su solicitud dentro de los 10 días hábiles establecidos por ley.
                 </p>
               </div>
@@ -235,7 +235,7 @@ export default function Privacidad() {
                 Para consultas sobre privacidad o para ejercer sus derechos:
               </p>
               <ul className="space-y-1">
-                <li>Email: <strong>contacto@servicioshogar.com.ar</strong></li>
+                <li>Email: <strong>administrador@servicioshogar.com.ar</strong></li>
               </ul>
             </CardContent>
           </Card>

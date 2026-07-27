@@ -198,7 +198,7 @@ export default function AvisoLegal() {
                 Para consultas legales o para reportar irregularidades graves:
               </p>
               <ul className="space-y-1">
-                <li><strong>Email:</strong> contacto@servicioshogar.com.ar</li>
+                <li><strong>Email:</strong> administrador@servicioshogar.com.ar</li>
               </ul>
             </CardContent>
           </Card>

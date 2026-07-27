@@ -169,7 +169,7 @@ export default function Register() {
           <p className="text-sm text-blue-700">
             Sus datos personales serán tratados conforme a la Ley 25.326 de Protección de Datos Personales. 
             Puede ejercer sus derechos de acceso, rectificación y supresión contactando a{" "}
-            <a href="mailto:contacto@servicioshogar.com.ar" className="underline">contacto@servicioshogar.com.ar</a>
+            <a href="mailto:administrador@servicioshogar.com.ar" className="underline">administrador@servicioshogar.com.ar</a>
           </p>
         </div>
       </div>
