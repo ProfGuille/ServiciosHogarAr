@@ -59,3 +59,7 @@ db_migration_errors.log
 # Legacy backup files
 *.backup
 
+# Deployment files - don't commit large ZIP files  
+deployment-files/
+*.zip
+
